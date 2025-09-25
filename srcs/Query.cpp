@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/25 18:12:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/25 22:19:42 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,20 +43,33 @@ int		Query::queryRespond()
 int		Query::setRessourceStatus()
 {
 	struct stat file_stat;
+	struct stat dir_stat;
 
 	if (stat(this->_query.getRequestTarget().c_str(), &file_stat) == -1)
 	{
 		if (errno == EACCES)
+		{
+			this->_err_code = 403;
 			this->_ressource_status = PERM_ISSUE;
+		}
 		else
+		{
+			this->_err_code = 404;
 			this->_ressource_status = NOT_FOUND;
+		}
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
 		return (-1);
 	}
 	this->_ressource_status = EXISTS;
 	if (S_ISDIR(file_stat.st_mode))
 	{
-		this->_ressource_status |= IS_DIR;
+		if (stat((this->_ressource + std::string("index.html")).c_str(), &dir_stat) == 0)
+		{
+			this->_ressource += "index.html";
+			this->setRessourceStatus();
+		}
+		else
+			this->_ressource_status |= IS_DIR;
 	}
 	if (file_stat.st_mode & S_IRUSR)
 		this->_ressource_status |= PERM_ROK;
@@ -69,6 +82,7 @@ int		Query::setRessourceStatus()
 	if (endsWith(this->_ressource, ".py"))
 	{
 		this->_ressource_status |= IS_CGI;
+		this->_query.setMethod(CGI_RUN);
 		this->_cgi_request = true;
 	}
 	else
@@ -78,6 +92,25 @@ int		Query::setRessourceStatus()
 
 int		Query::queryGet()
 {
+	struct stat file_stat;
+
+	if (!(this->_ressource_status & PERM_ROK))
+	{
+		this->_err_code = 403;
+		return (-1);
+	}
+	if ((this->_ressource_status & IS_DIR))
+	{
+		if
+		{	
+			this->_err_code = 200;
+			return (-1);
+		}
+	}
+	if (access(this->_ressource.c_str(), R_OK) == 0)
+	{
+		this->readFile(this->_ressource, );
+	}
 	return (0);
 }
 

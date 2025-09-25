@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/25 17:59:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/25 18:26:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,5 +49,7 @@ enum Method
 {
 	GET,
 	POST,
-	DELETE
+	DELETE,
+	CGI_RUN,
+	ERROR
 };

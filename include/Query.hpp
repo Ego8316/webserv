@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/25 18:12:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/25 18:27:18 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,9 @@ class Query {
 		int			setRessourceStatus();
 		int			queryCGIRun();
 	private :
+		static const int			_method_num = 5;
 		typedef int					(Query::*queryMethod)();
-		static const queryMethod	_queryExecute[4];
+		static const queryMethod	_queryExecute[_method_num];
 		std::string					_query_str;
 		Request						_query;
 		int							_err_code;
@@ -45,9 +46,10 @@ class Query {
 		bool						_cgi_request;
 };
 
-const Query::queryMethod	Query::_queryExecute[4] = {
+const Query::queryMethod	Query::_queryExecute[_method_num] = {
 	&Query::queryGet,
 	&Query::queryPost, 
 	&Query::queryDelete,
+	&Query::queryCGIRun,
 	&Query::queryError
 };

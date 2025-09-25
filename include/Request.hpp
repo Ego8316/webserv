@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/09/25 14:39:21 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/25 18:36:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ class Request
 		std::string							getRawBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
 		ParseError							getError(void) const;
+
+		void								setMethod(Method method);
 
 	private:
 		Method								_method;

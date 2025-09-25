@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/09/25 14:09:09 by ego              ###   ########.fr       */
+/*   Updated: 2025/09/25 18:36:06 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,11 @@ std::map<std::string, std::string>	Request::getHeaders(void) const
 Request::ParseError	Request::getError(void) const
 {
 	return (_error);
+}
+
+void	Request::setMethod(Method method)
+{
+	this->_method = method;
 }
 
 std::ostream	&operator<<(std::ostream &os, const Request &src)
