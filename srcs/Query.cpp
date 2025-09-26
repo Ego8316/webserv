@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/25 22:19:42 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/26 17:38:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,51 @@ int		Query::queryRespond()
 	}
 	this->_query = Request(this->_query_str);
 	(this->*_queryExecute[std::max(static_cast<int>(this->_query.getMethod()), DELETE + 1)])();
+	return (0);
+}
+
+int		Query::queryGet()
+{
+	if (!(this->_ressource_status & PERM_ROK))
+	{
+		this->_err_code = 403;
+		return (-1);
+	}
+	if ((this->_ressource_status & IS_DIR))
+	{
+		this->_err_code = 404;
+		return (-1);
+	}
+	this->setHeader();
+	if (access(this->_ressource.c_str(), R_OK) == 0)
+	{
+		if (this->sendHeader() == -1)
+		{
+			//set error
+			return (-1);
+		}
+		this->streamFile(this->_ressource);
+	}
+	return (0);
+}
+
+int		Query::queryPost()
+{
+	return (0);
+}
+
+int		Query::queryDelete()
+{
+	return (0);
+}
+
+int		Query::queryCGIRun()
+{
+	return (0);
+}
+
+int		Query::queryError()
+{
 	return (0);
 }
 
@@ -83,53 +128,70 @@ int		Query::setRessourceStatus()
 	{
 		this->_ressource_status |= IS_CGI;
 		this->_query.setMethod(CGI_RUN);
-		this->_cgi_request = true;
 	}
-	else
-		this->_cgi_request = false;
+	this->_content_len = file_stat.st_size;
 	return (this->_ressource_status);
 }
 
-int		Query::queryGet()
+std::string	Query::getRessourceTypeStr()
 {
-	struct stat file_stat;
+	if (this->_content_type == HTML)
+		return ("text/html");
+	if (this->_content_type == PLAIN)
+		return ("text/plain");
+	if (this->_content_type == JPEG)
+		return ("image/jpeg");
+	if (this->_content_type == PNG)
+		return ("image/png");
+	return ("");
+}
 
-	if (!(this->_ressource_status & PERM_ROK))
+void		Query::setHeader()
+{
+	this->_header = "HTTP/1.0 " + std::to_string(this->_err_code) + " OK\r\n";
+	this->_header += "Server: Apache/1.3.29 (Unix)";
+	this->_header += "Content-Type: " + this->getRessourceTypeStr();
+	this->_header += "Content-Length: " + std::to_string(this->_content_len);
+}
+
+int		Query::sendHeader()
+{
+	if (send(this->_client_socket.getFd(), this->_header.c_str(), this->_header.length(), 0) == -1)
 	{
-		this->_err_code = 403;
+		//set err
 		return (-1);
 	}
-	if ((this->_ressource_status & IS_DIR))
+	return (0);
+}
+
+int		Query::streamFile(std::string file)
+{
+	int		fd;
+	char	buffer[BUFFER_SIZE];
+	ssize_t	bytes_read;
+
+	fd = open(file.c_str(), O_RDONLY | O_NONBLOCK);
+	//TODO add epoll wait ?
+	bytes_read = read(fd, buffer, sizeof(buffer));
+	if (bytes_read <= 0)
 	{
-		if
-		{	
-			this->_err_code = 200;
+		//set err
+		return (-1);
+	}
+	while (bytes_read > 0)
+	{
+        if (send(this->_client_socket.getFd(), buffer, bytes_read, 0) == -1)
+		{
+			//set err
 			return (-1);
 		}
-	}
-	if (access(this->_ressource.c_str(), R_OK) == 0)
-	{
-		this->readFile(this->_ressource, );
-	}
-	return (0);
-}
-
-int		Query::queryPost()
-{
-	return (0);
-}
-
-int		Query::queryDelete()
-{
-	return (0);
-}
-
-int		Query::queryCGIRun()
-{
-	return (0);
-}
-
-int		Query::queryError()
-{
+		bytes_read = read(fd, buffer, sizeof(buffer));
+		if (bytes_read == -1)
+		{
+			//set err
+			return (-1);
+		}
+    }
+	close(fd);
 	return (0);
 }

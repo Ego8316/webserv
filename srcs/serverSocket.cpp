@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/23 16:18:19 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/25 22:39:44 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,5 @@ clientSocket	*serverSocket::socketAcceptClient()
 		&new_client->getClientLen()));
 	if (new_client->getFd() == -1)
 		std::cerr << "Accept failed: " << strerror(errno) << std::endl;
-	else
-		std::cout << "New client accepted" << std::endl;
 	return (new_client);
 }

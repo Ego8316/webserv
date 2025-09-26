@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/25 18:26:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/26 17:39:34 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <netinet/in.h>
 #include <poll.h>
@@ -30,11 +31,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
+#include <fcntl.h>
 
 #define ALL_FDS -1
 #define DEFAULT_EVENT -1
 #define NO_TIMEOUT -1
 #define SERVER_IDX 0
+#define BUFFER_SIZE 1024
 
 #define NOT_FOUND 0
 #define PERM_ISSUE 1
@@ -52,4 +55,12 @@ enum Method
 	DELETE,
 	CGI_RUN,
 	ERROR
+};
+
+enum ContentTypes
+{
+	HTML,
+	PLAIN,
+	JPEG,
+	PNG
 };

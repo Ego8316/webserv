@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/25 18:27:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/26 17:37:10 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "headers.hpp"
 #include "Request.hpp"
+#include "clientSocket.hpp"
 #include "utils.hpp"
 
 class Query {
@@ -27,13 +28,19 @@ class Query {
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
+
 		int			queryRespond();
 		int			queryGet();
 		int			queryPost();
 		int			queryDelete();
-		int			queryError();
-		int			setRessourceStatus();
 		int			queryCGIRun();
+		int			queryError();
+		
+		int			setRessourceStatus();
+		std::string	getRessourceTypeStr();
+		void		setHeader();
+		int			sendHeader();
+		int			streamFile(std::string file);
 	private :
 		static const int			_method_num = 5;
 		typedef int					(Query::*queryMethod)();
@@ -43,7 +50,10 @@ class Query {
 		int							_err_code;
 		std::string					_ressource;
 		int							_ressource_status;
-		bool						_cgi_request;
+		std::string					_header;
+		unsigned long				_content_len;
+		ContentTypes				_content_type;
+		clientSocket				_client_socket;
 };
 
 const Query::queryMethod	Query::_queryExecute[_method_num] = {
