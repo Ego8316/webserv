@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 17:24:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 20:28:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,18 @@ Query &Query::operator=(const Query &other)
 
 Query::~Query() {}
 
-int		Query::queryRespond()
+int		Query::queryRespond(Client *client, Config *config)
 {
+	std::cout << 1 << std::endl;
+	this->_client = client;
+	std::cout << 2 << std::endl;
+	this->_config = config;
+	std::cout << 3 << std::endl;
 	this->_query_str = this->readRequest();
+	std::cout << "Going to request str " << std::endl;
+	this->_query = Request(this->_query_str);
+	std::cout << "Query init ok " << std::endl;
+	this->setRessourceStatus();
 	if (this->_query_str.length() == 0)
 	{
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
@@ -45,16 +54,21 @@ int		Query::readRequest()
 {
 	char	buffer[BUFFER_SIZE];
 	int		bytes_read;
-
-	bytes_read = BUFFER_SIZE;
+	
+	std::cout << this->_config->buffer_size << std::endl;
+	std::cout << "a !" << std::endl;
+	bytes_read = this->_config->buffer_size;
 	while (bytes_read > 0)
 	{
-		if (this->_client.socketRead(buffer, bytes_read) == SERV_ERROR)
+		std::cout << "alleeez !" << std::endl;
+		std::cout <<  (void *)this->_client << std::endl;
+		if (this->_client->socketRead(buffer, bytes_read) == SERV_ERROR)
 		{
-			//set errors
+			std::cerr << "Query could not retrive request" << std::endl;
 			return (SERV_ERROR);
 		}
 		this->_query_str += std::string(buffer).substr(0, bytes_read);
+		std::cout << "_query_str is now " << this->_query_str << std::endl;
 	}
 	return (0);
 }
@@ -175,7 +189,7 @@ void		Query::setHeader()
 
 int		Query::sendHeader()
 {
-	if (this->_client.socketWrite(this->_header.c_str(), this->_header.length()))
+	if (this->_client->socketWrite(this->_header.c_str(), this->_header.length()))
 	{
 		//set err
 		return (SERV_ERROR);
@@ -200,7 +214,7 @@ int		Query::streamFile(std::string file)
 	while (bytes_read > 0)
 	{
 		//TODO add epoll wait for client Fd ?
-        if (send(this->_client.getFd(), buffer, bytes_read, 0) == -1)
+        if (send(this->_client->getFd(), buffer, bytes_read, 0) == -1)
 		{
 			//set err
 			return (SERV_ERROR);
@@ -215,3 +229,11 @@ int		Query::streamFile(std::string file)
 	close(fd);
 	return (0);
 }
+
+const Query::queryMethod	Query::_queryExecute[_method_num] = {
+	&Query::queryGet,
+	&Query::queryPost, 
+	&Query::queryDelete,
+	&Query::queryCGIRun,
+	&Query::queryError
+};

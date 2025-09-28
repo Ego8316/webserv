@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/28 19:39:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 19:57:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,4 +81,5 @@ struct Config
 	int		domain;
 	int		type;
 	int		protocol;
+	int		buffer_size;
 };

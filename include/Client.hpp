@@ -6,18 +6,19 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 18:38:47 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 20:32:18 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
+#include "Query.hpp"
 
 class Client {
 	public :
 	// CONSTRUCTORS
-		Client();
+		Client(Config *config);
 		Client(const Client &other);
 		Client &operator=(const Client &other);
 	//DESTUCTORS
@@ -38,4 +39,5 @@ class Client {
 		struct sockaddr_in	_client_addr;
 		socklen_t			_client_len;
 		int					_client_id;
+		Config				*_config;
 };

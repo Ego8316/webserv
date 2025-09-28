@@ -1,4 +1,14 @@
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   WebServ.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
+/*   Updated: 2025/09/28 20:34:38 by victorviter      ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "WebServ.hpp"
 
@@ -51,6 +61,7 @@ int		WebServ::setConfig(std::string config_file)
 	this->_config.type = SOCK_STREAM;
 	this->_config.protocol = 0;
 	this->_config.client_limit = CLIENT_LIMIT;
+	this->_config.buffer_size = BUFFER_SIZE;
 	return (0);
 }
 
@@ -94,8 +105,8 @@ int		WebServ::newClient()
 		if (!this->_clients[indx])
 			break;
 	}
-	this->_clients[indx] = new Client();
-	std::cout << "Created new client ok" << std::endl;
+	this->_clients[indx] = new Client(&this->_config);
+	std::cout << "Created new client ok on indx " << indx << std::endl;
 	if (this->_server.socketAcceptClient(this->_clients[indx]) == -1)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;

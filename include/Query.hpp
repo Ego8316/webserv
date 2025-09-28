@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 17:24:24 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 20:15:29 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include "Request.hpp"
 #include "Client.hpp"
 #include "utils.hpp"
+
+class Client;
 
 class Query {
 	public :
@@ -28,8 +30,7 @@ class Query {
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-
-		int			queryRespond();
+		int			queryRespond(Client *client, Config *config);
 		int			queryGet();
 		int			queryPost();
 		int			queryDelete();
@@ -54,13 +55,6 @@ class Query {
 		std::string					_header;
 		unsigned long				_content_len;
 		ContentTypes				_content_type;	//TODO implement setting this as part of setRessourceStatus
-		Client						_client;
-};
-
-const Query::queryMethod	Query::_queryExecute[_method_num] = {
-	&Query::queryGet,
-	&Query::queryPost, 
-	&Query::queryDelete,
-	&Query::queryCGIRun,
-	&Query::queryError
+		Client						*_client;
+		Config						*_config;
 };

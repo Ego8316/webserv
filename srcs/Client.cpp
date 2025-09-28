@@ -6,18 +6,18 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 19:35:20 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 20:33:51 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client()
+Client::Client(Config *config) : _config(config)
 {
 	this->_client_len = sizeof(this->_client_addr);
 }
 
-Client::Client(const Client &other) : _client_addr(other._client_addr), _client_len(other._client_len) {}
+Client::Client(const Client &other) : _client_addr(other._client_addr), _client_len(other._client_len), _config(other._config) {}
 
 Client &Client::operator=(const Client &other)
 {
@@ -25,6 +25,7 @@ Client &Client::operator=(const Client &other)
 	{
 		this->_client_addr = other._client_addr;
 		this->_client_len = other._client_len;
+		this->_config = other._config;
 	}
 	return (*this);
 }
@@ -57,11 +58,13 @@ void    Client::setFd(int fd)
 		
 int		Client::socketRead(char *buffer, int &bytes_read) //TODO
 {
+	std::cout << "coucou " << std::endl;
 	if (recv(this->_client_fd, buffer, bytes_read, 0) == SERV_ERROR)
 	{
 		std::cerr << "Receive failed\n";
 		return (SERV_ERROR);
 	}
+	std::cout << "Buffer = " << std::string(buffer) << std::endl;
 	return (0);
 }
 
@@ -77,7 +80,12 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 		
 int		Client::handleEvent()
 {
-	/* For now it just echoes back the message for testing purposes */
+	Query	query;
+
+	std::cout << "Client handling event" << std::endl;
+	query.queryRespond(this, this->_config);
+	/* 
+	For now it just echoes back the message for testing purposes 
 	char 	    buffer[10];
 	ssize_t     bytes_read;
 
@@ -96,7 +104,7 @@ int		Client::handleEvent()
 			return (SERV_ERROR);
 		}
 			return (0);
-	}
+	}*/
 	return (0);
 }
 

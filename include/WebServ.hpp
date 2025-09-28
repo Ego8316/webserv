@@ -3,9 +3,9 @@
 #pragma once
 
 #include "headers.hpp"
+#include "Client.hpp"
 #include "serverSocket.hpp"
 #include "serverPoll.hpp"
-#include "Client.hpp"
 
 class WebServ {
 	public :
