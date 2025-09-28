@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 19:16:44 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 19:25:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ int		serverPoll::pollWatchRevent(Config &config)
 	{
 		if (this->_poll_fds[i].revents & POLLHUP || this->_poll_fds[i].revents & POLLERR)
 		{
+			std::cout << i << " matched for revent" << std::endl;
 			if (i == 0)
 			{
 				std::cerr << "Server ended connection." << std::endl;
@@ -76,6 +77,7 @@ int		serverPoll::pollWatchRevent(Config &config)
 		}
         else if (this->_poll_fds[i].revents & POLLIN)
 		{
+			std::cout << i << " matched for revent" << std::endl;
 			if (i == 0)
 				return (NEW_CLIENT);
 			else

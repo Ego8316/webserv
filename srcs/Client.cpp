@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 18:51:38 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 19:35:20 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ int		Client::handleEvent()
 	char 	    buffer[10];
 	ssize_t     bytes_read;
 
+	std::cout << "handling event" << std::endl;
 	while ((bytes_read = recv(this->_client_fd, buffer, sizeof(buffer), 0)) > 0)
 	{
 		std::cout << "Reading input" << std::endl;

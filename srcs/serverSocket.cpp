@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 19:15:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 19:23:05 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ int		serverSocket::setSockOpt()
 
 int		serverSocket::socketListen(Config config)
 {
-	if (listen(this->_server_fd, config.backlog) == -1) //TODO make this a serverSocket member function
+	if (listen(this->_server_fd, config.backlog) == -1)
 	{
 		std::cerr << "Socket listen failed" << std::endl;
 		return (-1);

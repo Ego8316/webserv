@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/28 19:03:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 19:39:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@
 
 #define SERV_ERROR -1
 #define NEW_CLIENT 0
-#define CLIENT_ERR_IDX(idx) (-(idx + 2))
+#define CLIENT_ERR_IDX(idx) (-idx - 1)
 
 #define ALL_FDS -1
 #define DEFAULT_EVENT -1
@@ -44,6 +44,7 @@
 
 #define BUFFER_SIZE 1024
 #define REQUEST_TIME_WAIT 100000
+#define CLIENT_LIMIT 1000
 
 #define NOT_FOUND 0
 #define PERM_ISSUE 1
