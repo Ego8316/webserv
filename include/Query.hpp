@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/26 17:37:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 17:24:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #include "headers.hpp"
 #include "Request.hpp"
-#include "clientSocket.hpp"
+#include "Client.hpp"
 #include "utils.hpp"
 
 class Query {
@@ -36,6 +36,7 @@ class Query {
 		int			queryCGIRun();
 		int			queryError();
 		
+		int			readRequest();
 		int			setRessourceStatus();
 		std::string	getRessourceTypeStr();
 		void		setHeader();
@@ -52,8 +53,8 @@ class Query {
 		int							_ressource_status;
 		std::string					_header;
 		unsigned long				_content_len;
-		ContentTypes				_content_type;
-		clientSocket				_client_socket;
+		ContentTypes				_content_type;	//TODO implement setting this as part of setRessourceStatus
+		Client						_client;
 };
 
 const Query::queryMethod	Query::_queryExecute[_method_num] = {

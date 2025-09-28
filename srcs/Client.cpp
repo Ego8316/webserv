@@ -1,25 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   clientSocket.cpp                                   :+:      :+:    :+:   */
+/*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/23 16:49:31 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 18:51:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "clientSocket.hpp"
+#include "Client.hpp"
 
-clientSocket::clientSocket()
+Client::Client()
 {
 	this->_client_len = sizeof(this->_client_addr);
 }
 
-clientSocket::clientSocket(const clientSocket &other) : _client_addr(other._client_addr), _client_len(other._client_len) {}
+Client::Client(const Client &other) : _client_addr(other._client_addr), _client_len(other._client_len) {}
 
-clientSocket &clientSocket::operator=(const clientSocket &other)
+Client &Client::operator=(const Client &other)
 {
 	if (this != &other)
 	{
@@ -29,50 +29,77 @@ clientSocket &clientSocket::operator=(const clientSocket &other)
 	return (*this);
 }
 
-clientSocket::~clientSocket() {}
+Client::~Client()
+{
+	if (this->_client_fd)
+		close(this->_client_fd);
+}
 
-struct sockaddr_in	&clientSocket::getClientAddr()
+struct sockaddr_in	&Client::getClientAddr()
 {
 	return (this->_client_addr);
 }
 
-socklen_t   &clientSocket::getClientLen()
+socklen_t   &Client::getClientLen()
 {
 	return (this->_client_len);
 }
 
-int     clientSocket::getFd()
+int     Client::getFd()
 {
 	return (this->_client_fd);
 }
 
-void    clientSocket::setFd(int fd)
+void    Client::setFd(int fd)
 {
 	this->_client_fd = fd;
 }
+		
+int		Client::socketRead(char *buffer, int &bytes_read) //TODO
+{
+	if (recv(this->_client_fd, buffer, bytes_read, 0) == SERV_ERROR)
+	{
+		std::cerr << "Receive failed\n";
+		return (SERV_ERROR);
+	}
+	return (0);
+}
 
-int	clientSocket::handleEvent(short revent)
+int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 
+{
+	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR)
+	{
+		std::cerr << "Receive failed\n";
+		return (SERV_ERROR);
+	}
+	return (0);
+}
+		
+int		Client::handleEvent()
 {
 	/* For now it just echoes back the message for testing purposes */
 	char 	    buffer[10];
 	ssize_t     bytes_read;
 
-	std::cout << "clientSocket is handling the event on fd " << this->_client_fd << std::endl;
 	while ((bytes_read = recv(this->_client_fd, buffer, sizeof(buffer), 0)) > 0)
 	{
 		std::cout << "Reading input" << std::endl;
 		if (std::strncmp(buffer, "close", 5) == 0)
 		{
 			std::cout << "Closing connection ..." << std::endl;
-			return (-1);
+			return (SERV_ERROR);
 		}
-		else if (send(this->_client_fd, buffer, bytes_read, 0) == -1)
+		else if (send(this->_client_fd, buffer, bytes_read, 0) == SERV_ERROR)
 		{
 			std::cerr << "Send failed\n";
-			return (-1);
+			return (SERV_ERROR);
 		}
 			return (0);
 	}
-	(void)revent;
 	return (0);
+}
+
+void	Client::setClientId(int id)
+{
+	this->_client_id = id;
 }

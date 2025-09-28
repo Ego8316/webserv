@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/26 17:38:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 17:24:10 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,13 +30,32 @@ Query::~Query() {}
 
 int		Query::queryRespond()
 {
+	this->_query_str = this->readRequest();
 	if (this->_query_str.length() == 0)
 	{
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
-		return (-1);
+		return (SERV_ERROR);
 	}
 	this->_query = Request(this->_query_str);
 	(this->*_queryExecute[std::max(static_cast<int>(this->_query.getMethod()), DELETE + 1)])();
+	return (0);
+}
+
+int		Query::readRequest()
+{
+	char	buffer[BUFFER_SIZE];
+	int		bytes_read;
+
+	bytes_read = BUFFER_SIZE;
+	while (bytes_read > 0)
+	{
+		if (this->_client.socketRead(buffer, bytes_read) == SERV_ERROR)
+		{
+			//set errors
+			return (SERV_ERROR);
+		}
+		this->_query_str += std::string(buffer).substr(0, bytes_read);
+	}
 	return (0);
 }
 
@@ -45,20 +64,20 @@ int		Query::queryGet()
 	if (!(this->_ressource_status & PERM_ROK))
 	{
 		this->_err_code = 403;
-		return (-1);
+		return (SERV_ERROR);
 	}
 	if ((this->_ressource_status & IS_DIR))
 	{
 		this->_err_code = 404;
-		return (-1);
+		return (SERV_ERROR);
 	}
 	this->setHeader();
 	if (access(this->_ressource.c_str(), R_OK) == 0)
 	{
-		if (this->sendHeader() == -1)
+		if (this->sendHeader() == SERV_ERROR)
 		{
 			//set error
-			return (-1);
+			return (SERV_ERROR);
 		}
 		this->streamFile(this->_ressource);
 	}
@@ -90,7 +109,7 @@ int		Query::setRessourceStatus()
 	struct stat file_stat;
 	struct stat dir_stat;
 
-	if (stat(this->_query.getRequestTarget().c_str(), &file_stat) == -1)
+	if (stat(this->_query.getRequestTarget().c_str(), &file_stat) == SERV_ERROR)
 	{
 		if (errno == EACCES)
 		{
@@ -103,7 +122,7 @@ int		Query::setRessourceStatus()
 			this->_ressource_status = NOT_FOUND;
 		}
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
-		return (-1);
+		return (SERV_ERROR);
 	}
 	this->_ressource_status = EXISTS;
 	if (S_ISDIR(file_stat.st_mode))
@@ -156,10 +175,10 @@ void		Query::setHeader()
 
 int		Query::sendHeader()
 {
-	if (send(this->_client_socket.getFd(), this->_header.c_str(), this->_header.length(), 0) == -1)
+	if (this->_client.socketWrite(this->_header.c_str(), this->_header.length()))
 	{
 		//set err
-		return (-1);
+		return (SERV_ERROR);
 	}
 	return (0);
 }
@@ -171,25 +190,26 @@ int		Query::streamFile(std::string file)
 	ssize_t	bytes_read;
 
 	fd = open(file.c_str(), O_RDONLY | O_NONBLOCK);
-	//TODO add epoll wait ?
+	//TODO add epoll wait for client Fd ?
 	bytes_read = read(fd, buffer, sizeof(buffer));
 	if (bytes_read <= 0)
 	{
 		//set err
-		return (-1);
+		return (SERV_ERROR);
 	}
 	while (bytes_read > 0)
 	{
-        if (send(this->_client_socket.getFd(), buffer, bytes_read, 0) == -1)
+		//TODO add epoll wait for client Fd ?
+        if (send(this->_client.getFd(), buffer, bytes_read, 0) == -1)
 		{
 			//set err
-			return (-1);
+			return (SERV_ERROR);
 		}
-		bytes_read = read(fd, buffer, sizeof(buffer));
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
 		{
 			//set err
-			return (-1);
+			return (SERV_ERROR);
 		}
     }
 	close(fd);

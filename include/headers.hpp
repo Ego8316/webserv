@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/26 17:39:34 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 19:03:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,17 @@
 #include <vector>
 #include <fcntl.h>
 
+#define SERV_ERROR -1
+#define NEW_CLIENT 0
+#define CLIENT_ERR_IDX(idx) (-(idx + 2))
+
 #define ALL_FDS -1
 #define DEFAULT_EVENT -1
 #define NO_TIMEOUT -1
 #define SERVER_IDX 0
+
 #define BUFFER_SIZE 1024
+#define REQUEST_TIME_WAIT 100000
 
 #define NOT_FOUND 0
 #define PERM_ISSUE 1
@@ -63,4 +69,15 @@ enum ContentTypes
 	PLAIN,
 	JPEG,
 	PNG
+};
+
+struct Config
+{
+	int		port_number;
+	int		backlog;
+	int		time_out;
+	int		client_limit;
+	int		domain;
+	int		type;
+	int		protocol;
 };

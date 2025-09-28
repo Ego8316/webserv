@@ -1,0 +1,107 @@
+
+
+#include "WebServ.hpp"
+
+WebServ::WebServ() {}
+
+WebServ::WebServ(const WebServ &other) : _config(other._config), _server(other._server), _poll(other._poll), _clients(other._clients) {}
+
+WebServ &WebServ::operator=(const WebServ &other)
+{
+	if (this != &other)
+	{
+		this->_config = other._config;
+		this->_server = other._server;
+		this->_poll = other._poll;
+		this->_clients = other._clients;
+	}
+	return (*this);
+}
+
+WebServ::~WebServ() {}
+
+int		WebServ::WebServInit(std::string config_file)
+{
+	if (this->setConfig(config_file) == -1)
+		return (SERV_ERROR);
+	std::cout << "Config ok !" << std::endl;
+	if (this->_server.socketInit(this->_config) == -1)
+		return (SERV_ERROR);
+	std::cout << "Socket Init ok !" << std::endl;
+	if (this->_server.socketBind(this->_config.port_number) == -1)
+		return (SERV_ERROR);
+	std::cout << "Socket Bind ok !" << std::endl;
+	this->_poll.pollAdd(this->_server.getFd(), POLLIN, 0);
+	std::cout << "WebServ Init OK" << std::endl;
+	std::cout << "Server FD = " << this->_server.getFd() << std::endl;
+	return (0);
+}
+
+int		WebServ::setConfig(std::string config_file)
+{
+	(void)config_file;
+	this->_config.port_number = 12345;
+	this->_config.time_out = NO_TIMEOUT;
+	this->_config.domain = AF_INET;
+	this->_config.type = SOCK_STREAM;
+	this->_config.protocol = 0;
+	return (0);
+}
+
+int		WebServ::WebServRun()
+{
+	int	event;
+
+	while (true)
+	{
+		event = this->_poll.pollWatchRevent(this->_config);
+		if (event == -1)
+		{
+			std::cerr << "poll Wait failed" << std::endl;
+			return (-1);
+		}
+			 //TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
+		else if (event == 0)
+		{
+			if (this->newClient() == -1)
+			{
+				//set err
+				return (-1);
+			}
+		}
+		else if (event < 0)
+			this->removeClient(CLIENT_ERR_IDX(event));
+		else
+			this->_clients[event]->handleEvent();
+	}
+	return (0);
+}
+
+int		WebServ::newClient()
+{
+	int		indx;
+
+	for (indx = 0; indx < this->_config.client_limit; ++indx)
+	{
+		if (!this->_clients[indx])
+			break;
+	}
+	this->_clients[indx] = new Client();
+	if (this->_server.socketAcceptClient(this->_clients[indx]) == -1)
+	{
+		std::cerr << "Failed to accept new client" << std::endl;
+		return (SERV_ERROR);
+	}
+	this->_clients[indx]->setClientId(indx);
+	this->_poll.pollAdd(this->_clients[indx]->getFd(), POLLIN, indx);
+	return (0);
+}
+
+int		WebServ::removeClient(int indx)
+{
+	this->_poll.pollRemove(indx);
+	if (this->_clients[indx] != NULL)
+		delete this->_clients[indx];
+	this->_clients[indx] = NULL;
+	return (0);
+}
