@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 13:27:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 14:23:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ int		Client::socketRead(char *buffer, int bytes_read) //TODO
 		return (SERV_ERROR);
 	}
 	std::memset(buffer + bytes_read, 0, this->_config->buffer_size - bytes_read);
-	std::cout << "Buffer = " << std::string(buffer) << std::endl;
 	return (bytes_read);
 }
 

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 14:20:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 14:24:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,34 +36,13 @@ int		Query::queryRespond(Client *client, Config *config)
 	this->_client = client;
 	this->_config = config;
 	this->readRequest();
-	std::cout << "Going to request str " << this->_query_str << std::endl;
 	this->_query = Request(this->_query_str);
 	if (this->_query.getError() != NONE)
 	{
 		//TODO send 404 ou chais pas quoi
 		std::cerr << "Bad request 403" << std::endl;
-		std::cout << (int)this->_query.getError() << std::endl;
-		switch (this->_query.getError())
-		{
-			case (NONE):
-				std::cout << "NONE" << std::endl;
-				break;
-			case (UNSUPPORTED_METHOD):
-				std::cout << "UNSUPPORTED_METHOD" << std::endl;
-				break;
-			case (INVALID_REQUEST_LINE):
-				std::cout << "INVALID_REQUEST_LINE" << std::endl;
-				break;
-			case (INVALID_HEADER):
-				std::cout << "INVALID_HEADER" << std::endl;
-				break;
-			case (BAD_CONTENT_LENGTH):
-				std::cout << "BAD_CONTENT_LENGTH" << std::endl;
-			std::cout << "OK whatev's" << std::endl;
-		}
 		return (-1);
 	}
-	std::cout << "Query init ok " << std::endl;
 	this->setRessourceStatus();
 	if (this->_query_str.length() == 0)
 	{
@@ -71,9 +50,7 @@ int		Query::queryRespond(Client *client, Config *config)
 		return (SERV_ERROR);
 	}
 	this->_query = Request(this->_query_str);
-	std::cout << "Launching apropriate function step 12.32 " << static_cast<int>(this->_query.getMethod()) << std::endl;
 	(this->*_queryExecute[std::min(static_cast<int>(this->_query.getMethod()), (int)ERROR)])();
-	std::cout << "Done step 12.32" << std::endl;
 	return (0);
 }
 
@@ -92,16 +69,12 @@ int		Query::readRequest()
 			return (SERV_ERROR);
 		}
 		this->_query_str += std::string(buffer).substr(0, bytes_read);
-		std::cout << "bytes_read = " << bytes_read << std::endl;
-		std::cout << "_query_str is now >" << this->_query_str << "<" << std::endl;
 	}
-	std::cout << "Done reading request" << std::endl;
 	return (0);
 }
 
 int		Query::queryGet()
 {
-	std::cout << "Entered Query GET" << std::endl;
 	if (!(this->_ressource_status & PERM_ROK))
 	{
 		this->_err_code = 403;
@@ -120,7 +93,6 @@ int		Query::queryGet()
 			std::cerr << "Failed to send header" << std::endl;
 			return (SERV_ERROR);
 		}
-		std::cout << "header sent" << std::endl;
 		this->streamFile(this->_ressource);
 	}
 	else

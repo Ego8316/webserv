@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 19:25:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 14:25:07 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ void	serverPoll::pollAdd(int fd, int event, int indx)
     struct pollfd new_poll_fd;
 	new_poll_fd.fd = fd;
 	new_poll_fd.events = event;
-	std::cout << "Adding fd " << fd << " to poll indx " << indx << std::endl;
 	this->_poll_fds[indx] = new_poll_fd;
 }
 
@@ -46,11 +45,9 @@ int		serverPoll::pollWait(int time_Out)
 {
 	int	poll_count;
 
-	std::cout << "Going to poll wait for " << time_Out << "and monitoring " << std::endl;
 	poll_count = poll(&this->_poll_fds[0], this->_poll_count, time_Out);
 	if (poll_count == -1)
 		std::cerr << "Poll failed: " << strerror(errno) << std::endl;
-	std::cout << "Poll returned " << poll_count << std::endl;
 	return (poll_count);
 }
 
@@ -63,7 +60,6 @@ int		serverPoll::pollWatchRevent(Config &config)
 	{
 		if (this->_poll_fds[i].revents & POLLHUP || this->_poll_fds[i].revents & POLLERR)
 		{
-			std::cout << i << " matched for revent" << std::endl;
 			if (i == 0)
 			{
 				std::cerr << "Server ended connection." << std::endl;
@@ -77,7 +73,6 @@ int		serverPoll::pollWatchRevent(Config &config)
 		}
         else if (this->_poll_fds[i].revents & POLLIN)
 		{
-			std::cout << i << " matched for revent" << std::endl;
 			if (i == 0)
 				return (NEW_CLIENT);
 			else

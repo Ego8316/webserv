@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 20:45:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 14:25:42 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ int		WebServ::WebServInit(std::string config_file)
 	std::cout << "Socket Bind ok !" << std::endl;
 	this->_poll.pollAdd(this->_server.getFd(), POLLIN, 0);
 	std::cout << "WebServ Init OK" << std::endl;
-	std::cout << "Server FD = " << this->_server.getFd() << std::endl;
 	return (0);
 }
 
@@ -77,9 +76,9 @@ int		WebServ::WebServRun()
 		if (event == -1)
 		{
 			std::cerr << "poll Wait failed" << std::endl;
+			//TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
 			return (-1);
 		}
-			 //TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
 		else if (event == 0)
 		{
 			if (this->newClient() == -1)
@@ -100,14 +99,12 @@ int		WebServ::newClient()
 {
 	int		indx;
 
-	std::cout << "Trying to create new client" << std::endl;
 	for (indx = 0; indx < this->_config.client_limit; ++indx)
 	{
 		if (!this->_clients[indx])
 			break;
 	}
 	this->_clients[indx] = new Client(&this->_config);
-	std::cout << "Created new client ok on indx " << indx << std::endl;
 	if (this->_server.socketAcceptClient(this->_clients[indx]) == -1)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
