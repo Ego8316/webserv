@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 13:27:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 16:38:06 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 
 #include "headers.hpp"
 #include "Query.hpp"
+#include "Config.hpp"
+
+class Query;
+class Config;
 
 class Client {
 	public :

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/09/29 14:07:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 18:31:56 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,10 @@ Request::Request(const std::string &raw)
 				value.erase(0, 1);
 			if (!value.empty() && value[value.size() - 1] == '\r')
 				value.erase(value.size() - 1);
-			_headers[key] = value;
+			if (headerHasField(key))
+				_headers[key] = _headers[key] + "; " + value;
+			else
+				_headers[key] = value;
 		}
 		else
 		{
@@ -66,7 +69,6 @@ Request::Request(const std::string &raw)
 			return ;
 		}
 	}
-
 	std::ostringstream	bodyStream;
 	bodyStream << stream.rdbuf();
 	_rawBody = bodyStream.str();
@@ -128,6 +130,25 @@ int	Request::getError(void) const
 void	Request::setMethod(Method method)
 {
 	this->_method = method;
+}
+
+int		Request::updateCookie()
+{
+	//TODO code this function
+	_cookie = _cookie.parseHeader(_headers);
+	return (0);
+}
+
+bool	Request::headerHasField(const std::string field)
+{
+	return (_headers.find(field) != _headers.end());
+}
+
+std::string		Request::headerGetField(const std::string field)
+{
+	if (this->_headers.find(field) != this->_headers.end())
+		return (this->_headers[field]);
+	return ("");
 }
 
 std::ostream	&operator<<(std::ostream &os, const Request &src)

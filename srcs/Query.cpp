@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 14:24:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 16:04:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ int		Query::queryGet()
 
 int		Query::queryPost()
 {
+	
 	return (0);
 }
 

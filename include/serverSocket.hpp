@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:49 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 20:19:47 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 16:37:35 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,10 @@
 
 #include "headers.hpp"
 #include "Client.hpp"
+#include "Config.hpp"
 
 class Client;
+class Config;
 //serverSocket contains all the variables and functions that pertains to socket handling
 //including initialisation, setting up the addresses of the client and server,
 //accepting, listening and ending connections

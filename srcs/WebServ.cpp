@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 14:25:42 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 18:37:23 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,8 @@ WebServ::~WebServ() {}
 
 int		WebServ::WebServInit(std::string config_file)
 {
-	if (this->setConfig(config_file) == -1)
+	this->_config = Config(config_file);
+	if (this->_config.getParseError() != NONE)
 		return (SERV_ERROR);
 	std::cout << "Config ok !" << std::endl;
 	if (this->_server.socketInit(this->_config) == -1)
@@ -51,19 +52,6 @@ int		WebServ::WebServInit(std::string config_file)
 	return (0);
 }
 
-int		WebServ::setConfig(std::string config_file)
-{
-	(void)config_file;
-	this->_config.port_number = 12345;
-	this->_config.time_out = NO_TIMEOUT;
-	this->_config.domain = AF_INET;
-	this->_config.type = SOCK_STREAM;
-	this->_config.protocol = 0;
-	this->_config.client_limit = CLIENT_LIMIT;
-	this->_config.buffer_size = BUFFER_SIZE;
-	this->_config.ServHome = SERVER_HOME;
-	return (0);
-}
 
 int		WebServ::WebServRun()
 {

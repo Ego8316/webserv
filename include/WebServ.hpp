@@ -6,6 +6,8 @@
 #include "Client.hpp"
 #include "serverSocket.hpp"
 #include "serverPoll.hpp"
+#include "Cookie.hpp"
+#include "Config.hpp"
 
 class WebServ {
 	public :
@@ -22,7 +24,6 @@ class WebServ {
 		int					WebServRun();
 		int					newClient();
 		int					removeClient(int indx);
-		int					setConfig(std::string config_file);
 	private :
 		Config					_config;
 		serverSocket			_server;

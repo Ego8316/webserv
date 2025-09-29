@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:15 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 18:24:14 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 16:37:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,11 @@
 #include "headers.hpp"
 #include "serverSocket.hpp"
 #include "Client.hpp"
+#include "Config.hpp"
 
 class Client;
 class serverSocket;
+class Config;
 
 //serverPoll contains all the variables and function that pertains to the poll
 //function which is used to monitor fd activity and availability for I/O operations

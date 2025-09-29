@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/29 13:35:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 16:42:35 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,15 +82,15 @@ enum ContentTypes
 	PNG
 };
 
-struct Config
+enum Theme
 {
-	int				port_number;
-	int				backlog;
-	int				time_out;
-	int				client_limit;
-	int				domain;
-	int				type;
-	int				protocol;
-	int				buffer_size;
-	std::string		ServHome;
+	LIGHT_THEME,
+	DARK_THEME,
+	NORMAL_THEME
 };
+
+/*struct Cookie
+{
+	int		session_id;
+	Theme	theme;
+};*/

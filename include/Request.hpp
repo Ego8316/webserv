@@ -6,13 +6,14 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/09/29 13:59:39 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 18:30:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
+#include "Cookie.hpp"
 
 class Request
 {
@@ -31,12 +32,16 @@ class Request
 		int									getError(void) const;
 
 		void								setMethod(Method method);
+		int									updateCookie();
+		bool								headerHasField(const std::string field);
+		std::string							headerGetField(const std::string field);
 
 	private:
 		Method								_method;
 		std::string							_requestTarget;
 		std::string							_version;
 		std::string							_rawBody;
+		Cookie								_cookie;
 		std::map<std::string, std::string>	_headers;
 		int									_error;
 };
