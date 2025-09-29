@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 20:33:51 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 13:27:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,16 +56,17 @@ void    Client::setFd(int fd)
 	this->_client_fd = fd;
 }
 		
-int		Client::socketRead(char *buffer, int &bytes_read) //TODO
+int		Client::socketRead(char *buffer, int bytes_read) //TODO
 {
-	std::cout << "coucou " << std::endl;
-	if (recv(this->_client_fd, buffer, bytes_read, 0) == SERV_ERROR)
+	bytes_read = recv(this->_client_fd, buffer, bytes_read, 0);
+	if (bytes_read == SERV_ERROR)
 	{
 		std::cerr << "Receive failed\n";
 		return (SERV_ERROR);
 	}
+	std::memset(buffer + bytes_read, 0, this->_config->buffer_size - bytes_read);
 	std::cout << "Buffer = " << std::string(buffer) << std::endl;
-	return (0);
+	return (bytes_read);
 }
 
 int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 

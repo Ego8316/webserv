@@ -6,13 +6,16 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 20:28:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 14:20:07 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Query.hpp"
 
-Query::Query() {}
+Query::Query()
+{
+	this->_err_code = 200;
+}
 
 Query::Query(const Query &other) : _query(other._query), _err_code(other._err_code) {}
 
@@ -30,14 +33,36 @@ Query::~Query() {}
 
 int		Query::queryRespond(Client *client, Config *config)
 {
-	std::cout << 1 << std::endl;
 	this->_client = client;
-	std::cout << 2 << std::endl;
 	this->_config = config;
-	std::cout << 3 << std::endl;
-	this->_query_str = this->readRequest();
-	std::cout << "Going to request str " << std::endl;
+	this->readRequest();
+	std::cout << "Going to request str " << this->_query_str << std::endl;
 	this->_query = Request(this->_query_str);
+	if (this->_query.getError() != NONE)
+	{
+		//TODO send 404 ou chais pas quoi
+		std::cerr << "Bad request 403" << std::endl;
+		std::cout << (int)this->_query.getError() << std::endl;
+		switch (this->_query.getError())
+		{
+			case (NONE):
+				std::cout << "NONE" << std::endl;
+				break;
+			case (UNSUPPORTED_METHOD):
+				std::cout << "UNSUPPORTED_METHOD" << std::endl;
+				break;
+			case (INVALID_REQUEST_LINE):
+				std::cout << "INVALID_REQUEST_LINE" << std::endl;
+				break;
+			case (INVALID_HEADER):
+				std::cout << "INVALID_HEADER" << std::endl;
+				break;
+			case (BAD_CONTENT_LENGTH):
+				std::cout << "BAD_CONTENT_LENGTH" << std::endl;
+			std::cout << "OK whatev's" << std::endl;
+		}
+		return (-1);
+	}
 	std::cout << "Query init ok " << std::endl;
 	this->setRessourceStatus();
 	if (this->_query_str.length() == 0)
@@ -46,7 +71,9 @@ int		Query::queryRespond(Client *client, Config *config)
 		return (SERV_ERROR);
 	}
 	this->_query = Request(this->_query_str);
-	(this->*_queryExecute[std::max(static_cast<int>(this->_query.getMethod()), DELETE + 1)])();
+	std::cout << "Launching apropriate function step 12.32 " << static_cast<int>(this->_query.getMethod()) << std::endl;
+	(this->*_queryExecute[std::min(static_cast<int>(this->_query.getMethod()), (int)ERROR)])();
+	std::cout << "Done step 12.32" << std::endl;
 	return (0);
 }
 
@@ -55,26 +82,26 @@ int		Query::readRequest()
 	char	buffer[BUFFER_SIZE];
 	int		bytes_read;
 	
-	std::cout << this->_config->buffer_size << std::endl;
-	std::cout << "a !" << std::endl;
 	bytes_read = this->_config->buffer_size;
-	while (bytes_read > 0)
+	while (bytes_read == this->_config->buffer_size)
 	{
-		std::cout << "alleeez !" << std::endl;
-		std::cout <<  (void *)this->_client << std::endl;
-		if (this->_client->socketRead(buffer, bytes_read) == SERV_ERROR)
+		bytes_read = this->_client->socketRead(buffer, bytes_read);
+		if (bytes_read == SERV_ERROR)
 		{
 			std::cerr << "Query could not retrive request" << std::endl;
 			return (SERV_ERROR);
 		}
 		this->_query_str += std::string(buffer).substr(0, bytes_read);
-		std::cout << "_query_str is now " << this->_query_str << std::endl;
+		std::cout << "bytes_read = " << bytes_read << std::endl;
+		std::cout << "_query_str is now >" << this->_query_str << "<" << std::endl;
 	}
+	std::cout << "Done reading request" << std::endl;
 	return (0);
 }
 
 int		Query::queryGet()
 {
+	std::cout << "Entered Query GET" << std::endl;
 	if (!(this->_ressource_status & PERM_ROK))
 	{
 		this->_err_code = 403;
@@ -90,11 +117,14 @@ int		Query::queryGet()
 	{
 		if (this->sendHeader() == SERV_ERROR)
 		{
-			//set error
+			std::cerr << "Failed to send header" << std::endl;
 			return (SERV_ERROR);
 		}
+		std::cout << "header sent" << std::endl;
 		this->streamFile(this->_ressource);
 	}
+	else
+		std::cerr << "Could not access ressource : >" << this->_ressource << "<" << std::endl;
 	return (0);
 }
 
@@ -123,7 +153,8 @@ int		Query::setRessourceStatus()
 	struct stat file_stat;
 	struct stat dir_stat;
 
-	if (stat(this->_query.getRequestTarget().c_str(), &file_stat) == SERV_ERROR)
+	this->_ressource = this->_query.getRequestTarget();
+	if (stat(this->_ressource.c_str(), &file_stat) == SERV_ERROR)
 	{
 		if (errno == EACCES)
 		{
@@ -136,6 +167,7 @@ int		Query::setRessourceStatus()
 			this->_ressource_status = NOT_FOUND;
 		}
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
+		std::cerr << "Failed to find " << this->_query.getRequestTarget() << std::endl;
 		return (SERV_ERROR);
 	}
 	this->_ressource_status = EXISTS;
@@ -182,14 +214,14 @@ std::string	Query::getRessourceTypeStr()
 void		Query::setHeader()
 {
 	this->_header = "HTTP/1.0 " + std::to_string(this->_err_code) + " OK\r\n";
-	this->_header += "Server: Apache/1.3.29 (Unix)";
-	this->_header += "Content-Type: " + this->getRessourceTypeStr();
-	this->_header += "Content-Length: " + std::to_string(this->_content_len);
+	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
+	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
+	this->_header += "Content-Length: " + std::to_string(this->_content_len) + "\r\n\r\n";
 }
 
 int		Query::sendHeader()
 {
-	if (this->_client->socketWrite(this->_header.c_str(), this->_header.length()))
+	if (this->_client->socketWrite(this->_header.c_str(), this->_header.length()) == -1)
 	{
 		//set err
 		return (SERV_ERROR);

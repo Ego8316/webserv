@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 20:34:38 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/28 20:45:40 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ int		WebServ::setConfig(std::string config_file)
 	this->_config.protocol = 0;
 	this->_config.client_limit = CLIENT_LIMIT;
 	this->_config.buffer_size = BUFFER_SIZE;
+	this->_config.ServHome = SERVER_HOME;
 	return (0);
 }
 

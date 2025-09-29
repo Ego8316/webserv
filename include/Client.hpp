@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/28 20:32:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 13:27:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class Client {
 		void				setClientId(int id);
 	//MEMBER FUNCTIONS
 		int					handleEvent();
-		int					socketRead(char *buffer, int &bytes_read);
+		int					socketRead(char *buffer, int bytes_read);
 		int					socketWrite(const char *buffer, int bytes_write);
 	private :
 		int					_client_fd;

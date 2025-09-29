@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/28 19:57:24 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 13:35:58 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@
 #define BUFFER_SIZE 1024
 #define REQUEST_TIME_WAIT 100000
 #define CLIENT_LIMIT 1000
+#define SERVER_HOME "/Users/victorviterbo/Desktop/42/WebServ"
 
 #define NOT_FOUND 0
 #define PERM_ISSUE 1
@@ -64,6 +65,15 @@ enum Method
 	ERROR
 };
 
+enum ParseError
+{
+	NONE,
+	UNSUPPORTED_METHOD,
+	INVALID_REQUEST_LINE,
+	INVALID_HEADER,
+	BAD_CONTENT_LENGTH
+};
+
 enum ContentTypes
 {
 	HTML,
@@ -74,12 +84,13 @@ enum ContentTypes
 
 struct Config
 {
-	int		port_number;
-	int		backlog;
-	int		time_out;
-	int		client_limit;
-	int		domain;
-	int		type;
-	int		protocol;
-	int		buffer_size;
+	int				port_number;
+	int				backlog;
+	int				time_out;
+	int				client_limit;
+	int				domain;
+	int				type;
+	int				protocol;
+	int				buffer_size;
+	std::string		ServHome;
 };

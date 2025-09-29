@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/09/25 18:36:06 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 14:07:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,13 @@ Request::Request(const std::string &raw)
 		if (methodStr == "GET") _method = GET;
 		else if (methodStr == "POST") _method = POST;
 		else _method = DELETE;
+		this->_requestTarget = std::string(SERVER_HOME) + this->_requestTarget;
 	}
 	else
 	{
 		_error = INVALID_REQUEST_LINE;
 		return ;
 	}
-
 	while (std::getline(stream, line) && line != "\r")
 	{
 		size_t	pos = line.find(':');
@@ -88,6 +88,7 @@ Request &Request::operator=(const Request &other)
 		_version = other._version;
 		_rawBody = other._rawBody;
 		_headers = other._headers;
+		_error = other._error;
 	}
 	return (*this);
 }
@@ -119,7 +120,7 @@ std::map<std::string, std::string>	Request::getHeaders(void) const
 	return (_headers);
 }
 
-Request::ParseError	Request::getError(void) const
+int	Request::getError(void) const
 {
 	return (_error);
 }
@@ -135,7 +136,7 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 	const std::map<std::string, std::string>	&headers = src.getHeaders();
 	std::string									methodStr;
 
-	if (src.getError() != Request::NONE)
+	if (src.getError() != NONE)
 	{
 		os << "Parse error detected: " << src.getError() << std::endl;
 		return (os);
