@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 15:24:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 16:58:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,13 @@ class Cookie {
 	//DESTUCTORS
 		~Cookie();
 	//GETTERS
+		std::map<std::string, std::string>	const	&getAllAttributes() const;
+		int											getSessionId() const;
+		std::string const							getAttribute(std::string key) const;
 	//SETTERS
-		void				setSessionID(unsigned int id);
+		void				setSessionId(unsigned int id);
+		void				writeAttribute(std::string key, std::string newvalue);
+		void				appendAttribute(std::string key, std::string newvalue);
 	//MEMBER FUNCTIONS
 		static int			initCookies();
 		static Cookie		*getCookie(std::map<std::string, std::string> header);
@@ -37,16 +42,16 @@ class Cookie {
 		static int			createSession();
 		static int			removeSession(int id);
 		int					updateCookie(std::map<std::string, std::string> header);
-		int					updateField(std::string field_name, std::string field_value);
-		int					isExpired();
-		bool				hasField(std::string key);
-		std::string			getField(std::string key);
-		void				writeField(std::string key, std::string newvalue);
-		void				appendField(std::string key, std::string newvalue);
+		int					updateAttribute(std::string field_name, std::string field_value);
+		int					isExpired() const;
+		bool				hasAttribute(std::string key) const;
 	//VARIABLES
 	private :
 		static std::vector<Cookie *>			_sessions;
 		unsigned int							_session_id;
 		time_t									_life_time;
-		std::map<std::string, std::string>		_cookies;
+		std::map<std::string, std::string>		_attributes;
 };
+
+
+std::ostream	&operator<<(std::ostream &os, const Cookie &src);

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 15:44:29 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 16:32:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class Request
 		std::string							_requestTarget;
 		std::string							_version;
 		std::string							_rawBody;
-		Cookie								*_cookie;
+		Cookie								*_attributes;
 		std::map<std::string, std::string>	_headers;
 		int									_error;
 };

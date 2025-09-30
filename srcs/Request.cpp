@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 14:20:52 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 16:32:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,7 @@ void	Request::setMethod(Method method)
 int		Request::setCookie()
 {
 	//TODO code this function
-	this->_cookie = Cookie().getCookie(_headers);
+	this->_attributes = Cookie().getCookie(_headers);
 	return (0);
 }
 
