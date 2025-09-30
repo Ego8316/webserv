@@ -6,19 +6,15 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 21:44:19 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 23:09:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Cookie.hpp"
 
-//std::vector<Cookie*> Cookie::_sessions;
 Cookie	*Cookie::_sessions[MAX_COOKIE_SESSIONS];
 
-Cookie::Cookie()
-{
-	//this->initCookies();
-}
+Cookie::Cookie() {}
 
 Cookie::Cookie(const Cookie &other) : _session_id(other._session_id), _life_time(other._life_time) {}
 
@@ -43,29 +39,21 @@ Cookie::~Cookie()
 	}
 }
 
-/*int		Cookie::initCookies()
-{
-	if (Cookie::_sessions.size() == MAX_COOKIE_SESSIONS)
-		return (0);
-	Cookie::_sessions.resize(MAX_COOKIE_SESSIONS);
-	return (1);
-}*/
-
-bool			Cookie::hasAttribute(std::string key) const
+bool		Cookie::hasAttribute(std::string key) const
 {
 	if (this->_attributes.find(key) == this->_attributes.end())
 		return (false);
 	return (true);
 }
 
-void			Cookie::writeAttribute(std::string key, std::string newvalue)
+void		Cookie::writeAttribute(std::string key, std::string newvalue)
 {
 	if (this->getAttribute(key).compare(newvalue) == 0)
 		return ;
 	this->_attributes[key] = newvalue;
 }
 
-void			Cookie::appendAttribute(std::string key, std::string newvalue)
+void		Cookie::appendAttribute(std::string key, std::string newvalue)
 {
 	if (this->hasAttribute(key))
 		this->_attributes[key] = this->_attributes[key] + "; " + newvalue;
@@ -73,12 +61,12 @@ void			Cookie::appendAttribute(std::string key, std::string newvalue)
 		this->_attributes[key] = newvalue;
 }
 
-void			Cookie::setSessionId(unsigned int id)
+void		Cookie::setSessionId(unsigned int id)
 {
 	this->_session_id = id;
 }
 
-int				Cookie::getSessionId() const
+int			Cookie::getSessionId() const
 {
 	return (this->_session_id);
 }
@@ -86,10 +74,9 @@ int				Cookie::getSessionId() const
 std::string const	Cookie::getAttribute(std::string key) const
 {
 	std::map<std::string, std::string>::const_iterator it = this->_attributes.find(key);
-    if (it != _attributes.end()) {
-        return it->second;  // Return copy of the value
-    }
-	return ("");
+    if (it == _attributes.end())
+		return ("");
+    return it->second;
 }
 
 std::map<std::string, std::string> const	&Cookie::getAllAttributes() const
@@ -153,6 +140,7 @@ int			Cookie::findSession(std::map<std::string, std::string> header)
 		std::vector<std::string>	cookie_in = stringSplit(header["Cookie"], ";");
 		if (cookie_in[0].compare(0, 11, "session_id") == 0)
 		{
+			std::cout << "Is this your session id ? >" + cookie_in[0].substr(11, cookie_in[0].length()) + "<";
 			uid = std::atoi(cookie_in[0].substr(11, cookie_in[0].length()).c_str());
 			if (uid < 0 || uid >= MAX_COOKIE_SESSIONS || !sessionExists(uid))
 			{

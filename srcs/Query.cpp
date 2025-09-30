@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 20:58:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 23:28:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ int		Query::queryRespond(Client *client, Config *config)
 		std::cerr << "Bad request 403" << std::endl;
 		return (-1);
 	}
+	std::cout << "version is now " << this->_query->getVersion() << std::endl;
 	this->_query->setCookie();
 	this->_cookie = this->_query->getCookie();
 	if (this->_cookie == NULL)

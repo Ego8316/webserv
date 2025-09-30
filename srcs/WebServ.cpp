@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 15:13:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 22:28:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ WebServ::~WebServ() {}
 int		WebServ::WebServInit(std::string config_file)
 {
 	this->_config = Config(config_file);
+	std::cout << "config port number = " << this->_config.port_number << std::endl;
 	if (this->_config.getParseError() != NONE)
 		return (SERV_ERROR);
 	std::cout << "Config ok !" << std::endl;

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 14:02:29 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 22:33:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ std::vector<std::string>		stringSplit(std::string s, std::string d)
 	{
         element = s.substr(0, pos);
         split_str.push_back(element);
-        s.erase(0, pos + s.length());
+        s.erase(0, pos + d.length());
 		pos = s.find(d);
     }
     split_str.push_back(s);

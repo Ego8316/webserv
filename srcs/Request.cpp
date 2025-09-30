@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 20:45:00 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 23:31:19 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,13 @@ Request::Request(const Request &other)
 
 Request::Request(const std::string &raw)
 {
-	std::istringstream	stream(raw);
+	//std::istringstream	stream(raw);
 	std::string			line;
+	unsigned int		i = 0;
 
 	_error = NONE;
-	if (std::getline(stream, line))
+	std::vector<std::string>	lines = stringSplit(raw, "\r\n");
+	if (lines.size())
 	{
 		std::istringstream	firstLine(line);
 		std::string			methodStr;
@@ -46,28 +48,36 @@ Request::Request(const std::string &raw)
 		_error = INVALID_REQUEST_LINE;
 		return ;
 	}
+	std::cout << "WTHELL" << std::endl;
 	while (std::getline(stream, line) && line != "\r")
 	{
-		size_t	pos = line.find(':');
+		std::cout << "WwarvékjnwTHELL" << std::endl;
+		std::vector<std::string>	line_split = stringSplit(line, "\r\n");
+		for (unsigned int i = 0; i < line_split.size(); ++i)
+		{
+			std::vector<std::string>	field_split = stringSplit(line_split[i], ": ");
 
-		if (pos != std::string::npos)
-		{
-			std::string	key = line.substr(0, pos);
-			std::string	value = line.substr(pos + 1);
-			if (!value.empty() && value[0] == ' ')
-				value.erase(0, 1);
-			if (!value.empty() && value[value.size() - 1] == '\r')
-				value.erase(value.size() - 1);
-			if (headerHasField(key))
-				_headers[key] = _headers[key] + "; " + value;
+			std::cout << ">" << field_split[0] << "<>" << field_split[1] << "<" << std::endl;
+			if (field_split.size() == 2)
+			{
+				std::string	key = field_split[0];
+				std::string	value = field_split[1];
+				std::cout << ">" << field_split[0] << "<>" << field_split[1] << "<" << std::endl;
+				if (!value.empty() && value[0] == ' ')
+					value.erase(0, 1);
+				if (!value.empty() && value[value.size() - 1] == '\r')
+					value.erase(value.size() - 1);
+				if (headerHasField(key))
+					_headers[key] = _headers[key] + "; " + value;
+				else
+					_headers[key] = value;
+			}
 			else
-				_headers[key] = value;
-		}
-		else
-		{
-			_error = INVALID_HEADER;
-			return ;
-		}
+			{
+				_error = INVALID_HEADER;
+				return ;
+			}
+		}	
 	}
 	std::ostringstream	bodyStream;
 	bodyStream << stream.rdbuf();
@@ -140,13 +150,8 @@ void	Request::setMethod(Method method)
 int		Request::setCookie()
 {
 	//TODO code this function
-	std::cout << "HELLO" << std::endl;
+	std::cout << *this << std::endl;
 	this->_cookie = Cookie::getCookie(_headers);
-	std::cout << "eh ben ?" << std::endl;
-	if (this->_cookie == NULL)
-		std::cout << "WTFFFFFFFF" << std::endl;
-	else
-		std::cout << "NOOOOOOOO" << std::endl;
 	std::cout << "Printing cookies !!!" << std::endl;
 	std::cout << *(this->_cookie) << std::endl;
 	return (0);
