@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/25 14:25:01 by ego              ###   ########.fr       */
+/*   Updated: 2025/09/30 15:19:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,26 +16,70 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <strings.h>
+#include <algorithm>
+#include <vector>
+#include <map>
 #include <iomanip>
 #include <iostream>
-#include <map>
+#include <fstream>
+#include <ctime>
 #include <netinet/in.h>
 #include <poll.h>
 #include <sstream>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
-#include <vector>
+#include <fcntl.h>
+
+#define SERV_ERROR -1
+#define NEW_CLIENT 0
+#define CLIENT_ERR_IDX(idx) (-idx - 1)
 
 #define ALL_FDS -1
 #define DEFAULT_EVENT -1
 #define NO_TIMEOUT -1
 #define SERVER_IDX 0
 
+#define BUFFER_SIZE 1024
+#define REQUEST_TIME_WAIT 100000
+#define CLIENT_LIMIT 1000
+#define SERVER_HOME "/Users/victorviterbo/Desktop/42/WebServ"
+#define MAX_COOKIE_SESSIONS 1000
+
+#define NOT_FOUND 0
+#define PERM_ISSUE 1
+#define IS_DIR 2
+#define PERM_ROK 4
+#define PERM_WOK 8
+#define PERM_XOK 16
+#define IS_CGI 32
+#define EXISTS 128
+
 enum Method
 {
 	GET,
 	POST,
-	DELETE
+	DELETE,
+	CGI_RUN,
+	ERROR
+};
+
+enum ParseError
+{
+	NONE,
+	UNSUPPORTED_METHOD,
+	INVALID_REQUEST_LINE,
+	INVALID_HEADER,
+	BAD_CONTENT_LENGTH
+};
+
+enum ContentTypes
+{
+	HTML,
+	PLAIN,
+	JPEG,
+	PNG
 };

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverPoll.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:15 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/25 14:16:37 by ego              ###   ########.fr       */
+/*   Updated: 2025/09/29 16:37:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,12 @@
 
 #include "headers.hpp"
 #include "serverSocket.hpp"
-#include "clientSocket.hpp"
+#include "Client.hpp"
+#include "Config.hpp"
 
-class clientSocket;
+class Client;
 class serverSocket;
+class Config;
 
 //serverPoll contains all the variables and function that pertains to the poll
 //function which is used to monitor fd activity and availability for I/O operations
@@ -25,7 +27,7 @@ class serverSocket;
 //first element of vector will always be server fd which will not change
 //following elements are clients fds that are dynamically created and destroyed
 
-class serverPoll {
+class serverPoll{
 	public :
 	// CONSTRUCTORS
 		serverPoll();
@@ -34,17 +36,13 @@ class serverPoll {
 	//DESTUCTORS
 		~serverPoll();
 	//GETTERS
-		serverSocket	*getServSocket();
 	//SETTERS
-		void			setServSocket(serverSocket *server);
 	//MEMBER FUNCTIONS
-		void	pollAdd(int fd, int event, clientSocket *client);
-		int		pollRemove(int indx);
-		int		pollWait(int TimeOut);
-		int		pollWatchRevent();
+		void	pollAdd(int fd, int event, int indx);
+		void	pollRemove(int indx);
+		int		pollWait(int time_Out);
+		int		pollWatchRevent(Config &config);
 	private :
-		static const unsigned int			_poll_count = 10000;	//number of fds simultaneously handled by poll (different from backlog which is number of connections pending 'accept')
+		static const unsigned int			_poll_count = 10000;	//TODO get from config
 		std::vector<struct pollfd>			_poll_fds;				//vector of fds (will be of len _poll_count)
-		serverSocket						*_server;
-		std::map<int, clientSocket *>		_client_map;
 };

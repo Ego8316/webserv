@@ -1,20 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   serverSocket.hpp                                   :+:      :+:    :+:   */
+/*   ServerSocket.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:49 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/25 14:16:50 by ego              ###   ########.fr       */
+/*   Updated: 2025/09/29 16:37:35 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
-#include "clientSocket.hpp"
+#include "Client.hpp"
+#include "Config.hpp"
 
+class Client;
+class Config;
 //serverSocket contains all the variables and functions that pertains to socket handling
 //including initialisation, setting up the addresses of the client and server,
 //accepting, listening and ending connections
@@ -31,25 +34,16 @@ class serverSocket {
 		int					getFd();
 	//SETTERS
 	//MEMBER FUNCTIONS
-		int					socketInit(int domain, int type, int protocol);
+		int					socketInit(Config &config);
 		int					socketBind(int portNumber);
-		clientSocket		*socketAcceptClient();
-		//bool				setSockOpt(); //TODO set options for poll (see exemple below)
+		int					socketAcceptClient(Client *new_client);
+		int					socketListen(Config config);
+		int					setSockOpt();
 	private :
-		static const unsigned int	_backlog = 100;		//number of connections pending 'accept' that can be queued
+		static const unsigned int	_backlog = 100;		//TODO get from config
+		int							_domain;			//TODO get from config
+		int							_type;				//TODO get from config
+		int							_protocol;			//TODO get from config
    		int							_server_fd;			//server file descriptor
-		int							_domain;			//protocol family - AF_...
-		int							_type;				//communication semantics - SOCK_...
-		int							_protocol;			//specific protocol - 0 for standard in the domain
 		struct sockaddr_in			_server_addr;
 };
-
-/*
-// Set socket options to reuse address
-    int opt = 1;
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
-        std::cerr << "Failed to set socket options: " << strerror(errno) << std::endl;
-        close(server_fd);
-        return EXIT_FAILURE;
-    }
-*/

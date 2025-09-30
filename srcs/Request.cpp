@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/09/25 14:09:09 by ego              ###   ########.fr       */
+/*   Updated: 2025/09/30 14:20:52 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,13 @@ Request::Request(const std::string &raw)
 		if (methodStr == "GET") _method = GET;
 		else if (methodStr == "POST") _method = POST;
 		else _method = DELETE;
+		this->_requestTarget = std::string(SERVER_HOME) + this->_requestTarget;
 	}
 	else
 	{
 		_error = INVALID_REQUEST_LINE;
 		return ;
 	}
-
 	while (std::getline(stream, line) && line != "\r")
 	{
 		size_t	pos = line.find(':');
@@ -58,7 +58,10 @@ Request::Request(const std::string &raw)
 				value.erase(0, 1);
 			if (!value.empty() && value[value.size() - 1] == '\r')
 				value.erase(value.size() - 1);
-			_headers[key] = value;
+			if (headerHasField(key))
+				_headers[key] = _headers[key] + "; " + value;
+			else
+				_headers[key] = value;
 		}
 		else
 		{
@@ -66,7 +69,6 @@ Request::Request(const std::string &raw)
 			return ;
 		}
 	}
-
 	std::ostringstream	bodyStream;
 	bodyStream << stream.rdbuf();
 	_rawBody = bodyStream.str();
@@ -88,6 +90,7 @@ Request &Request::operator=(const Request &other)
 		_version = other._version;
 		_rawBody = other._rawBody;
 		_headers = other._headers;
+		_error = other._error;
 	}
 	return (*this);
 }
@@ -119,9 +122,33 @@ std::map<std::string, std::string>	Request::getHeaders(void) const
 	return (_headers);
 }
 
-Request::ParseError	Request::getError(void) const
+int	Request::getError(void) const
 {
 	return (_error);
+}
+
+void	Request::setMethod(Method method)
+{
+	this->_method = method;
+}
+
+int		Request::setCookie()
+{
+	//TODO code this function
+	this->_cookie = Cookie().getCookie(_headers);
+	return (0);
+}
+
+bool	Request::headerHasField(const std::string field)
+{
+	return (_headers.find(field) != _headers.end());
+}
+
+std::string		Request::headerGetField(const std::string field)
+{
+	if (this->_headers.find(field) != this->_headers.end())
+		return (this->_headers[field]);
+	return ("");
 }
 
 std::ostream	&operator<<(std::ostream &os, const Request &src)
@@ -130,7 +157,7 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 	const std::map<std::string, std::string>	&headers = src.getHeaders();
 	std::string									methodStr;
 
-	if (src.getError() != Request::NONE)
+	if (src.getError() != NONE)
 	{
 		os << "Parse error detected: " << src.getError() << std::endl;
 		return (os);

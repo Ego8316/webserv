@@ -1,0 +1,114 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Client.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
+/*   Updated: 2025/09/29 14:23:59 by victorviter      ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "Client.hpp"
+
+Client::Client(Config *config) : _config(config)
+{
+	this->_client_len = sizeof(this->_client_addr);
+}
+
+Client::Client(const Client &other) : _client_addr(other._client_addr), _client_len(other._client_len), _config(other._config) {}
+
+Client &Client::operator=(const Client &other)
+{
+	if (this != &other)
+	{
+		this->_client_addr = other._client_addr;
+		this->_client_len = other._client_len;
+		this->_config = other._config;
+	}
+	return (*this);
+}
+
+Client::~Client()
+{
+	if (this->_client_fd)
+		close(this->_client_fd);
+}
+
+struct sockaddr_in	&Client::getClientAddr()
+{
+	return (this->_client_addr);
+}
+
+socklen_t   &Client::getClientLen()
+{
+	return (this->_client_len);
+}
+
+int     Client::getFd()
+{
+	return (this->_client_fd);
+}
+
+void    Client::setFd(int fd)
+{
+	this->_client_fd = fd;
+}
+		
+int		Client::socketRead(char *buffer, int bytes_read) //TODO
+{
+	bytes_read = recv(this->_client_fd, buffer, bytes_read, 0);
+	if (bytes_read == SERV_ERROR)
+	{
+		std::cerr << "Receive failed\n";
+		return (SERV_ERROR);
+	}
+	std::memset(buffer + bytes_read, 0, this->_config->buffer_size - bytes_read);
+	return (bytes_read);
+}
+
+int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 
+{
+	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR)
+	{
+		std::cerr << "Receive failed\n";
+		return (SERV_ERROR);
+	}
+	return (0);
+}
+		
+int		Client::handleEvent()
+{
+	Query	query;
+
+	std::cout << "Client handling event" << std::endl;
+	query.queryRespond(this, this->_config);
+	/* 
+	For now it just echoes back the message for testing purposes 
+	char 	    buffer[10];
+	ssize_t     bytes_read;
+
+	std::cout << "handling event" << std::endl;
+	while ((bytes_read = recv(this->_client_fd, buffer, sizeof(buffer), 0)) > 0)
+	{
+		std::cout << "Reading input" << std::endl;
+		if (std::strncmp(buffer, "close", 5) == 0)
+		{
+			std::cout << "Closing connection ..." << std::endl;
+			return (SERV_ERROR);
+		}
+		else if (send(this->_client_fd, buffer, bytes_read, 0) == SERV_ERROR)
+		{
+			std::cerr << "Send failed\n";
+			return (SERV_ERROR);
+		}
+			return (0);
+	}*/
+	return (0);
+}
+
+void	Client::setClientId(int id)
+{
+	this->_client_id = id;
+}

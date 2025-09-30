@@ -59,9 +59,6 @@ int main() {
 		close(server_fd);
 		return EXIT_FAILURE;
 	}
-
-	std::cout << "Listening on port " << PORT << "..." << std::endl;
-
 	// Add server socket to poll fds
 	struct pollfd server_poll_fd;
 	server_poll_fd.fd = server_fd;

@@ -3,16 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/09/25 14:32:22 by ego              ###   ########.fr       */
+/*   Updated: 2025/09/30 15:44:29 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
+#include "Cookie.hpp"
+#include "utils.hpp"
+
+class Cookie;
 
 class Request
 {
@@ -23,29 +27,26 @@ class Request
 		Request	&operator=(const Request &other);
 		~Request(void);
 
-		enum ParseError
-		{
-			NONE,
-			UNSUPPORTED_METHOD,
-			INVALID_REQUEST_LINE,
-			INVALID_HEADER,
-			BAD_CONTENT_LENGTH
-		};
-
 		Method								getMethod(void) const;
 		std::string							getRequestTarget(void) const;
 		std::string							getVersion(void) const;
 		std::string							getRawBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
-		ParseError							getError(void) const;
+		int									getError(void) const;
+
+		void								setMethod(Method method);
+		int									setCookie();
+		bool								headerHasField(const std::string field);
+		std::string							headerGetField(const std::string field);
 
 	private:
 		Method								_method;
 		std::string							_requestTarget;
 		std::string							_version;
 		std::string							_rawBody;
+		Cookie								*_cookie;
 		std::map<std::string, std::string>	_headers;
-		ParseError							_error;
+		int									_error;
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);

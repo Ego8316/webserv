@@ -1,37 +1,47 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   clientSocket.hpp                                   :+:      :+:    :+:   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/25 14:15:55 by ego              ###   ########.fr       */
+/*   Updated: 2025/09/29 16:38:06 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
+#include "Query.hpp"
+#include "Config.hpp"
 
-class clientSocket {
+class Query;
+class Config;
+
+class Client {
 	public :
 	// CONSTRUCTORS
-		clientSocket();
-		clientSocket(const clientSocket &other);
-		clientSocket &operator=(const clientSocket &other);
+		Client(Config *config);
+		Client(const Client &other);
+		Client &operator=(const Client &other);
 	//DESTUCTORS
-		~clientSocket();
+		~Client();
 	//GETTERS
 		int					getFd();
 		struct sockaddr_in	&getClientAddr();
 		socklen_t			&getClientLen();
 	//SETTERS
 		void				setFd(int fd);
+		void				setClientId(int id);
 	//MEMBER FUNCTIONS
-		int	handleEvent(short revent);
+		int					handleEvent();
+		int					socketRead(char *buffer, int bytes_read);
+		int					socketWrite(const char *buffer, int bytes_write);
 	private :
 		int					_client_fd;
 		struct sockaddr_in	_client_addr;
 		socklen_t			_client_len;
+		int					_client_id;
+		Config				*_config;
 };
