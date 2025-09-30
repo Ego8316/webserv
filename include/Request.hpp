@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 16:32:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 17:22:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Request
 		std::string							getRawBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
 		int									getError(void) const;
+		Cookie								*getCookie(void) const;
 
 		void								setMethod(Method method);
 		int									setCookie();
@@ -44,7 +45,7 @@ class Request
 		std::string							_requestTarget;
 		std::string							_version;
 		std::string							_rawBody;
-		Cookie								*_attributes;
+		Cookie								*_cookie;
 		std::map<std::string, std::string>	_headers;
 		int									_error;
 };

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 16:58:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 17:57:11 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class Cookie {
 		std::map<std::string, std::string>	const	&getAllAttributes() const;
 		int											getSessionId() const;
 		std::string const							getAttribute(std::string key) const;
+		static Cookie								*getSessionById(unsigned int idx);
 	//SETTERS
 		void				setSessionId(unsigned int id);
 		void				writeAttribute(std::string key, std::string newvalue);
@@ -45,12 +46,15 @@ class Cookie {
 		int					updateAttribute(std::string field_name, std::string field_value);
 		int					isExpired() const;
 		bool				hasAttribute(std::string key) const;
+		std::string			genHeader();
 	//VARIABLES
 	private :
+		static const int						_max_age = 3600;
 		static std::vector<Cookie *>			_sessions;
 		unsigned int							_session_id;
 		time_t									_life_time;
 		std::map<std::string, std::string>		_attributes;
+		bool									_http_only;
 };
 
 

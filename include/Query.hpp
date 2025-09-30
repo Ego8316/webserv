@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 15:43:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 17:23:20 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,12 @@
 #include "Client.hpp"
 #include "utils.hpp"
 #include "Config.hpp"
+#include "Cookie.hpp"
 
 class Client;
 class Request;
 class Config;
+class Cookie;
 
 class Query {
 	public :
@@ -60,4 +62,5 @@ class Query {
 		ContentTypes				_content_type;	//TODO implement setting this as part of setRessourceStatus
 		Client						*_client;
 		Config						*_config;
+		Cookie						*_cookie;
 };

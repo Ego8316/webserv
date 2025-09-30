@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 16:32:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 17:29:13 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,6 +127,11 @@ int	Request::getError(void) const
 	return (_error);
 }
 
+Cookie	*Request::getCookie(void) const
+{
+	return (_cookie);
+}
+		
 void	Request::setMethod(Method method)
 {
 	this->_method = method;
@@ -135,7 +140,9 @@ void	Request::setMethod(Method method)
 int		Request::setCookie()
 {
 	//TODO code this function
-	this->_attributes = Cookie().getCookie(_headers);
+	this->_cookie = Cookie().getCookie(_headers);
+	std::cout << "Printing cookies !!!" << std::endl;
+	std::cout << *(this->_cookie) << std::endl;
 	return (0);
 }
 

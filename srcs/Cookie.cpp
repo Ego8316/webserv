@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 16:58:47 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 17:57:40 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,14 +59,14 @@ bool			Cookie::hasAttribute(std::string key) const
 	return (true);
 }
 
-void		Cookie::writeAttribute(std::string key, std::string newvalue)
+void			Cookie::writeAttribute(std::string key, std::string newvalue)
 {
 	if (this->getAttribute(key).compare(newvalue) == 0)
 		return ;
 	this->_attributes[key] = newvalue;
 }
 
-void		Cookie::appendAttribute(std::string key, std::string newvalue)
+void			Cookie::appendAttribute(std::string key, std::string newvalue)
 {
 	if (this->hasAttribute(key))
 		this->_attributes[key] = this->_attributes[key] + "; " + newvalue;
@@ -74,12 +74,12 @@ void		Cookie::appendAttribute(std::string key, std::string newvalue)
 		this->_attributes[key] = newvalue;
 }
 
-void		Cookie::setSessionId(unsigned int id)
+void			Cookie::setSessionId(unsigned int id)
 {
 	this->_session_id = id;
 }
 
-int			Cookie::getSessionId() const
+int				Cookie::getSessionId() const
 {
 	return (this->_session_id);
 }
@@ -93,7 +93,7 @@ std::string const	Cookie::getAttribute(std::string key) const
 	return ("");
 }
 
-std::map<std::string, std::string>		const &Cookie::getAllAttributes() const
+std::map<std::string, std::string> const	&Cookie::getAllAttributes() const
 {
 	return (this->_attributes);
 }
@@ -114,11 +114,12 @@ Cookie			*Cookie::getCookie(std::map<std::string, std::string> header)
 	return (Cookie::_sessions[uid]);
 }
 
+
 int			Cookie::updateCookie(std::map<std::string, std::string> header)
 {
 	for (std::map<std::string, std::string>::iterator it = header.begin(); it != header.end() ; ++it)
 	{
-		if (it->first.compare("Set-Cookie") == 0)
+		if (it->first.compare("Cookie") == 0)
 		{
 			std::vector<std::string>	field_split = stringSplit(it->second, "; ");
 			std::string					field_name;
@@ -142,9 +143,9 @@ int			Cookie::findSession(std::map<std::string, std::string> header)
 {
 	int		uid = -1;
 	
-	if (header.find("Set-Cookie") != header.end())
+	if (header.find("Cookie") != header.end())
 	{
-		std::vector<std::string>	cookie_in = stringSplit(header["Set-Cookie"], ";");
+		std::vector<std::string>	cookie_in = stringSplit(header["Cookie"], ";");
 		if (cookie_in[0].compare(0, 11, "session_id") == 0)
 		{
 			uid = std::atoi(cookie_in[0].substr(11, cookie_in[0].length()).c_str());
@@ -195,6 +196,13 @@ int		Cookie::removeSession(int id)
 	return (-1);
 }
 
+Cookie			*Cookie::getSessionById(unsigned int idx)
+{
+	if (sessionExists(idx))
+		return (_sessions[idx]);
+	return (NULL);
+}
+
 int		Cookie::isExpired() const
 {
 	time_t	t;
@@ -209,6 +217,19 @@ int		Cookie::isExpired() const
 	}
 	return (difftime(t, this->_life_time) > 0);
 }
+
+std::string			Cookie::genHeader()
+{
+	std::string	header;
+
+	header = "Set-Cookie: session_id=" + this->_session_id;
+	header += "; Path " + this->getAttribute("Path");
+	if (this->_http_only)
+		header += "; HttpOnly";
+	header += "; Max-Age=" + this->_life_time;
+	return (header);
+}
+
 
 std::ostream	&operator<<(std::ostream &os, const Cookie &item)
 {
