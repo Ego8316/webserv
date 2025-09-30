@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 18:51:06 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 12:13:31 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 class Config {
 	public :
 	// CONSTRUCTORS
+		Config();
 		Config(std::string filename);
 		Config(const Config &other);
 		Config &operator=(const Config &other);

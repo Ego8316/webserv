@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 16:04:38 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/29 19:12:31 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,21 +36,21 @@ int		Query::queryRespond(Client *client, Config *config)
 	this->_client = client;
 	this->_config = config;
 	this->readRequest();
-	this->_query = Request(this->_query_str);
-	if (this->_query.getError() != NONE)
+	if (this->_query_str.length() == 0)
+	{
+		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
+		return (SERV_ERROR);
+	}
+	this->_query = new Request(this->_query_str);
+	if (this->_query->getError() != NONE)
 	{
 		//TODO send 404 ou chais pas quoi
 		std::cerr << "Bad request 403" << std::endl;
 		return (-1);
 	}
 	this->setRessourceStatus();
-	if (this->_query_str.length() == 0)
-	{
-		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
-		return (SERV_ERROR);
-	}
-	this->_query = Request(this->_query_str);
-	(this->*_queryExecute[std::min(static_cast<int>(this->_query.getMethod()), (int)ERROR)])();
+	this->_query = new Request(this->_query_str);
+	(this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])();
 	return (0);
 }
 
@@ -126,7 +126,7 @@ int		Query::setRessourceStatus()
 	struct stat file_stat;
 	struct stat dir_stat;
 
-	this->_ressource = this->_query.getRequestTarget();
+	this->_ressource = this->_query->getRequestTarget();
 	if (stat(this->_ressource.c_str(), &file_stat) == SERV_ERROR)
 	{
 		if (errno == EACCES)
@@ -140,7 +140,7 @@ int		Query::setRessourceStatus()
 			this->_ressource_status = NOT_FOUND;
 		}
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
-		std::cerr << "Failed to find " << this->_query.getRequestTarget() << std::endl;
+		std::cerr << "Failed to find " << this->_query->getRequestTarget() << std::endl;
 		return (SERV_ERROR);
 	}
 	this->_ressource_status = EXISTS;
@@ -165,7 +165,7 @@ int		Query::setRessourceStatus()
 	if (endsWith(this->_ressource, ".py"))
 	{
 		this->_ressource_status |= IS_CGI;
-		this->_query.setMethod(CGI_RUN);
+		this->_query->setMethod(CGI_RUN);
 	}
 	this->_content_len = file_stat.st_size;
 	return (this->_ressource_status);

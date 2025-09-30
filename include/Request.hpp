@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/09/29 18:30:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 12:09:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 
 #include "headers.hpp"
 #include "Cookie.hpp"
+#include "utils.hpp"
+
+class Cookie;
 
 class Request
 {
@@ -32,7 +35,7 @@ class Request
 		int									getError(void) const;
 
 		void								setMethod(Method method);
-		int									updateCookie();
+		int									setCookie();
 		bool								headerHasField(const std::string field);
 		std::string							headerGetField(const std::string field);
 
@@ -41,7 +44,7 @@ class Request
 		std::string							_requestTarget;
 		std::string							_version;
 		std::string							_rawBody;
-		Cookie								_cookie;
+		Cookie								*_cookie;
 		std::map<std::string, std::string>	_headers;
 		int									_error;
 };

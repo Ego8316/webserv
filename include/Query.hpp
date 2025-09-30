@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 18:38:06 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 14:20:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ class Query {
 		typedef int					(Query::*queryMethod)();
 		static const queryMethod	_queryExecute[_method_num];
 		std::string					_query_str;
-		Request						_query;
+		Request						*_query;
 		int							_err_code;
 		std::string					_ressource;
 		int							_ressource_status;

@@ -18,6 +18,7 @@ class WebServ {
 	//DESTUCTORS
 		~WebServ();
 	//GETTERS
+		Client 				*getClient(int uid);
 	//SETTERS
 	//MEMBER FUNCTIONS
 		int					WebServInit(std::string config_file);

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/29 16:42:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 14:13:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,12 @@
 #include <cstring>
 #include <strings.h>
 #include <algorithm>
+#include <vector>
+#include <map>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
-#include <map>
+#include <ctime>
 #include <netinet/in.h>
 #include <poll.h>
 #include <sstream>
@@ -30,7 +32,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <vector>
 #include <fcntl.h>
 
 #define SERV_ERROR -1
@@ -46,6 +47,7 @@
 #define REQUEST_TIME_WAIT 100000
 #define CLIENT_LIMIT 1000
 #define SERVER_HOME "/Users/victorviterbo/Desktop/42/WebServ"
+#define MAX_COOKIE_SESSIONS 1000
 
 #define NOT_FOUND 0
 #define PERM_ISSUE 1
@@ -88,9 +90,3 @@ enum Theme
 	DARK_THEME,
 	NORMAL_THEME
 };
-
-/*struct Cookie
-{
-	int		session_id;
-	Theme	theme;
-};*/
