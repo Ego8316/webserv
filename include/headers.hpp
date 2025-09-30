@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 15:19:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 21:00:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@
 #define CLIENT_LIMIT 1000
 #define SERVER_HOME "/Users/victorviterbo/Desktop/42/WebServ"
 #define MAX_COOKIE_SESSIONS 1000
+#define COOKIE_LIFE_TIME 3600
 
 #define NOT_FOUND 0
 #define PERM_ISSUE 1

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 17:45:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 20:58:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ int		Query::queryRespond(Client *client, Config *config)
 	this->_client = client;
 	this->_config = config;
 	this->readRequest();
-	this->_cookie = this->_query->getCookie();
 	if (this->_query_str.length() == 0)
 	{
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
@@ -52,6 +51,7 @@ int		Query::queryRespond(Client *client, Config *config)
 		std::cerr << "Bad request 403" << std::endl;
 		return (-1);
 	}
+	this->_query->setCookie();
 	this->_cookie = this->_query->getCookie();
 	if (this->_cookie == NULL)
 	{
@@ -202,9 +202,10 @@ void		Query::setHeader()
 {
 	this->_header = "HTTP/1.0 " + std::to_string(this->_err_code) + " OK\r\n";
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
+	this->_header += this->_cookie->genHeader() + "\r\n";
 	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
-	this->_header += "Content-Length: " + std::to_string(this->_content_len) + "\r\n\r\n";
-	this->_header += this->_cookie->genHeader();
+	this->_header += "Content-Length: " + std::to_string(this->_content_len) + "\r\n";
+	this->_header += "\r\n";
 }
 
 int		Query::sendHeader()

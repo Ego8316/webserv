@@ -6,17 +6,18 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 18:13:32 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 21:44:19 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Cookie.hpp"
 
-std::vector<Cookie*> Cookie::_sessions;
+//std::vector<Cookie*> Cookie::_sessions;
+Cookie	*Cookie::_sessions[MAX_COOKIE_SESSIONS];
 
 Cookie::Cookie()
 {
-	this->initCookies();
+	//this->initCookies();
 }
 
 Cookie::Cookie(const Cookie &other) : _session_id(other._session_id), _life_time(other._life_time) {}
@@ -42,15 +43,13 @@ Cookie::~Cookie()
 	}
 }
 
-int		Cookie::initCookies()
+/*int		Cookie::initCookies()
 {
-	if (Cookie::_sessions.size() != MAX_COOKIE_SESSIONS)
-	{
-		Cookie::_sessions.resize(MAX_COOKIE_SESSIONS);
-		return (1);
-	}
-	return (0);
-}
+	if (Cookie::_sessions.size() == MAX_COOKIE_SESSIONS)
+		return (0);
+	Cookie::_sessions.resize(MAX_COOKIE_SESSIONS);
+	return (1);
+}*/
 
 bool			Cookie::hasAttribute(std::string key) const
 {
@@ -100,15 +99,19 @@ std::map<std::string, std::string> const	&Cookie::getAllAttributes() const
 
 Cookie			*Cookie::getCookie(std::map<std::string, std::string> header)
 {
-	//TODO check if user exist and return the appropriate cookike;
 	int		uid;
-	
+
+	//initCookies();
 	uid = findSession(header);
 	if (uid == -1)
 	{
+		std::cerr << "Could not find Cookie session" << std::endl;
 		uid = createSession();
 		if (uid == -1)
+		{
+			std::cerr << "Could not initiate Cookie session" << std::endl;
 			return (NULL);
+		}
 	}
 	Cookie::_sessions[uid]->updateCookie(header);
 	return (Cookie::_sessions[uid]);
@@ -168,6 +171,7 @@ int			Cookie::findSession(std::map<std::string, std::string> header)
 
 bool	Cookie::sessionExists(int id)
 {
+	//initCookies();
 	if (id >= 0 && id < MAX_COOKIE_SESSIONS)
 		return (_sessions[id] != NULL);
 	return (false);
@@ -175,12 +179,13 @@ bool	Cookie::sessionExists(int id)
 
 int		Cookie::createSession()
 {
+	//initCookies();
 	for (int i = 0; i < MAX_COOKIE_SESSIONS; ++i)
 	{
-		if (!sessionExists(i))
+		if (_sessions[i] == NULL)
 		{
 			_sessions[i] = new Cookie();
-			_sessions[i]->setSessionId(i);
+			_sessions[i]->setSessionId(0);
 			return (i);
 		}
 	}
@@ -217,7 +222,7 @@ bool		Cookie::isExpired() const
 		std::cerr << "Clock error in Cookie. Considering Cookie as expired" << std::endl;
 		return (true);
 	}
-	return ((this->getTime() - this->_generation_time) > 0);
+	return ((this->_generation_time + COOKIE_LIFE_TIME - this->getTime()) > 0);
 }
 
 int		Cookie::getTime() const
@@ -238,10 +243,10 @@ std::string			Cookie::genHeader()
 	std::string	header;
 
 	header = "Set-Cookie: session_id=" + std::to_string(this->_session_id);
-	header += "; Path " + this->getAttribute("Path");
+	header += "; Path=" + this->getAttribute("Path");
 	if (this->_http_only)
 		header += "; HttpOnly";
-	header += "; Max-Age=" + std::to_string(this->_generation_time + this->_life_time - this->getTime());
+	header += "; Max-Age=" + std::to_string(this->_generation_time + COOKIE_LIFE_TIME - this->getTime());
 	return (header);
 }
 

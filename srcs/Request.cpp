@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 17:29:13 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 20:45:00 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,13 @@ void	Request::setMethod(Method method)
 int		Request::setCookie()
 {
 	//TODO code this function
-	this->_cookie = Cookie().getCookie(_headers);
+	std::cout << "HELLO" << std::endl;
+	this->_cookie = Cookie::getCookie(_headers);
+	std::cout << "eh ben ?" << std::endl;
+	if (this->_cookie == NULL)
+		std::cout << "WTFFFFFFFF" << std::endl;
+	else
+		std::cout << "NOOOOOOOO" << std::endl;
 	std::cout << "Printing cookies !!!" << std::endl;
 	std::cout << *(this->_cookie) << std::endl;
 	return (0);
