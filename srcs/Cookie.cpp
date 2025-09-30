@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 15:43:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 15:52:09 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,9 +75,10 @@ void		Cookie::writeField(std::string key, std::string newvalue)
 
 void		Cookie::appendField(std::string key, std::string newvalue)
 {
-	//if (this->getField(key).find(newvalue) != this->getField(key).end())
-	//	return ;
-	this->_cookies[key] = this->_cookies[key] + "; " + newvalue;
+	if (this->hasField(key))
+		this->_cookies[key] = this->_cookies[key] + "; " + newvalue;
+	else
+		this->_cookies[key] = newvalue;
 }
 
 void		Cookie::setSessionID(unsigned int id)
