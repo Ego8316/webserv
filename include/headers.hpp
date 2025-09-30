@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 14:13:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 15:19:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,11 +82,4 @@ enum ContentTypes
 	PLAIN,
 	JPEG,
 	PNG
-};
-
-enum Theme
-{
-	LIGHT_THEME,
-	DARK_THEME,
-	NORMAL_THEME
 };

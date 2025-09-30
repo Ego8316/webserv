@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 12:13:55 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 15:13:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,14 @@ int		WebServ::WebServInit(std::string config_file)
 	if (this->_server.socketInit(this->_config) == -1)
 		return (SERV_ERROR);
 	std::cout << "Socket Init ok !" << std::endl;
+	this->_poll.pollAdd(this->_server.getFd(), POLLIN, 0);
+	std::cout << "pollAdd ok !" << std::endl;
 	if (this->_server.socketBind(this->_config.port_number) == -1)
 		return (SERV_ERROR);
+	std::cout << "Socket Bind ok !" << std::endl;
 	if (this->_server.socketListen(this->_config) == -1)
 		return (SERV_ERROR);
-	std::cout << "Socket Bind ok !" << std::endl;
-	this->_poll.pollAdd(this->_server.getFd(), POLLIN, 0);
+	std::cout << "Socket Listen ok !" << std::endl;
 	std::cout << "WebServ Init OK" << std::endl;
 	return (0);
 }

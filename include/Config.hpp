@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 12:13:31 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 14:44:51 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ class Config {
 		ParseError		getParseError();
 	//SETTERS
 	//MEMBER FUNCTIONS
-	
 		int				port_number;
 		int				backlog;
 		int				time_out;

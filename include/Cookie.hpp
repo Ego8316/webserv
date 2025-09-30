@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 14:32:24 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 15:24:56 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,7 @@ class Cookie {
 	//DESTUCTORS
 		~Cookie();
 	//GETTERS
-		Theme				getTheme();
 	//SETTERS
-		void				setTheme(Theme theme);
 		void				setSessionID(unsigned int id);
 	//MEMBER FUNCTIONS
 		static int			initCookies();

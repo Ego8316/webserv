@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 19:12:31 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 15:26:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,10 @@ Query &Query::operator=(const Query &other)
 	return (*this);
 }
 
-Query::~Query() {}
+Query::~Query()
+{
+	delete this->_query;
+}
 
 int		Query::queryRespond(Client *client, Config *config)
 {
@@ -49,7 +52,7 @@ int		Query::queryRespond(Client *client, Config *config)
 		return (-1);
 	}
 	this->setRessourceStatus();
-	this->_query = new Request(this->_query_str);
+	//TODO add some funcs
 	(this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])();
 	return (0);
 }
@@ -102,7 +105,6 @@ int		Query::queryGet()
 
 int		Query::queryPost()
 {
-	
 	return (0);
 }
 
@@ -209,7 +211,6 @@ int		Query::streamFile(std::string file)
 	ssize_t	bytes_read;
 
 	fd = open(file.c_str(), O_RDONLY | O_NONBLOCK);
-	//TODO add epoll wait for client Fd ?
 	bytes_read = read(fd, buffer, sizeof(buffer));
 	if (bytes_read <= 0)
 	{
@@ -218,7 +219,6 @@ int		Query::streamFile(std::string file)
 	}
 	while (bytes_read > 0)
 	{
-		//TODO add epoll wait for client Fd ?
         if (send(this->_client->getFd(), buffer, bytes_read, 0) == -1)
 		{
 			//set err
