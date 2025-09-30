@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 17:57:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/09/30 18:13:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,9 @@ int			Cookie::updateCookie(std::map<std::string, std::string> header)
 			}
 		}
 	}
-	//TODO set _life_time pour le cookie
+	this->_generation_time = this->getTime();
+	if (this->_generation_time == -1)
+		return (SERV_ERROR);
 	return (0);
 }
 
@@ -203,7 +205,7 @@ Cookie			*Cookie::getSessionById(unsigned int idx)
 	return (NULL);
 }
 
-int		Cookie::isExpired() const
+bool		Cookie::isExpired() const
 {
 	time_t	t;
 
@@ -215,18 +217,31 @@ int		Cookie::isExpired() const
 		std::cerr << "Clock error in Cookie. Considering Cookie as expired" << std::endl;
 		return (true);
 	}
-	return (difftime(t, this->_life_time) > 0);
+	return ((this->getTime() - this->_generation_time) > 0);
+}
+
+int		Cookie::getTime() const
+{
+	time_t	t;
+	
+	t = time(NULL);
+	if (t == -1)
+	{
+		std::cerr << "Clock error in Cookie. Considering Cookie as expired" << std::endl;
+		return (-1);
+	}
+	return (t);
 }
 
 std::string			Cookie::genHeader()
 {
 	std::string	header;
 
-	header = "Set-Cookie: session_id=" + this->_session_id;
+	header = "Set-Cookie: session_id=" + std::to_string(this->_session_id);
 	header += "; Path " + this->getAttribute("Path");
 	if (this->_http_only)
 		header += "; HttpOnly";
-	header += "; Max-Age=" + this->_life_time;
+	header += "; Max-Age=" + std::to_string(this->_generation_time + this->_life_time - this->getTime());
 	return (header);
 }
 
