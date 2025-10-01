@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 23:09:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/01 13:40:51 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,25 +135,34 @@ int			Cookie::findSession(std::map<std::string, std::string> header)
 {
 	int		uid = -1;
 	
+	std::cout << 1 << std::endl;
 	if (header.find("Cookie") != header.end())
 	{
+		std::cout << 2 << std::endl;
 		std::vector<std::string>	cookie_in = stringSplit(header["Cookie"], ";");
-		if (cookie_in[0].compare(0, 11, "session_id") == 0)
+		if (cookie_in[0].find("session_id", 0) != std::string::npos)
 		{
-			std::cout << "Is this your session id ? >" + cookie_in[0].substr(11, cookie_in[0].length()) + "<";
-			uid = std::atoi(cookie_in[0].substr(11, cookie_in[0].length()).c_str());
+			std::cout << 3 << std::endl;
+			std::cout << "Is this your session id ? >" + cookie_in[0].substr(cookie_in[0].find("=", 0) + 1, cookie_in[0].length()) + "<";
+			//uid = std::atoi(cookie_in[0].substr(11, cookie_in[0].length()).c_str());//cookie_in[0].substr(cookie_in[0].find("session_id", 0) + 11, cookie_in[0].length())
+			uid = std::atoi(cookie_in[0].substr(cookie_in[0].find("=", 0) + 1, cookie_in[0].length()).c_str());
 			if (uid < 0 || uid >= MAX_COOKIE_SESSIONS || !sessionExists(uid))
 			{
-				std::cerr << "Invalid session ID, could not retrieve cookies";
+				std::cout << 4 << std::endl;
+				std::cerr << "Invalid session ID, could not retrieve cookies " << sessionExists(uid) << std::endl;
 				uid = -1;
 			}
 			else if (sessionExists(uid) && _sessions[uid]->isExpired())
 			{
+				std::cout << 5 << std::endl;
 				removeSession(uid);
 				uid = -1;
 			}
+			std::cout << 6 << std::endl;
 		}
+		std::cout << 7 << std::endl;
 	}
+	std::cout << "UID = " << uid << std::endl;
 	return (uid);
 }
 
@@ -210,12 +219,12 @@ bool		Cookie::isExpired() const
 		std::cerr << "Clock error in Cookie. Considering Cookie as expired" << std::endl;
 		return (true);
 	}
-	return ((this->_generation_time + COOKIE_LIFE_TIME - this->getTime()) > 0);
+	return ((this->getTime() - this->_generation_time) > COOKIE_LIFE_TIME);
 }
 
 int		Cookie::getTime() const
 {
-	time_t	t;
+	time_t		t;
 	
 	t = time(NULL);
 	if (t == -1)
@@ -223,7 +232,7 @@ int		Cookie::getTime() const
 		std::cerr << "Clock error in Cookie. Considering Cookie as expired" << std::endl;
 		return (-1);
 	}
-	return (t);
+	return (static_cast<int>(t));
 }
 
 std::string			Cookie::genHeader()
@@ -247,7 +256,7 @@ std::ostream	&operator<<(std::ostream &os, const Cookie &item)
 	os << "session id = :\t\t" << item.getSessionId() << std::endl;
 	os << "attributes:" << std::endl;
 	for (it = attr.begin(); it != attr.end(); ++it)
-		os << it->first << " : " << it->second;
+		os << it->first << " : " << it->second << std::endl;
 	os << "End attributes" << std::endl;
 	return (os);
 }

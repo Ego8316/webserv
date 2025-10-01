@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 23:28:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/01 12:48:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 Query::Query()
 {
 	this->_err_code = 200;
+	this->_query = new Request();
 }
 
 Query::Query(const Query &other) : _query(other._query), _err_code(other._err_code) {}
@@ -44,7 +45,7 @@ int		Query::queryRespond(Client *client, Config *config)
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_query = new Request(this->_query_str);
+	this->_query->parseRequest(this->_query_str);
 	if (this->_query->getError() != NONE)
 	{
 		//TODO send 404 ou chais pas quoi

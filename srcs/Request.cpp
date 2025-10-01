@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 23:31:19 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/01 13:21:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,77 +17,6 @@ Request::Request(void) {}
 Request::Request(const Request &other)
 {
 	*this = other;
-	return ;
-}
-
-Request::Request(const std::string &raw)
-{
-	//std::istringstream	stream(raw);
-	std::string			line;
-	unsigned int		i = 0;
-
-	_error = NONE;
-	std::vector<std::string>	lines = stringSplit(raw, "\r\n");
-	if (lines.size())
-	{
-		std::istringstream	firstLine(line);
-		std::string			methodStr;
-
-		if (!(firstLine >> methodStr >> _requestTarget >> _version))
-		{
-			_error = INVALID_REQUEST_LINE;
-			return ;
-		}
-		if (methodStr == "GET") _method = GET;
-		else if (methodStr == "POST") _method = POST;
-		else _method = DELETE;
-		this->_requestTarget = std::string(SERVER_HOME) + this->_requestTarget;
-	}
-	else
-	{
-		_error = INVALID_REQUEST_LINE;
-		return ;
-	}
-	std::cout << "WTHELL" << std::endl;
-	while (std::getline(stream, line) && line != "\r")
-	{
-		std::cout << "WwarvékjnwTHELL" << std::endl;
-		std::vector<std::string>	line_split = stringSplit(line, "\r\n");
-		for (unsigned int i = 0; i < line_split.size(); ++i)
-		{
-			std::vector<std::string>	field_split = stringSplit(line_split[i], ": ");
-
-			std::cout << ">" << field_split[0] << "<>" << field_split[1] << "<" << std::endl;
-			if (field_split.size() == 2)
-			{
-				std::string	key = field_split[0];
-				std::string	value = field_split[1];
-				std::cout << ">" << field_split[0] << "<>" << field_split[1] << "<" << std::endl;
-				if (!value.empty() && value[0] == ' ')
-					value.erase(0, 1);
-				if (!value.empty() && value[value.size() - 1] == '\r')
-					value.erase(value.size() - 1);
-				if (headerHasField(key))
-					_headers[key] = _headers[key] + "; " + value;
-				else
-					_headers[key] = value;
-			}
-			else
-			{
-				_error = INVALID_HEADER;
-				return ;
-			}
-		}	
-	}
-	std::ostringstream	bodyStream;
-	bodyStream << stream.rdbuf();
-	_rawBody = bodyStream.str();
-	if (_headers.count("Content-Length"))
-	{
-		size_t	expected = std::atoi(_headers["Content-Length"].c_str());
-		if (_rawBody.size() != expected)
-			_error = BAD_CONTENT_LENGTH;
-	}
 	return ;
 }
 
@@ -106,6 +35,98 @@ Request &Request::operator=(const Request &other)
 }
 
 Request::~Request(void) {}
+
+int		Request::parseRequest(std::string request)
+{
+	std::istringstream			stream(request);
+	std::string					line;
+	std::vector<std::string>	line_split;
+
+	_error = NONE;
+	std::cout << "INITIAL STRING" << request << std::endl;
+	if (!std::getline(stream, line))
+	{
+		std::cerr << "Empty request" << std::endl;
+		_error = INVALID_REQUEST_LINE;
+		return (SERV_ERROR);
+	}
+	line_split = stringSplit(line, "\\r\\n");
+	std::cout << "Splitted line = " << line_split[0] << std::endl;
+	if (line_split.size() == 0)
+	{
+		std::cerr << "Empty request" << std::endl;
+		_error = INVALID_REQUEST_LINE;
+		return (SERV_ERROR);
+	}
+	std::istringstream	firstLine(line_split[0]);
+	std::string			methodStr;
+
+	if (!(firstLine >> methodStr >> _requestTarget >> _version))
+	{
+		_error = INVALID_REQUEST_LINE;
+		return (SERV_ERROR);
+	}
+	if (methodStr == "GET") _method = GET;
+	else if (methodStr == "POST") _method = POST;
+	else _method = DELETE;
+	this->_requestTarget = std::string(SERVER_HOME) + this->_requestTarget;
+	for (unsigned int i = 1; i < line_split.size(); ++i)
+	{
+		std::cout << "still on first line" << std::endl;
+		std::cout << i << "/" << line_split.size() << std::endl;
+		parseHeaderLine(line_split[i]);
+	}
+	while (std::getline(stream, line) && line != "\r")
+	{
+		std::cout << "NEW LINE IS NOW : " << line << std::endl;
+		std::vector<std::string>	line_split = stringSplit(line, "\\r\\n");
+		for (unsigned int i = 0; i < line_split.size(); ++i)
+			parseHeaderLine(line_split[i]);
+	}
+	std::ostringstream	bodyStream;
+	bodyStream << stream.rdbuf();
+	_rawBody = bodyStream.str();
+	if (_headers.count("Content-Length"))
+	{
+		size_t	expected = std::atoi(_headers["Content-Length"].c_str());
+		if (_rawBody.size() != expected)
+		{
+			std::cerr << "Bad content length" << std::endl;
+			_error = BAD_CONTENT_LENGTH;
+			return (SERV_ERROR);
+		}
+	}
+	return (0);
+}
+
+int		Request::parseHeaderLine(std::string line)
+{
+	std::vector<std::string>	field_split = stringSplit(line, ": ");
+
+	std::cout << "PARSING THIS" << std::endl;
+	std::cout << ">" << field_split[0] << "<>" << field_split[1] << "<" << std::endl;
+	if (field_split.size() == 2)
+	{
+		std::string	key = field_split[0];
+		std::string	value = field_split[1];
+		std::cout << "HELLOOOOOO" << std::endl;
+		if (!value.empty() && value[0] == ' ')
+			value.erase(0, 1);
+		if (!value.empty() && value[value.size() - 1] == '\r')
+			value.erase(value.size() - 1);
+		if (headerHasField(key))
+			_headers[key] = _headers[key] + "; " + value;
+		else
+			_headers[key] = value;
+	}
+	else
+	{
+		std::cerr << "Invalid Header in Request" << std::endl;
+		_error = INVALID_HEADER;
+		return (SERV_ERROR);
+	}
+	return (0);
+}
 
 Method	Request::getMethod(void) const
 {
