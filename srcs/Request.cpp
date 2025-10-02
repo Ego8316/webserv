@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 15:01:57 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:16:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,5 +200,6 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
 		os << "\t\t" << it->first << ": " << it->second << std::endl;
 	os << "Body:\n" << src.getRawBody() << std::endl;
+	os << "DONE" << std::endl;
 	return (os);
 }

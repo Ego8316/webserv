@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 15:21:49 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:23:31 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,11 @@ class Cookie {
 	//MEMBER FUNCTIONS
 		//static int			initCookies();
 		//static Cookie		*getCookie(std::map<std::string, std::string> header);
+		static bool			isInit();
+		static void			initCookies(Config *config);
 		static Cookie		*findSession(std::map<std::string, std::string> header);
 		static bool			sessionExists(int id);
-		static Cookie		*createSession();
+		static Cookie		*createSession(std::map<std::string, std::string> header);
 		static int			removeSession(int id);
 		static void			removeExpired();
 		int					updateCookie(std::map<std::string, std::string> header);

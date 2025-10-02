@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 15:32:04 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:25:05 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,17 +58,6 @@ int		Query::queryRespond()
 	{
 		std::cerr << "Cookie failed" << std::endl;
 	}
-	std::cout << "*clocks gun* I said we good ?" << std::endl;
-	if (this->_cookie == NULL)
-	{
-		std::cerr << "Could not initiate Cookies" << std::endl;
-		this->_cookie = Cookie(this->_config).createSession();
-		if (this->_cookie == NULL)
-		{
-			std::cerr << "Fatal: cannot initiate Cookies" << std::endl;
-			return (SERV_ERROR);
-		}
-	}
 	std::cout << "How about now ?" << std::endl;
 	this->setRessource();
 	//TODO add some funcs
@@ -79,13 +68,17 @@ int		Query::queryRespond()
 int		Query::setCookie()
 {
 	//TODO code this function
+	std::cout << "OHOH" << std::endl;
 	std::cout << *this->_query << std::endl;
-	Cookie(this->_config); //TODO : trouver une meilleur manière de faire ca...
+	std::cout << "Am here " << std::endl;
+	if (!Cookie::isInit())
+		Cookie::initCookies(this->_config);
+	std::cout << "Am here " << std::endl;
 	this->_cookie = Cookie::findSession(this->_query->getHeaders());
 	if (this->_cookie == NULL)
 	{
 		std::cout << "creating new Cookie" << std::endl;
-		this->_cookie = new Cookie();
+		this->_cookie = Cookie::createSession(this->_query->getHeaders());
 	}
 	std::cout << "hello ?" << std::endl;
 	std::cout << "Printing cookies !!!" << std::endl;

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 13:11:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 15:58:47 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define SERV_ERROR -1
 #define NEW_CLIENT 0

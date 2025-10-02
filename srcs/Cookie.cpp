@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 15:29:34 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:23:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ Cookie::Cookie(Config *config)
 		_sessions.resize(this->_config->cookie_sessions_max);
 		_is_init = true;
 	}
+	else
+		std::cout << "Already init !" << std::endl;
 	return ;
 }
 
@@ -93,6 +95,24 @@ std::string const	Cookie::getAttribute(std::string key) const
     return it->second;
 }
 
+bool		Cookie::isInit()
+{
+	return (_is_init);
+}
+
+void		Cookie::initCookies(Config *config)
+{
+	if (!isInit())
+	{
+		std::cout << "Initialisation of cookies" << std::endl;
+		_config = config;
+		_sessions.resize(_config->cookie_sessions_max);
+		_is_init = true;
+	}
+	else
+		std::cout << "Already init !" << std::endl;
+}
+
 std::map<std::string, std::string> const	&Cookie::getAllAttributes() const
 {
 	return (this->_attributes);
@@ -150,6 +170,7 @@ int			Cookie::updateCookie(std::map<std::string, std::string> header)
 		}
 	}
 	this->_generation_time = this->getTime();
+	std::cout << "generation time is " << this->_generation_time << std::endl;
 	if (this->_generation_time == -1)
 		return (SERV_ERROR);
 	return (0);
@@ -160,6 +181,7 @@ Cookie		*Cookie::findSession(std::map<std::string, std::string> header)
 	int		uid = -1;
 	Cookie	*found = NULL;
 	
+	std::cout << "enter findSession" << std::endl;
 	if (header.find("Cookie") != header.end())
 	{
 		std::vector<std::string>	cookie_in = stringSplit(header["Cookie"], ";");
@@ -178,9 +200,13 @@ Cookie		*Cookie::findSession(std::map<std::string, std::string> header)
 				found = NULL;
 			}
 			else
+			{
 				found = getSessionById(uid);
+				found->updateCookie(header);
+			}
 		}
 	}
+	std::cout << "exit findSession" << std::endl;
 	return (found);
 }
 
@@ -192,7 +218,7 @@ bool	Cookie::sessionExists(int id)
 	return (false);
 }
 
-Cookie		*Cookie::createSession()
+Cookie		*Cookie::createSession(std::map<std::string, std::string> header)
 {
 	removeExpired();
 	std::cout << _is_init << std::endl;
@@ -202,6 +228,7 @@ Cookie		*Cookie::createSession()
 		{
 			_sessions[i] = new Cookie(_config);
 			_sessions[i]->setSessionId(i);
+			_sessions[i]->updateCookie(header);
 			return (_sessions[i]);
 		}
 	}
@@ -267,7 +294,8 @@ int		Cookie::getTime() const
 
 std::string			Cookie::genHeader()
 {
-	std::string	header;
+	std::string			header;
+	std::ostringstream	convert;
 
 	std::cout << "step 3.3.1" << std::endl;
 	header = "Set-Cookie: session_id=" + std::to_string(this->_session_id);
@@ -279,7 +307,9 @@ std::string			Cookie::genHeader()
 	std::cout << "step 3.3.4" << std::endl;
 	std::cout << *this->_config << std::endl;
 	std::cout << "step 3.3.4.2" << std::endl;
-	header += "; Max-Age=" + std::to_string(this->_generation_time + this->_config->cookie_life_time - this->getTime());
+	convert << this->_generation_time + this->_config->cookie_life_time - this->getTime();
+	std::cout << "time left = " << this->_generation_time << "+" << this->_config->cookie_life_time << "-" << this->getTime() << " = " << this->_generation_time + this->_config->cookie_life_time - this->getTime() << std::endl;
+	header += "; Max-Age=" + convert.str();
 	std::cout << "step 3.3.5" << std::endl;
 	return (header);
 }
