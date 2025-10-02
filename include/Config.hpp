@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:01:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:53:11 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class Config {
 		int				type;
 		int				protocol;
 		int				buffer_size;
-		std::string		ServHome;
+		std::string		server_home;
 		std::string		default_page;
 		ParseError		parse_error;
 		int				cookie_life_time;

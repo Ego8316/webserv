@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 17:41:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:53:35 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ int		Request::parseRequest(std::string request)
 	if (methodStr == "GET") _method = GET;
 	else if (methodStr == "POST") _method = POST;
 	else _method = DELETE;
-	this->_requestTarget = std::string(SERVER_HOME) + this->_requestTarget;
 	for (unsigned int i = 1; i < line_split.size(); ++i)
 	{
 		if (line == "\\r\\n")

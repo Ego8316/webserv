@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 13:31:49 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:53:11 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ Config::Config(std::string filename)
 		else if (split_str[0] == "BUFFER_SIZE")
 			this->buffer_size = atoi(split_str[1].c_str());
 		else if (split_str[0] == "SERVER_HOME")
-			this->ServHome = split_str[1];
+			this->server_home = split_str[1];
 		else if (split_str[0] == "DEFAULT_PAGE")
 			this->default_page = split_str[1];
 		else if (split_str[0] == "INCOMMING_QUEUE_BACKLOG")
@@ -86,7 +86,7 @@ Config::Config(const Config &other)
 	this->protocol = other.protocol;
 	this->client_limit = other.client_limit;
 	this->buffer_size = other.buffer_size;
-	this->ServHome = other.ServHome;
+	this->server_home = other.server_home;
 }
 
 Config &Config::operator=(const Config &other)
@@ -100,7 +100,7 @@ Config &Config::operator=(const Config &other)
 		this->protocol = other.protocol;
 		this->client_limit = other.client_limit;
 		this->buffer_size = other.buffer_size;
-		this->ServHome = other.ServHome;
+		this->server_home = other.server_home;
 	}
 	return (*this);
 }
@@ -123,7 +123,7 @@ std::ostream	&operator<<(std::ostream &os, const Config &item)
 	os << "type :" << item.type << std::endl;
 	os << "protocol :" << item.protocol << std::endl;
 	os << "buffer_size :" << item.buffer_size << std::endl;
-	os << "ServHome :" << item.ServHome << std::endl;
+	os << "ServHome :" << item.server_home << std::endl;
 	os << "default_page :" << item.default_page << std::endl;
 	os << "parse_error :" << item.parse_error << std::endl;
 	os << "cookie_life_time :" << item.cookie_life_time << std::endl;

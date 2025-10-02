@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:46:24 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:54:15 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,7 @@ int		Query::findRessource()
 	struct stat file_stat;
 	struct stat dir_stat;
 	
+	this->_ressource = this->_config->server_home + this->_ressource;
 	if (stat(this->_ressource.c_str(), &file_stat) == -1)
 	{
 		if (errno == EACCES)
@@ -179,6 +180,7 @@ int		Query::findRessource()
 				this->_ressource += this->_config->default_page;
 				return (0);
 			}
+			std::cout << "This homepage cannot be found " << this->_ressource + this->_config->default_page << std::endl;
 			std::cerr << "Ressource is a directory " << this->_ressource << std::endl;
 			return (SERV_ERROR);
 		}
