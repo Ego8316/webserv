@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 14:27:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:28:47 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,28 +84,7 @@ int		Client::handleEvent()
 
 	std::cout << "Client handling event" << std::endl;
 	query.queryRespond();
-	/* 
-	For now it just echoes back the message for testing purposes 
-	char 	    buffer[10];
-	ssize_t     bytes_read;
-
-	std::cout << "handling event" << std::endl;
-	while ((bytes_read = recv(this->_client_fd, buffer, sizeof(buffer), 0)) > 0)
-	{
-		std::cout << "Reading input" << std::endl;
-		if (std::strncmp(buffer, "close", 5) == 0)
-		{
-			std::cout << "Closing connection ..." << std::endl;
-			return (SERV_ERROR);
-		}
-		else if (send(this->_client_fd, buffer, bytes_read, 0) == SERV_ERROR)
-		{
-			std::cerr << "Send failed\n";
-			return (SERV_ERROR);
-		}
-			return (0);
-	}*/
-	return (0);
+	return (0); //TODO return err code
 }
 
 void	Client::setClientId(int id)

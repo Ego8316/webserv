@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 13:33:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:33:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,6 @@ serverSocket::serverSocket(Config *config)
 		close(this->_server_fd);
 		this->_server_fd = -1;
 	}
-	else
-		std::cout << "server fd is now " << this->_server_fd << std::endl;
 }
 
 serverSocket::serverSocket(const serverSocket &other)
@@ -64,7 +62,6 @@ int		serverSocket::socketBind()
 	success = ::bind(this->_server_fd, (struct sockaddr*)&this->_server_addr, sizeof(this->_server_addr));
 	if (success == -1)
 		std::cerr << "Socket bind failed: " << strerror(errno) << std::endl;
-	std::cout << "Binding to port number " << this->_config->port_number << " ok !" << std::endl;
 	return (success);
 }
 

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 13:32:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:32:25 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,23 +36,15 @@ WebServ::~WebServ() {}
 int		WebServ::WebServInit(std::string config_file)
 {
 	this->_config = new Config(config_file);
-	std::cout << "config port number = " << this->_config->port_number << std::endl;
 	std::cout << *this->_config << std::endl;
 	if (this->_config->getParseError() != NONE)
 	{
-		std::cout << strerror(errno) << std::endl;
-		std::cout << this->_config->getParseError() << std::endl;
-		std::cout << "err 10" << std::endl;
 		return (SERV_ERROR);
 	}
 	std::cout << "Config ok !" << std::endl;
 	this->_server = new serverSocket(this->_config);
-	std::cout << this->_server->getFd() << std::endl;
 	if (this->_server == NULL || this->_server->getFd() < 0)
 	{
-		if (this->_server)
-			std::cout << "server fd =" << this->_server->getFd() << std::endl;
-		std::cout << "err 11" << std::endl;
 		return (SERV_ERROR);
 	}
 	std::cout << "Socket Init ok ! " << this->_server->getFd() << std::endl;
@@ -60,16 +52,10 @@ int		WebServ::WebServInit(std::string config_file)
 	this->_poll->pollAdd(this->_server->getFd(), POLLIN, 0);
 	std::cout << "pollAdd ok !" << std::endl;
 	if (this->_server->socketBind() == -1)
-	{
-		std::cout << "err 12" << std::endl;
 		return (SERV_ERROR);
-	}
 	std::cout << "Socket Bind ok !" << std::endl;
 	if (this->_server->socketListen() == -1)
-	{
-		std::cout << "err 13" << std::endl;
 		return (SERV_ERROR);
-	}
 	std::cout << "Socket Listen ok !" << std::endl;
 	std::cout << "WebServ Init OK" << std::endl;
 	return (0);

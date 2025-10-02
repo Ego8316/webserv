@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 16:25:05 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:31:36 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,38 +52,23 @@ int		Query::queryRespond()
 		std::cerr << "Bad request 403" << std::endl;
 		return (-1);
 	}
-	std::cout << "version is now " << this->_query->getVersion() << std::endl;
-	std::cout << "We good ?" << std::endl;
 	if (this->setCookie() == SERV_ERROR)
 	{
 		std::cerr << "Cookie failed" << std::endl;
 	}
-	std::cout << "How about now ?" << std::endl;
 	this->setRessource();
 	//TODO add some funcs
-	std::cout << "And here ?" << std::endl;
 	return ((this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])());
 }
 
 int		Query::setCookie()
 {
 	//TODO code this function
-	std::cout << "OHOH" << std::endl;
-	std::cout << *this->_query << std::endl;
-	std::cout << "Am here " << std::endl;
 	if (!Cookie::isInit())
 		Cookie::initCookies(this->_config);
-	std::cout << "Am here " << std::endl;
 	this->_cookie = Cookie::findSession(this->_query->getHeaders());
 	if (this->_cookie == NULL)
-	{
-		std::cout << "creating new Cookie" << std::endl;
 		this->_cookie = Cookie::createSession(this->_query->getHeaders());
-	}
-	std::cout << "hello ?" << std::endl;
-	std::cout << "Printing cookies !!!" << std::endl;
-	std::cout << *(this->_cookie) << std::endl;
-	std::cout << "ok so we are ok" << std::endl;
 	return (0);
 }
 
@@ -108,24 +93,19 @@ int		Query::readRequest()
 
 int		Query::queryGet()
 {
-	std::cout << "step 1" << std::endl;
 	if (!(this->_ressource_status & PERM_ROK))
 	{
 		this->_err_code = 403;
 		return (SERV_ERROR);
 	}
-	std::cout << "step 2" << std::endl;
 	if ((this->_ressource_status & IS_DIR))
 	{
 		this->_err_code = 404;
 		return (SERV_ERROR);
 	}
-	std::cout << "step 3" << std::endl;
 	this->setHeader();
-	std::cout << "step 4" << std::endl;
 	if (access(this->_ressource.c_str(), R_OK) == 0)
 	{
-		std::cout << "step 5" << std::endl;
 		if (this->sendHeader() == SERV_ERROR)
 		{
 			std::cerr << "Failed to send header" << std::endl;
@@ -187,7 +167,6 @@ int		Query::findRessource()
 			this->_err_code = 404;
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
 		std::cerr << "Failed to find " << this->_ressource << std::endl;
-		std::cerr << "Failed to find " << this->_query->getRequestTarget() << std::endl;
 		return (SERV_ERROR);
 	}
 	else
@@ -199,7 +178,7 @@ int		Query::findRessource()
 				this->_ressource += this->_config->default_page;
 				return (0);
 			}
-			std::cerr << "Ressource is a directory " << this->_query->getRequestTarget() << std::endl;
+			std::cerr << "Ressource is a directory " << this->_ressource << std::endl;
 			return (SERV_ERROR);
 		}
 	}
@@ -223,7 +202,6 @@ int		Query::setRessourceStatus()
 			this->_ressource_status = NOT_FOUND;
 		}
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
-		std::cerr << "Failed to find " << this->_query->getRequestTarget() << std::endl;
 		std::cerr << "Failed to find " << this->_ressource << std::endl;
 		return (SERV_ERROR);
 	}
@@ -285,17 +263,11 @@ std::string	Query::getRessourceTypeExtenssion()
 
 void		Query::setHeader()
 {
-	std::cout << "step 3.1" << std::endl;
 	this->_header = "HTTP/1.0 " + std::to_string(this->_err_code) + " OK\r\n";
-	std::cout << "step 3.2" << std::endl;
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
-	std::cout << "step 3.3" << std::endl;
 	this->_header += this->_cookie->genHeader() + "\r\n";
-	std::cout << "step 3.4" << std::endl;
 	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
-	std::cout << "step 3.5" << std::endl;
 	this->_header += "Content-Length: " + std::to_string(this->_content_len) + "\r\n";
-	std::cout << "step 3.6" << std::endl;
 	this->_header += "\r\n";
 }
 

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 16:16:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:31:52 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ int		Request::parseRequest(std::string request)
 	std::vector<std::string>	line_split;
 
 	_error = NONE;
-	std::cout << "INITIAL STRING: " << request << std::endl;
 	if (!std::getline(stream, line))
 	{
 		std::cerr << "Empty request" << std::endl;
@@ -51,7 +50,6 @@ int		Request::parseRequest(std::string request)
 		return (SERV_ERROR);
 	}
 	line_split = stringSplit(line, "\\r\\n");
-	std::cout << "Splitted line = " << line_split[0] << std::endl;
 	if (line_split.size() == 0)
 	{
 		std::cerr << "Empty request" << std::endl;
@@ -72,16 +70,12 @@ int		Request::parseRequest(std::string request)
 	this->_requestTarget = std::string(SERVER_HOME) + this->_requestTarget;
 	for (unsigned int i = 1; i < line_split.size(); ++i)
 	{
-		std::cout << "still on first line" << std::endl;
-		std::cout << i << "/" << line_split.size() << std::endl;
-		std::cout << line_split[i] << std::endl;
 		if (line != "\\r\\n")
 			continue;
 		parseHeaderLine(line_split[i]);
 	}
 	while (std::getline(stream, line) && line != "\r")
 	{
-		std::cout << "NEW LINE IS NOW : " << line << std::endl;
 		std::vector<std::string>	line_split = stringSplit(line, "\\r\\n");
 		for (unsigned int i = 0; i < line_split.size(); ++i)
 			parseHeaderLine(line_split[i]);

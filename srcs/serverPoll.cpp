@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 14:10:06 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 16:32:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ serverPoll::~serverPoll() {}
 
 void	serverPoll::pollAdd(int fd, int event, int indx)
 {
-	std::cout << "adding fd=" << fd << " to poll watchlist" << std::endl; 
     struct pollfd new_poll_fd;
 	new_poll_fd.fd = fd;
 	new_poll_fd.events = event;
@@ -45,9 +44,6 @@ void	serverPoll::pollRemove(int indx)
 int		serverPoll::pollWait(int time_out)
 {
 	int	poll_count;
-
-	std::cout << "Sending poll params " << &this->_poll_fds[0] << " " << this->_config->client_limit << " " << time_out << std::endl;
-
 
 	poll_count = poll(&this->_poll_fds[0], this->_config->client_limit, time_out);
 	if (poll_count == -1)
