@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 15:25:52 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 15:29:34 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,7 @@ std::vector<Cookie *>	Cookie::_sessions;
 bool					Cookie::_is_init = false;
 Config					*Cookie::_config;
 
-Cookie::Cookie()
-{
-	if (!_is_init)
-	{
-		std::cerr << "tried to use unitialized cookies" << std::endl;
-	}
-}
+Cookie::Cookie() {}
 
 Cookie::Cookie(Config *config)
 {

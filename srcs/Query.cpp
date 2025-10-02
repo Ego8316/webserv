@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 15:24:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 15:32:04 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,12 +80,13 @@ int		Query::setCookie()
 {
 	//TODO code this function
 	std::cout << *this->_query << std::endl;
+	Cookie(this->_config); //TODO : trouver une meilleur manière de faire ca...
 	this->_cookie = Cookie::findSession(this->_query->getHeaders());
 	if (this->_cookie == NULL)
 	{
+		std::cout << "creating new Cookie" << std::endl;
 		this->_cookie = new Cookie();
 	}
-		return (SERV_ERROR);
 	std::cout << "hello ?" << std::endl;
 	std::cout << "Printing cookies !!!" << std::endl;
 	std::cout << *(this->_cookie) << std::endl;
