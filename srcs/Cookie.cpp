@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 16:30:02 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:44:44 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,14 +149,14 @@ Cookie		*Cookie::findSession(std::map<std::string, std::string> header)
 {
 	int		uid = -1;
 	Cookie	*found = NULL;
-	
+
 	if (header.find("Cookie") != header.end())
 	{
 		std::vector<std::string>	cookie_in = stringSplit(header["Cookie"], ";");
 		if (cookie_in[0].find("session_id", 0) != std::string::npos)
 		{
 			//uid = std::atoi(cookie_in[0].substr(11, cookie_in[0].length()).c_str());//cookie_in[0].substr(cookie_in[0].find("session_id", 0) + 11, cookie_in[0].length())
-			uid = std::atoi(cookie_in[0].substr(cookie_in[0].find("=", 0) + 1, cookie_in[0].length()).c_str());
+			uid = atoi(cookie_in[0].substr(cookie_in[0].find("=", 0) + 1, cookie_in[0].length()).c_str());
 			if (uid < 0 || uid >= MAX_COOKIE_SESSIONS || !sessionExists(uid))
 			{
 				std::cerr << "Invalid session ID, could not retrieve cookies " << sessionExists(uid) << std::endl;
@@ -171,6 +171,7 @@ Cookie		*Cookie::findSession(std::map<std::string, std::string> header)
 			{
 				found = getSessionById(uid);
 				found->updateCookie(header);
+				std::cout << "Found cookie session" << std::endl;
 			}
 		}
 	}

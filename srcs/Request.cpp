@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 16:31:52 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:41:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,15 +70,19 @@ int		Request::parseRequest(std::string request)
 	this->_requestTarget = std::string(SERVER_HOME) + this->_requestTarget;
 	for (unsigned int i = 1; i < line_split.size(); ++i)
 	{
-		if (line != "\\r\\n")
+		if (line == "\\r\\n")
 			continue;
-		parseHeaderLine(line_split[i]);
+		this->parseHeaderLine(line_split[i]);
 	}
 	while (std::getline(stream, line) && line != "\r")
 	{
-		std::vector<std::string>	line_split = stringSplit(line, "\\r\\n");
-		for (unsigned int i = 0; i < line_split.size(); ++i)
-			parseHeaderLine(line_split[i]);
+		line_split = stringSplit(line, "\\r\\n");
+		for (unsigned int i = 1; i < line_split.size(); ++i)
+		{
+			if (line == "\\r\\n")
+				continue;
+			this->parseHeaderLine(line_split[i]);
+		}
 	}
 	std::ostringstream	bodyStream;
 	bodyStream << stream.rdbuf();
@@ -104,14 +108,15 @@ int		Request::parseHeaderLine(std::string line)
 	{
 		std::string	key = field_split[0];
 		std::string	value = field_split[1];
-		if (!value.empty() && value[0] == ' ')
+		while (!value.empty() && value[0] == ' ')
 			value.erase(0, 1);
 		if (!value.empty() && value[value.size() - 1] == '\r')
 			value.erase(value.size() - 1);
 		if (headerHasField(key))
-			_headers[key] = _headers[key] + "; " + value;
+			this->_headers[key] = _headers[key] + "; " + value;
 		else
-			_headers[key] = value;
+			this->_headers[key] = value;
+			
 	}
 	else
 	{

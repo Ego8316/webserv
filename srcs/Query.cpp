@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 16:31:36 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:46:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,7 @@ int		Query::queryGet()
 	}
 	else
 		std::cerr << "Could not access ressource : >" << this->_ressource << "<" << std::endl;
+	std::cout << "Query answered with code " << this->_err_code << std::endl;
 	return (0);
 }
 

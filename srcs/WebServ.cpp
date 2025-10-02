@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 16:32:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:44:07 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,11 @@ int		WebServ::newClient()
 	{
 		if (!this->_clients[indx])
 			break;
+	}
+	if (indx == this->_config->client_limit)
+	{
+		std::cerr << "Cannot accept new clients" << std::endl;
+		return (SERV_ERROR);
 	}
 	this->_clients[indx] = new Client(this->_config);
 	if (this->_server->socketAcceptClient(this->_clients[indx]) == -1)
