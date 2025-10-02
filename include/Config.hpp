@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 23:25:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 13:20:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 class Config {
 	public :
 	// CONSTRUCTORS
-		Config();
+		//Config();
 		Config(std::string filename);
 		Config(const Config &other);
 		Config &operator=(const Config &other);
@@ -29,7 +29,6 @@ class Config {
 	//SETTERS
 	//MEMBER FUNCTIONS
 		int				port_number;
-		int				backlog;
 		int				time_out;
 		int				client_limit;
 		int				domain;
@@ -37,7 +36,12 @@ class Config {
 		int				protocol;
 		int				buffer_size;
 		std::string		ServHome;
+		std::string		default_page;
 		ParseError		parse_error;
-		
+		int				cookie_life_time;
+		int				cookie_sessions_max;
+		int				incomming_queue_backlog;
 	private :
 };
+
+std::ostream	&operator<<(std::ostream &os, const Config &src);

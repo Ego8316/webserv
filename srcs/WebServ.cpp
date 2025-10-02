@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 22:28:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 13:32:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,21 +35,41 @@ WebServ::~WebServ() {}
 
 int		WebServ::WebServInit(std::string config_file)
 {
-	this->_config = Config(config_file);
-	std::cout << "config port number = " << this->_config.port_number << std::endl;
-	if (this->_config.getParseError() != NONE)
+	this->_config = new Config(config_file);
+	std::cout << "config port number = " << this->_config->port_number << std::endl;
+	std::cout << *this->_config << std::endl;
+	if (this->_config->getParseError() != NONE)
+	{
+		std::cout << strerror(errno) << std::endl;
+		std::cout << this->_config->getParseError() << std::endl;
+		std::cout << "err 10" << std::endl;
 		return (SERV_ERROR);
+	}
 	std::cout << "Config ok !" << std::endl;
-	if (this->_server.socketInit(this->_config) == -1)
+	this->_server = new serverSocket(this->_config);
+	std::cout << this->_server->getFd() << std::endl;
+	if (this->_server == NULL || this->_server->getFd() < 0)
+	{
+		if (this->_server)
+			std::cout << "server fd =" << this->_server->getFd() << std::endl;
+		std::cout << "err 11" << std::endl;
 		return (SERV_ERROR);
-	std::cout << "Socket Init ok !" << std::endl;
-	this->_poll.pollAdd(this->_server.getFd(), POLLIN, 0);
+	}
+	std::cout << "Socket Init ok ! " << this->_server->getFd() << std::endl;
+	this->_poll = new serverPoll(this->_config);
+	this->_poll->pollAdd(this->_server->getFd(), POLLIN, 0);
 	std::cout << "pollAdd ok !" << std::endl;
-	if (this->_server.socketBind(this->_config.port_number) == -1)
+	if (this->_server->socketBind() == -1)
+	{
+		std::cout << "err 12" << std::endl;
 		return (SERV_ERROR);
+	}
 	std::cout << "Socket Bind ok !" << std::endl;
-	if (this->_server.socketListen(this->_config) == -1)
+	if (this->_server->socketListen() == -1)
+	{
+		std::cout << "err 13" << std::endl;
 		return (SERV_ERROR);
+	}
 	std::cout << "Socket Listen ok !" << std::endl;
 	std::cout << "WebServ Init OK" << std::endl;
 	return (0);
@@ -62,7 +82,7 @@ int		WebServ::WebServRun()
 
 	while (true)
 	{
-		event = this->_poll.pollWatchRevent(this->_config);
+		event = this->_poll->pollWatchRevent();
 		std::cout << "Detected new event " << event << std::endl;
 		if (event == -1)
 		{
@@ -90,25 +110,25 @@ int		WebServ::newClient()
 {
 	int		indx;
 
-	for (indx = 0; indx < this->_config.client_limit; ++indx)
+	for (indx = 0; indx < this->_config->client_limit; ++indx)
 	{
 		if (!this->_clients[indx])
 			break;
 	}
-	this->_clients[indx] = new Client(&this->_config);
-	if (this->_server.socketAcceptClient(this->_clients[indx]) == -1)
+	this->_clients[indx] = new Client(this->_config);
+	if (this->_server->socketAcceptClient(this->_clients[indx]) == -1)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
 		return (SERV_ERROR);
 	}
 	this->_clients[indx]->setClientId(indx);
-	this->_poll.pollAdd(this->_clients[indx]->getFd(), POLLIN, indx + 1);
+	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN, indx + 1);
 	return (0);
 }
 
 int		WebServ::removeClient(int indx)
 {
-	this->_poll.pollRemove(indx);
+	this->_poll->pollRemove(indx);
 	if (this->_clients[indx] != NULL)
 		delete this->_clients[indx];
 	this->_clients[indx] = NULL;

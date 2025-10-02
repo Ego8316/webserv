@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/09/30 21:00:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 13:11:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,17 +38,12 @@
 #define NEW_CLIENT 0
 #define CLIENT_ERR_IDX(idx) (-idx - 1)
 
-#define ALL_FDS -1
-#define DEFAULT_EVENT -1
 #define NO_TIMEOUT -1
-#define SERVER_IDX 0
-
 #define BUFFER_SIZE 1024
-#define REQUEST_TIME_WAIT 100000
 #define CLIENT_LIMIT 1000
 #define SERVER_HOME "/Users/victorviterbo/Desktop/42/WebServ"
 #define MAX_COOKIE_SESSIONS 1000
-#define COOKIE_LIFE_TIME 3600
+//#define COOKIE_LIFE_TIME 3600
 
 #define NOT_FOUND 0
 #define PERM_ISSUE 1
@@ -74,7 +69,8 @@ enum ParseError
 	UNSUPPORTED_METHOD,
 	INVALID_REQUEST_LINE,
 	INVALID_HEADER,
-	BAD_CONTENT_LENGTH
+	BAD_CONTENT_LENGTH,
+	UNREADABLE_FILE
 };
 
 enum ContentTypes
@@ -82,5 +78,7 @@ enum ContentTypes
 	HTML,
 	PLAIN,
 	JPEG,
-	PNG
+	PNG,
+	CGI_PY,
+	CGI_PHP
 };

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:15 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 16:37:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 14:01:13 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Config;
 class serverPoll{
 	public :
 	// CONSTRUCTORS
-		serverPoll();
+		serverPoll(Config *config);
 		serverPoll(const serverPoll &other);
 		serverPoll &operator=(const serverPoll &other);
 	//DESTUCTORS
@@ -40,9 +40,9 @@ class serverPoll{
 	//MEMBER FUNCTIONS
 		void	pollAdd(int fd, int event, int indx);
 		void	pollRemove(int indx);
-		int		pollWait(int time_Out);
-		int		pollWatchRevent(Config &config);
+		int		pollWait(int time_out);
+		int		pollWatchRevent();
 	private :
-		static const unsigned int			_poll_count = 10000;	//TODO get from config
-		std::vector<struct pollfd>			_poll_fds;				//vector of fds (will be of len _poll_count)
+		std::vector<struct pollfd>			_poll_fds;
+		Config								*_config;
 };

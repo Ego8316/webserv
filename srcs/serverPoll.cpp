@@ -6,15 +6,15 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 14:25:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 14:10:06 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "serverPoll.hpp"
 
-serverPoll::serverPoll()
+serverPoll::serverPoll(Config *config) : _config(config)
 {
-	this->_poll_fds.resize(this->_poll_count);
+	this->_poll_fds.resize(this->_config->client_limit);
 }
 
 serverPoll::serverPoll(const serverPoll &other) : _poll_fds(other._poll_fds){}
@@ -30,6 +30,7 @@ serverPoll::~serverPoll() {}
 
 void	serverPoll::pollAdd(int fd, int event, int indx)
 {
+	std::cout << "adding fd=" << fd << " to poll watchlist" << std::endl; 
     struct pollfd new_poll_fd;
 	new_poll_fd.fd = fd;
 	new_poll_fd.events = event;
@@ -41,22 +42,25 @@ void	serverPoll::pollRemove(int indx)
 	std::memset(&this->_poll_fds[indx], 0, sizeof(pollfd));
 }
 
-int		serverPoll::pollWait(int time_Out)
+int		serverPoll::pollWait(int time_out)
 {
 	int	poll_count;
 
-	poll_count = poll(&this->_poll_fds[0], this->_poll_count, time_Out);
+	std::cout << "Sending poll params " << &this->_poll_fds[0] << " " << this->_config->client_limit << " " << time_out << std::endl;
+
+
+	poll_count = poll(&this->_poll_fds[0], this->_config->client_limit, time_out);
 	if (poll_count == -1)
 		std::cerr << "Poll failed: " << strerror(errno) << std::endl;
 	return (poll_count);
 }
 
-int		serverPoll::pollWatchRevent(Config &config)
+int		serverPoll::pollWatchRevent()
 {
-	static unsigned int	i = 0;
+	//TODO find a way so that when it comes back it doesnt start from i = 0 every time
 
-	this->pollWait(config.time_out);
-	for (i = 0; i < this->_poll_count; ++i)
+	this->pollWait(this->_config->time_out);
+	for (int	i = 0; i < this->_config->client_limit; ++i)
 	{
 		if (this->_poll_fds[i].revents & POLLHUP || this->_poll_fds[i].revents & POLLERR)
 		{

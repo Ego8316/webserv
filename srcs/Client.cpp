@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 14:23:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 08:56:39 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 		
 int		Client::handleEvent()
 {
-	Query	query;
+	Query	query(this->_config);
 
 	std::cout << "Client handling event" << std::endl;
 	query.queryRespond(this, this->_config);

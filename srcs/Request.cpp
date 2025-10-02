@@ -6,13 +6,14 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/01 13:21:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 13:39:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-Request::Request(void) {}
+//Request::Request() {}
+Request::Request(Config *config) : _config(config) {}
 
 Request::Request(const Request &other)
 {
@@ -43,7 +44,7 @@ int		Request::parseRequest(std::string request)
 	std::vector<std::string>	line_split;
 
 	_error = NONE;
-	std::cout << "INITIAL STRING" << request << std::endl;
+	std::cout << "INITIAL STRING: " << request << std::endl;
 	if (!std::getline(stream, line))
 	{
 		std::cerr << "Empty request" << std::endl;
@@ -74,6 +75,9 @@ int		Request::parseRequest(std::string request)
 	{
 		std::cout << "still on first line" << std::endl;
 		std::cout << i << "/" << line_split.size() << std::endl;
+		std::cout << line_split[i] << std::endl;
+		if (line != "\\r\\n")
+			continue;
 		parseHeaderLine(line_split[i]);
 	}
 	while (std::getline(stream, line) && line != "\r")
@@ -103,13 +107,10 @@ int		Request::parseHeaderLine(std::string line)
 {
 	std::vector<std::string>	field_split = stringSplit(line, ": ");
 
-	std::cout << "PARSING THIS" << std::endl;
-	std::cout << ">" << field_split[0] << "<>" << field_split[1] << "<" << std::endl;
 	if (field_split.size() == 2)
 	{
 		std::string	key = field_split[0];
 		std::string	value = field_split[1];
-		std::cout << "HELLOOOOOO" << std::endl;
 		if (!value.empty() && value[0] == ' ')
 			value.erase(0, 1);
 		if (!value.empty() && value[value.size() - 1] == '\r')
@@ -172,7 +173,9 @@ int		Request::setCookie()
 {
 	//TODO code this function
 	std::cout << *this << std::endl;
-	this->_cookie = Cookie::getCookie(_headers);
+	std::cout << "getting tired ..." << std::endl;
+	this->_cookie = Cookie(this->_config).getCookie(_headers);
+	std::cout << "hello ?" << std::endl;
 	std::cout << "Printing cookies !!!" << std::endl;
 	std::cout << *(this->_cookie) << std::endl;
 	return (0);
@@ -201,9 +204,12 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 		os << "Parse error detected: " << src.getError() << std::endl;
 		return (os);
 	}
-	if (method == GET) methodStr = "GET";
-	else if (method == POST) methodStr = "POST";
-	else methodStr = "DELETE";
+	if (method == GET)
+		methodStr = "GET";
+	else if (method == POST)
+		methodStr = "POST";
+	else
+		methodStr = "DELETE";
 
 	os << "Method:\t\t" << methodStr << std::endl
 		<< "Target:\t\t" << src.getRequestTarget() << std::endl

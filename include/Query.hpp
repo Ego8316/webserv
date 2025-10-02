@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 21:36:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/01 20:05:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Cookie;
 class Query {
 	public :
 	// CONSTRUCTORS
-		Query();
+		Query(Config *config);
 		Query(const Query &other);
 		Query &operator=(const Query &other);
 	//DESTUCTORS
@@ -43,8 +43,11 @@ class Query {
 		int			queryError();
 		
 		int			readRequest();
+		int			setRessource();
+		int			findRessource();
 		int			setRessourceStatus();
 		std::string	getRessourceTypeStr();
+		std::string	getRessourceTypeExtenssion();
 		void		setHeader();
 		int			sendHeader();
 		int			streamFile(std::string file);

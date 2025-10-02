@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:49 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/29 16:37:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 09:08:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ class Config;
 class serverSocket {
 	public :
 	// CONSTRUCTORS
-		serverSocket();
+		serverSocket(Config *config);
 		serverSocket(const serverSocket &other);
 		serverSocket &operator=(const serverSocket &other);
 	//DESTUCTORS
@@ -34,16 +34,12 @@ class serverSocket {
 		int					getFd();
 	//SETTERS
 	//MEMBER FUNCTIONS
-		int					socketInit(Config &config);
-		int					socketBind(int portNumber);
+		int					socketBind();
 		int					socketAcceptClient(Client *new_client);
-		int					socketListen(Config config);
+		int					socketListen();
 		int					setSockOpt();
 	private :
-		static const unsigned int	_backlog = 100;		//TODO get from config
-		int							_domain;			//TODO get from config
-		int							_type;				//TODO get from config
-		int							_protocol;			//TODO get from config
-   		int							_server_fd;			//server file descriptor
+   		int							_server_fd;
 		struct sockaddr_in			_server_addr;
+		Config						*_config;
 };

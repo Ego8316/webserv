@@ -26,8 +26,8 @@ class WebServ {
 		int					newClient();
 		int					removeClient(int indx);
 	private :
-		Config					_config;
-		serverSocket			_server;
-		serverPoll				_poll;
+		Config					*_config;
+		serverSocket			*_server;
+		serverPoll				*_poll;
 		std::vector<Client *>	_clients;
 };

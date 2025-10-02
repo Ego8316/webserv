@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/01 12:56:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 13:22:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,15 @@
 #include "headers.hpp"
 #include "Cookie.hpp"
 #include "utils.hpp"
+#include "Config.hpp"
 
 class Cookie;
 
 class Request
 {
 	public:
-		Request(void);
+		//Request();
+		Request(Config *config);
 		Request(const Request &other);
 		Request	&operator=(const Request &other);
 		~Request(void);
@@ -49,6 +51,7 @@ class Request
 		Cookie								*_cookie;
 		std::map<std::string, std::string>	_headers;
 		int									_error;
+		Config								*_config;
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);
