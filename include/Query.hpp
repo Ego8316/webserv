@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/01 20:05:32 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 14:58:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Cookie;
 class Query {
 	public :
 	// CONSTRUCTORS
-		Query(Config *config);
+		Query(Config *config, Client *client);
 		Query(const Query &other);
 		Query &operator=(const Query &other);
 	//DESTUCTORS
@@ -35,7 +35,7 @@ class Query {
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-		int			queryRespond(Client *client, Config *config);
+		int			queryRespond();
 		int			queryGet();
 		int			queryPost();
 		int			queryDelete();
@@ -43,6 +43,7 @@ class Query {
 		int			queryError();
 		
 		int			readRequest();
+		int			setCookie();
 		int			setRessource();
 		int			findRessource();
 		int			setRessourceStatus();
@@ -63,7 +64,7 @@ class Query {
 		std::string					_header;
 		unsigned long				_content_len;
 		ContentTypes				_content_type;	//TODO implement setting this as part of setRessourceStatus
-		Client						*_client;
 		Config						*_config;
+		Client						*_client;
 		Cookie						*_cookie;
 };

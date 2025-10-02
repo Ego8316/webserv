@@ -6,24 +6,26 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 12:56:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 15:24:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Query.hpp"
 
-Query::Query(Config *config) : _config(config)
+Query::Query(Config *config, Client *client) : _config(config), _client(client)
 {
 	this->_err_code = 200;
-	this->_query = new Request(this->_config);
+	this->_query = new Request();
 }
 
-Query::Query(const Query &other) : _query(other._query), _err_code(other._err_code) {}
+Query::Query(const Query &other) :  _query(other._query), _err_code(other._err_code), _config(other._config), _client(other._client) {}
 
 Query &Query::operator=(const Query &other)
 {
 	if (this != &other)
 	{
+		this->_config = other._config;
+		this->_client = other._client;
 		this->_query = other._query;
 		this->_err_code = other._err_code;
 	}
@@ -35,10 +37,8 @@ Query::~Query()
 	delete this->_query;
 }
 
-int		Query::queryRespond(Client *client, Config *config)
+int		Query::queryRespond()
 {
-	this->_client = client;
-	this->_config = config;
 	this->readRequest();
 	if (this->_query_str.length() == 0)
 	{
@@ -53,9 +53,11 @@ int		Query::queryRespond(Client *client, Config *config)
 		return (-1);
 	}
 	std::cout << "version is now " << this->_query->getVersion() << std::endl;
-	this->_query->setCookie();
 	std::cout << "We good ?" << std::endl;
-	this->_cookie = this->_query->getCookie();
+	if (this->setCookie() == SERV_ERROR)
+	{
+		std::cerr << "Cookie failed" << std::endl;
+	}
 	std::cout << "*clocks gun* I said we good ?" << std::endl;
 	if (this->_cookie == NULL)
 	{
@@ -72,6 +74,23 @@ int		Query::queryRespond(Client *client, Config *config)
 	//TODO add some funcs
 	std::cout << "And here ?" << std::endl;
 	return ((this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])());
+}
+
+int		Query::setCookie()
+{
+	//TODO code this function
+	std::cout << *this->_query << std::endl;
+	this->_cookie = Cookie::findSession(this->_query->getHeaders());
+	if (this->_cookie == NULL)
+	{
+		this->_cookie = new Cookie();
+	}
+		return (SERV_ERROR);
+	std::cout << "hello ?" << std::endl;
+	std::cout << "Printing cookies !!!" << std::endl;
+	std::cout << *(this->_cookie) << std::endl;
+	std::cout << "ok so we are ok" << std::endl;
+	return (0);
 }
 
 int		Query::readRequest()

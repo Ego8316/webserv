@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 13:02:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 15:21:49 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ class Client;
 class Cookie {
 	public :
 	// CONSTRUCTORS
+		Cookie();
 		Cookie(Config *config);
 		Cookie(const Cookie &other);
 		Cookie &operator=(const Cookie &other);
@@ -31,19 +32,19 @@ class Cookie {
 		std::map<std::string, std::string>	const	&getAllAttributes() const;
 		int											getSessionId() const;
 		std::string const							getAttribute(std::string key) const;
-		Cookie										*getSessionById(unsigned int idx);
+		static Cookie								*getSessionById(unsigned int idx);
 	//SETTERS
 		void				setSessionId(unsigned int id);
 		void				writeAttribute(std::string key, std::string newvalue);
 		void				appendAttribute(std::string key, std::string newvalue);
 	//MEMBER FUNCTIONS
 		//static int			initCookies();
-		Cookie				*getCookie(std::map<std::string, std::string> header);
-		Cookie				*findSession(std::map<std::string, std::string> header);
-		bool				sessionExists(int id);
-		Cookie				*createSession();
-		int					removeSession(int id);
-		void				removeExpired();
+		//static Cookie		*getCookie(std::map<std::string, std::string> header);
+		static Cookie		*findSession(std::map<std::string, std::string> header);
+		static bool			sessionExists(int id);
+		static Cookie		*createSession();
+		static int			removeSession(int id);
+		static void			removeExpired();
 		int					updateCookie(std::map<std::string, std::string> header);
 		int					updateAttribute(std::string field_name, std::string field_value);
 		bool				isExpired() const;
@@ -59,7 +60,7 @@ class Cookie {
 		std::map<std::string, std::string>		_attributes;
 		bool									_http_only;
 		int										_generation_time;
-		Config									*_config;
+		static Config							*_config;
 };
 
 

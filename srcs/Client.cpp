@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 08:56:39 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 14:27:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,10 +80,10 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 		
 int		Client::handleEvent()
 {
-	Query	query(this->_config);
+	Query	query(this->_config, this);
 
 	std::cout << "Client handling event" << std::endl;
-	query.queryRespond(this, this->_config);
+	query.queryRespond();
 	/* 
 	For now it just echoes back the message for testing purposes 
 	char 	    buffer[10];

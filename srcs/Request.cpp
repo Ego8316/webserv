@@ -6,14 +6,13 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 13:39:27 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 15:01:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-//Request::Request() {}
-Request::Request(Config *config) : _config(config) {}
+Request::Request() {}
 
 Request::Request(const Request &other)
 {
@@ -158,27 +157,10 @@ int	Request::getError(void) const
 {
 	return (_error);
 }
-
-Cookie	*Request::getCookie(void) const
-{
-	return (_cookie);
-}
 		
 void	Request::setMethod(Method method)
 {
 	this->_method = method;
-}
-
-int		Request::setCookie()
-{
-	//TODO code this function
-	std::cout << *this << std::endl;
-	std::cout << "getting tired ..." << std::endl;
-	this->_cookie = Cookie(this->_config).getCookie(_headers);
-	std::cout << "hello ?" << std::endl;
-	std::cout << "Printing cookies !!!" << std::endl;
-	std::cout << *(this->_cookie) << std::endl;
-	return (0);
 }
 
 bool	Request::headerHasField(const std::string field)
