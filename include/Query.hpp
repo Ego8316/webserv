@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 21:16:45 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/02 21:28:12 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class Query {
 		Query &operator=(const Query &other);
 		~Query(void);
 
-		int			queryRespond(Client *client, Config *config);
+		int			queryRespond(void);
 		int			queryGet(void);
 		int			queryPost(void);
 		int			queryDelete(void);
@@ -64,7 +64,7 @@ class Query {
 		std::string					_header;
 		unsigned long				_contentLen;
 		ContentTypes				_contentType;	//TODO implement setting this as part of setRessourceStatus
+		Config						*_config;
 		Client						*_client;
 		Cookie						*_cookie;
-		Config						*_config;
 };

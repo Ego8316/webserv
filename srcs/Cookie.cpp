@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cookie.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:44:44 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 21:29:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,7 +264,7 @@ std::string			Cookie::genHeader()
 	std::string			header;
 	std::ostringstream	convert;
 
-	header = "Set-Cookie: session_id=" + std::to_string(this->_session_id);
+	header = "Set-Cookie: session_id=" + toString(this->_session_id);
 	header += "; Path=" + this->getAttribute("Path");
 	if (this->_http_only)
 		header += "; HttpOnly";

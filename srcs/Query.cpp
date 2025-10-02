@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 21:24:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/02 21:29:25 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ Query::~Query(void)
 		delete this->_query;
 }
 
-int		Query::queryRespond(Client *client, Config *config)
+int		Query::queryRespond(void)
 {
 	this->readRequest();
 	if (this->_requestStr.length() == 0)
@@ -271,8 +271,6 @@ void		Query::setHeader()
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
 	this->_header += this->_cookie->genHeader() + "\r\n";
 	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
-	this->_header += "Content-Length: " + std::to_string(this->_contentLen) + "\r\n";
-	this->_header += "\r\n";
 	this->_header += "Content-Length: " + toString(this->_contentLen) + "\r\n\r\n";
 }
 
