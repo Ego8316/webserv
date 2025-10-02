@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Query.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:58:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 21:15:00 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ Query::Query(Config *config, Client *client) : _config(config), _client(client)
 	this->_query = new Request();
 }
 
-Query::Query(const Query &other) :  _query(other._query), _err_code(other._err_code), _config(other._config), _client(other._client) {}
+Query::Query(const Query &other) : _query(other._query), _statusCode(other._statusCode) {}
 
 Query &Query::operator=(const Query &other)
 {
@@ -27,20 +27,21 @@ Query &Query::operator=(const Query &other)
 		this->_config = other._config;
 		this->_client = other._client;
 		this->_query = other._query;
-		this->_err_code = other._err_code;
+		this->_statusCode = other._statusCode;
 	}
 	return (*this);
 }
 
-Query::~Query()
+Query::~Query(void)
 {
-	delete this->_query;
+	if (this->_query)
+		delete this->_query;
 }
 
 int		Query::queryRespond()
 {
 	this->readRequest();
-	if (this->_query_str.length() == 0)
+	if (this->_requestStr.length() == 0)
 	{
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
 		return (SERV_ERROR);
@@ -72,7 +73,7 @@ int		Query::setCookie()
 	return (0);
 }
 
-int		Query::readRequest()
+int		Query::readRequest(void)
 {
 	char	buffer[BUFFER_SIZE];
 	int		bytes_read;
@@ -86,21 +87,21 @@ int		Query::readRequest()
 			std::cerr << "Query could not retrive request" << std::endl;
 			return (SERV_ERROR);
 		}
-		this->_query_str += std::string(buffer).substr(0, bytes_read);
+		this->_requestStr += std::string(buffer).substr(0, bytes_read);
 	}
 	return (0);
 }
 
-int		Query::queryGet()
+int		Query::queryGet(void)
 {
-	if (!(this->_ressource_status & PERM_ROK))
+	if (!(this->_ressourceStatus & PERM_ROK))
 	{
-		this->_err_code = 403;
+		this->_statusCode = FORBIDDEN;
 		return (SERV_ERROR);
 	}
-	if ((this->_ressource_status & IS_DIR))
+	if ((this->_ressourceStatus & IS_DIR))
 	{
-		this->_err_code = 404;
+		this->_statusCode = NOT_FOUND;
 		return (SERV_ERROR);
 	}
 	this->setHeader();
@@ -119,22 +120,22 @@ int		Query::queryGet()
 	return (0);
 }
 
-int		Query::queryPost()
+int		Query::queryPost(void)
 {
 	return (0);
 }
 
-int		Query::queryDelete()
+int		Query::queryDelete(void)
 {
 	return (0);
 }
 
-int		Query::queryCGIRun()
+int		Query::queryCGIRun(void)
 {
 	return (0);
 }
 
-int		Query::queryError()
+int		Query::queryError(void)
 {
 	return (0);
 }
@@ -195,30 +196,40 @@ int		Query::setRessourceStatus()
 	{
 		if (errno == EACCES)
 		{
-			this->_err_code = 403;
-			this->_ressource_status = PERM_ISSUE;
+			this->_statusCode = FORBIDDEN;
+			this->_ressourceStatus = PERM_ISSUE;
 		}
 		else
 		{
-			this->_err_code = 404;
-			this->_ressource_status = NOT_FOUND;
+			this->_statusCode = NOT_FOUND;
+			this->_ressourceStatus = RESOURCE_NOT_FOUND;
 		}
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
 		std::cerr << "Failed to find " << this->_ressource << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_ressource_status = EXISTS;
+	this->_ressourceStatus = EXISTS;
+	if (S_ISDIR(file_stat.st_mode))
+	{
+		if (stat((this->_ressource + std::string("index.html")).c_str(), &dir_stat) == 0)
+		{
+			this->_ressource += "index.html";
+			this->setRessourceStatus();
+		}
+		else
+			this->_ressourceStatus |= IS_DIR;
+	}
 	if (file_stat.st_mode & S_IRUSR)
-		this->_ressource_status |= PERM_ROK;
+		this->_ressourceStatus |= PERM_ROK;
 	if (file_stat.st_mode & S_IWUSR)
-		this->_ressource_status |= PERM_WOK;
+		this->_ressourceStatus |= PERM_WOK;
 	if (file_stat.st_mode & S_IXUSR)
-		this->_ressource_status |= PERM_XOK;
-	if (this->_ressource_status <= IS_DIR)
-		this->_ressource_status |= PERM_ISSUE;
+		this->_ressourceStatus |= PERM_XOK;
+	if (this->_ressourceStatus <= IS_DIR)
+		this->_ressourceStatus |= PERM_ISSUE;
 	if (endsWith(this->_ressource, ".py"))
 	{
-		this->_ressource_status |= IS_CGI;
+		this->_ressourceStatus |= IS_CGI;
 		this->_query->setMethod(CGI_RUN);
 		this->_content_type = CGI_PY;
 	}
@@ -226,21 +237,20 @@ int		Query::setRessourceStatus()
 	{
 		this->_ressource_status |= IS_CGI;
 		this->_query->setMethod(CGI_RUN);
-		this->_content_type = CGI_PHP;
 	}
-	this->_content_len = file_stat.st_size;
-	return (0);
+	this->_contentLen = file_stat.st_size;
+	return (this->_ressourceStatus);
 }
 
-std::string	Query::getRessourceTypeStr()
+std::string	Query::getRessourceTypeStr(void)
 {
-	if (this->_content_type == HTML)
+	if (this->_contentType == HTML)
 		return ("text/html");
-	if (this->_content_type == PLAIN)
+	if (this->_contentType == PLAIN)
 		return ("text/plain");
-	if (this->_content_type == JPEG)
+	if (this->_contentType == JPEG)
 		return ("image/jpeg");
-	if (this->_content_type == PNG)
+	if (this->_contentType == PNG)
 		return ("image/png");
 	return ("");
 }
@@ -265,15 +275,18 @@ std::string	Query::getRessourceTypeExtenssion()
 
 void		Query::setHeader()
 {
-	this->_header = "HTTP/1.0 " + std::to_string(this->_err_code) + " OK\r\n";
+	this->_header = "HTTP/1.0 "
+		+ toString(this->_statusCode)
+		+ " " + httpStatusToStr(this->_statusCode) + "\r\n";
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
 	this->_header += this->_cookie->genHeader() + "\r\n";
 	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
 	this->_header += "Content-Length: " + std::to_string(this->_content_len) + "\r\n";
 	this->_header += "\r\n";
+	this->_header += "Content-Length: " + toString(this->_contentLen) + "\r\n\r\n";
 }
 
-int		Query::sendHeader()
+int		Query::sendHeader(void)
 {
 	if (this->_client->socketWrite(this->_header.c_str(), this->_header.length()) == -1)
 	{
@@ -314,7 +327,36 @@ int		Query::streamFile(std::string file)
 	return (0);
 }
 
-const Query::queryMethod	Query::_queryExecute[_method_num] = {
+std::string	Query::httpStatusToStr(HttpStatus code)
+{
+	switch(code)
+	{
+		case OK:							return "OK";
+		case BAD_REQUEST:					return "Bad Request";
+		case FORBIDDEN:						return "Forbidden";
+		case NOT_FOUND:						return "Not Found";
+		case INTERNAL_SERVER_ERROR:			return "Internal Server Error";
+		case NOT_IMPLEMENTED:				return "Not Implemented";
+		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";
+		default:							return "Unknown";
+	}
+}
+
+std::string	Query::getDefaultErrorPage(HttpStatus code)
+{
+	switch(code)
+	{
+		case BAD_REQUEST:					return ERROR_PAGE_400;
+		case FORBIDDEN:						return ERROR_PAGE_403;
+		case NOT_FOUND:						return ERROR_PAGE_404;
+		case INTERNAL_SERVER_ERROR:			return ERROR_PAGE_500;
+		case NOT_IMPLEMENTED:				return ERROR_PAGE_501;
+		case HTTP_VERSION_NOT_SUPPORTED:	return ERROR_PAGE_505;
+		default:							return "<html><body><h1>Unknown Error</h1></body></html>";
+	}
+}
+
+const Query::queryMethod	Query::_queryExecute[_methodNum] = {
 	&Query::queryGet,
 	&Query::queryPost, 
 	&Query::queryDelete,

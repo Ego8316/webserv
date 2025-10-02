@@ -73,6 +73,8 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "__nullptr": "cpp",
-        "cerrno": "cpp"
+        "cerrno": "cpp",
+        "codecvt": "cpp",
+        "fstream": "cpp"
     }
 }

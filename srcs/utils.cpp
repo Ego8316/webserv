@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Utils.cpp                                          :+:      :+:    :+:   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 22:33:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 21:10:58 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,17 +23,17 @@ bool endsWith(const std::string& str, const std::string& suffix)
 std::vector<std::string>		stringSplit(std::string s, std::string d)
 {
 	std::vector<std::string>	split_str;
-    size_t						pos = 0;
-    std::string					element;
+	size_t						pos = 0;
+	std::string					element;
 
 	pos = s.find(d);
-    while (pos != std::string::npos)
+	while (pos != std::string::npos)
 	{
         element = s.substr(0, pos);
         split_str.push_back(element);
         s.erase(0, pos + d.length());
 		pos = s.find(d);
-    }
-    split_str.push_back(s);
-    return (split_str);
+	}
+	split_str.push_back(s);
+	return (split_str);
 }
