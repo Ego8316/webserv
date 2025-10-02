@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 21:09:09 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/02 21:23:11 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,9 @@ enum	ContentTypes
 	HTML,
 	PLAIN,
 	JPEG,
-	PNG
+	PNG,
+	CGI_PY,
+	CGI_PHP
 };
 
 enum	HttpStatus

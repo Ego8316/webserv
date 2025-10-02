@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 21:15:00 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/02 21:24:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 Query::Query(Config *config, Client *client) : _config(config), _client(client)
 {
-	this->_err_code = 200;
+	this->_statusCode = OK;
 	this->_query = new Request();
 }
 
@@ -38,7 +38,7 @@ Query::~Query(void)
 		delete this->_query;
 }
 
-int		Query::queryRespond()
+int		Query::queryRespond(Client *client, Config *config)
 {
 	this->readRequest();
 	if (this->_requestStr.length() == 0)
@@ -46,7 +46,7 @@ int		Query::queryRespond()
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_query->parseRequest(this->_query_str);
+	this->_query->parseRequest(this->_requestStr);
 	if (this->_query->getError() != NONE)
 	{
 		//TODO send 404 ou chais pas quoi
@@ -116,7 +116,7 @@ int		Query::queryGet(void)
 	}
 	else
 		std::cerr << "Could not access ressource : >" << this->_ressource << "<" << std::endl;
-	std::cout << "Query answered with code " << this->_err_code << std::endl;
+	std::cout << "Query answered with code " << this->_statusCode << std::endl;
 	return (0);
 }
 
@@ -165,9 +165,9 @@ int		Query::findRessource()
 	if (stat(this->_ressource.c_str(), &file_stat) == -1)
 	{
 		if (errno == EACCES)
-			this->_err_code = 403;
+			this->_statusCode = FORBIDDEN;
 		else
-			this->_err_code = 404;
+			this->_statusCode = NOT_FOUND;
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
 		std::cerr << "Failed to find " << this->_ressource << std::endl;
 		return (SERV_ERROR);
@@ -209,16 +209,6 @@ int		Query::setRessourceStatus()
 		return (SERV_ERROR);
 	}
 	this->_ressourceStatus = EXISTS;
-	if (S_ISDIR(file_stat.st_mode))
-	{
-		if (stat((this->_ressource + std::string("index.html")).c_str(), &dir_stat) == 0)
-		{
-			this->_ressource += "index.html";
-			this->setRessourceStatus();
-		}
-		else
-			this->_ressourceStatus |= IS_DIR;
-	}
 	if (file_stat.st_mode & S_IRUSR)
 		this->_ressourceStatus |= PERM_ROK;
 	if (file_stat.st_mode & S_IWUSR)
@@ -231,11 +221,11 @@ int		Query::setRessourceStatus()
 	{
 		this->_ressourceStatus |= IS_CGI;
 		this->_query->setMethod(CGI_RUN);
-		this->_content_type = CGI_PY;
+		this->_contentType = CGI_PY;
 	}
 	else if (endsWith(this->_ressource, ".php"))
 	{
-		this->_ressource_status |= IS_CGI;
+		this->_ressourceStatus |= IS_CGI;
 		this->_query->setMethod(CGI_RUN);
 	}
 	this->_contentLen = file_stat.st_size;
@@ -257,17 +247,17 @@ std::string	Query::getRessourceTypeStr(void)
 
 std::string	Query::getRessourceTypeExtenssion()
 {
-	if (this->_content_type == HTML)
+	if (this->_contentType == HTML)
 		return (".html");
-	if (this->_content_type == PLAIN)
+	if (this->_contentType == PLAIN)
 		return ("");
-	if (this->_content_type == JPEG)
+	if (this->_contentType == JPEG)
 		return (".jpeg");
-	if (this->_content_type == PNG)
+	if (this->_contentType == PNG)
 		return (".png");
-	if (this->_content_type == CGI_PY)
+	if (this->_contentType == CGI_PY)
 		return (".py");
-	if (this->_content_type == CGI_PHP)
+	if (this->_contentType == CGI_PHP)
 		return (".php");
 	
 	return ("");
@@ -281,7 +271,7 @@ void		Query::setHeader()
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
 	this->_header += this->_cookie->genHeader() + "\r\n";
 	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
-	this->_header += "Content-Length: " + std::to_string(this->_content_len) + "\r\n";
+	this->_header += "Content-Length: " + std::to_string(this->_contentLen) + "\r\n";
 	this->_header += "\r\n";
 	this->_header += "Content-Length: " + toString(this->_contentLen) + "\r\n\r\n";
 }

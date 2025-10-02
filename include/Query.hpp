@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 21:10:29 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/02 21:16:45 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,4 +66,5 @@ class Query {
 		ContentTypes				_contentType;	//TODO implement setting this as part of setRessourceStatus
 		Client						*_client;
 		Cookie						*_cookie;
+		Config						*_config;
 };
