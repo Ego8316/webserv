@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 16:35:32 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:59:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 serverSocket::serverSocket(Config *config)
 {
 	this->_config = config;
-	std::cout << this->_config->domain << " " << this->_config->type << " " << this->_config->protocol << std::endl;
 	this->_server_fd = socket(this->_config->domain, this->_config->type, this->_config->protocol);
 	if (this->_server_fd == -1)
 		std::cerr << "Socket init failed" << std::endl;

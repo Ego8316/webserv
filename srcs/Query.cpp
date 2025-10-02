@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:54:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/02 17:58:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,6 @@ int		Query::findRessource()
 				this->_ressource += this->_config->default_page;
 				return (0);
 			}
-			std::cout << "This homepage cannot be found " << this->_ressource + this->_config->default_page << std::endl;
 			std::cerr << "Ressource is a directory " << this->_ressource << std::endl;
 			return (SERV_ERROR);
 		}
