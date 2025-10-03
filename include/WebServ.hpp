@@ -12,7 +12,7 @@
 class WebServ {
 	public :
 	// CONSTRUCTORS
-		WebServ();
+		WebServ(std::string config_file);
 		WebServ(const WebServ &other);
 		WebServ &operator=(const WebServ &other);
 	//DESTUCTORS
@@ -21,7 +21,7 @@ class WebServ {
 		Client 				*getClient(int uid);
 	//SETTERS
 	//MEMBER FUNCTIONS
-		int					WebServInit(std::string config_file);
+		int					WebServInit();
 		int					WebServRun();
 		int					newClient();
 		int					removeClient(int indx);
@@ -29,5 +29,6 @@ class WebServ {
 		Config					*_config;
 		serverSocket			*_server;
 		serverPoll				*_poll;
+		Cookie					*_cookies;
 		std::vector<Client *>	_clients;
 };

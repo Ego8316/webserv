@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 21:41:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/03 16:16:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "headers.hpp"
 #include "Query.hpp"
 #include "Config.hpp"
+#include "Cookie.hpp"
 
 class Query;
 class Config;
@@ -22,7 +23,7 @@ class Config;
 class Client {
 	public :
 	// CONSTRUCTORS
-		Client(Config *config);
+		Client(Config *config, Cookie *cookies);
 		Client(const Client &other);
 		Client &operator=(const Client &other);
 	//DESTUCTORS
@@ -43,5 +44,6 @@ class Client {
 		struct sockaddr_in	_client_addr;
 		socklen_t			_client_len;
 		int					_client_id;
+		Cookie				*_cookies;
 		Config				*_config;
 };

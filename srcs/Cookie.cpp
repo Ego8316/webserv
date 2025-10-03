@@ -6,17 +6,15 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:44:44 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/03 16:58:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Cookie.hpp"
 
-std::vector<Cookie *>	Cookie::_sessions;
-bool					Cookie::_is_init = false;
-Config					*Cookie::_config;
-
-Cookie::Cookie() {}
+std::map<std::string, Cookie *>		Cookie::_sessions;
+Config								*Cookie::_config;
+bool								Cookie::_is_init = false;
 
 Cookie::Cookie(Config *config)
 {
@@ -24,7 +22,6 @@ Cookie::Cookie(Config *config)
 	{
 		std::cout << "Initialisation of cookies" << std::endl;
 		_config = config;
-		_sessions.resize(this->_config->cookie_sessions_max);
 		_is_init = true;
 	}
 	else
@@ -32,25 +29,27 @@ Cookie::Cookie(Config *config)
 	return ;
 }
 
-Cookie::Cookie(const Cookie &other) : _session_id(other._session_id), _life_time(other._life_time) {}
+Cookie::Cookie(const Cookie &other) : _session_uid(other._session_uid), _life_time(other._life_time) {}
 
 Cookie &Cookie::operator=(const Cookie &other)
 {
 	if (this != &other)
 	{
-		this->_session_id = other._session_id;
+		this->_session_uid = other._session_uid;
 		this->_life_time = other._life_time;
 	}
 	return (*this);
 }
 
 Cookie::~Cookie()
-{
-	for (unsigned int i = 0; i < MAX_COOKIE_SESSIONS; ++i)
+
+	{std::map<std::string, Cookie *>::iterator	it;
+	for (it = this->_sessions.begin(); it != this->_sessions.end(); ++it)
 	{
-		if (this->_sessions[i] != NULL)
+		if (it->second != NULL)
 		{
-			delete this->_sessions[i];
+			delete it->second;
+			this->_sessions[it->first] = NULL;
 		}
 	}
 }
@@ -69,24 +68,6 @@ void		Cookie::writeAttribute(std::string key, std::string newvalue)
 	this->_attributes[key] = newvalue;
 }
 
-void		Cookie::appendAttribute(std::string key, std::string newvalue)
-{
-	if (this->hasAttribute(key))
-		this->_attributes[key] = this->_attributes[key] + "; " + newvalue;
-	else
-		this->_attributes[key] = newvalue;
-}
-
-void		Cookie::setSessionId(unsigned int id)
-{
-	this->_session_id = id;
-}
-
-int			Cookie::getSessionId() const
-{
-	return (this->_session_id);
-}
-
 std::string const	Cookie::getAttribute(std::string key) const
 {
 	std::map<std::string, std::string>::const_iterator it = this->_attributes.find(key);
@@ -94,30 +75,20 @@ std::string const	Cookie::getAttribute(std::string key) const
 		return ("");
     return it->second;
 }
-
-bool		Cookie::isInit()
-{
-	return (_is_init);
-}
-
-void		Cookie::initCookies(Config *config)
-{
-	if (!isInit())
-	{
-		std::cout << "Initialisation of cookies" << std::endl;
-		_config = config;
-		_sessions.resize(_config->cookie_sessions_max);
-		_is_init = true;
-	}
-	else
-		std::cout << "Already init !" << std::endl;
-}
-
 std::map<std::string, std::string> const	&Cookie::getAllAttributes() const
 {
 	return (this->_attributes);
 }
 
+void		Cookie::setSessionUID(std::string uid)
+{
+	this->_sessions[uid]->_session_uid = uid;
+}
+
+std::string			Cookie::getSessionUID() const
+{
+	return (this->_session_uid);
+}
 
 int			Cookie::updateCookie(std::map<std::string, std::string> header)
 {
@@ -135,7 +106,7 @@ int			Cookie::updateCookie(std::map<std::string, std::string> header)
 				pos = field_split[i].find("=");
 				field_name = field_split[i].substr(0, pos);
 				field_value = field_split[i].erase(0, pos + 1);
-				this->writeAttribute(field_name, field_value);
+				//TODO -> switch
 			}
 		}
 	}
@@ -145,59 +116,68 @@ int			Cookie::updateCookie(std::map<std::string, std::string> header)
 	return (0);
 }
 
-Cookie		*Cookie::findSession(std::map<std::string, std::string> header)
+Cookie		*Cookie::getSession(std::map<std::string, std::string> header)
 {
-	int		uid = -1;
-	Cookie	*found = NULL;
+	std::string		uid = "";
+	Cookie			*found = NULL;
 
 	if (header.find("Cookie") != header.end())
 	{
 		std::vector<std::string>	cookie_in = stringSplit(header["Cookie"], ";");
-		if (cookie_in[0].find("session_id", 0) != std::string::npos)
+		if (_sessions.find(cookie_in[0]) != _sessions.end())
 		{
-			//uid = std::atoi(cookie_in[0].substr(11, cookie_in[0].length()).c_str());//cookie_in[0].substr(cookie_in[0].find("session_id", 0) + 11, cookie_in[0].length())
-			uid = atoi(cookie_in[0].substr(cookie_in[0].find("=", 0) + 1, cookie_in[0].length()).c_str());
-			if (uid < 0 || uid >= MAX_COOKIE_SESSIONS || !sessionExists(uid))
+			std::string					uid = cookie_in[0];
+			std::vector<std::string>	cookie_in = stringSplit(header["Cookie"], "=");
+			if (!sessionExists(uid))
 			{
 				std::cerr << "Invalid session ID, could not retrieve cookies " << sessionExists(uid) << std::endl;
 				found = NULL;
 			}
 			else if (sessionExists(uid) && _sessions[uid]->isExpired())
 			{
-				removeSession(uid);
+				delete _sessions[uid];
 				found = NULL;
 			}
-			else
+			else if (sessionExists(uid))
 			{
-				found = getSessionById(uid);
+				found = _sessions[uid];
 				found->updateCookie(header);
 				std::cout << "Found cookie session" << std::endl;
 			}
 		}
 	}
+	if (found == NULL)
+		found = this->createSession(header);
 	return (found);
 }
 
-bool	Cookie::sessionExists(int id)
+bool	Cookie::sessionExists(std::string uid)
 {
 	removeExpired();
-	if (id >= 0 && id < _config->cookie_sessions_max)
-		return (_sessions[id] != NULL);
+	if (_sessions.find(uid) != _sessions.end())
+		return (_sessions[uid] != NULL);
 	return (false);
 }
 
 Cookie		*Cookie::createSession(std::map<std::string, std::string> header)
 {
+	int 				uid = 0;
+	std::ostringstream	convert;
+
 	removeExpired();
-	for (int i = 0; i < _config->cookie_sessions_max; ++i)
+	for (int uid = 0; uid < this->_config->cookie_sessions_max; ++uid)
 	{
-		if (_sessions[i] == NULL)
-		{
-			_sessions[i] = new Cookie(_config);
-			_sessions[i]->setSessionId(i);
-			_sessions[i]->updateCookie(header);
-			return (_sessions[i]);
-		}
+		convert << uid;
+		if (!sessionExists(convert.str()))
+			break ;
+	}
+	if (uid != this->_config->cookie_sessions_max)
+	{
+		_sessions[convert.str()] = new Cookie(_config);
+		_sessions[convert.str()]->setSessionUID(convert.str());
+		//_sessions[convert.str()]->updateCookie(header);
+		(void)header;
+		return (_sessions[convert.str()]);
 	}
 	std::cerr << "Cannot create new Cookie, limit reached" << std::endl;
 	return (NULL);
@@ -205,29 +185,33 @@ Cookie		*Cookie::createSession(std::map<std::string, std::string> header)
 
 void		Cookie::removeExpired()
 {
-	for (int i = 0; i < _config->cookie_sessions_max; ++i)
+	std::map<std::string, Cookie *>::iterator	it;
+	for (it = _sessions.begin(); it != _sessions.end(); ++it)
 	{
-		if (_sessions[i] != NULL && _sessions[i]->isExpired())
-			removeSession(i);
+		if (it->second != NULL && it->second->isExpired())
+		{
+			delete it->second;
+			_sessions[it->first] = NULL;
+		}
 	}
 	return ;
 }
 
-int		Cookie::removeSession(int id)
+int		Cookie::removeSession(std::string uid)
 {
-	if (sessionExists(id))
+	if (sessionExists(uid))
 	{
-		delete _sessions[id];
-		_sessions[id] = NULL;
+		delete _sessions[uid];
+		_sessions[uid] = NULL;
 		return (0);
 	}
 	return (-1);
 }
 
-Cookie			*Cookie::getSessionById(unsigned int idx)
+Cookie			*Cookie::getSessionByUID(std::string uid)
 {
-	if (sessionExists(idx))
-		return (_sessions[idx]);
+	if (sessionExists(uid))
+		return (_sessions[uid]);
 	return (NULL);
 }
 
@@ -264,11 +248,11 @@ std::string			Cookie::genHeader()
 	std::string			header;
 	std::ostringstream	convert;
 
-	header = "Set-Cookie: session_id=" + std::to_string(this->_session_id);
-	header += "; Path=" + this->getAttribute("Path");
+	header = "Set-Cookie: " + this->_session_uid;
+	header += "; Path=" + this->_path;
 	if (this->_http_only)
 		header += "; HttpOnly";
-	convert << this->_generation_time + this->_config->cookie_life_time - this->getTime();
+	convert << this->_config->cookie_life_time;
 	header += "; Max-Age=" + convert.str();
 	return (header);
 }
@@ -279,7 +263,7 @@ std::ostream	&operator<<(std::ostream &os, const Cookie &item)
 	std::map<std::string, std::string>				attr = item.getAllAttributes();
 	std::map<std::string, std::string>::iterator	it;
 	os << "Cookie :" << std::endl;
-	os << "session id: " << item.getSessionId() << std::endl;
+	os << "session id: " << item.getSessionUID() << std::endl;
 	os << "attributes: " << std::endl;
 	for (it = attr.begin(); it != attr.end(); ++it)
 		os << it->first << ": " << it->second << std::endl;

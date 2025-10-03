@@ -6,13 +6,13 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:58:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/03 16:57:40 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Query.hpp"
 
-Query::Query(Config *config, Client *client) : _config(config), _client(client)
+Query::Query(Config *config, Client *client, Cookie *cookies) : _config(config), _client(client), _cookie(cookies)
 {
 	this->_err_code = 200;
 	this->_query = new Request();
@@ -52,7 +52,8 @@ int		Query::queryRespond()
 		std::cerr << "Bad request 403" << std::endl;
 		return (-1);
 	}
-	if (this->setCookie() == SERV_ERROR)
+	this->_cookie = this->_cookie->getSession(this->_query->getHeaders());
+	if (this->_cookie == NULL)
 	{
 		std::cerr << "Cookie failed" << std::endl;
 	}
@@ -63,12 +64,7 @@ int		Query::queryRespond()
 
 int		Query::setCookie()
 {
-	//TODO code this function
-	if (!Cookie::isInit())
-		Cookie::initCookies(this->_config);
-	this->_cookie = Cookie::findSession(this->_query->getHeaders());
-	if (this->_cookie == NULL)
-		this->_cookie = Cookie::createSession(this->_query->getHeaders());
+	;
 	return (0);
 }
 

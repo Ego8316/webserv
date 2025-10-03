@@ -6,15 +6,23 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:59:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/03 16:14:41 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServ.hpp"
 
-WebServ::WebServ()
+WebServ::WebServ(std::string config_file)
 {
-	this->_clients.resize(CLIENT_LIMIT);
+	this->_config = new Config(config_file);
+	if (this->_config->getParseError() != NONE)
+		return ;
+	this->_cookies = new Cookie(this->_config);
+	this->_server = new serverSocket(this->_config);
+	if (this->_server->getFd() < 0)
+		return ;
+	this->_poll = new serverPoll(this->_config);
+	this->_clients.resize(this->_config->client_limit);
 }
 
 WebServ::WebServ(const WebServ &other) : _config(other._config), _server(other._server), _poll(other._poll), _clients(other._clients) {}
@@ -33,22 +41,10 @@ WebServ &WebServ::operator=(const WebServ &other)
 
 WebServ::~WebServ() {}
 
-int		WebServ::WebServInit(std::string config_file)
+int WebServ::WebServInit()
 {
-	this->_config = new Config(config_file);
-	std::cout << *this->_config << std::endl;
-	if (this->_config->getParseError() != NONE)
-	{
+	if (!this->_config || !this->_cookies || !this->_server || !this->_poll)
 		return (SERV_ERROR);
-	}
-	std::cout << "Config ok !" << std::endl;
-	this->_server = new serverSocket(this->_config);
-	if (this->_server == NULL || this->_server->getFd() < 0)
-	{
-		return (SERV_ERROR);
-	}
-	std::cout << "Socket Init ok ! " << this->_server->getFd() << std::endl;
-	this->_poll = new serverPoll(this->_config);
 	this->_poll->pollAdd(this->_server->getFd(), POLLIN, 0);
 	std::cout << "pollAdd ok !" << std::endl;
 	if (this->_server->socketBind() == -1)
@@ -61,10 +57,9 @@ int		WebServ::WebServInit(std::string config_file)
 	return (0);
 }
 
-
-int		WebServ::WebServRun()
+int WebServ::WebServRun()
 {
-	int	event;
+	int event;
 
 	while (true)
 	{
@@ -73,7 +68,7 @@ int		WebServ::WebServRun()
 		if (event == -1)
 		{
 			std::cerr << "poll Wait failed" << std::endl;
-			//TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
+			// TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
 			return (-1);
 		}
 		else if (event == 0)
@@ -92,9 +87,9 @@ int		WebServ::WebServRun()
 	return (0);
 }
 
-int		WebServ::newClient()
+int WebServ::newClient()
 {
-	int		indx;
+	int indx;
 
 	for (indx = 0; indx < this->_config->client_limit; ++indx)
 	{
@@ -106,7 +101,7 @@ int		WebServ::newClient()
 		std::cerr << "Cannot accept new clients" << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_clients[indx] = new Client(this->_config);
+	this->_clients[indx] = new Client(this->_config, this->_cookies);
 	if (this->_server->socketAcceptClient(this->_clients[indx]) == -1)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
@@ -117,7 +112,7 @@ int		WebServ::newClient()
 	return (0);
 }
 
-int		WebServ::removeClient(int indx)
+int WebServ::removeClient(int indx)
 {
 	this->_poll->pollRemove(indx);
 	if (this->_clients[indx] != NULL)

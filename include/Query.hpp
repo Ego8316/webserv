@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 14:58:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/03 16:13:13 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Cookie;
 class Query {
 	public :
 	// CONSTRUCTORS
-		Query(Config *config, Client *client);
+		Query(Config *config, Client *client, Cookie *cookies);
 		Query(const Query &other);
 		Query &operator=(const Query &other);
 	//DESTUCTORS
