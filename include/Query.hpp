@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/03 16:13:13 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/04 09:19:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ class Query {
 		int			queryError();
 		
 		int			readRequest();
-		int			setCookie();
 		int			setRessource();
 		int			findRessource();
 		int			setRessourceStatus();

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/03 16:57:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/04 09:16:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,28 +45,28 @@ int		Query::queryRespond()
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
 		return (SERV_ERROR);
 	}
+	std::cout << "step 1" << std::endl;
 	this->_query->parseRequest(this->_query_str);
+	std::cout << "step 2" << std::endl;
 	if (this->_query->getError() != NONE)
 	{
 		//TODO send 404 ou chais pas quoi
 		std::cerr << "Bad request 403" << std::endl;
 		return (-1);
 	}
+	std::cout << "step 3" << std::endl;
 	this->_cookie = this->_cookie->getSession(this->_query->getHeaders());
+	std::cout << "step 4" << std::endl;
 	if (this->_cookie == NULL)
 	{
 		std::cerr << "Cookie failed" << std::endl;
 	}
 	this->setRessource();
+	std::cout << "step 5" << std::endl;
 	//TODO add some funcs
 	return ((this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])());
 }
 
-int		Query::setCookie()
-{
-	;
-	return (0);
-}
 
 int		Query::readRequest()
 {
