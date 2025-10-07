@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/04 09:16:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/07 15:55:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ Query::~Query()
 int		Query::queryRespond()
 {
 	this->readRequest();
+	std::cout << "REQUEST = " << std::endl;
+	std::cout << this->_query_str << std::endl;
 	if (this->_query_str.length() == 0)
 	{
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
@@ -224,6 +226,14 @@ int		Query::setRessourceStatus()
 		this->_query->setMethod(CGI_RUN);
 		this->_content_type = CGI_PHP;
 	}
+	else if (endsWith(this->_ressource, ".html"))
+		this->_content_type = HTML;
+	else if (endsWith(this->_ressource, ".jpeg"))
+		this->_content_type = JPEG;
+	else if (endsWith(this->_ressource, ".png"))
+		this->_content_type = PNG;
+	else if (endsWith(this->_ressource, ".txt") || this->_ressource.find(".") == std::string::npos)
+		this->_content_type = PLAIN;
 	this->_content_len = file_stat.st_size;
 	return (0);
 }

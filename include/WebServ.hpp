@@ -12,6 +12,7 @@
 class WebServ {
 	public :
 	// CONSTRUCTORS
+		WebServ(Config *config);
 		WebServ(std::string config_file);
 		WebServ(const WebServ &other);
 		WebServ &operator=(const WebServ &other);
@@ -25,6 +26,7 @@ class WebServ {
 		int					WebServRun();
 		int					newClient();
 		int					removeClient(int indx);
+		int					WebServReboot();
 	private :
 		Config					*_config;
 		serverSocket			*_server;

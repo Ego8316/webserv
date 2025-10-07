@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:53:11 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/07 17:24:18 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,21 +26,27 @@ class Config {
 		~Config();
 	//GETTERS
 		ParseError		getParseError();
+		void			setIP(std::string ip_str);
+		void			parseDefaultErrorPages(std::istringstream &conf_stream);
 	//SETTERS
 	//MEMBER FUNCTIONS
-		int				port_number;
-		int				time_out;
-		int				client_limit;
-		int				domain;
-		int				type;
-		int				protocol;
-		int				buffer_size;
-		std::string		server_home;
-		std::string		default_page;
-		ParseError		parse_error;
-		int				cookie_life_time;
-		int				cookie_sessions_max;
-		int				incomming_queue_backlog;
+		unsigned int 					ip;
+		int								port_number;
+		int								client_limit;
+		int								domain;
+		int								type;
+		int								protocol;
+		int								buffer_size;
+		std::string						server_home;
+		std::string						default_page;
+		std::map<int, std::string>		default_error_pages;
+		ParseError						parse_error;
+		int								cookie_life_time;
+		int								cookie_sessions_max;
+		int								incomming_queue_backlog;
+		
+		static std::vector<Config *>	parseMultipleConfigs(std::string filename);
+		static void						deleteAllConfigs(std::vector<Config *> &configs);
 	private :
 };
 

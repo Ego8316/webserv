@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/03 16:58:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/04 14:54:14 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,9 +58,8 @@ class Cookie {
 		std::map<std::string, std::string>			_attributes;
 		bool										_http_only;
 		int											_generation_time;
-		std::string									_path;
+		std::string									_path; //TODO
 		static Config								*_config;
 };
-
 
 std::ostream	&operator<<(std::ostream &os, const Cookie &src);

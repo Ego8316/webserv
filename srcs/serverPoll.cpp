@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 16:32:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/07 16:21:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,11 +41,11 @@ void	serverPoll::pollRemove(int indx)
 	std::memset(&this->_poll_fds[indx], 0, sizeof(pollfd));
 }
 
-int		serverPoll::pollWait(int time_out)
+int		serverPoll::pollWait()
 {
 	int	poll_count;
 
-	poll_count = poll(&this->_poll_fds[0], this->_config->client_limit, time_out);
+	poll_count = poll(&this->_poll_fds[0], this->_config->client_limit, 0);
 	if (poll_count == -1)
 		std::cerr << "Poll failed: " << strerror(errno) << std::endl;
 	return (poll_count);
@@ -55,7 +55,7 @@ int		serverPoll::pollWatchRevent()
 {
 	//TODO find a way so that when it comes back it doesnt start from i = 0 every time
 
-	this->pollWait(this->_config->time_out);
+	this->pollWait();
 	for (int	i = 0; i < this->_config->client_limit; ++i)
 	{
 		if (this->_poll_fds[i].revents & POLLHUP || this->_poll_fds[i].revents & POLLERR)

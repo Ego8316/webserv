@@ -6,11 +6,25 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/04 09:36:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/07 16:56:23 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServ.hpp"
+
+WebServ::WebServ(Config *config)
+{
+	this->_config = config;
+	if (this->_config->getParseError() != NONE)
+		return ;
+	std::cout << *this->_config << std::endl;
+	this->_cookies = new Cookie(this->_config);
+	this->_server = new serverSocket(this->_config);
+	if (this->_server->getFd() < 0)
+		return ;
+	this->_poll = new serverPoll(this->_config);
+	this->_clients.resize(this->_config->client_limit);
+}
 
 WebServ::WebServ(std::string config_file)
 {
@@ -46,14 +60,14 @@ int WebServ::WebServInit()
 	if (!this->_config || !this->_cookies || !this->_server || !this->_poll)
 		return (SERV_ERROR);
 	this->_poll->pollAdd(this->_server->getFd(), POLLIN, 0);
-	std::cout << "pollAdd ok !" << std::endl;
+	std::cout << "pollAdd \t ok !" << std::endl;
 	if (this->_server->socketBind() == -1)
 		return (SERV_ERROR);
-	std::cout << "Socket Bind ok !" << std::endl;
+	std::cout << "Socket Bind \t ok !" << std::endl;
 	if (this->_server->socketListen() == -1)
 		return (SERV_ERROR);
-	std::cout << "Socket Listen ok !" << std::endl;
-	std::cout << "WebServ Init OK" << std::endl;
+	std::cout << "Socket Listen \t ok !" << std::endl;
+	std::cout << "WebServ Init \t ok !" << std::endl;
 	return (0);
 }
 
@@ -119,4 +133,10 @@ int WebServ::removeClient(int indx)
 		delete this->_clients[indx];
 	this->_clients[indx] = NULL;
 	return (0);
+}
+
+int WebServ::WebServReboot()
+{
+	std::cerr << "Gné gné gné ca marche pas" << std::endl;
+	return (SERV_ERROR);
 }

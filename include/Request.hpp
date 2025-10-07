@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 15:02:11 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/04 14:58:42 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ class Request
 		std::string							_rawBody;
 		std::map<std::string, std::string>	_headers;
 		int									_error;
+		std::vector<Cookie *>				_cookies; //TODO
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);

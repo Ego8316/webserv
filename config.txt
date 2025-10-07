@@ -1,16 +1,20 @@
 
-client config
-it needs a line that consist of '<FIELD> = <VALUE>'
-
-PORT_NUMBER = 12346
-TIME_OUT = -1
-DOMAIN = AF_INET
-TYPE = SOCK_STREAM
-PROTOCOL = 0
-CLIENT_LIMIT = 1000
-BUFFER_SIZE = 1024
-COOKIE_LIFE_TIME = 100
-COOKIE_SESSIONS_MAX = 10000
-SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite
-DEFAULT_PAGE = /index.html
-INCOMMING_QUEUE_BACKLOG = 100
+MyServer1 I can write whatever here {
+	IP : 192.168.1.6
+	PORT : 8080
+	DOMAIN = AF_INET
+	TYPE = SOCK_STREAM
+	PROTOCOL = 0
+	CLIENT_LIMIT = 1000
+	BUFFER_SIZE = 1024
+	ACCEPT = text/plain
+	COOKIE_LIFE_TIME = 10
+	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite
+	COOKIE_SESSIONS_MAX = 10000
+	DEFAULT_PAGE = /index.html
+	DEFAULT_ERROR_PAGES = list
+		404 : error/404.html
+		403 : error/403.html
+	end
+	INCOMMING_QUEUE_BACKLOG = 100
+}

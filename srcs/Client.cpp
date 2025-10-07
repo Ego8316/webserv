@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/03 16:17:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/07 16:21:05 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,6 @@ int		Client::socketRead(char *buffer, int bytes_read) //TODO
 
 int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 
 {
-	//TODO pollWait;
 	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR)
 	{
 		std::cerr << "Receive failed\n";
