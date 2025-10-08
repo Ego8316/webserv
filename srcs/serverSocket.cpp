@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 19:02:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 23:54:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ int		serverSocket::socketBind()
 
 	std::memset(&this->_server_addr, 0, sizeof(this->_server_addr));
 	this->_server_addr.sin_family = this->_config->domain;
-	this->_server_addr.sin_addr.s_addr = this->_config->ip; //TODO change that Bind to all available interfaces
+	this->_server_addr.sin_addr.s_addr = this->_config->ip;
 	this->_server_addr.sin_port = htons(this->_config->port_number); //port # above 1024 are not priviledged
 	success = ::bind(this->_server_fd, (struct sockaddr*)&this->_server_addr, sizeof(this->_server_addr));
 	if (success == -1)

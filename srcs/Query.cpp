@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 23:45:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 23:54:02 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,17 +54,14 @@ int		Query::queryRespond()
 		this->_err_code = 403;
 		return (this->queryError());
 	}
-	std::cout << "step 3" << std::endl;
 	this->_query_cookies = this->_query->getQueryCookies();
-	std::cout << "step 4" << std::endl;
 	if (this->_query_cookies.size() == 0)
 		std::cerr << "Cookie failed" << std::endl;
-	std::cout << "step 5" << std::endl;
 	this->setRessource();
 	this->screenErrors();
 	if (this->_err_code != 200)
 		return (this->queryError());
-	//TODO add some funcs
+	//TODO add some funcs ?
 	return ((this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])());
 }
 
@@ -97,7 +94,6 @@ int		Query::readRequest()
 
 int		Query::queryGet()
 {
-	std::cout << "Coucou !" << std::endl;
 	if (!(this->_ressource_status & PERM_ROK))
 	{
 		this->_err_code = 403;

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/08 23:45:29 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 23:53:07 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,10 +86,8 @@ int		Request::parseRequest(std::string request)
 			this->parseHeaderLine(line_split[i]);
 		}
 	}
-	std::cout << "step 1" << std::endl;
 	if (this->_query_cookies.size() == 0)
 		this->_query_cookies.push_back(Cookie::createSession(this->_all_cookies));
-	std::cout << "step 1.2" << std::endl;
 	std::ostringstream	bodyStream;
 	bodyStream << stream.rdbuf();
 	_rawBody = bodyStream.str();
@@ -103,7 +101,6 @@ int		Request::parseRequest(std::string request)
 			return (SERV_ERROR);
 		}
 	}
-	std::cout << "step 2" << std::endl;
 	return (0);
 }
 
