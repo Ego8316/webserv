@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 16:15:55 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 19:00:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,14 +144,14 @@ int		Query::queryError()
 int		Query::setRessource()
 {
 	this->_ressource = this->_query->getRequestTarget();
-	if (this->findRessource() == -1)
+	if (this->findRessource() == SERV_ERROR)
 	{
 		std::cerr << "Ressource could not be found" << std::endl;
 		return (SERV_ERROR);
 	}
 	if (this->_err_code != 200)
 		return (SERV_ERROR);
-	if (this->setRessourceStatus() == -1)
+	if (this->setRessourceStatus() == SERV_ERROR)
 	{
 		std::cerr << "Ressource status error " << std::endl;
 		return (SERV_ERROR);
@@ -288,7 +288,7 @@ void		Query::setHeader()
 
 int		Query::sendHeader()
 {
-	if (this->_client->socketWrite(this->_header.c_str(), this->_header.length()) == -1)
+	if (this->_client->socketWrite(this->_header.c_str(), this->_header.length()) == SERV_ERROR)
 	{
 		//set err
 		return (SERV_ERROR);

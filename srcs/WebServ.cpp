@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 16:19:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 19:01:51 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,10 +61,10 @@ int WebServ::WebServInit()
 		return (SERV_ERROR);
 	this->_poll->pollAdd(this->_server->getFd(), POLLIN, 0);
 	std::cout << "pollAdd \t ok !" << std::endl;
-	if (this->_server->socketBind() == -1)
+	if (this->_server->socketBind() == SERV_ERROR)
 		return (SERV_ERROR);
 	std::cout << "Socket Bind \t ok !" << std::endl;
-	if (this->_server->socketListen() == -1)
+	if (this->_server->socketListen() == SERV_ERROR)
 		return (SERV_ERROR);
 	std::cout << "Socket Listen \t ok !" << std::endl;
 	std::cout << "WebServ Init \t ok !" << std::endl;
@@ -86,7 +86,7 @@ int WebServ::WebServRun()
 			{
 				std::cerr << "poll Wait failed" << std::endl;
 				// TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
-				return (-1);	
+				return (SERV_ERROR);
 			}
 			else
 				removeClient(event->client_id);
@@ -95,7 +95,7 @@ int WebServ::WebServRun()
 		{
 			if (event->client_id == 0)
 			{
-				if (this->newClient() == -1)
+				if (this->newClient() == SERV_ERROR)
 					std::cerr << "Failed to accept new client" << std::endl;
 			}
 			else
@@ -120,7 +120,7 @@ int WebServ::newClient()
 		return (SERV_ERROR);
 	}
 	this->_clients[indx] = new Client(this->_config, this->_cookies);
-	if (this->_server->socketAcceptClient(this->_clients[indx]) == -1)
+	if (this->_server->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
 		return (SERV_ERROR);

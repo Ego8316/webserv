@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 14:05:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 19:02:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,11 @@ serverSocket::serverSocket(Config *config)
 	this->_server_fd = socket(this->_config->domain, this->_config->type, this->_config->protocol);
 	if (this->_server_fd == -1)
 		std::cerr << "Socket init failed" << std::endl;
-	else if (this->setSockOpt() == -1)
+	else if (this->setSockOpt() == SERV_ERROR)
 	{
 		std::cerr << "Socket setSockOpt failed" << std::endl;
 		close(this->_server_fd);
-		this->_server_fd = -1;
+		this->_server_fd = SERV_ERROR;
 	}
 }
 
@@ -80,7 +80,7 @@ int		serverSocket::setSockOpt()
     if (setsockopt(this->_server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 	{
         std::cerr << "Failed to set socket options: " << strerror(errno) << std::endl;
-        return (-1);
+        return (SERV_ERROR);
 	}
 	return (0);
 }
@@ -90,7 +90,7 @@ int		serverSocket::socketListen()
 	if (listen(this->_server_fd, this->_config->incomming_queue_backlog) == -1)
 	{
 		std::cerr << "Socket listen failed" << std::endl;
-		return (-1);
+		return (SERV_ERROR);
 	}
 	return (0);
 }

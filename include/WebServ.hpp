@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 14:57:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 18:58:12 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,9 @@ class WebServ {
 		int					removeClient(int indx);
 		int					WebServReboot();
 	private :
-		Config					*_config;
-		serverSocket			*_server;
-		serverPoll				*_poll;
-		Cookie					*_cookies;
-		std::vector<Client *>	_clients;
+		Config								*_config;
+		serverSocket						*_server;
+		serverPoll							*_poll;
+		std::map<std::string, Cookie *>		_cookie_sessions;
+		std::vector<Client *>				_clients;
 };

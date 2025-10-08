@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 15:52:55 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 18:56:53 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,5 +66,6 @@ class Query {
 		ContentTypes				_content_type;	//TODO implement setting this as part of setRessourceStatus
 		Config						*_config;
 		Client						*_client;
-		Cookie						*_cookie;
+		std::vector<Cookie *>		_all_cookie;
+		std::vector<Cookie *>		_query_cookie;
 };
