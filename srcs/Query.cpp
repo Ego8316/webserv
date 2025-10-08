@@ -6,16 +6,16 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 19:00:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 20:48:53 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Query.hpp"
 
-Query::Query(Config *config, Client *client, Cookie *cookies) : _config(config), _client(client), _cookie(cookies)
+Query::Query(Config *config, Client *client, std::map<std::string, Cookie *> *all_cookies) : _config(config), _client(client), _all_cookies(all_cookies)
 {
 	this->_err_code = 200;
-	this->_query = new Request();
+	this->_query = new Request(this->_all_cookies);
 }
 
 Query::Query(const Query &other) :  _query(other._query), _err_code(other._err_code), _config(other._config), _client(other._client) {}
@@ -54,8 +54,8 @@ int		Query::queryRespond()
 		this->_err_code = 403;
 		return (this->queryError());
 	}
-	this->_cookie = this->_cookie->getSession(this->_query->getHeaders());
-	if (this->_cookie == NULL)
+	this->_query_cookies = this->_query->getQueryCookies();
+	if (this->_query_cookies == NULL)
 		std::cerr << "Cookie failed" << std::endl;
 	this->setRessource();
 	this->screenErrors();
@@ -280,7 +280,8 @@ void		Query::setHeader()
 {
 	this->_header = "HTTP/1.0 " + std::to_string(this->_err_code) + " OK\r\n";
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
-	this->_header += this->_cookie->genHeader() + "\r\n";
+	for (unsigned int i = 0; i < (*this->_query_cookies).size(); ++i)
+		this->_header += (*this->_query_cookies)[i]->genHeader() + "\r\n";
 	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
 	this->_header += "Content-Length: " + std::to_string(this->_content_len) + "\r\n";
 	this->_header += "\r\n";

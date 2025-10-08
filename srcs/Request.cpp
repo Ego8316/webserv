@@ -6,13 +6,13 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/08 16:13:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 20:45:10 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-Request::Request() {}
+Request::Request(std::map<std::string, Cookie *> *all_cookies) : _all_cookies(all_cookies) {}
 
 Request::Request(const Request &other)
 {
@@ -102,6 +102,7 @@ int		Request::parseRequest(std::string request)
 int		Request::parseHeaderLine(std::string line)
 {
 	std::vector<std::string>	field_split = stringSplit(line, ": ");
+	Cookie						*cookie;
 
 	if (field_split.size() == 2)
 	{
@@ -111,6 +112,12 @@ int		Request::parseHeaderLine(std::string line)
 			value.erase(0, 1);
 		if (!value.empty() && value[value.size() - 1] == '\r')
 			value.erase(value.size() - 1);
+		if (key == "Cookie")
+		{
+			cookie = Cookie::getSession(this->_all_cookies, value);
+			if (cookie)
+				this->_query_cookies->push_back(cookie);
+		}
 		if (headerHasField(key))
 			this->_headers[key] = _headers[key] + "; " + value;
 		else
@@ -170,6 +177,11 @@ std::string		Request::headerGetField(const std::string field)
 	if (this->_headers.find(field) != this->_headers.end())
 		return (this->_headers[field]);
 	return ("");
+}
+
+std::vector<Cookie *>		*Request::getQueryCookies() const
+{
+	return (this->_query_cookies);
 }
 
 std::ostream	&operator<<(std::ostream &os, const Request &src)

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 18:56:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 20:35:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Cookie;
 class Query {
 	public :
 	// CONSTRUCTORS
-		Query(Config *config, Client *client, Cookie *cookies);
+		Query(Config *config, Client *client, std::map<std::string, Cookie *> *all_cookies);
 		Query(const Query &other);
 		Query &operator=(const Query &other);
 	//DESTUCTORS
@@ -53,19 +53,19 @@ class Query {
 		int			sendHeader();
 		int			streamFile(std::string file);
 	private :
-		static const int			_method_num = 5;
-		typedef int					(Query::*queryMethod)();
-		static const queryMethod	_queryExecute[_method_num];
-		std::string					_query_str;
-		Request						*_query;
-		int							_err_code;
-		std::string					_ressource;
-		int							_ressource_status;
-		std::string					_header;
-		unsigned long				_content_len;
-		ContentTypes				_content_type;	//TODO implement setting this as part of setRessourceStatus
-		Config						*_config;
-		Client						*_client;
-		std::vector<Cookie *>		_all_cookie;
-		std::vector<Cookie *>		_query_cookie;
+		static const int				_method_num = 5;
+		typedef int						(Query::*queryMethod)();
+		static const queryMethod		_queryExecute[_method_num];
+		std::string						_query_str;
+		Request							*_query;
+		int								_err_code;
+		std::string						_ressource;
+		int								_ressource_status;
+		std::string						_header;
+		unsigned long					_content_len;
+		ContentTypes					_content_type;
+		Config							*_config;
+		Client							*_client;
+		std::map<std::string, Cookie *>	*_all_cookies;
+		std::vector<Cookie *>			*_query_cookies;
 };

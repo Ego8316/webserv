@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 19:13:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 20:12:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,24 +31,24 @@ class Cookie {
 	//GETTERS
 		std::map<std::string, std::string>	const	&getAllAttributes() const;
 		std::string			getSessionUID() const;
-		Cookie				*getSessionByUID(std::map<std::string, Cookie *> &sessions, std::string uid);
+		static Cookie		*getSessionByUID(std::map<std::string, Cookie *> *sessions, std::string uid);
 		std::string const	getAttribute(std::string key) const;
 		void				writeAttribute(std::string key, std::string newvalue);
 		
 	//SETTERS
 		void				setSessionUID(std::string uid);
 	//MEMBER FUNCTIONS
-		Cookie				*getSession(std::map<std::string, Cookie *> &sessions, std::map<std::string, std::string> header);
-		Cookie				*createSession(std::map<std::string, Cookie *> &sessions, std::map<std::string, std::string> header);
+		static Cookie		*getSession(std::map<std::string, Cookie *> *sessions, std::string header);
+		static Cookie		*createSession(std::map<std::string, Cookie *> *sessions);
+		static int			removeSession(std::map<std::string, Cookie *> *sessions, std::string uid);
+		static bool			sessionExists(std::map<std::string, Cookie *> *sessions, std::string uid);
+		static void			removeExpired(std::map<std::string, Cookie *> *sessions);
+		static int			getTime();
 		int					updateAttribute(std::string field_name, std::string field_value);
 		bool				hasAttribute(std::string key) const;
-		int					removeSession(std::map<std::string, Cookie *> &sessions, std::string uid);
-		bool				sessionExists(std::map<std::string, Cookie *> &sessions, std::string uid);
-		void				removeExpired(std::map<std::string, Cookie *> &sessions);
 		bool				isExpired() const;
-		int					updateCookie(std::map<std::string, std::string> header);
+		int					updateCookie(std::string header);
 		std::string			genHeader();
-		int					getTime() const;
 	//VARIABLES
 	private :
 		std::string									_session_uid;

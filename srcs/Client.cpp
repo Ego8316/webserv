@@ -6,15 +6,14 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 15:02:02 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 20:45:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(Config *config, Cookie *cookies) : _config(config)
+Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies) : _all_cookies(all_cookies), _config(config)
 {
-	this->_cookies = cookies;
 	this->_client_len = sizeof(this->_client_addr);
 }
 
@@ -81,7 +80,7 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 		
 int		Client::handleEvent()
 {
-	Query	query(this->_config, this, this->_cookies);
+	Query	query(this->_config, this, this->_all_cookies);
 
 	std::cout << "Client handling event" << std::endl;
 	query.queryRespond();

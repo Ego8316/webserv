@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 19:01:51 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 19:41:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ WebServ::WebServ(Config *config)
 	if (this->_config->getParseError() != NONE)
 		return ;
 	std::cout << *this->_config << std::endl;
-	this->_cookies = new Cookie(this->_config);
+	Cookie(this->_config);
+	this->_cookie_sessions = new std::map<std::string, Cookie *>;
 	this->_server = new serverSocket(this->_config);
 	if (this->_server->getFd() < 0)
 		return ;
@@ -31,7 +32,8 @@ WebServ::WebServ(std::string config_file)
 	this->_config = new Config(config_file);
 	if (this->_config->getParseError() != NONE)
 		return ;
-	this->_cookies = new Cookie(this->_config);
+	Cookie(this->_config);
+	this->_cookie_sessions = new std::map<std::string, Cookie *>;
 	this->_server = new serverSocket(this->_config);
 	if (this->_server->getFd() < 0)
 		return ;
@@ -57,7 +59,7 @@ WebServ::~WebServ() {}
 
 int WebServ::WebServInit()
 {
-	if (!this->_config || !this->_cookies || !this->_server || !this->_poll)
+	if (!this->_config || !this->_cookie_sessions || !this->_server || !this->_poll)
 		return (SERV_ERROR);
 	this->_poll->pollAdd(this->_server->getFd(), POLLIN, 0);
 	std::cout << "pollAdd \t ok !" << std::endl;
@@ -119,7 +121,7 @@ int WebServ::newClient()
 		std::cerr << "Cannot accept new clients" << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_clients[indx] = new Client(this->_config, this->_cookies);
+	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions);
 	if (this->_server->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
