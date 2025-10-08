@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 14:53:41 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 15:40:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,22 +213,22 @@ int		Query::setRessourceStatus()
 	{
 		this->_ressource_status |= IS_CGI;
 		this->_query->setMethod(CGI_RUN);
-		this->_content_type = CGI_PY;
+		this->_content_type = ACCEPT_CGI_PY;
 	}
 	else if (endsWith(this->_ressource, ".php"))
 	{
 		this->_ressource_status |= IS_CGI;
 		this->_query->setMethod(CGI_RUN);
-		this->_content_type = CGI_PHP;
+		this->_content_type = ACCEPT_CGI_PHP;
 	}
 	else if (endsWith(this->_ressource, ".html"))
-		this->_content_type = HTML;
+		this->_content_type = ACCEPT_HTML;
 	else if (endsWith(this->_ressource, ".jpeg"))
-		this->_content_type = JPEG;
+		this->_content_type = ACCEPT_JPEG;
 	else if (endsWith(this->_ressource, ".png"))
-		this->_content_type = PNG;
+		this->_content_type = ACCEPT_PNG;
 	else if (endsWith(this->_ressource, ".txt") || this->_ressource.find(".") == std::string::npos)
-		this->_content_type = PLAIN;
+		this->_content_type = ACCEPT_PLAIN;
 	this->_content_len = file_stat.st_size;
 	//TODO check Accept ici
 	return (0);
@@ -236,30 +236,30 @@ int		Query::setRessourceStatus()
 
 std::string	Query::getRessourceTypeStr()
 {
-	if (this->_content_type == HTML)
+	if (this->_content_type == ACCEPT_HTML)
 		return ("text/html");
-	if (this->_content_type == PLAIN)
+	if (this->_content_type == ACCEPT_PLAIN)
 		return ("text/plain");
-	if (this->_content_type == JPEG)
+	if (this->_content_type == ACCEPT_JPEG)
 		return ("image/jpeg");
-	if (this->_content_type == PNG)
+	if (this->_content_type == ACCEPT_PNG)
 		return ("image/png");
 	return ("");
 }
 
 std::string	Query::getRessourceTypeExtenssion()
 {
-	if (this->_content_type == HTML)
+	if (this->_content_type == ACCEPT_HTML)
 		return (".html");
-	if (this->_content_type == PLAIN)
+	if (this->_content_type == ACCEPT_PLAIN)
 		return ("");
-	if (this->_content_type == JPEG)
+	if (this->_content_type == ACCEPT_JPEG)
 		return (".jpeg");
-	if (this->_content_type == PNG)
+	if (this->_content_type == ACCEPT_PNG)
 		return (".png");
-	if (this->_content_type == CGI_PY)
+	if (this->_content_type == ACCEPT_CGI_PY)
 		return (".py");
-	if (this->_content_type == CGI_PHP)
+	if (this->_content_type == ACCEPT_CGI_PHP)
 		return (".php");
 	
 	return ("");

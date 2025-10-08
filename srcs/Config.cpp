@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 14:03:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 15:46:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,6 +155,48 @@ void		Config::parseDefaultErrorPages(std::istringstream &conf_stream)
 		}
 		this->default_error_pages[field] = value;
 	}
+}
+
+void	Config::parseAccept(std::istringstream &conf_stream)
+{
+	std::string			newline;
+	std::string			field;
+
+	while (std::getline(conf_stream, newline))
+	{
+		if (newline.find("end") != std::string::npos)
+			return ;
+		std::istringstream 	line(newline);
+		
+		if (!(line >> field))
+		{
+			std::cerr << "Could not parse config line " << newline << std::endl;
+			continue;
+		}
+		if (this->strToContentType(field) == ACCEPT_NONE)
+		{
+			std::cerr << "Could not interpret Accept section in config: " << newline << std::endl;
+			continue;
+		}
+		this->accept_list.push_back(this->strToContentType(field));
+	}
+}
+
+ContentTypes		Config::strToContentType(std::string input)
+{
+	if (input == "*/*")
+		return (ACCEPT_ANY);
+	if (input == "text/*")
+		return (ACCEPT_TEXT);
+	if (input == "image/*")
+		return (ACCEPT_IMAGE);
+	if (input == "text/html")
+		return (ACCEPT_HTML);
+	if (input == "image/png")
+		return (ACCEPT_PNG);
+	if (input == "image/jpeg")
+		return (ACCEPT_JPEG);
+	return (ACCEPT_NONE);
 }
 
 std::ostream	&operator<<(std::ostream &os, const Config &item)

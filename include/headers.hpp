@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/08 14:46:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 15:46:39 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,17 +44,6 @@
 #define BUFFER_SIZE 1024
 #define CLIENT_LIMIT 1000
 #define MAX_COOKIE_SESSIONS 1000
-//#define COOKIE_LIFE_TIME 3600
-
-#define NOT_FOUND 0
-#define PERM_ISSUE 1
-#define IS_DIR 2
-#define PERM_ROK 4
-#define PERM_WOK 8  // 0 0 0 1 0 0 0 
-#define PERM_XOK 16 // 0 0 1 0 0 0 0 
-					// 0 0 1 1 0 0 0 
-#define IS_CGI 32
-#define EXISTS 128
 
 enum Method
 {
@@ -75,14 +64,32 @@ enum ParseError
 	UNREADABLE_FILE
 };
 
+enum FileStatus
+{
+	NOT_FOUND	= 0,	// 0 0 0 0 0 0 0 0
+	PERM_ISSUE	= 1,	// 0 0 0 0 0 0 0 1
+	IS_DIR		= 2,	// 0 0 0 0 0 0 1 0
+	PERM_ROK	= 4,	// 0 0 0 0 0 1 0 0
+	PERM_WOK	= 8,	// 0 0 0 0 1 0 0 0
+	PERM_XOK	= 16,	// 0 0 0 1 0 0 0 0
+	IS_CGI		= 32,	// 0 0 1 0 0 0 0 0
+	EXISTS		= 128	// 1 0 0 0 0 0 0 0
+};
+
 enum ContentTypes
 {
-	HTML,
-	PLAIN,
-	JPEG,
-	PNG,
-	CGI_PY,
-	CGI_PHP
+		ACCEPT_NONE		= 0,	// 0 0 0 0 0 0 0 0
+		ACCEPT_HTML		= 1,	// 0 0 0 0 0 0 0 1
+		ACCEPT_PLAIN	= 2,	// 0 0 0 0 0 0 1 0
+		// 0 0 0 0 0 1 0 0
+		ACCEPT_TEXT		= 7,	// 0 0 0 0 0 1 1 1
+		ACCEPT_JPEG		= 8,	// 0 0 0 0 1 0 0 0
+		ACCEPT_PNG		= 16,	// 0 0 0 1 0 0 0 0
+		// 0 0 1 0 0 0 0 0
+		ACCEPT_IMAGE	= 56,	// 0 0 1 1 1 0 0 
+		ACCEPT_CGI_PY	= 64,	// 0 1 0 0 0 0 0 0
+		ACCEPT_CGI_PHP	= 128,	// 1 0 0 0 0 0 0 0
+		ACCEPT_ANY		= 255	// 1 1 1 1 1 1 1 1
 };
 
 typedef struct s_pollRevent

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/07 17:24:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 15:16:11 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ class Config {
 		ParseError		getParseError();
 		void			setIP(std::string ip_str);
 		void			parseDefaultErrorPages(std::istringstream &conf_stream);
+		void			parseAccept(std::istringstream &conf_stream);
+		ContentTypes	strToContentType(std::string input);
 	//SETTERS
 	//MEMBER FUNCTIONS
 		unsigned int 					ip;
@@ -40,6 +42,7 @@ class Config {
 		std::string						server_home;
 		std::string						default_page;
 		std::map<int, std::string>		default_error_pages;
+		std::vector<ContentTypes>		accept_list;
 		ParseError						parse_error;
 		int								cookie_life_time;
 		int								cookie_sessions_max;
