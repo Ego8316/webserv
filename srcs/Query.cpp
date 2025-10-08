@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 14:05:21 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 14:53:41 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,6 +230,7 @@ int		Query::setRessourceStatus()
 	else if (endsWith(this->_ressource, ".txt") || this->_ressource.find(".") == std::string::npos)
 		this->_content_type = PLAIN;
 	this->_content_len = file_stat.st_size;
+	//TODO check Accept ici
 	return (0);
 }
 

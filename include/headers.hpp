@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/08 13:48:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 14:46:18 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,9 @@
 #define PERM_ISSUE 1
 #define IS_DIR 2
 #define PERM_ROK 4
-#define PERM_WOK 8
-#define PERM_XOK 16
+#define PERM_WOK 8  // 0 0 0 1 0 0 0 
+#define PERM_XOK 16 // 0 0 1 0 0 0 0 
+					// 0 0 1 1 0 0 0 
 #define IS_CGI 32
 #define EXISTS 128
 
