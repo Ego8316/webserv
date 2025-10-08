@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 15:40:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 16:15:55 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,20 +50,28 @@ int		Query::queryRespond()
 	this->_query->parseRequest(this->_query_str);
 	if (this->_query->getError() != NONE)
 	{
-		//TODO send 404 ou chais pas quoi
 		std::cerr << "Bad request 403" << std::endl;
-		return (-1);
+		this->_err_code = 403;
+		return (this->queryError());
 	}
 	this->_cookie = this->_cookie->getSession(this->_query->getHeaders());
 	if (this->_cookie == NULL)
-	{
 		std::cerr << "Cookie failed" << std::endl;
-	}
 	this->setRessource();
+	this->screenErrors();
+	if (this->_err_code != 200)
+		return (this->queryError());
 	//TODO add some funcs
 	return ((this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])());
 }
 
+void	Query::screenErrors()
+{
+	if (this->_err_code != 200)
+		return ;
+	//this->_err_code = 0; ?
+	return ;
+}
 
 int		Query::readRequest()
 {
@@ -86,6 +94,7 @@ int		Query::readRequest()
 
 int		Query::queryGet()
 {
+	std::cout << "Coucou !" << std::endl;
 	if (!(this->_ressource_status & PERM_ROK))
 	{
 		this->_err_code = 403;
@@ -140,6 +149,8 @@ int		Query::setRessource()
 		std::cerr << "Ressource could not be found" << std::endl;
 		return (SERV_ERROR);
 	}
+	if (this->_err_code != 200)
+		return (SERV_ERROR);
 	if (this->setRessourceStatus() == -1)
 	{
 		std::cerr << "Ressource status error " << std::endl;

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 17:53:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 16:13:58 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,6 @@ int		Request::parseHeaderLine(std::string line)
 			this->_headers[key] = _headers[key] + "; " + value;
 		else
 			this->_headers[key] = value;
-			
 	}
 	else
 	{

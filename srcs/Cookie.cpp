@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 14:05:05 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 16:16:09 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,10 @@ Cookie::Cookie(Config *config)
 {
 	if (!_is_init)
 	{
-		std::cout << "Initialisation of cookies" << std::endl;
 		_config = config;
 		_is_init = true;
 	}
 	else
-		std::cout << "Already init !" << std::endl;
 	return ;
 }
 
