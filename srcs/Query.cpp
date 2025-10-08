@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 23:54:02 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 01:08:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,10 +57,13 @@ int		Query::queryRespond()
 	this->_query_cookies = this->_query->getQueryCookies();
 	if (this->_query_cookies.size() == 0)
 		std::cerr << "Cookie failed" << std::endl;
-	this->setRessource();
+	if (this->setRessource() == SERV_ERROR)
+		return (SERV_ERROR);
 	this->screenErrors();
 	if (this->_err_code != 200)
 		return (this->queryError());
+	if (this->_ressource_status & IS_DIR)
+		return (this->queryListDir());
 	//TODO add some funcs ?
 	return ((this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])());
 }
@@ -69,7 +72,7 @@ void	Query::screenErrors()
 {
 	if (this->_err_code != 200)
 		return ;
-	//this->_err_code = 0; ?
+	//TODO
 	return ;
 }
 
@@ -100,10 +103,7 @@ int		Query::queryGet()
 		return (SERV_ERROR);
 	}
 	if ((this->_ressource_status & IS_DIR))
-	{
-		this->_err_code = 404;
 		return (SERV_ERROR);
-	}
 	this->setHeader();
 	if (access(this->_ressource.c_str(), R_OK) == 0)
 	{
@@ -137,6 +137,34 @@ int		Query::queryCGIRun()
 
 int		Query::queryError()
 {
+	return (0);
+}
+
+int		Query::queryListDir()
+{
+	std::string		ret_body;
+	DIR				*dir;
+	struct dirent	*dir_ent;
+	
+	dir = opendir(this->_ressource.c_str());
+	if (dir == NULL)
+	{
+		std::cerr << "Cannot open directory\n" << std::endl;
+		return (SERV_ERROR);
+	}
+	ret_body = LISTDIR_HEADER;
+	dir_ent = readdir(dir);
+	while (dir_ent != NULL)
+	{
+		ret_body += LISTDIR_PREFIX + std::string(dir_ent->d_name) + LISTDIR_SUFFIX;
+		dir_ent = readdir(dir);
+	}
+	ret_body += LISTDIR_ENDING;
+	closedir(dir);
+	this->_content_len = ret_body.length();
+	this->setHeader();
+	this->sendHeader();
+	this->_client->socketWrite(ret_body.c_str(), ret_body.length());
 	return (0);
 }
 
@@ -183,8 +211,11 @@ int		Query::findRessource()
 				this->_ressource += this->_config->default_page;
 				return (0);
 			}
-			std::cerr << "Ressource is a directory " << this->_ressource << std::endl;
-			return (SERV_ERROR);
+			else if (this->_config->enable_listdir == false)
+			{
+				std::cerr << "Ressource is a directory " << this->_ressource << std::endl;
+				return (SERV_ERROR);
+			}
 		}
 	}
 	return (0);
@@ -211,6 +242,8 @@ int		Query::setRessourceStatus()
 		return (SERV_ERROR);
 	}
 	this->_ressource_status = EXISTS;
+	if (S_ISDIR(file_stat.st_mode))
+		this->_ressource_status |= IS_DIR;
 	if (file_stat.st_mode & S_IRUSR)
 		this->_ressource_status |= PERM_ROK;
 	if (file_stat.st_mode & S_IWUSR)
@@ -311,7 +344,7 @@ int		Query::streamFile(std::string file)
 	}
 	while (bytes_read > 0)
 	{
-        if (send(this->_client->getFd(), buffer, bytes_read, 0) == -1)
+		if (send(this->_client->getFd(), buffer, bytes_read, 0) == -1)
 		{
 			//set err
 			return (SERV_ERROR);
@@ -322,7 +355,7 @@ int		Query::streamFile(std::string file)
 			//set err
 			return (SERV_ERROR);
 		}
-    }
+	}
 	close(fd);
 	return (0);
 }

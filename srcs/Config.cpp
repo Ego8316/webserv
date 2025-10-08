@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 15:46:27 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 00:13:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,8 @@ Config::Config(std::string config)
 			this->incomming_queue_backlog = atoi(value.c_str());
 		else if (field == "DEFAULT_ERROR_PAGES" && value == "list")
 			this->parseDefaultErrorPages(conf_stream);
+		else if (field == "ENABLE_LISTDIR")
+			this->enable_listdir = ((value == "1") || (value == "true") || (value == "TRUE") || (value == "True"));
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 15:16:11 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 00:07:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class Config {
 		int								cookie_life_time;
 		int								cookie_sessions_max;
 		int								incomming_queue_backlog;
+		bool							enable_listdir;
 		
 		static std::vector<Config *>	parseMultipleConfigs(std::string filename);
 		static void						deleteAllConfigs(std::vector<Config *> &configs);

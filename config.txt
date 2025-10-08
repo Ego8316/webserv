@@ -7,20 +7,21 @@ MyServer1 I can write whatever here {
 	PROTOCOL = 0
 	CLIENT_LIMIT = 1000
 	BUFFER_SIZE = 1024
-	ACCEPT = text/plain
 	COOKIE_LIFE_TIME = 2
 	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite
 	COOKIE_SESSIONS_MAX = 10000
+	INCOMMING_QUEUE_BACKLOG = 100
+	ENABLE_LISTDIR = true
 	DEFAULT_PAGE = /index.html
 	DEFAULT_ERROR_PAGES = dict
 		404 : error/404.html
 		403 : error/403.html
 	end
+
 	ACCEPT = unsep_list
 		text/plain
 		text/html
 	end
-	INCOMMING_QUEUE_BACKLOG = 100
 }
 
 MyServer1 I can write whatever here {

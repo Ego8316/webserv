@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/08 15:47:09 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 00:58:58 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cmath>
+#include <dirent.h>
 
 #define SERV_ERROR -1
 #define NEW_CLIENT 1
@@ -98,3 +99,8 @@ typedef struct s_pollRevent
 	short	revent;
 	int		client_id;
 }	pollRevent;
+
+#define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
+#define LISTDIR_PREFIX "  "
+#define LISTDIR_SUFFIX "<br>\n"
+#define LISTDIR_ENDING "</body>\n</html>"
