@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 20:35:24 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 23:40:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,5 +67,5 @@ class Query {
 		Config							*_config;
 		Client							*_client;
 		std::map<std::string, Cookie *>	*_all_cookies;
-		std::vector<Cookie *>			*_query_cookies;
+		std::vector<Cookie *>			_query_cookies;
 };

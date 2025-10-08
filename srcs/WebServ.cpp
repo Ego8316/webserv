@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 19:41:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 21:15:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,25 @@ WebServ &WebServ::operator=(const WebServ &other)
 	return (*this);
 }
 
-WebServ::~WebServ() {}
+WebServ::~WebServ()
+{
+	for (unsigned int i = 0; i < _clients.size(); ++i)
+	{
+		if (this->_clients[i] != NULL)
+			delete this->_clients[i];
+	}
+	for (std::map<std::string, Cookie *>::iterator it = (*this->_cookie_sessions).begin(); it != (*this->_cookie_sessions).end(); ++it)
+	{
+		if (it->second != NULL)
+			delete it->second;
+	}
+	if (this->_cookie_sessions)
+		delete this->_cookie_sessions;
+	if (this->_server)
+		delete this->_server;
+	if (this->_poll)
+		delete this->_poll;
+}
 
 int WebServ::WebServInit()
 {

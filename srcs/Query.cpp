@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 20:48:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 23:45:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,12 @@ int		Query::queryRespond()
 		this->_err_code = 403;
 		return (this->queryError());
 	}
+	std::cout << "step 3" << std::endl;
 	this->_query_cookies = this->_query->getQueryCookies();
-	if (this->_query_cookies == NULL)
+	std::cout << "step 4" << std::endl;
+	if (this->_query_cookies.size() == 0)
 		std::cerr << "Cookie failed" << std::endl;
+	std::cout << "step 5" << std::endl;
 	this->setRessource();
 	this->screenErrors();
 	if (this->_err_code != 200)
@@ -280,8 +283,8 @@ void		Query::setHeader()
 {
 	this->_header = "HTTP/1.0 " + std::to_string(this->_err_code) + " OK\r\n";
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
-	for (unsigned int i = 0; i < (*this->_query_cookies).size(); ++i)
-		this->_header += (*this->_query_cookies)[i]->genHeader() + "\r\n";
+	for (unsigned int i = 0; i < this->_query_cookies.size(); ++i)
+		this->_header += this->_query_cookies[i]->genHeader() + "\r\n";
 	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
 	this->_header += "Content-Length: " + std::to_string(this->_content_len) + "\r\n";
 	this->_header += "\r\n";

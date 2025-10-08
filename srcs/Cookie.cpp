@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 20:50:24 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 23:47:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,18 +32,7 @@ Cookie &Cookie::operator=(const Cookie &other)
 	return (*this);
 }
 
-Cookie::~Cookie()
-{
-	/*std::map<std::string, Cookie *>::iterator	it;
-	for (it = this->_sessions.begin(); it != this->_sessions.end(); ++it)
-	{
-		if (it->second != NULL)
-		{
-			delete it->second;
-			this->_sessions[it->first] = NULL;
-		}
-	}*/
-}
+Cookie::~Cookie() {}
 
 bool		Cookie::hasAttribute(std::string key) const
 {
@@ -157,6 +146,7 @@ Cookie		*Cookie::createSession(std::map<std::string, Cookie *> *sessions)
 	std::string			uid_str;
 	std::ostringstream	convert;
 
+	removeExpired(sessions);
 	for (int uid = 0; uid < _config->cookie_sessions_max; ++uid)
 	{
 		convert.str("");

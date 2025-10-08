@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/08 20:44:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 23:43:47 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class Request
 		std::string							getRawBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
 		int									getError(void) const;
-		std::vector<Cookie *>				*getQueryCookies() const;
+		std::vector<Cookie *>				getQueryCookies();
 
 		void								setMethod(Method method);
 		bool								headerHasField(const std::string field);
@@ -49,7 +49,7 @@ class Request
 		std::map<std::string, std::string>	_headers;
 		int									_error;
 		std::map<std::string, Cookie *>		*_all_cookies;
-		std::vector<Cookie *>				*_query_cookies; //TODO
+		std::vector<Cookie *>				_query_cookies; //TODO
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);
