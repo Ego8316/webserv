@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/07 16:56:23 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 14:05:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,30 +73,34 @@ int WebServ::WebServInit()
 
 int WebServ::WebServRun()
 {
-	int event;
+	std::vector<pollRevent>	events;
 
-	while (true)
+	events = this->_poll->pollWatchRevent();
+	if (events.size() == 0)
+		return (0);
+	for (std::vector<pollRevent>::iterator event = events.begin(); event != events.end(); ++event)
 	{
-		event = this->_poll->pollWatchRevent();
-		std::cout << "Detected new event " << event << std::endl;
-		if (event == -1)
+		if (event->is_error)
 		{
-			std::cerr << "poll Wait failed" << std::endl;
-			// TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
-			return (-1);
-		}
-		else if (event == 0)
-		{
-			if (this->newClient() == -1)
+			if (event->client_id == 0)
 			{
-				std::cerr << "Failed to accept new client" << std::endl;
-				return (-1);
+				std::cerr << "poll Wait failed" << std::endl;
+				// TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
+				return (-1);	
 			}
+			else
+				removeClient(event->client_id);
 		}
-		else if (event < 0)
-			this->removeClient(CLIENT_ERR_IDX(event) - 1);
 		else
-			this->_clients[event - 1]->handleEvent();
+		{
+			if (event->client_id == 0)
+			{
+				if (this->newClient() == -1)
+					std::cerr << "Failed to accept new client" << std::endl;
+			}
+			else
+				this->_clients[event->client_id - 1]->handleEvent();
+		}
 	}
 	return (0);
 }

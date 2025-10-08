@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/07 17:39:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 14:03:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ Config::Config(std::string config)
 	std::string			field, equal, value;
 
 	this->parse_error = NONE;
-	std::cout << "Parsing " << config << std::endl;
 	while (std::getline(conf_stream, newline))
 	{
 		std::istringstream 			line(newline);
@@ -35,7 +34,6 @@ Config::Config(std::string config)
 			this->port_number = atoi(value.c_str());
 		else if (field == "DOMAIN")
 		{
-			std::cout << "coucou !" << std::endl;
 			if (value == "AF_INET")
 				this->domain = AF_INET;
 		}

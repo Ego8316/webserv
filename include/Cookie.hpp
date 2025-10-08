@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/04 14:54:14 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 12:09:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class Cookie {
 		int					removeSession(std::string uid);
 		bool				sessionExists(std::string uid);
 		void				removeExpired();
+		void				setLifeTime(std::string exp_date);
 		bool				isExpired() const;
 		int					updateCookie(std::map<std::string, std::string> header);
 		std::string			genHeader();
@@ -57,8 +58,10 @@ class Cookie {
 		time_t										_life_time;
 		std::map<std::string, std::string>			_attributes;
 		bool										_http_only;
+		bool										_secure;
 		int											_generation_time;
 		std::string									_path; //TODO
+		std::string									_domain; //TODO
 		static Config								*_config;
 };
 

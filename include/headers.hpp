@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/07 16:39:44 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 13:48:10 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,7 @@
 #include <cmath>
 
 #define SERV_ERROR -1
-#define NEW_CLIENT 0
-#define CLIENT_ERR_IDX(idx) (-idx - 1)
+#define NEW_CLIENT 1
 
 #define NO_TIMEOUT -1
 #define BUFFER_SIZE 1024
@@ -84,3 +83,10 @@ enum ContentTypes
 	CGI_PY,
 	CGI_PHP
 };
+
+typedef struct s_pollRevent
+{
+	bool	is_error;
+	short	revent;
+	int		client_id;
+}	pollRevent;

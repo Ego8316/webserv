@@ -8,7 +8,27 @@ MyServer1 I can write whatever here {
 	CLIENT_LIMIT = 1000
 	BUFFER_SIZE = 1024
 	ACCEPT = text/plain
-	COOKIE_LIFE_TIME = 10
+	COOKIE_LIFE_TIME = 2
+	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite
+	COOKIE_SESSIONS_MAX = 10000
+	DEFAULT_PAGE = /index.html
+	DEFAULT_ERROR_PAGES = list
+		404 : error/404.html
+		403 : error/403.html
+	end
+	INCOMMING_QUEUE_BACKLOG = 100
+}
+
+MyServer1 I can write whatever here {
+	IP : 127.0.0.1
+	PORT : 12345
+	DOMAIN = AF_INET
+	TYPE = SOCK_STREAM
+	PROTOCOL = 0
+	CLIENT_LIMIT = 1000
+	BUFFER_SIZE = 1024
+	ACCEPT = text/plain
+	COOKIE_LIFE_TIME = 2
 	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite
 	COOKIE_SESSIONS_MAX = 10000
 	DEFAULT_PAGE = /index.html
