@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 01:14:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 16:52:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,13 @@ class Query {
 		int			queryDelete();
 		int			queryCGIRun();
 		int			queryError();
+		int			queryRedirect();
 		int			queryListDir();
-		
 		int			readRequest();
-		void		screenErrors();
+		int			screenErrors();
 		int			setRessource();
 		int			findRessource();
+		void		checkRedirections();
 		int			setRessourceStatus();
 		std::string	getRessourceTypeStr();
 		std::string	getRessourceTypeExtenssion();
@@ -65,6 +66,8 @@ class Query {
 		std::string						_header;
 		unsigned long					_content_len;
 		ContentTypes					_content_type;
+		std::string						_http_redirect;
+
 		Config							*_config;
 		Client							*_client;
 		std::map<std::string, Cookie *>	*_all_cookies;

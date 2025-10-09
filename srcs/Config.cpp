@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 00:13:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 17:02:55 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ Config::Config(std::string config)
 			this->setIP(value);
 		if (field == "PORT")
 			this->port_number = atoi(value.c_str());
+		if (field == "HOST_NAME")
+			this->host_name = value;
 		else if (field == "DOMAIN")
 		{
 			if (value == "AF_INET")
@@ -46,22 +48,26 @@ Config::Config(std::string config)
 			this->protocol = atoi(value.c_str());
 		else if (field == "CLIENT_LIMIT")
 			this->client_limit = atoi(value.c_str());
-		else if (field == "COOKIE_LIFE_TIME")
-			this->cookie_life_time = atoi(value.c_str());
+		else if (field == "INCOMMING_QUEUE_BACKLOG")
+			this->incomming_queue_backlog = atoi(value.c_str());
 		else if (field == "COOKIE_SESSIONS_MAX")
 			this->cookie_sessions_max = atoi(value.c_str());
+		else if (field == "COOKIE_LIFE_TIME")
+			this->cookie_life_time = atoi(value.c_str());
 		else if (field == "BUFFER_SIZE")
 			this->buffer_size = atoi(value.c_str());
 		else if (field == "SERVER_HOME")
 			this->server_home = value;
-		else if (field == "DEFAULT_PAGE")
-			this->default_page = value;
-		else if (field == "INCOMMING_QUEUE_BACKLOG")
-			this->incomming_queue_backlog = atoi(value.c_str());
-		else if (field == "DEFAULT_ERROR_PAGES" && value == "list")
-			this->parseDefaultErrorPages(conf_stream);
 		else if (field == "ENABLE_LISTDIR")
 			this->enable_listdir = ((value == "1") || (value == "true") || (value == "TRUE") || (value == "True"));
+		else if (field == "DEFAULT_PAGE")
+			this->default_page = value;
+		else if (field == "DEFAULT_ERROR_PAGES" && value == "list")
+			this->parseDefaultErrorPages(conf_stream);
+		else if (field == "ACCEPT")
+			this->parseAccept(conf_stream);
+		else if (field == "HTTP_REDIR")
+			this->parseHttpRedir(conf_stream);
 	}
 }
 
@@ -69,11 +75,21 @@ Config::Config(const Config &other)
 {
 	this->port_number = other.port_number;
 	this->domain = other.domain;
+	this->host_name = other.host_name;
 	this->type = other.type;
 	this->protocol = other.protocol;
 	this->client_limit = other.client_limit;
+	this->incomming_queue_backlog = other.incomming_queue_backlog;
 	this->buffer_size = other.buffer_size;
+	this->cookie_sessions_max = other.cookie_sessions_max;
+	this->cookie_life_time = other.cookie_life_time;
 	this->server_home = other.server_home;
+	this->enable_listdir = other.enable_listdir;
+	this->default_page = other.default_page;
+	this->default_error_pages = other.default_error_pages;
+	this->accept_list = other.accept_list;
+	this->http_redir = other.http_redir;
+	this->parse_error = other.parse_error;
 }
 
 Config &Config::operator=(const Config &other)
@@ -82,11 +98,21 @@ Config &Config::operator=(const Config &other)
 	{
 		this->port_number = other.port_number;
 		this->domain = other.domain;
+		this->host_name = other.host_name;
 		this->type = other.type;
 		this->protocol = other.protocol;
 		this->client_limit = other.client_limit;
+		this->incomming_queue_backlog = other.incomming_queue_backlog;
 		this->buffer_size = other.buffer_size;
+		this->cookie_sessions_max = other.cookie_sessions_max;
+		this->cookie_life_time = other.cookie_life_time;
 		this->server_home = other.server_home;
+		this->enable_listdir = other.enable_listdir;
+		this->default_page = other.default_page;
+		this->default_error_pages = other.default_error_pages;
+		this->http_redir = other.http_redir;
+		this->accept_list = other.accept_list;
+		this->parse_error = other.parse_error;
 	}
 	return (*this);
 }
@@ -181,6 +207,30 @@ void	Config::parseAccept(std::istringstream &conf_stream)
 			continue;
 		}
 		this->accept_list.push_back(this->strToContentType(field));
+	}
+}
+
+void		Config::parseHttpRedir(std::istringstream &conf_stream)
+{
+	std::string			newline;
+	std::string			path, equal, dest;
+	int					error_code;
+
+	while (std::getline(conf_stream, newline))
+	{
+		if (newline.find("end") != std::string::npos)
+			return ;
+		std::istringstream 	line(newline);
+		
+		if (!(line >> path >> equal >> dest >> error_code) || (equal != "=" && equal != ":"))
+		{
+			std::cerr << "Could not parse config line " << newline << std::endl;
+			continue;
+		}
+		this->http_redir[path].dest = dest;
+		this->http_redir[path].error_code = error_code;
+		if (newline.find("}") != std::string::npos)
+			return ;
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 01:08:24 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 17:06:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,20 +60,37 @@ int		Query::queryRespond()
 	if (this->setRessource() == SERV_ERROR)
 		return (SERV_ERROR);
 	this->screenErrors();
-	if (this->_err_code != 200)
+	if (this->_err_code >= 400)
 		return (this->queryError());
+	if (this->_http_redirect.length() != 0)
+		return (queryRedirect());
 	if (this->_ressource_status & IS_DIR)
 		return (this->queryListDir());
 	//TODO add some funcs ?
 	return ((this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])());
 }
 
-void	Query::screenErrors()
+int		Query::screenErrors()
 {
 	if (this->_err_code != 200)
-		return ;
-	//TODO
-	return ;
+		return (SERV_ERROR);
+	if (!(this->_ressource_status & PERM_ROK) && this->_query->getMethod() == GET)
+	{
+		this->_err_code = 403;
+		return (SERV_ERROR);
+	}
+	else if (!(this->_ressource_status & PERM_WOK)
+		&& (this->_query->getMethod() == POST || this->_query->getMethod() == DELETE))
+	{
+		this->_err_code = 403;
+		return (SERV_ERROR);
+	}
+	else if (!(this->_ressource_status & PERM_XOK) && this->_query->getMethod() == CGI_RUN)
+	{
+		this->_err_code = 403;
+		return (SERV_ERROR);
+	}
+	return (0);
 }
 
 int		Query::readRequest()
@@ -97,11 +114,6 @@ int		Query::readRequest()
 
 int		Query::queryGet()
 {
-	if (!(this->_ressource_status & PERM_ROK))
-	{
-		this->_err_code = 403;
-		return (SERV_ERROR);
-	}
 	if ((this->_ressource_status & IS_DIR))
 		return (SERV_ERROR);
 	this->setHeader();
@@ -140,6 +152,12 @@ int		Query::queryError()
 	return (0);
 }
 
+int		Query::queryRedirect()
+{
+	//TODO some shit here
+	return (0);
+}
+
 int		Query::queryListDir()
 {
 	std::string		ret_body;
@@ -163,20 +181,23 @@ int		Query::queryListDir()
 	closedir(dir);
 	this->_content_len = ret_body.length();
 	this->setHeader();
-	this->sendHeader();
-	this->_client->socketWrite(ret_body.c_str(), ret_body.length());
-	return (0);
+	if (this->sendHeader() == SERV_ERROR)
+		std::cerr << "SetHeader failed" << std::endl;
+	return (this->_client->socketWrite(ret_body.c_str(), ret_body.length()));
 }
 
 int		Query::setRessource()
 {
 	this->_ressource = this->_query->getRequestTarget();
+	this->checkRedirections();
+	if (this->_http_redirect.length())
+		return (0);
 	if (this->findRessource() == SERV_ERROR)
 	{
 		std::cerr << "Ressource could not be found" << std::endl;
 		return (SERV_ERROR);
 	}
-	if (this->_err_code != 200)
+	if (this->_err_code >= 400) //TODO
 		return (SERV_ERROR);
 	if (this->setRessourceStatus() == SERV_ERROR)
 	{
@@ -184,6 +205,26 @@ int		Query::setRessource()
 		return (SERV_ERROR);
 	}
 	return (0);
+}
+
+void	Query::checkRedirections()
+{
+	std::string		raw_path_requested;
+	std::string		raw_redir_key;
+
+	raw_path_requested = this->_ressource;
+	if (startsWith(raw_path_requested, "https://"))
+		raw_path_requested.erase(0, 9);
+	if (startsWith(raw_path_requested, "http://"))
+		raw_path_requested.erase(0, 8);
+	if (startsWith(raw_path_requested, "www"))
+		raw_path_requested.erase(0, raw_path_requested.find("/"));
+	for (std::map<std::string, Redirection>::iterator it = this->_config->http_redir.begin();
+		it != this->_config->http_redir.end(); ++it)
+	{
+		raw_redir_key = it->first;
+		this->_err_code = 301;
+	}
 }
 
 int		Query::findRessource()

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/09 00:58:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 16:56:52 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,12 @@ typedef struct s_pollRevent
 	short	revent;
 	int		client_id;
 }	pollRevent;
+
+typedef struct s_Redirection
+{
+	std::string		dest;
+	int				error_code;
+}	Redirection;
 
 #define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
 #define LISTDIR_PREFIX "  "
