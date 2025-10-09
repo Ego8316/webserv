@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 20:37:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 22:13:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,6 @@ Cookie		*Cookie::getSession(std::map<std::string, Cookie *> *sessions, std::stri
 	std::string		uid = "";
 	Cookie			*found = NULL;
 
-	removeExpired(sessions);
 	std::vector<std::string>	cookie_in = utils::stringSplit(header, ";");
 	if ((*sessions).find(cookie_in[0]) != (*sessions).end())
 	{
@@ -146,7 +145,6 @@ Cookie		*Cookie::createSession(std::map<std::string, Cookie *> *sessions)
 	std::string			uid_str;
 	std::ostringstream	convert;
 
-	removeExpired(sessions);
 	for (int uid = 0; uid < _config->cookie_sessions_max; ++uid)
 	{
 		convert.str("");

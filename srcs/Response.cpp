@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/09 20:42:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 21:02:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,9 +127,9 @@ std::string	Response::httpStatusToStr(HttpStatus code)
 	switch(code)
 	{
 		case HTTP_OK:						return "OK";
-		case HTTP_BAD_REQUEST:					return "Bad Request";
-		case HTTP_FORBIDDEN:						return "Forbidden";
-		case HTTP_NOT_FOUND:						return "Not Found";
+		case HTTP_BAD_REQUEST:				return "Bad Request";
+		case HTTP_FORBIDDEN:				return "Forbidden";
+		case HTTP_NOT_FOUND:				return "Not Found";
 		case INTERNAL_SERVER_ERROR:			return "Internal Server Error";
 		case NOT_IMPLEMENTED:				return "Not Implemented";
 		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";

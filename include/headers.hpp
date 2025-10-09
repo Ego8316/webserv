@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/09 20:42:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 21:20:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,8 +124,6 @@ enum	HttpStatus
 	REDIRECT = 300,
 	REDIRECT_MOVE = 301,
 	REDIRECT_FOUND = 302,
-	REDIRECT_MISC = 303,
-	REDIRECT_TEMP = 307,
 	REDIRECT_PERM = 308,
 	HTTP_BAD_REQUEST = 400,
 	HTTP_FORBIDDEN = 403,

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/09 19:51:00 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 22:14:20 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ int		Request::parseRequest(std::string request)
 			continue;
 		this->parseHeaderLine(line_split[i]);
 	}
+	Cookie::removeExpired(this->_all_cookies);
 	while (std::getline(stream, line) && line != "\r")
 	{
 		line_split = utils::stringSplit(line, "\\r\\n");
@@ -122,6 +123,7 @@ int		Request::parseHeaderLine(std::string line)
 			cookie = Cookie::getSession(this->_all_cookies, value);
 			if (cookie)
 				this->_query_cookies.push_back(cookie);
+			//TODO add filter on 
 		}
 		if (headerHasField(key))
 			this->_headers[key] = _headers[key] + "; " + value;

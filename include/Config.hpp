@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 20:07:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 21:36:12 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,20 +33,20 @@ class Config {
 		ContentTypes	strToContentType(std::string input);
 	//SETTERS
 	//MEMBER FUNCTIONS
-		unsigned int 					ip;
-		int								port_number;
-		std::string						host_name; //TODO
-		int								domain;
-		int								type;
-		int								protocol;
-		int								client_limit;
-		int								incoming_queue_backlog;
-		int								buffer_size;
-		int								cookie_sessions_max;
-		int								cookie_life_time;
-		std::string						server_home;
-		bool							enable_listdir;
-		std::string						default_page;
+		unsigned int 							ip;
+		int										port_number;
+		std::string								host_name; //TODO
+		int										domain;
+		int										type;
+		int										protocol;
+		int										client_limit;
+		int										incoming_queue_backlog;
+		int										buffer_size;
+		int										cookie_sessions_max;
+		int										cookie_life_time;
+		std::string								server_home;
+		bool									enable_listdir;
+		std::string								default_page;
 		
 		std::map<int, std::string>				default_error_pages;
 		std::vector<ContentTypes>				accept_list;

@@ -25,6 +25,7 @@ MyServer1 I can write whatever here {
 
 	REDIRECT = dict
 		WebSite/redirect_test/redi_test.txt = WebSite/some_pagew/page.html
+	end
 }
 
 Website 2 {
@@ -54,4 +55,5 @@ Website 2 {
 
 	REDIRECT = dict
 		/index.html = WebSite/some_pagew/page.html 308
+	end
 }

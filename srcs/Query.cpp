@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 20:42:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 22:00:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ int		Query::readRequest(void)
 {
 	char	buffer[BUFFER_SIZE];
 	int		bytes_read;
-	
+
 	bytes_read = this->_config->buffer_size;
 	while (bytes_read == this->_config->buffer_size)
 	{
@@ -396,7 +396,7 @@ void		Query::setHeader()
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
 	for (unsigned int i = 0; i < this->_query_cookies.size(); ++i)
 		this->_header += this->_query_cookies[i]->genHeader() + "\r\n";
-	this->_header += "Connection: close \r\n";  //TODO why ?
+	this->_header += "Connection: close \r\n";
 	this->_header += "Content-Type: " + this->getResourceTypeStr() + "\r\n";
 	this->_header += "Content-Length: " + utils::toString(this->_content_len) + "\r\n\r\n";
 }
@@ -426,7 +426,7 @@ int		Query::streamFile(std::string file)
 	}
 	while (bytes_read > 0)
 	{
-		if (send(this->_client->getFd(), buffer, bytes_read, 0) == -1)
+		if (this->_client->socketWrite(buffer, bytes_read) == SERV_ERROR)
 		{
 			//set err
 			return (SERV_ERROR);

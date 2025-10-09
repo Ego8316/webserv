@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 20:37:42 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 22:03:47 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class Query {
 		int			queryListDir();
 		int			readRequest();
 		int			screenErrors();
+		
 		int			setResource();
 		int			findResource();
 		void		checkRedirections();
@@ -53,6 +54,7 @@ class Query {
 		std::string	getResourceTypeExtenssion();
 		void		setHeader();
 		int			sendHeader();
+		
 		int			streamFile(std::string file);
 		std::string	httpStatusToStr(HttpStatus code);
 		std::string	getDefaultErrorPage(HttpStatus code);
