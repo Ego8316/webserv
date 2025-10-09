@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Query.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/07 13:49:16 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/09 18:29:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,26 +15,26 @@
 Query::Query(Config *config, Client *client)
 	:	_config(config),
 		_client(client),
-		_statusCode(OK),
+		_err_code(OK),
 		_query(new Request()),
 		_cookie(nullptr),
-		_contentLen(0),
+		_content_len(0),
 		_resourceStatus(0),
-		_contentType(PLAIN)
+		_content_type(PLAIN)
 {
 }
 
 Query::Query(const Query &other)
 	:	_config(other._config),
 		_client(other._client),
-		_statusCode(other._statusCode),
+		_err_code(other._err_code),
 		_query(other._query ? new Request(*other._query) : nullptr),
 		_cookie(other._cookie),
-		_contentLen(other._contentLen),
+		_content_len(other._content_len),
 		_resource(other._resource),
 		_header(other._header),
 		_resourceStatus(other._resourceStatus),
-		_contentType(other._contentType)
+		_content_type(other._content_type)
 {
 }
 
@@ -44,17 +44,17 @@ Query &Query::operator=(const Query &other)
 	{
 		_config = other._config;
 		_client = other._client;
-		_statusCode = other._statusCode;
+		_err_code = other._err_code;
 
 		delete _query;
 		_query = other._query ? new Request(*other._query) : nullptr;
 
 		_cookie = other._cookie;
-		_contentLen = other._contentLen;
+		_content_len = other._content_len;
 		_resource = other._resource;
 		_header = other._header;
 		_resourceStatus = other._resourceStatus;
-		_contentType = other._contentType;
+		_content_type = other._content_type;
 	}
 	return (*this);
 }
@@ -71,15 +71,15 @@ int		Query::queryRespond(void)
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
 		return (SERV_ERROR);
 	}
-	std::cout << _requestStr << std::endl;
-	this->_query->parseRequest(this->_requestStr);
+	std::cout << _request_str << std::endl;
+	this->_query->parseRequest(this->_request_str);
 	if (this->_query->getError() != NONE)
 	{
 		if (this->_query->getError() == UNSUPPORTED_METHOD)
-			this->_statusCode = NOT_IMPLEMENTED;
+			this->_err_code = NOT_IMPLEMENTED;
 		else
-			this->_statusCode = BAD_REQUEST;
-		std::cout << "HERE ERROR " << _statusCode << std::endl;
+			this->_err_code = BAD_REQUEST;
+		std::cout << "HERE ERROR " << _err_code << std::endl;
 		return (queryError());
 	}
 	if (this->setCookie() == SERV_ERROR)
@@ -114,7 +114,7 @@ int		Query::readRequest(void)
 			std::cerr << "Query could not retrive request" << std::endl;
 			return (SERV_ERROR);
 		}
-		this->_requestStr += std::string(buffer).substr(0, bytes_read);
+		this->_request_str += std::string(buffer).substr(0, bytes_read);
 	}
 	return (0);
 }
@@ -123,12 +123,12 @@ int		Query::queryGet(void)
 {
 	if (!(this->_resourceStatus & PERM_ROK))
 	{
-		this->_statusCode = FORBIDDEN;
+		this->_err_code = FORBIDDEN;
 		return (SERV_ERROR);
 	}
 	if ((this->_resourceStatus & IS_DIR))
 	{
-		this->_statusCode = NOT_FOUND;
+		this->_err_code = NOT_FOUND;
 		return (SERV_ERROR);
 	}
 	this->setHeader();
@@ -143,7 +143,7 @@ int		Query::queryGet(void)
 	}
 	else
 		std::cerr << "Could not access ressource : >" << this->_resource << "<" << std::endl;
-	std::cout << "Query answered with code " << this->_statusCode << std::endl;
+	std::cout << "Query answered with code " << this->_err_code << std::endl;
 	return (0);
 }
 
@@ -166,10 +166,10 @@ int		Query::queryError(void)
 {
 	// std::string	defaultErrorPage = getDefaultErrorPage(_statusCode);
 
-	// _contentLen = defaultErrorPage.size();
+	// _content_len = defaultErrorPage.size();
 	// this->setHeader();
 	// this->sendHeader();
-	this->streamFile(getDefaultErrorPage(_statusCode));
+	this->streamFile(getDefaultErrorPage(_err_code));
 	return (0);
 }
 
@@ -198,9 +198,9 @@ int		Query::findRessource()
 	if (stat(this->_resource.c_str(), &file_stat) == -1)
 	{
 		if (errno == EACCES)
-			this->_statusCode = FORBIDDEN;
+			this->_err_code = FORBIDDEN;
 		else
-			this->_statusCode = NOT_FOUND;
+			this->_err_code = NOT_FOUND;
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
 		std::cerr << "Failed to find " << this->_resource << std::endl;
 		return (SERV_ERROR);
@@ -229,12 +229,12 @@ int		Query::setRessourceStatus()
 	{
 		if (errno == EACCES)
 		{
-			this->_statusCode = FORBIDDEN;
+			this->_err_code = FORBIDDEN;
 			this->_resourceStatus = PERM_ISSUE;
 		}
 		else
 		{
-			this->_statusCode = NOT_FOUND;
+			this->_err_code = NOT_FOUND;
 			this->_resourceStatus = RESOURCE_NOT_FOUND;
 		}
 		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
@@ -254,43 +254,43 @@ int		Query::setRessourceStatus()
 	{
 		this->_resourceStatus |= IS_CGI;
 		this->_query->setMethod(CGI_RUN);
-		this->_contentType = CGI_PY;
+		this->_content_type = CGI_PY;
 	}
 	else if (utils::endsWith(this->_resource, ".php"))
 	{
 		this->_resourceStatus |= IS_CGI;
 		this->_query->setMethod(CGI_RUN);
 	}
-	this->_contentLen = file_stat.st_size;
+	this->_content_len = file_stat.st_size;
 	return (this->_resourceStatus);
 }
 
 std::string	Query::getRessourceTypeStr(void)
 {
-	if (this->_contentType == HTML)
+	if (this->_content_type == HTML)
 		return ("text/html");
-	if (this->_contentType == PLAIN)
+	if (this->_content_type == PLAIN)
 		return ("text/plain");
-	if (this->_contentType == JPEG)
+	if (this->_content_type == JPEG)
 		return ("image/jpeg");
-	if (this->_contentType == PNG)
+	if (this->_content_type == PNG)
 		return ("image/png");
 	return ("");
 }
 
 std::string	Query::getRessourceTypeExtenssion()
 {
-	if (this->_contentType == HTML)
+	if (this->_content_type == HTML)
 		return (".html");
-	if (this->_contentType == PLAIN)
+	if (this->_content_type == PLAIN)
 		return ("");
-	if (this->_contentType == JPEG)
+	if (this->_content_type == JPEG)
 		return (".jpeg");
-	if (this->_contentType == PNG)
+	if (this->_content_type == PNG)
 		return (".png");
-	if (this->_contentType == CGI_PY)
+	if (this->_content_type == CGI_PY)
 		return (".py");
-	if (this->_contentType == CGI_PHP)
+	if (this->_content_type == CGI_PHP)
 		return (".php");
 	
 	return ("");
@@ -299,13 +299,13 @@ std::string	Query::getRessourceTypeExtenssion()
 void		Query::setHeader()
 {
 	this->_header = "HTTP/1.0 "
-		+ utils::toString(this->_statusCode)
-		+ " " + httpStatusToStr(this->_statusCode) + "\r\n";
+		+ utils::toString(this->_err_code)
+		+ " " + httpStatusToStr(this->_err_code) + "\r\n";
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
 	this->_header += this->_cookie->genHeader() + "\r\n";
 	this->_header += "Connection: close \r\n";
 	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
-	this->_header += "Content-Length: " + utils::toString(this->_contentLen) + "\r\n\r\n";
+	this->_header += "Content-Length: " + utils::toString(this->_content_len) + "\r\n\r\n";
 }
 
 int		Query::sendHeader(void)
@@ -378,7 +378,7 @@ std::string	Query::getDefaultErrorPage(HttpStatus code)
 	}
 }
 
-const Query::queryMethod	Query::_queryExecute[_methodNum] = {
+const Query::queryMethod	Query::_queryExecute[_method_num] = {
 	&Query::queryGet,
 	&Query::queryPost, 
 	&Query::queryDelete,
