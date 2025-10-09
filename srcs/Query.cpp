@@ -6,36 +6,36 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:30 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 18:29:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 20:42:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Query.hpp"
 
-Query::Query(Config *config, Client *client)
+Query::Query(Config *config, Client *client, std::map<std::string, Cookie *> *all_cookies)
 	:	_config(config),
 		_client(client),
-		_err_code(OK),
-		_query(new Request()),
-		_cookie(nullptr),
-		_content_len(0),
-		_resourceStatus(0),
-		_content_type(PLAIN)
+		_all_cookies(all_cookies)
 {
+	this->_query = new Request(all_cookies);
+	this->_content_len = 0;
+	this->_err_code = HTTP_OK;
+	this->_resource_status = FILE_NOT_FOUND;
+	this->_content_type = FTYPE_PLAIN;
 }
 
 Query::Query(const Query &other)
 	:	_config(other._config),
 		_client(other._client),
-		_err_code(other._err_code),
-		_query(other._query ? new Request(*other._query) : nullptr),
-		_cookie(other._cookie),
-		_content_len(other._content_len),
-		_resource(other._resource),
-		_header(other._header),
-		_resourceStatus(other._resourceStatus),
-		_content_type(other._content_type)
+		_all_cookies(other._all_cookies)
 {
+	_err_code = other._err_code;
+	_query = other._query ? new Request(*other._query) : nullptr;
+	_content_len = other._content_len;
+	_resource = other._resource;
+	_header = other._header;
+	_resource_status = other._resource_status;
+	_content_type = other._content_type;
 }
 
 Query &Query::operator=(const Query &other)
@@ -44,16 +44,16 @@ Query &Query::operator=(const Query &other)
 	{
 		_config = other._config;
 		_client = other._client;
+		_all_cookies = other._all_cookies;
 		_err_code = other._err_code;
 
 		delete _query;
 		_query = other._query ? new Request(*other._query) : nullptr;
 
-		_cookie = other._cookie;
 		_content_len = other._content_len;
 		_resource = other._resource;
 		_header = other._header;
-		_resourceStatus = other._resourceStatus;
+		_resource_status = other._resource_status;
 		_content_type = other._content_type;
 	}
 	return (*this);
@@ -66,7 +66,10 @@ Query::~Query(void)
 
 int		Query::queryRespond(void)
 {
-	if (this->readRequest() == SERV_ERROR)
+	this->readRequest();
+	std::cout << "REQUEST = " << std::endl;
+	std::cout << this->_request_str << std::endl;
+	if (this->_request_str.length() == 0)
 	{
 		std::cerr << "queryRespond: Could not retrieve query" << std::endl;
 		return (SERV_ERROR);
@@ -78,25 +81,50 @@ int		Query::queryRespond(void)
 		if (this->_query->getError() == UNSUPPORTED_METHOD)
 			this->_err_code = NOT_IMPLEMENTED;
 		else
-			this->_err_code = BAD_REQUEST;
-		std::cout << "HERE ERROR " << _err_code << std::endl;
-		return (queryError());
+			this->_err_code = HTTP_BAD_REQUEST;
+		return (this->queryError());
 	}
-	if (this->setCookie() == SERV_ERROR)
+	this->_query_cookies = this->_query->getQueryCookies();
+	if (this->_query_cookies.size() == 0)
 		std::cerr << "Cookie failed" << std::endl;
-	this->setRessource();
-	//TODO add some funcs
+	if (this->setResource() == SERV_ERROR)
+		return (SERV_ERROR);
+	this->screenErrors();
+	if (this->_err_code >= HTTP_BAD_REQUEST)
+		return (this->queryError());
+	if (this->_http_redirect.length() != 0)
+		return (queryRedirect());
+	if (this->_resource_status & IS_DIR)
+		return (this->queryListDir());
+	//TODO add some funcs ?
 	return ((this->*_queryExecute[std::min(static_cast<int>(this->_query->getMethod()), (int)ERROR)])());
 }
 
-int		Query::setCookie()
+int		Query::screenErrors()
 {
-	//TODO code this function
-	if (!Cookie::isInit())
-		Cookie::initCookies(this->_config);
-	this->_cookie = Cookie::findSession(this->_query->getHeaders());
-	if (this->_cookie == NULL)
-		this->_cookie = Cookie::createSession(this->_query->getHeaders());
+	if (this->_err_code != 200)
+		return (SERV_ERROR);
+	if (!(this->_resource_status & PERM_ROK) && this->_query->getMethod() == GET)
+	{
+		this->_err_code = HTTP_FORBIDDEN;
+		return (SERV_ERROR);
+	}
+	else if (!(this->_resource_status & PERM_WOK)
+		&& (this->_query->getMethod() == POST || this->_query->getMethod() == DELETE))
+	{
+		this->_err_code = HTTP_FORBIDDEN;
+		return (SERV_ERROR);
+	}
+	else if (!(this->_resource_status & PERM_XOK) && this->_query->getMethod() == CGI_RUN)
+	{
+		this->_err_code = HTTP_FORBIDDEN;
+		return (SERV_ERROR);
+	}
+	if ((this->_resource_status & IS_DIR))
+	{
+		this->_err_code = HTTP_BAD_REQUEST;
+		return (SERV_ERROR);
+	}
 	return (0);
 }
 
@@ -121,16 +149,6 @@ int		Query::readRequest(void)
 
 int		Query::queryGet(void)
 {
-	if (!(this->_resourceStatus & PERM_ROK))
-	{
-		this->_err_code = FORBIDDEN;
-		return (SERV_ERROR);
-	}
-	if ((this->_resourceStatus & IS_DIR))
-	{
-		this->_err_code = NOT_FOUND;
-		return (SERV_ERROR);
-	}
 	this->setHeader();
 	if (access(this->_resource.c_str(), R_OK) == 0)
 	{
@@ -142,7 +160,7 @@ int		Query::queryGet(void)
 		this->streamFile(this->_resource);
 	}
 	else
-		std::cerr << "Could not access ressource : >" << this->_resource << "<" << std::endl;
+		std::cerr << "Could not access resource : >" << this->_resource << "<" << std::endl;
 	std::cout << "Query answered with code " << this->_err_code << std::endl;
 	return (0);
 }
@@ -173,23 +191,82 @@ int		Query::queryError(void)
 	return (0);
 }
 
-int		Query::setRessource()
+int		Query::queryRedirect()
 {
-	this->_resource = this->_query->getRequestTarget();
-	if (this->findRessource() == -1)
+	//TODO some shit here
+	return (0);
+}
+
+int		Query::queryListDir()
+{
+	std::string		ret_body;
+	DIR				*dir;
+	struct dirent	*dir_ent;
+	
+	dir = opendir(this->_resource.c_str());
+	if (dir == NULL)
 	{
-		std::cerr << "Ressource could not be found" << std::endl;
+		std::cerr << "Cannot open directory\n" << std::endl;
 		return (SERV_ERROR);
 	}
-	if (this->setRessourceStatus() == -1)
+	ret_body = LISTDIR_HEADER;
+	dir_ent = readdir(dir);
+	while (dir_ent != NULL)
 	{
-		std::cerr << "Ressource status error " << std::endl;
+		ret_body += LISTDIR_PREFIX + std::string(dir_ent->d_name) + LISTDIR_SUFFIX;
+		dir_ent = readdir(dir);
+	}
+	ret_body += LISTDIR_ENDING;
+	closedir(dir);
+	this->_content_len = ret_body.length();
+	this->setHeader();
+	if (this->sendHeader() == SERV_ERROR)
+		std::cerr << "SetHeader failed" << std::endl;
+	return (this->_client->socketWrite(ret_body.c_str(), ret_body.length()));
+}
+
+int		Query::setResource()
+{
+	this->_resource = this->_query->getRequestTarget();
+	this->checkRedirections();
+	if (this->_http_redirect.length())
+		return (0);
+	if (this->findResource() == SERV_ERROR)
+	{
+		std::cerr << "Resource could not be found" << std::endl;
+		return (SERV_ERROR);
+	}
+	if (this->_err_code >= HTTP_BAD_REQUEST) //TODO
+		return (SERV_ERROR);
+	if (this->setResourceStatus() == SERV_ERROR)
+	{
+		std::cerr << "Resource status error " << std::endl;
 		return (SERV_ERROR);
 	}
 	return (0);
 }
 
-int		Query::findRessource()
+void	Query::checkRedirections()
+{
+	std::string		raw_path_requested;
+	std::string		raw_redir_key;
+
+	raw_path_requested = this->_resource;
+	if (utils::startsWith(raw_path_requested, "https://"))
+		raw_path_requested.erase(0, 9);
+	if (utils::startsWith(raw_path_requested, "http://"))
+		raw_path_requested.erase(0, 8);
+	if (utils::startsWith(raw_path_requested, "www"))
+		raw_path_requested.erase(0, raw_path_requested.find("/"));
+	for (std::map<std::string, Redirection>::iterator it = this->_config->http_redir.begin();
+		it != this->_config->http_redir.end(); ++it)
+	{
+		raw_redir_key = it->first;
+		this->_err_code = REDIRECT_MOVE;
+	}
+}
+
+int		Query::findResource()
 {
 	struct stat file_stat;
 	struct stat dir_stat;
@@ -198,10 +275,10 @@ int		Query::findRessource()
 	if (stat(this->_resource.c_str(), &file_stat) == -1)
 	{
 		if (errno == EACCES)
-			this->_err_code = FORBIDDEN;
+			this->_err_code = HTTP_FORBIDDEN;
 		else
-			this->_err_code = NOT_FOUND;
-		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
+			this->_err_code = HTTP_NOT_FOUND;
+		std::cerr << "Resource stat failed: " << strerror(errno) << std::endl;
 		std::cerr << "Failed to find " << this->_resource << std::endl;
 		return (SERV_ERROR);
 	}
@@ -214,14 +291,17 @@ int		Query::findRessource()
 				this->_resource += this->_config->default_page;
 				return (0);
 			}
-			std::cerr << "Ressource is a directory " << this->_resource << std::endl;
-			return (SERV_ERROR);
+			else if (this->_config->enable_listdir == false)
+			{
+				std::cerr << "Resource is a directory " << this->_resource << std::endl;
+				return (SERV_ERROR);
+			}
 		}
 	}
 	return (0);
 }
 
-int		Query::setRessourceStatus()
+int		Query::setResourceStatus()
 {
 	struct stat file_stat;
 
@@ -229,68 +309,80 @@ int		Query::setRessourceStatus()
 	{
 		if (errno == EACCES)
 		{
-			this->_err_code = FORBIDDEN;
-			this->_resourceStatus = PERM_ISSUE;
+			this->_err_code = HTTP_FORBIDDEN;
+			this->_resource_status = PERM_ISSUE;
 		}
 		else
 		{
-			this->_err_code = NOT_FOUND;
-			this->_resourceStatus = RESOURCE_NOT_FOUND;
+			this->_err_code = HTTP_NOT_FOUND;
+			this->_resource_status = FILE_NOT_FOUND;
 		}
-		std::cerr << "Ressource stat failed: " << strerror(errno) << std::endl;
+		std::cerr << "Resource stat failed: " << strerror(errno) << std::endl;
 		std::cerr << "Failed to find " << this->_resource << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_resourceStatus = EXISTS;
+	this->_resource_status = EXISTS;
+	if (S_ISDIR(file_stat.st_mode))
+		this->_resource_status = static_cast<FileStatus>(this->_resource_status | IS_DIR);
 	if (file_stat.st_mode & S_IRUSR)
-		this->_resourceStatus |= PERM_ROK;
+		this->_resource_status = static_cast<FileStatus>(this->_resource_status | PERM_ROK);
 	if (file_stat.st_mode & S_IWUSR)
-		this->_resourceStatus |= PERM_WOK;
+		this->_resource_status = static_cast<FileStatus>(this->_resource_status | PERM_WOK);
 	if (file_stat.st_mode & S_IXUSR)
-		this->_resourceStatus |= PERM_XOK;
-	if (this->_resourceStatus <= IS_DIR)
-		this->_resourceStatus |= PERM_ISSUE;
+		this->_resource_status = static_cast<FileStatus>(this->_resource_status | PERM_XOK);
+	if (this->_resource_status <= IS_DIR)
+		this->_resource_status = static_cast<FileStatus>(this->_resource_status | PERM_ISSUE);
 	if (utils::endsWith(this->_resource, ".py"))
 	{
-		this->_resourceStatus |= IS_CGI;
+		this->_resource_status = static_cast<FileStatus>(this->_resource_status | IS_CGI);
 		this->_query->setMethod(CGI_RUN);
-		this->_content_type = CGI_PY;
+		this->_content_type = FTYPE_CGI_PY;
 	}
 	else if (utils::endsWith(this->_resource, ".php"))
 	{
-		this->_resourceStatus |= IS_CGI;
+		this->_resource_status = static_cast<FileStatus>(this->_resource_status | IS_CGI);
 		this->_query->setMethod(CGI_RUN);
+		this->_content_type = FTYPE_CGI_PHP;
 	}
+	else if (utils::endsWith(this->_resource, ".html"))
+		this->_content_type = FTYPE_HTML;
+	else if (utils::endsWith(this->_resource, ".jpeg"))
+		this->_content_type = FTYPE_JPEG;
+	else if (utils::endsWith(this->_resource, ".png"))
+		this->_content_type = FTYPE_PNG;
+	else if (utils::endsWith(this->_resource, ".txt") || this->_resource.find(".") == std::string::npos)
+		this->_content_type = FTYPE_PLAIN;
 	this->_content_len = file_stat.st_size;
-	return (this->_resourceStatus);
+	//TODO check Accept ici
+	return (0);
 }
 
-std::string	Query::getRessourceTypeStr(void)
+std::string	Query::getResourceTypeStr(void)
 {
-	if (this->_content_type == HTML)
+	if (this->_content_type == FTYPE_HTML)
 		return ("text/html");
-	if (this->_content_type == PLAIN)
+	if (this->_content_type == FTYPE_PLAIN)
 		return ("text/plain");
-	if (this->_content_type == JPEG)
+	if (this->_content_type == FTYPE_JPEG)
 		return ("image/jpeg");
-	if (this->_content_type == PNG)
+	if (this->_content_type == FTYPE_PNG)
 		return ("image/png");
 	return ("");
 }
 
-std::string	Query::getRessourceTypeExtenssion()
+std::string	Query::getResourceTypeExtenssion()
 {
-	if (this->_content_type == HTML)
+	if (this->_content_type == FTYPE_HTML)
 		return (".html");
-	if (this->_content_type == PLAIN)
+	if (this->_content_type == FTYPE_PLAIN)
 		return ("");
-	if (this->_content_type == JPEG)
+	if (this->_content_type == FTYPE_JPEG)
 		return (".jpeg");
-	if (this->_content_type == PNG)
+	if (this->_content_type == FTYPE_PNG)
 		return (".png");
-	if (this->_content_type == CGI_PY)
+	if (this->_content_type == FTYPE_CGI_PY)
 		return (".py");
-	if (this->_content_type == CGI_PHP)
+	if (this->_content_type == FTYPE_CGI_PHP)
 		return (".php");
 	
 	return ("");
@@ -302,15 +394,16 @@ void		Query::setHeader()
 		+ utils::toString(this->_err_code)
 		+ " " + httpStatusToStr(this->_err_code) + "\r\n";
 	this->_header += "Server: Apache/1.3.29 (Unix)\r\n";
-	this->_header += this->_cookie->genHeader() + "\r\n";
-	this->_header += "Connection: close \r\n";
-	this->_header += "Content-Type: " + this->getRessourceTypeStr() + "\r\n";
+	for (unsigned int i = 0; i < this->_query_cookies.size(); ++i)
+		this->_header += this->_query_cookies[i]->genHeader() + "\r\n";
+	this->_header += "Connection: close \r\n";  //TODO why ?
+	this->_header += "Content-Type: " + this->getResourceTypeStr() + "\r\n";
 	this->_header += "Content-Length: " + utils::toString(this->_content_len) + "\r\n\r\n";
 }
 
 int		Query::sendHeader(void)
 {
-	if (this->_client->socketWrite(this->_header.c_str(), this->_header.length()) == -1)
+	if (this->_client->socketWrite(this->_header.c_str(), this->_header.length()) == SERV_ERROR)
 	{
 		//set err
 		return (SERV_ERROR);
@@ -333,7 +426,7 @@ int		Query::streamFile(std::string file)
 	}
 	while (bytes_read > 0)
 	{
-        if (send(this->_client->getFd(), buffer, bytes_read, 0) == -1)
+		if (send(this->_client->getFd(), buffer, bytes_read, 0) == -1)
 		{
 			//set err
 			return (SERV_ERROR);
@@ -344,7 +437,7 @@ int		Query::streamFile(std::string file)
 			//set err
 			return (SERV_ERROR);
 		}
-    }
+	}
 	close(fd);
 	return (0);
 }
@@ -353,10 +446,10 @@ std::string	Query::httpStatusToStr(HttpStatus code)
 {
 	switch(code)
 	{
-		case OK:							return "OK";
-		case BAD_REQUEST:					return "Bad Request";
-		case FORBIDDEN:						return "Forbidden";
-		case NOT_FOUND:						return "Not Found";
+		case HTTP_OK:							return "OK";
+		case HTTP_BAD_REQUEST:					return "Bad Request";
+		case HTTP_FORBIDDEN:						return "Forbidden";
+		case HTTP_NOT_FOUND:						return "Not Found";
 		case INTERNAL_SERVER_ERROR:			return "Internal Server Error";
 		case NOT_IMPLEMENTED:				return "Not Implemented";
 		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";
@@ -368,9 +461,9 @@ std::string	Query::getDefaultErrorPage(HttpStatus code)
 {
 	switch(code)
 	{
-		case BAD_REQUEST:					return ERROR_PAGE_400;
-		case FORBIDDEN:						return ERROR_PAGE_403;
-		case NOT_FOUND:						return ERROR_PAGE_404;
+		case HTTP_BAD_REQUEST:					return ERROR_PAGE_400;
+		case HTTP_FORBIDDEN:						return ERROR_PAGE_403;
+		case HTTP_NOT_FOUND:						return ERROR_PAGE_404;
 		case INTERNAL_SERVER_ERROR:			return ERROR_PAGE_500;
 		case NOT_IMPLEMENTED:				return ERROR_PAGE_501;
 		case HTTP_VERSION_NOT_SUPPORTED:	return ERROR_PAGE_505;

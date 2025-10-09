@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:49 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 09:08:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 14:56:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,6 @@
 
 class Client;
 class Config;
-//serverSocket contains all the variables and functions that pertains to socket handling
-//including initialisation, setting up the addresses of the client and server,
-//accepting, listening and ending connections
 
 class serverSocket {
 	public :

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 13:40:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:59:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 20:07:25 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,11 @@ serverSocket::serverSocket(Config *config)
 	this->_server_fd = socket(this->_config->domain, this->_config->type, this->_config->protocol);
 	if (this->_server_fd == -1)
 		std::cerr << "Socket init failed" << std::endl;
-	else if (this->setSockOpt() == -1)
+	else if (this->setSockOpt() == SERV_ERROR)
 	{
 		std::cerr << "Socket setSockOpt failed" << std::endl;
 		close(this->_server_fd);
-		this->_server_fd = -1;
+		this->_server_fd = SERV_ERROR;
 	}
 }
 
@@ -56,7 +56,7 @@ int		serverSocket::socketBind()
 
 	std::memset(&this->_server_addr, 0, sizeof(this->_server_addr));
 	this->_server_addr.sin_family = this->_config->domain;
-	this->_server_addr.sin_addr.s_addr = INADDR_ANY; //Bind to all available interfaces
+	this->_server_addr.sin_addr.s_addr = this->_config->ip;
 	this->_server_addr.sin_port = htons(this->_config->port_number); //port # above 1024 are not priviledged
 	success = ::bind(this->_server_fd, (struct sockaddr*)&this->_server_addr, sizeof(this->_server_addr));
 	if (success == -1)
@@ -80,17 +80,17 @@ int		serverSocket::setSockOpt()
     if (setsockopt(this->_server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 	{
         std::cerr << "Failed to set socket options: " << strerror(errno) << std::endl;
-        return (-1);
+        return (SERV_ERROR);
 	}
 	return (0);
 }
 
 int		serverSocket::socketListen()
 {
-	if (listen(this->_server_fd, this->_config->incomming_queue_backlog) == -1)
+	if (listen(this->_server_fd, this->_config->incoming_queue_backlog) == -1)
 	{
 		std::cerr << "Socket listen failed" << std::endl;
-		return (-1);
+		return (SERV_ERROR);
 	}
 	return (0);
 }

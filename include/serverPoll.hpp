@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:15 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 14:01:13 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 14:56:40 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,6 @@ class Client;
 class serverSocket;
 class Config;
 
-//serverPoll contains all the variables and function that pertains to the poll
-//function which is used to monitor fd activity and availability for I/O operations
-//see I/O multiplexing
-//first element of vector will always be server fd which will not change
-//following elements are clients fds that are dynamically created and destroyed
-
 class serverPoll{
 	public :
 	// CONSTRUCTORS
@@ -38,10 +32,10 @@ class serverPoll{
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-		void	pollAdd(int fd, int event, int indx);
-		void	pollRemove(int indx);
-		int		pollWait(int time_out);
-		int		pollWatchRevent();
+		void						pollAdd(int fd, int event, int indx);
+		void						pollRemove(int indx);
+		int							pollWait();
+		std::vector<pollRevent>		pollWatchRevent();
 	private :
 		std::vector<struct pollfd>			_poll_fds;
 		Config								*_config;

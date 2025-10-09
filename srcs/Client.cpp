@@ -6,13 +6,13 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:10:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 23:53:51 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(Config *config) : _config(config)
+Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies) : _all_cookies(all_cookies), _config(config)
 {
 	this->_client_len = sizeof(this->_client_addr);
 }
@@ -70,7 +70,6 @@ int		Client::socketRead(char *buffer, int bytes_read) //TODO
 
 int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 
 {
-	//TODO pollWait;
 	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR)
 	{
 		std::cerr << "Receive failed\n";
@@ -81,7 +80,7 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 		
 int		Client::handleEvent()
 {
-	Query	query(this->_config, this);
+	Query	query(this->_config, this, this->_all_cookies);
 
 	std::cout << "Client handling event" << std::endl;
 	query.queryRespond();

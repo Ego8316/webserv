@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 16:32:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 14:29:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,43 +41,51 @@ void	serverPoll::pollRemove(int indx)
 	std::memset(&this->_poll_fds[indx], 0, sizeof(pollfd));
 }
 
-int		serverPoll::pollWait(int time_out)
+int		serverPoll::pollWait()
 {
 	int	poll_count;
 
-	poll_count = poll(&this->_poll_fds[0], this->_config->client_limit, time_out);
+	poll_count = poll(&this->_poll_fds[0], this->_config->client_limit, 0);
 	if (poll_count == -1)
 		std::cerr << "Poll failed: " << strerror(errno) << std::endl;
 	return (poll_count);
 }
 
-int		serverPoll::pollWatchRevent()
+std::vector<pollRevent>	serverPoll::pollWatchRevent()
 {
-	//TODO find a way so that when it comes back it doesnt start from i = 0 every time
+	std::vector<pollRevent>		ret;
+	pollRevent					revent;
+	int							num_event;
 
-	this->pollWait(this->_config->time_out);
-	for (int	i = 0; i < this->_config->client_limit; ++i)
+	ret.resize(0);
+	num_event = this->pollWait();
+	if (num_event < 0)
+		return (ret);
+	for (int i = 0; i < this->_config->client_limit; ++i)
 	{
+		if (num_event == 0)
+			return (ret);
 		if (this->_poll_fds[i].revents & POLLHUP || this->_poll_fds[i].revents & POLLERR)
 		{
+			revent.is_error = true;
+			revent.revent = this->_poll_fds[i].revents;
+			revent.client_id = i;
 			if (i == 0)
-			{
 				std::cerr << "Server ended connection." << std::endl;
-				return (SERV_ERROR);
-			}
 			else
-			{
-				std::cerr << "Client ended connection." << std::endl;
-				return (CLIENT_ERR_IDX(i));	
-			}
+				std::cerr << "Client " << i << " ended connection." << std::endl;
+			ret.push_back(revent);
+			--num_event;
 		}
         else if (this->_poll_fds[i].revents & POLLIN)
 		{
-			if (i == 0)
-				return (NEW_CLIENT);
-			else
-				return (i);
+			revent.is_error = false;
+			revent.revent = POLLIN;
+			revent.client_id = i;
+			ret.push_back(revent);
+			--num_event;
 		}
+		this->_poll_fds[i].revents = 0;
 	}
-	return (0);
+	return (ret);
 }

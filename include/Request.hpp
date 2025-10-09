@@ -3,25 +3,26 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/03 17:13:41 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/09 18:34:05 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
-#include "utils.hpp"
 #include "Config.hpp"
+#include "utils.hpp"
+#include "Cookie.hpp"
 
 class Cookie;
 
 class Request
 {
 	public:
-		Request();
+		Request(std::map<std::string, Cookie *> *all_cookies);
 		Request(const Request &other);
 		Request	&operator=(const Request &other);
 		~Request(void);
@@ -34,6 +35,7 @@ class Request
 		std::string							getRawBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
 		int									getError(void) const;
+		std::vector<Cookie *>				getQueryCookies();
 
 		void								setMethod(Method method);
 		bool								headerHasField(const std::string field);
@@ -45,7 +47,9 @@ class Request
 		std::string							_version;
 		std::string							_rawBody;
 		std::map<std::string, std::string>	_headers;
-		ParseError							_error;
+		int									_error;
+		std::map<std::string, Cookie *>		*_all_cookies;
+		std::vector<Cookie *>				_query_cookies; //TODO
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);

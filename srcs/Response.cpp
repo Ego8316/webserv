@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/08 23:08:16 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/09 20:42:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
  * @brief Default constructor. Initializes status code to 200 OK.
  */
 Response::Response(void)
-	:	_statusCode(OK)
+	:	_statusCode(HTTP_OK)
 {
 	return ;
 }
@@ -58,7 +58,7 @@ Response::~Response(void)
 
 /**
  * @brief Sets the HTTP status code for the response.
- * @param code HTTP status code (e.g., OK, NOT_FOUND).
+ * @param code HTTP status code (e.g., OK, HTTP_NOT_FOUND).
  */
 void	Response::setStatus(HttpStatus code)
 {
@@ -126,10 +126,10 @@ std::string	Response::httpStatusToStr(HttpStatus code)
 {
 	switch(code)
 	{
-		case OK:							return "OK";
-		case BAD_REQUEST:					return "Bad Request";
-		case FORBIDDEN:						return "Forbidden";
-		case NOT_FOUND:						return "Not Found";
+		case HTTP_OK:						return "OK";
+		case HTTP_BAD_REQUEST:					return "Bad Request";
+		case HTTP_FORBIDDEN:						return "Forbidden";
+		case HTTP_NOT_FOUND:						return "Not Found";
 		case INTERNAL_SERVER_ERROR:			return "Internal Server Error";
 		case NOT_IMPLEMENTED:				return "Not Implemented";
 		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 18:29:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 20:37:42 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,47 +24,54 @@ class Request;
 class Config;
 class Cookie;
 
-class Query
-{
-	public:
-		Query(Config *config, Client *client);
+class Query {
+	public :
+	// CONSTRUCTORS
+		Query(Config *config, Client *client, std::map<std::string, Cookie *> *all_cookies);
 		Query(const Query &other);
 		Query &operator=(const Query &other);
-		~Query(void);
-
-		int			queryRespond(void);
-		int			queryGet(void);
-		int			queryPost(void);
-		int			queryDelete(void);
-		int			queryCGIRun(void);
-		int			queryError(void);
-		
+	//DESTUCTORS
+		~Query();
+	//GETTERS
+	//SETTERS
+	//MEMBER FUNCTIONS
+		int			queryRespond();
+		int			queryGet();
+		int			queryPost();
+		int			queryDelete();
+		int			queryCGIRun();
+		int			queryError();
+		int			queryRedirect();
+		int			queryListDir();
 		int			readRequest();
-		int			setCookie();
-		int			setRessource();
-		int			findRessource();
-		int			setRessourceStatus();
-		std::string	getRessourceTypeStr();
-		std::string	getRessourceTypeExtenssion();
+		int			screenErrors();
+		int			setResource();
+		int			findResource();
+		void		checkRedirections();
+		int			setResourceStatus();
+		std::string	getResourceTypeStr();
+		std::string	getResourceTypeExtenssion();
 		void		setHeader();
 		int			sendHeader();
 		int			streamFile(std::string file);
 		std::string	httpStatusToStr(HttpStatus code);
 		std::string	getDefaultErrorPage(HttpStatus code);
+	private :
+		static const int				_method_num = 5;
+		typedef int						(Query::*queryMethod)();
+		static const queryMethod		_queryExecute[_method_num];
+		std::string						_request_str;
+		HttpStatus						_err_code;
+		std::string						_resource;
+		FileStatus						_resource_status;
+		std::string						_header;
+		unsigned long					_content_len;
+		ContentTypes					_content_type;
+		std::string						_http_redirect;
 
-	private:
-		static const int			_method_num = 5;
-		typedef int					(Query::*queryMethod)(void);
-		static const queryMethod	_queryExecute[_method_num];
-		std::string					_request_str;
-		Request						*_query;
-		HttpStatus					_err_code;
-		std::string					_resource;
-		int							_resourceStatus;
-		std::string					_header;
-		unsigned long				_content_len;
-		ContentTypes				_content_type;	//TODO implement setting this as part of setRessourceStatus
-		Config						*_config;
-		Client						*_client;
-		Cookie						*_cookie;
+		Config							*_config;
+		Client							*_client;
+		Request							*_query;
+		std::map<std::string, Cookie *>	*_all_cookies;
+		std::vector<Cookie *>			_query_cookies;
 };

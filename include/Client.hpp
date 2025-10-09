@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/09/30 21:41:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 20:46:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,16 @@
 #include "headers.hpp"
 #include "Query.hpp"
 #include "Config.hpp"
+#include "Cookie.hpp"
 
 class Query;
 class Config;
+class Cookie;
 
 class Client {
 	public :
 	// CONSTRUCTORS
-		Client(Config *config);
+		Client(Config *config, std::map<std::string, Cookie *> *all_cookies);
 		Client(const Client &other);
 		Client &operator=(const Client &other);
 	//DESTUCTORS
@@ -39,9 +41,10 @@ class Client {
 		int					socketRead(char *buffer, int bytes_read);
 		int					socketWrite(const char *buffer, int bytes_write);
 	private :
-		int					_client_fd;
-		struct sockaddr_in	_client_addr;
-		socklen_t			_client_len;
-		int					_client_id;
-		Config				*_config;
+		int								_client_fd;
+		struct sockaddr_in				_client_addr;
+		socklen_t						_client_len;
+		int								_client_id;
+		std::map<std::string, Cookie *> *_all_cookies;
+		Config							*_config;
 };

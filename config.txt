@@ -1,16 +1,57 @@
 
-client config
-it needs a line that consist of '<FIELD> = <VALUE>'
+MyServer1 I can write whatever here {
+	IP : 192.168.1.6
+	PORT : 8080
+	DOMAIN = AF_INET
+	TYPE = SOCK_STREAM
+	PROTOCOL = 0
+	CLIENT_LIMIT = 1000
+	INCOMMING_QUEUE_BACKLOG = 100
+	BUFFER_SIZE = 1024
+	COOKIE_SESSIONS_MAX = 10000
+	COOKIE_LIFE_TIME = 2
+	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite
+	ENABLE_LISTDIR = true
+	DEFAULT_PAGE = /index.html
+	DEFAULT_ERROR_PAGES = dict
+		404 : error/404.html
+		403 : error/403.html
+	end
 
-PORT_NUMBER = 12346
-TIME_OUT = -1
-DOMAIN = AF_INET
-TYPE = SOCK_STREAM
-PROTOCOL = 0
-CLIENT_LIMIT = 10000
-BUFFER_SIZE = 1024
-COOKIE_LIFE_TIME = 10000
-COOKIE_SESSIONS_MAX = 10000
-SERVER_HOME = ./WebSite
-DEFAULT_PAGE = /index.html
-INCOMMING_QUEUE_BACKLOG = 100
+	ACCEPT = unsep_list
+		text/plain
+		text/html
+	end
+
+	REDIRECT = dict
+		WebSite/redirect_test/redi_test.txt = WebSite/some_pagew/page.html
+}
+
+Website 2 {
+	IP : 192.168.1.6
+	PORT : 8081
+	DOMAIN = AF_INET
+	TYPE = SOCK_STREAM
+	PROTOCOL = 0
+	CLIENT_LIMIT = 1000
+	INCOMMING_QUEUE_BACKLOG = 100
+	BUFFER_SIZE = 1024
+	COOKIE_SESSIONS_MAX = 10000
+	COOKIE_LIFE_TIME = 2
+
+	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite2
+	ENABLE_LISTDIR = true
+	DEFAULT_PAGE = /index.html
+	DEFAULT_ERROR_PAGES = dict
+		404 : error/404.html
+		403 : error/403.html
+	end
+
+	ACCEPT = unsep_list
+		text/plain
+		text/html
+	end
+
+	REDIRECT = dict
+		/index.html = WebSite/some_pagew/page.html 308
+}

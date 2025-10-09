@@ -6,15 +6,39 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 17:59:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/08 21:15:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServ.hpp"
 
-WebServ::WebServ()
+WebServ::WebServ(Config *config)
 {
-	this->_clients.resize(CLIENT_LIMIT);
+	this->_config = config;
+	if (this->_config->getParseError() != NONE)
+		return ;
+	std::cout << *this->_config << std::endl;
+	Cookie(this->_config);
+	this->_cookie_sessions = new std::map<std::string, Cookie *>;
+	this->_server = new serverSocket(this->_config);
+	if (this->_server->getFd() < 0)
+		return ;
+	this->_poll = new serverPoll(this->_config);
+	this->_clients.resize(this->_config->client_limit);
+}
+
+WebServ::WebServ(std::string config_file)
+{
+	this->_config = new Config(config_file);
+	if (this->_config->getParseError() != NONE)
+		return ;
+	Cookie(this->_config);
+	this->_cookie_sessions = new std::map<std::string, Cookie *>;
+	this->_server = new serverSocket(this->_config);
+	if (this->_server->getFd() < 0)
+		return ;
+	this->_poll = new serverPoll(this->_config);
+	this->_clients.resize(this->_config->client_limit);
 }
 
 WebServ::WebServ(const WebServ &other) : _config(other._config), _server(other._server), _poll(other._poll), _clients(other._clients) {}
@@ -31,70 +55,79 @@ WebServ &WebServ::operator=(const WebServ &other)
 	return (*this);
 }
 
-WebServ::~WebServ() {}
-
-int		WebServ::WebServInit(std::string config_file)
+WebServ::~WebServ()
 {
-	this->_config = new Config(config_file);
-	std::cout << *this->_config << std::endl;
-	if (this->_config->getParseError() != NONE)
+	for (unsigned int i = 0; i < _clients.size(); ++i)
 	{
-		return (SERV_ERROR);
+		if (this->_clients[i] != NULL)
+			delete this->_clients[i];
 	}
-	std::cout << "Config ok !" << std::endl;
-	this->_server = new serverSocket(this->_config);
-	if (this->_server == NULL || this->_server->getFd() < 0)
+	for (std::map<std::string, Cookie *>::iterator it = (*this->_cookie_sessions).begin(); it != (*this->_cookie_sessions).end(); ++it)
 	{
-		return (SERV_ERROR);
+		if (it->second != NULL)
+			delete it->second;
 	}
-	std::cout << "Socket Init ok ! " << this->_server->getFd() << std::endl;
-	this->_poll = new serverPoll(this->_config);
+	if (this->_cookie_sessions)
+		delete this->_cookie_sessions;
+	if (this->_server)
+		delete this->_server;
+	if (this->_poll)
+		delete this->_poll;
+}
+
+int WebServ::WebServInit()
+{
+	if (!this->_config || !this->_cookie_sessions || !this->_server || !this->_poll)
+		return (SERV_ERROR);
 	this->_poll->pollAdd(this->_server->getFd(), POLLIN, 0);
-	std::cout << "pollAdd ok !" << std::endl;
-	if (this->_server->socketBind() == -1)
+	std::cout << "pollAdd \t ok !" << std::endl;
+	if (this->_server->socketBind() == SERV_ERROR)
 		return (SERV_ERROR);
-	std::cout << "Socket Bind ok !" << std::endl;
-	if (this->_server->socketListen() == -1)
+	std::cout << "Socket Bind \t ok !" << std::endl;
+	if (this->_server->socketListen() == SERV_ERROR)
 		return (SERV_ERROR);
-	std::cout << "Socket Listen ok !" << std::endl;
-	std::cout << "WebServ Init OK" << std::endl;
+	std::cout << "Socket Listen \t ok !" << std::endl;
+	std::cout << "WebServ Init \t ok !" << std::endl;
 	return (0);
 }
 
-
-int		WebServ::WebServRun()
+int WebServ::WebServRun()
 {
-	int	event;
+	std::vector<pollRevent>	events;
 
-	while (true)
+	events = this->_poll->pollWatchRevent();
+	if (events.size() == 0)
+		return (0);
+	for (std::vector<pollRevent>::iterator event = events.begin(); event != events.end(); ++event)
 	{
-		event = this->_poll->pollWatchRevent();
-		std::cout << "Detected new event " << event << std::endl;
-		if (event == -1)
+		if (event->is_error)
 		{
-			std::cerr << "poll Wait failed" << std::endl;
-			//TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
-			return (-1);
-		}
-		else if (event == 0)
-		{
-			if (this->newClient() == -1)
+			if (event->client_id == 0)
 			{
-				std::cerr << "Failed to accept new client" << std::endl;
-				return (-1);
+				std::cerr << "poll Wait failed" << std::endl;
+				// TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
+				return (SERV_ERROR);
 			}
+			else
+				removeClient(event->client_id);
 		}
-		else if (event < 0)
-			this->removeClient(CLIENT_ERR_IDX(event) - 1);
 		else
-			this->_clients[event - 1]->handleEvent();
+		{
+			if (event->client_id == 0)
+			{
+				if (this->newClient() == SERV_ERROR)
+					std::cerr << "Failed to accept new client" << std::endl;
+			}
+			else
+				this->_clients[event->client_id - 1]->handleEvent();
+		}
 	}
 	return (0);
 }
 
-int		WebServ::newClient()
+int WebServ::newClient()
 {
-	int		indx;
+	int indx;
 
 	for (indx = 0; indx < this->_config->client_limit; ++indx)
 	{
@@ -106,8 +139,8 @@ int		WebServ::newClient()
 		std::cerr << "Cannot accept new clients" << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_clients[indx] = new Client(this->_config);
-	if (this->_server->socketAcceptClient(this->_clients[indx]) == -1)
+	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions);
+	if (this->_server->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
 		return (SERV_ERROR);
@@ -117,11 +150,17 @@ int		WebServ::newClient()
 	return (0);
 }
 
-int		WebServ::removeClient(int indx)
+int WebServ::removeClient(int indx)
 {
 	this->_poll->pollRemove(indx);
 	if (this->_clients[indx] != NULL)
 		delete this->_clients[indx];
 	this->_clients[indx] = NULL;
 	return (0);
+}
+
+int WebServ::WebServReboot()
+{
+	std::cerr << "Gné gné gné ca marche pas" << std::endl;
+	return (SERV_ERROR);
 }

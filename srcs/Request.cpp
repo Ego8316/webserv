@@ -3,16 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/07 13:48:46 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/09 19:51:00 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-Request::Request() {}
+Request::Request(std::map<std::string, Cookie *> *all_cookies) : _all_cookies(all_cookies)
+{
+	this->_query_cookies.resize(0);
+}
 
 Request::Request(const Request &other)
 {
@@ -83,6 +86,8 @@ int		Request::parseRequest(std::string request)
 			this->parseHeaderLine(line_split[i]);
 		}
 	}
+	if (this->_query_cookies.size() == 0)
+		this->_query_cookies.push_back(Cookie::createSession(this->_all_cookies));
 	std::ostringstream	bodyStream;
 	bodyStream << stream.rdbuf();
 	_rawBody = bodyStream.str();
@@ -102,6 +107,7 @@ int		Request::parseRequest(std::string request)
 int		Request::parseHeaderLine(std::string line)
 {
 	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
+	Cookie						*cookie;
 
 	if (field_split.size() == 2)
 	{
@@ -111,11 +117,16 @@ int		Request::parseHeaderLine(std::string line)
 			value.erase(0, 1);
 		if (!value.empty() && value[value.size() - 1] == '\r')
 			value.erase(value.size() - 1);
+		if (key == "Cookie")
+		{
+			cookie = Cookie::getSession(this->_all_cookies, value);
+			if (cookie)
+				this->_query_cookies.push_back(cookie);
+		}
 		if (headerHasField(key))
 			this->_headers[key] = _headers[key] + "; " + value;
 		else
 			this->_headers[key] = value;
-			
 	}
 	else
 	{
@@ -173,6 +184,11 @@ std::string		Request::headerGetField(const std::string field)
 	return ("");
 }
 
+std::vector<Cookie *>		Request::getQueryCookies()
+{
+	return (this->_query_cookies);
+}
+
 std::ostream	&operator<<(std::ostream &os, const Request &src)
 {
 	Method										method = src.getMethod();
@@ -190,7 +206,6 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 		methodStr = "POST";
 	else
 		methodStr = "DELETE";
-
 	os << "Method:\t\t" << methodStr << std::endl
 		<< "Target:\t\t" << src.getRequestTarget() << std::endl
 		<< "Version:\t" << src.getVersion() << std::endl
