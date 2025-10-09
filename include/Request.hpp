@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 15:02:11 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/03 17:13:41 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class Request
 		std::string							_version;
 		std::string							_rawBody;
 		std::map<std::string, std::string>	_headers;
-		int									_error;
+		ParseError							_error;
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);

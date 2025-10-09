@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 16:19:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/02 21:28:12 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/07 12:26:42 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,9 @@ class Request;
 class Config;
 class Cookie;
 
-class Query {
-	public :
-	// CONSTRUCTORS
+class Query
+{
+	public:
 		Query(Config *config, Client *client);
 		Query(const Query &other);
 		Query &operator=(const Query &other);
@@ -59,8 +59,8 @@ class Query {
 		std::string					_requestStr;
 		Request						*_query;
 		HttpStatus					_statusCode;
-		std::string					_ressource;
-		int							_ressourceStatus;
+		std::string					_resource;
+		int							_resourceStatus;
 		std::string					_header;
 		unsigned long				_contentLen;
 		ContentTypes				_contentType;	//TODO implement setting this as part of setRessourceStatus

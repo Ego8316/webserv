@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+         #
+#    By: ego <ego@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/09/29 19:14:10 by victorviter      ###   ########.fr        #
+#    Updated: 2025/10/07 14:21:11 by ego              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,8 @@ ODIR		=	objs/
 
 SRC			=	main.cpp
 SRC			+=	serverSocket.cpp serverPoll.cpp Client.cpp Request.cpp \
-				Query.cpp utils.cpp Cookie.cpp Config.cpp WebServ.cpp
+				Query.cpp utils.cpp Cookie.cpp Config.cpp WebServ.cpp \
+				Response.cpp
 
 OBJS		=	$(addprefix $(ODIR), $(SRC:.cpp=.o))
 SRCS		=	$(addprefix $(SDIR), $(SRC))

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 17:53:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/07 13:48:46 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ int		Request::parseRequest(std::string request)
 		_error = INVALID_REQUEST_LINE;
 		return (SERV_ERROR);
 	}
-	line_split = stringSplit(line, "\\r\\n");
+	line_split = utils::stringSplit(line, "\\r\\n");
 	if (line_split.size() == 0)
 	{
 		std::cerr << "Empty request" << std::endl;
@@ -75,7 +75,7 @@ int		Request::parseRequest(std::string request)
 	}
 	while (std::getline(stream, line) && line != "\r")
 	{
-		line_split = stringSplit(line, "\\r\\n");
+		line_split = utils::stringSplit(line, "\\r\\n");
 		for (unsigned int i = 1; i < line_split.size(); ++i)
 		{
 			if (line == "\\r\\n")
@@ -101,7 +101,7 @@ int		Request::parseRequest(std::string request)
 
 int		Request::parseHeaderLine(std::string line)
 {
-	std::vector<std::string>	field_split = stringSplit(line, ": ");
+	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
 
 	if (field_split.size() == 2)
 	{

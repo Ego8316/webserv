@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/02 21:23:11 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/08 22:24:12 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,15 +45,6 @@
 #define CLIENT_LIMIT 1000
 #define MAX_COOKIE_SESSIONS 1000
 //#define COOKIE_LIFE_TIME 3600
-
-#define RESOURCE_NOT_FOUND 0
-#define PERM_ISSUE 1
-#define IS_DIR 2
-#define PERM_ROK 4
-#define PERM_WOK 8
-#define PERM_XOK 16
-#define IS_CGI 32
-#define EXISTS 128
 
 // Default error pages
 #define ERROR_PAGE_400 "<html><head><title>400 Bad Request</title></head>" \
