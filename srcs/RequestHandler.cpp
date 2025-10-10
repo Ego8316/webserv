@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 18:34:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 19:58:53 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ Response	RequestHandler::handle(const Request &req, const Config &config, std::v
 		return _handleError(HTTP_BAD_REQUEST, config);
 	if (req.getMethod() == UNKNOWN)
 		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
-	if (req.getVersion() != "HTTP/0.9" || req.getVersion() != "HTTP/1.0")
+	// BIEN PENSER A CHANGER AVANT DE RENDRE
+	if (req.getVersion() != "HTTP/1.1" || req.getVersion() != "HTTP/1.0")
 		return (_handleError(HTTP_VERSION_NOT_SUPPORTED, config));
 
 	Resource	res;
@@ -68,19 +69,28 @@ Response	RequestHandler::_handleGet(const Request &req, const Config &config, co
 	Response			response;
 	std::ifstream		file;
 	std::ostringstream	buffer;
-	std::string			content;
 
-	(void)req;
+	if (!res.isReadable())
+		return (_handleError(HTTP_FORBIDDEN, config));
+
+	if (res.isDirectory())
+	{
+		if (!utils::endsWith(res.getPath(), "/"))
+			return (_handleError(HTTP_REDIRECT_MOVE, config));
+		if (config.enable_listdir)
+			return (_handleListDir(req, config, res));
+		return (_handleError(HTTP_FORBIDDEN, config));
+	}
+
 	file.open(res.getPath().c_str(), std::ios::in | std::ios::binary);
 	if (!file.is_open())
 		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
 	buffer << file.rdbuf();
-	content = buffer.str();
 	file.close();
 
 	response.setStatus(HTTP_OK);
-	response.setBody(content);
-	response.setContentLength(content.size());
+	response.setBody(buffer.str());
+	response.setContentLength(buffer.str().size());
 	response.setContentType(res.getMimeType());
 	response.buildHeader();
 	return (response);
