@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 17:08:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:33:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,13 @@ Config::Config(std::string config)
 	this->parse_error = NONE;
 	while (std::getline(conf_stream, newline))
 	{
-		if (utils::stringTrim(newline, " \t").length() == 0)
+		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue ;
 		std::istringstream 			line(newline);
 	
 		if (!(line >> field >> equal >> value) || (equal != "=" && equal != ":"))
 		{
-			std::cerr << "Could not parse config line " << newline << std::endl;
+			std::cerr << "Could not parse config line " << newline << " in global"   << std::endl;
 			continue;
 		}
 		if (field == "IP")
@@ -75,6 +75,7 @@ Config::Config(std::string config)
 
 Config::Config(const Config &other)
 {
+	this->ip = other.ip;
 	this->port_number = other.port_number;
 	this->domain = other.domain;
 	this->host_name = other.host_name;
@@ -98,6 +99,7 @@ Config &Config::operator=(const Config &other)
 {
 	if (this != &other)
 	{
+		this->ip = other.ip;
 		this->port_number = other.port_number;
 		this->domain = other.domain;
 		this->host_name = other.host_name;
@@ -173,15 +175,15 @@ void		Config::parseDefaultErrorPages(std::istringstream &conf_stream)
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (utils::stringTrim(newline, " \t").length() == 0)
+		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue;
-		else if (utils::stringTrim(newline, " \t") == "end")
+		else if (utils::stringTrim(newline, " \t\n") == "end")
 			return ;
 		std::istringstream 	line(newline);
 		
 		if (!(line >> field >> equal >> value) || (equal != "=" && equal != ":"))
 		{
-			std::cerr << "Could not parse config line " << newline << std::endl;
+			std::cerr << "Could not parse config line " << newline << " in default error pages" << std::endl;
 			continue;
 		}
 		if (field < 200 || field > 600)
@@ -200,15 +202,15 @@ void	Config::parseAccept(std::istringstream &conf_stream)
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (utils::stringTrim(newline, " \t").length() == 0)
+		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue;
-		else if (utils::stringTrim(newline, " \t") == "end")
+		else if (utils::stringTrim(newline, " \t\n") == "end")
 			return ;
 		std::istringstream 	line(newline);
 		
 		if (!(line >> field))
 		{
-			std::cerr << "Could not parse config line " << newline << std::endl;
+			std::cerr << "Could not parse config line " << newline << " in accept"  << std::endl;
 			continue;
 		}
 		if (this->strToContentType(field) == FTYPE_NONE)
@@ -228,17 +230,19 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (utils::stringTrim(newline, " \t").length() == 0)
+		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue;
-		else if (utils::stringTrim(newline, " \t") == "end")
+		else if (utils::stringTrim(newline, " \t\n") == "end")
 			return ;
 		std::istringstream 	line(newline);
 		
 		if (!(line >> path >> equal >> dest >> error_code) || (equal != "=" && equal != ":"))
 		{
-			std::cerr << "Could not parse config line " << newline << std::endl;
+			std::cerr << "Could not parse config line " << newline << " in http redirections"  << std::endl;
 			continue;
 		}
+		std::cout << "COUCOU 1" << std::endl;
+		std::cout << path << " mapped to " << dest << std::endl;
 		this->http_redir[path].dest = dest;
 		if ((300 <= error_code && error_code <= 302) || error_code == 308)
 			this->http_redir[path].error_code = static_cast<HttpStatus>(error_code);
@@ -272,16 +276,34 @@ std::ostream	&operator<<(std::ostream &os, const Config &item)
 {
 	os << "IP :" << item.ip << std::endl;
 	os << "port_number :" << item.port_number << std::endl;
-	os << "incoming_queue_backlog :" << item.incoming_queue_backlog << std::endl;
-	os << "client_limit :" << item.client_limit << std::endl;
+	os << "host_name :" << item.host_name << std::endl;
 	os << "domain :" << item.domain << std::endl;
 	os << "type :" << item.type << std::endl;
 	os << "protocol :" << item.protocol << std::endl;
+	os << "client_limit :" << item.client_limit << std::endl;
+	os << "incoming_queue_backlog :" << item.incoming_queue_backlog << std::endl;
 	os << "buffer_size :" << item.buffer_size << std::endl;
+	os << "cookie_sessions_max :" << item.cookie_sessions_max << std::endl;
+	os << "cookie_life_time :" << item.cookie_life_time << std::endl;
 	os << "ServHome :" << item.server_home << std::endl;
+	os << "enable_listdir :" << item.enable_listdir << std::endl;
 	os << "default_page :" << item.default_page << std::endl;
 	os << "parse_error :" << item.parse_error << std::endl;
-	os << "cookie_life_time :" << item.cookie_life_time << std::endl;
-	os << "cookie_sessions_max :" << item.cookie_sessions_max << std::endl;
+	os << "Default error pages:" << std::endl;
+	std::map<int, std::string>		dep = item.default_error_pages;
+	std::map<int, std::string>::iterator		dep_it;
+	for (dep_it = dep.begin(); dep_it != dep.end(); ++dep_it)
+		os << dep_it->first << ": " << dep_it->second << "\n";
+	os << std::endl;
+	os << "Accept list:" << std::endl;
+	for (unsigned int i = 0; i < item.accept_list.size(); ++i)
+		os << static_cast<int>(item.accept_list[i]);
+	os << std::endl;
+	os << "Redirections:" << std::endl;
+	std::map<std::string, Redirection>		red = item.http_redir;
+	std::map<std::string, Redirection>::iterator	red_it;
+	for (red_it = red.begin(); red_it != red.end(); ++red_it)
+		os << red_it->first << " -> " << red_it->second.dest << " with errcode " << red_it->second.error_code << "\n";
+	os << std::endl;
 	return (os);
 }

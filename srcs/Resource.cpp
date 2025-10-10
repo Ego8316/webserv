@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 17:38:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:01:36 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ Resource::~Resource(void)
  */
 void	Resource::build(const std::string &requestTarget, const Config &config)
 {
-	if (_checkRedirect(config))
+	if (_checkRedirect(requestTarget, config))
 		return ;
 	if (_resolvePath(requestTarget, config) == SERV_ERROR)
 		return ;
@@ -77,11 +77,12 @@ void	Resource::build(const std::string &requestTarget, const Config &config)
 	return ;
 }
 
-bool	Resource::_checkRedirect(const Config &config)
+bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &config)
 {
-	std::string							raw_path_requested(this->_path);
+	std::string							raw_path_requested(requestTarget);
 	std::map<std::string, Redirection>	redirs = config.getRedirections();
 	
+	std::cout << "raw_path_requested = " << raw_path_requested << std::endl;
 	if (raw_path_requested.length() == 0)
 		return (false);
 	if (utils::startsWith(raw_path_requested, "https://"))
@@ -90,8 +91,9 @@ bool	Resource::_checkRedirect(const Config &config)
 		raw_path_requested.erase(0, 8);
 	if (utils::startsWith(raw_path_requested, "www"))
 		raw_path_requested.erase(0, raw_path_requested.find("/"));
-	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != config.http_redir.end(); ++it)
+	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
 	{
+		std::cout << "Cecking for reroute match with >" << it->first << "<" << std::endl;
 		if (raw_path_requested == it->first)
 		{
 			_path = it->second.dest;
@@ -122,7 +124,9 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
 	struct stat	fileStat;
 	struct stat	indexStat;
 
+	std::cout << "requested path as is" << requestTarget << std::endl;
 	_path = config.server_home + requestTarget;
+	std::cout << "requested path is now" << _path << std::endl;
 	_status &= ~(EXISTS | IS_DIR);
 	if (stat(_path.c_str(), &fileStat) == -1)
 	{

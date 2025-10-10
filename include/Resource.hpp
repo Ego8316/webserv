@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 17:06:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 17:59:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,8 @@ class	Resource
 		size_t			_size;
 		ContentTypes	_type;
 		
-		bool	_checkRedirect(const Config &config);
-		int		_resolvePath(const std::string &requestTarget,const Config &config);
+		bool	_checkRedirect(const std::string &requestTarget, const Config &config);
+		int		_resolvePath(const std::string &requestTarget, const Config &config);
 		void	_evaluatePermissions(void);
 		void	_detectType(void);
 };

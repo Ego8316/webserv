@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 17:32:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:40:49 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ Response	RequestHandler::handle(const Request &request, const Config &config, st
 	Resource	resource;
 	resource.build(request.getRequestTarget(), config);
 
+	if (resource.isRedirect())
+		return (_handleRedirect(request, config, resource));
 	if (!resource.exists()) //TODO -> @Hugo faut corriger ca du coup par ex. pour un post c'est OK
 	{
 		std::cout << "Resource not found" << std::endl;
@@ -54,8 +56,6 @@ Response	RequestHandler::handle(const Request &request, const Config &config, st
 		return (_handleError(HTTP_FORBIDDEN, config));
 	if (resource.isDirectory()) //TODO -> pareil pour delete
 		return (_handleListDir(request, config, resource));
-	if (resource.isRedirect())
-		return (_handleRedirect(request, config, resource));
 	if (resource.isCGI())
 		return (_handleCGI(request, config, resource));
 
@@ -131,6 +131,7 @@ Response	RequestHandler::_handleRedirect(const Request &request, const Config &c
 
 	(void)request;
 	(void)config;
+	std::cout << "HANDLING REDIRECT" << std::endl;
 	response.setStatus(static_cast<HttpStatus>(resource.getStatus()));
 	response.setHeaders("Location", resource.getPath());
 	response.setContentType("text/html");

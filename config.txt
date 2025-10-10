@@ -23,8 +23,8 @@ MyServer1 I can write whatever here {
 		text/html
 	end
 
-	REDIRECT = dict
-		WebSite/redirect_test/redi_test.txt = WebSite/some_pagew/page.html
+	HTTP_REDIR = dict
+		/redirect_test/redi_test.txt = /some_page/page.html 301
 	end
 }
 
@@ -53,7 +53,7 @@ Website 2 {
 		text/html
 	end
 
-	REDIRECT = dict
-		/index.html = WebSite/some_pagew/page.html 308
+	HTTP_REDIR = dict
+		/index.html = /some_page/page2.html 301
 	end
 }

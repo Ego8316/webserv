@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 17:41:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:34:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,8 @@ int		Client::handleEvent()
 	std::vector<Cookie *> cookies = request.getQueryCookies();
 	Response	response = RequestHandler::handle(request, *_config, cookies);
 	response_str = response.toString();
+	std::cout << "RESPONSE:" << std::endl;
+	std::cout << response_str << std::endl;
 	if (socketWrite(response_str.c_str(), response_str.length()) == SERV_ERROR)
 		return (SERV_ERROR);
 	delete[] buffer;
