@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:04:13 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:18:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ int WebServ::WebServInit()
 {
 	if (!this->_config || !this->_cookie_sessions || !this->_server || !this->_poll)
 		return (SERV_ERROR);
-	this->_poll->pollAdd(this->_server->getFd(), POLLIN, 0);
+	this->_poll->pollAdd(this->_server->getFd(), POLLIN, -1);
 	std::cout << "pollAdd \t ok !" << std::endl;
 	if (this->_server->socketBind() == SERV_ERROR)
 		return (SERV_ERROR);
@@ -115,8 +115,8 @@ int WebServ::WebServRun()
 			else
 			{
 				std::cout << "step 2.1.2" << std::endl;
-				std::cout << "removing client " << event->client_id - 1 << std::endl;
-				removeClient(event->client_id - 1);
+				std::cout << "removing client " << event->client_id << std::endl;
+				removeClient(event->client_id);
 			}
 		}
 		else
@@ -134,8 +134,8 @@ int WebServ::WebServRun()
 			else
 			{
 				std::cout << "step 2.2.3" << std::endl;
-				std::cout << "Client " << event->client_id - 1 << " handles event" << std::endl;
-				this->_clients[event->client_id - 1]->handleEvent();
+				std::cout << "Client " << event->client_id << " handles event" << std::endl;
+				this->_clients[event->client_id]->handleEvent();
 			}
 		}
 		std::cout << "step 3" << std::endl;
@@ -165,7 +165,7 @@ int WebServ::newClient()
 		return (SERV_ERROR);
 	}
 	this->_clients[indx]->setClientId(indx);
-	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN, indx + 1);
+	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN, indx);
 	std::cout << "Accepted client " << indx << std::endl;
 	return (0);
 }

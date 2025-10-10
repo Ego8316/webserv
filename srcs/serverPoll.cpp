@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:00:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:19:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 serverPoll::serverPoll(Config *config) : _config(config)
 {
-	this->_poll_fds.resize(this->_config->client_limit);
+	this->_poll_fds.resize(this->_config->client_limit + 1);
 }
 
 serverPoll::serverPoll(const serverPoll &other) : _poll_fds(other._poll_fds){}
@@ -30,6 +30,8 @@ serverPoll::~serverPoll() {}
 
 void	serverPoll::pollAdd(int fd, int event, int indx)
 {
+	if (indx == -1)
+		indx = this->_poll_fds.size() - 1;
     struct pollfd new_poll_fd;
 	new_poll_fd.fd = fd;
 	new_poll_fd.events = event;
@@ -51,7 +53,7 @@ int		serverPoll::pollWait()
 {
 	int	poll_count;
 
-	poll_count = poll(&this->_poll_fds[0], this->_config->client_limit, 0);
+	poll_count = poll(&this->_poll_fds[0], this->_poll_fds.size() , 0);
 	if (poll_count == -1)
 		std::cerr << "Poll failed: " << strerror(errno) << std::endl;
 	return (poll_count);
@@ -67,10 +69,12 @@ std::vector<pollRevent>	serverPoll::pollWatchRevent()
 	num_event = this->pollWait();
 	if (num_event < 0)
 		return (ret);
-	for (int i = 0; i < this->_config->client_limit; ++i)
+	for (unsigned int i = 0; i < this->_poll_fds.size(); ++i)
 	{
 		if (num_event == 0)
 			return (ret);
+		if (this->_poll_fds[i].fd == 0)
+			continue ;
 		if (this->_poll_fds[i].revents & POLLHUP || this->_poll_fds[i].revents & POLLERR)
 		{
 			revent.is_error = true;
