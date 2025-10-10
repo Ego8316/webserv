@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 02:28:43 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 17:06:18 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class	Resource
 
 		bool	exists(void) const;
 		bool	isCGI(void) const;
+		bool	isRedirect(void) const;
 		bool	isDirectory(void) const;
 		bool	isReadable(void) const;
 		bool	isWritable(void) const;
@@ -54,9 +55,9 @@ class	Resource
 		int				_status;
 		size_t			_size;
 		ContentTypes	_type;
-
-		int		_resolvePath(const std::string &requestTarget, const Config &config);
+		
+		bool	_checkRedirect(const Config &config);
+		int		_resolvePath(const std::string &requestTarget,const Config &config);
 		void	_evaluatePermissions(void);
 		void	_detectType(void);
-
 };

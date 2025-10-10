@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 00:43:52 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 17:29:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,6 +127,10 @@ std::string	Response::httpStatusToStr(HttpStatus code)
 	switch(code)
 	{
 		case HTTP_OK:						return "OK";
+		case HTTP_REDIRECT:					return "Multiple Choices"; //TODO : le virer ?
+		case HTTP_REDIRECT_MOVE:			return "Moved Permanently";
+		case HTTP_REDIRECT_FOUND:			return "Found";
+		case HTTP_REDIRECT_PERM:			return "Permanent Redirect";
 		case HTTP_BAD_REQUEST:				return "Bad Request";
 		case HTTP_FORBIDDEN:				return "Forbidden";
 		case HTTP_NOT_FOUND:				return "Not Found";
@@ -150,7 +154,6 @@ void	Response::buildHeader(void)
 		_headers["Server"] = "Webserv/1.0 (Unix)";
 	if (!utils::mapHasEntry(_headers, std::string("Connection")))
 		_headers["Connection"] = "close";
-
 	_header = "HTTP/1.0 " + utils::toString(_statusCode)
 		+ " " + httpStatusToStr(_statusCode) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)

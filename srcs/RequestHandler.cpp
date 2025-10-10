@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 15:05:38 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 17:32:07 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,44 +34,49 @@ RequestHandler::~RequestHandler(void)
 	return ;
 }
 
-Response	RequestHandler::handle(const Request &req, const Config &config, std::vector<Cookie *> cookies)
+Response	RequestHandler::handle(const Request &request, const Config &config, std::vector<Cookie *> cookies)
 {
 	(void)cookies;
-	if (req.getError() == UNSUPPORTED_METHOD)
+	if (request.getError() == UNSUPPORTED_METHOD)
 		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
-	else if (req.getError() >= INVALID_REQUEST_LINE)
+	else if (request.getError() >= INVALID_REQUEST_LINE)
 		return _handleError(HTTP_BAD_REQUEST, config);
 
-	Resource	res;
-	res.build(req.getRequestTarget(), config);
+	Resource	resource;
+	resource.build(request.getRequestTarget(), config);
 
-	if (!res.exists())
-		return (_handleError(HTTP_NOT_FOUND, config));
-	if (res.isForbidden())
-		return (_handleError(HTTP_FORBIDDEN, config));
-	if (res.isDirectory())
-		return (_handleListDir(req, config, res));
-	if (res.isCGI())
-		return (_handleCGI(req, config, res));
-
-	switch (req.getMethod())
+	if (!resource.exists()) //TODO -> @Hugo faut corriger ca du coup par ex. pour un post c'est OK
 	{
-		case GET:		return _handleGet(req, config, res);
-		case POST:		return _handlePost(req, config, res);
-		case DELETE:	return _handleDelete(req, config, res);
+		std::cout << "Resource not found" << std::endl;
+		return (_handleError(HTTP_NOT_FOUND, config));
+	}
+	if (resource.isForbidden()) //TODO -> pareil
+		return (_handleError(HTTP_FORBIDDEN, config));
+	if (resource.isDirectory()) //TODO -> pareil pour delete
+		return (_handleListDir(request, config, resource));
+	if (resource.isRedirect())
+		return (_handleRedirect(request, config, resource));
+	if (resource.isCGI())
+		return (_handleCGI(request, config, resource));
+
+	switch (request.getMethod())
+	{
+		case GET:		return _handleGet(request, config, resource);
+		case POST:		return _handlePost(request, config, resource);
+		case DELETE:	return _handleDelete(request, config, resource);
 		default:		return _handleError(HTTP_NOT_IMPLEMENTED, config);
 	}
 }
 
-Response	RequestHandler::_handleGet(const Request &req, const Config &config, const Resource &res)
+Response	RequestHandler::_handleGet(const Request &request, const Config &config, const Resource &resource)
 {
 	Response			response;
 	std::ifstream		file;
 	std::ostringstream	buffer;
 	std::string			content;
 
-	(void)req;
-	file.open(res.getPath().c_str(), std::ios::in | std::ios::binary);
+	(void)request;
+	file.open(resource.getPath().c_str(), std::ios::in | std::ios::binary);
 	if (!file.is_open())
 		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
 	buffer << file.rdbuf();
@@ -81,76 +86,68 @@ Response	RequestHandler::_handleGet(const Request &req, const Config &config, co
 	response.setStatus(HTTP_OK);
 	response.setBody(content);
 	response.setContentLength(content.size());
-	response.setContentType(res.getMimeType());
+	response.setContentType(resource.getMimeType());
 	response.buildHeader();
 	return (response);
 }
 
-Response	RequestHandler::_handlePost(const Request &req, const Config &config, const Resource &res)
+Response	RequestHandler::_handlePost(const Request &request, const Config &config, const Resource &resource)
 {
 	Response	response;
 
-	(void)req;
+	(void)request;
 	(void)config;
-	(void)res;
+	(void)resource;
 	
 	return (response);
 }
 
-Response	RequestHandler::_handleDelete(const Request &req, const Config &config, const Resource &res)
+Response	RequestHandler::_handleDelete(const Request &request, const Config &config, const Resource &resource)
 {
 	Response	response;
 
-	(void)req;
+	(void)request;
 	(void)config;
-	(void)res;
+	(void)resource;
 	
 	return (response);
 }
 
-Response	RequestHandler::_handleCGI(const Request &req, const Config &config, const Resource &res)
+Response	RequestHandler::_handleCGI(const Request &request, const Config &config, const Resource &resource)
 {
 	Response	response;
 
-	(void)req;
+	(void)request;
 	(void)config;
-	(void)res;
+	(void)resource;
 	
 	return (response);
 }
 
-Response	RequestHandler::_handleRedirect(const Request &req, const Config &config, const Resource &res)
+Response	RequestHandler::_handleRedirect(const Request &request, const Config &config, const Resource &resource)
 {
 	Response		response;
-	std::string		raw_path_requested;
-	std::string		raw_redir_key;
+	std::string		response_body;
 
-	(void)req;
+	(void)request;
 	(void)config;
-	raw_path_requested = res.getPath();
-	if (utils::startsWith(raw_path_requested, "https://"))
-		raw_path_requested.erase(0, 9);
-	if (utils::startsWith(raw_path_requested, "http://"))
-		raw_path_requested.erase(0, 8);
-	if (utils::startsWith(raw_path_requested, "www"))
-		raw_path_requested.erase(0, raw_path_requested.find("/"));
-	/*for (std::map<std::string, Redirection>::iterator it = config.http_redir.begin(); it != config.http_redir.end(); ++it)
-	{
-		raw_redir_key = it->first;
-		response.setStatus(HTTP_OK); // mettre le bon statut
-	}*/
+	response.setStatus(static_cast<HttpStatus>(resource.getStatus()));
+	response.setHeaders("Location", resource.getPath());
+	response.setContentType("text/html");
+	response.setContentLength(0);
+	response.buildHeader();
 	return (response);
 }
 
-Response	RequestHandler::_handleListDir(const Request &req, const Config &config, const Resource &res)
+Response	RequestHandler::_handleListDir(const Request &request, const Config &config, const Resource &resource)
 {
-	Response		response;
+	Response	response;
 	std::string		response_body;
 	DIR				*dir;
 	struct dirent	*dir_ent;
 	
-	(void)req;
-	dir = opendir(res.getPath().c_str());
+	(void)request;
+	dir = opendir(resource.getPath().c_str());
 	if (dir == NULL)
 	{
 		std::cerr << "Cannot open directory\n" << std::endl;

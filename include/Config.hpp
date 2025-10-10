@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 13:40:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 17:07:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ class Config {
 	//DESTUCTORS
 		~Config();
 	//GETTERS
+		std::map<std::string, Redirection>		getRedirections() const;
 		ParseError		getParseError();
 		void			setIP(std::string ip_str);
 		void			parseDefaultErrorPages(std::istringstream &conf_stream);

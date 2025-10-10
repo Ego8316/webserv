@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 14:59:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 16:52:09 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ enum ContentTypes
 		FTYPE_JPEG		= 8,	// 0 0 0 0 1 0 0 0
 		FTYPE_PNG		= 16,	// 0 0 0 1 0 0 0 0
 								// 0 0 1 0 0 0 0 0
-		FTYPE_IMAGE		= 56,	// 0 0 1 1 1 0 0 
+		FTYPE_IMAGE		= 56,	// 0 0 1 1 1 0 0 0
 		FTYPE_CGI_PY	= 64,	// 0 1 0 0 0 0 0 0
 		FTYPE_CGI_PHP	= 128,	// 1 0 0 0 0 0 0 0
 		FTYPE_ANY		= 255	// 1 1 1 1 1 1 1 1
@@ -142,7 +142,7 @@ typedef struct s_pollRevent
 typedef struct s_Redirection
 {
 	std::string		dest;
-	int				error_code;
+	HttpStatus		error_code;
 }	Redirection;
 
 #define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"

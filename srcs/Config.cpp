@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:45:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 17:08:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,11 @@ Config &Config::operator=(const Config &other)
 
 Config::~Config() {}
 
-
+std::map<std::string, Redirection>		Config::getRedirections() const
+{
+	return (this->http_redir);
+}
+		
 ParseError		Config::getParseError()
 {
 	return (this->parse_error);
@@ -236,7 +240,10 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
 			continue;
 		}
 		this->http_redir[path].dest = dest;
-		this->http_redir[path].error_code = error_code;
+		if ((300 <= error_code && error_code <= 302) || error_code == 308)
+			this->http_redir[path].error_code = static_cast<HttpStatus>(error_code);
+		else
+			this->http_redir[path].error_code = HTTP_REDIRECT;
 		if (newline.find("}") != std::string::npos)
 			return ;
 	}

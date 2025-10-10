@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 00:32:55 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 17:38:58 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,11 +68,39 @@ Resource::~Resource(void)
  */
 void	Resource::build(const std::string &requestTarget, const Config &config)
 {
+	if (_checkRedirect(config))
+		return ;
 	if (_resolvePath(requestTarget, config) == SERV_ERROR)
 		return ;
 	_evaluatePermissions();
 	_detectType();
 	return ;
+}
+
+bool	Resource::_checkRedirect(const Config &config)
+{
+	std::string							raw_path_requested(this->_path);
+	std::map<std::string, Redirection>	redirs = config.getRedirections();
+	
+	if (raw_path_requested.length() == 0)
+		return (false);
+	if (utils::startsWith(raw_path_requested, "https://"))
+		raw_path_requested.erase(0, 9);
+	if (utils::startsWith(raw_path_requested, "http://"))
+		raw_path_requested.erase(0, 8);
+	if (utils::startsWith(raw_path_requested, "www"))
+		raw_path_requested.erase(0, raw_path_requested.find("/"));
+	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != config.http_redir.end(); ++it)
+	{
+		if (raw_path_requested == it->first)
+		{
+			_path = it->second.dest;
+			_status = it->second.error_code;
+			std::cout << "Found redirection from " << it->first << " to " << it->second.dest << std::endl;
+			return (true);
+		}
+	}
+	return (false);
 }
 
 /**
@@ -253,6 +281,11 @@ bool	Resource::exists(void) const
 bool	Resource::isCGI(void) const
 {
 	return (_status & IS_CGI);
+}
+
+bool	Resource::isRedirect(void) const
+{
+	return (300 <= _status && _status <= 308);
 }
 
 /**
