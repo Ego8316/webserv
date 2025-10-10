@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 01:46:46 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 02:28:56 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,17 +90,15 @@ enum	ParseError
 	UNREADABLE_FILE
 };
 
-// enum FileStatus
-// {
-// 	FILE_NOT_FOUND	= 1 << 0,	// 0 0 0 0 0 0 0 0
-// 	PERM_ISSUE		= 1 << 1,	// 0 0 0 0 0 0 0 1
-// 	IS_DIR			= 1 << 2,	// 0 0 0 0 0 0 1 0
-// 	PERM_ROK		= 1 << 3,	// 0 0 0 0 0 1 0 0
-// 	PERM_WOK		= 1 << 4,	// 0 0 0 0 1 0 0 0
-// 	PERM_XOK		= 1 << 5,	// 0 0 0 1 0 0 0 0
-// 	IS_CGI			= 1 << 6,	// 0 0 1 0 0 0 0 0
-// 	EXISTS			= 1 << 7	// 1 0 0 0 0 0 0 0
-// };
+enum	ResourceStatus
+{
+	EXISTS				= 1 << 0,
+	IS_DIR				= 1 << 1,
+	IS_CGI				= 1 << 2,
+	PERM_ROK			= 1 << 3,
+	PERM_WOK			= 1 << 4,
+	PERM_XOK			= 1 << 5
+};
 
 enum ContentTypes
 {

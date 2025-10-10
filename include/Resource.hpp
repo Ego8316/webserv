@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/09 02:14:12 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 02:28:43 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,6 @@
 #include "headers.hpp"
 #include "utils.hpp"
 #include "Config.hpp"
-
-enum	ResourceStatus
-{
-	EXISTS				= 1 << 0,
-	IS_DIR				= 1 << 1,
-	IS_CGI				= 1 << 2,
-	PERM_ROK			= 1 << 3,
-	PERM_WOK			= 1 << 4,
-	PERM_XOK			= 1 << 5
-};
 
 /**
  * @class Resource
