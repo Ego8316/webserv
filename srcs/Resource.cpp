@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 18:52:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 20:13:52 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,8 @@ bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &co
 		if (raw_path_requested == it->first)
 		{
 			_path = it->second.dest;
-			_status = it->second.error_code;
+			_redir_code = it->second.error_code;
+			_status = IS_REDIRECT;
 			return (true);
 		}
 	}
@@ -284,7 +285,7 @@ bool	Resource::isCGI(void) const
 
 bool	Resource::isRedirect(void) const
 {
-	return (300 <= _status && _status <= 308);
+	return (_status & IS_REDIRECT);
 }
 
 /**

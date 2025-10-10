@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 17:59:32 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 20:10:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class	Resource
 		int				_status;
 		size_t			_size;
 		ContentTypes	_type;
+		HttpStatus		_redir_code;
 		
 		bool	_checkRedirect(const std::string &requestTarget, const Config &config);
 		int		_resolvePath(const std::string &requestTarget, const Config &config);
