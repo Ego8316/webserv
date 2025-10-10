@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/07 14:07:04 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 00:38:25 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class	Response
 
 		void	setStatus(HttpStatus code);
 		void	setBody(const std::string &body);
-		void	setHeader(const std::string &key, const std::string &value);
+		void	setHeaders(const std::string &key, const std::string &value);
 
 		void	setContentType(const std::string &type);
 		void	setContentLength(size_t len);
@@ -50,4 +50,6 @@ class	Response
 		const std::string	&getHeader(void) const;
 		const std::string	&getBody(void) const;
 		std::string			toString(void) const;
+
+		static std::string	getDefaultErrorPage(HttpStatus code);
 };

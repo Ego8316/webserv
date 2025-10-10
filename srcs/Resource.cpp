@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/09 02:12:45 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 00:32:55 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ Resource::Resource(void)
 	:	_path(""),
 		_status(0),
 		_size(0),
-		_type(PLAIN)
+		_type(FTYPE_PLAIN)
 {
 	return ;
 }
@@ -148,21 +148,21 @@ void	Resource::_detectType(void)
 	if (utils::endsWith(_path, ".py"))
 	{
 		_status |= IS_CGI;
-		_type = CGI_PY;
+		_type = FTYPE_CGI_PY;
 	}
 	else if (utils::endsWith(_path, ".php"))
 	{
 		_status |= IS_CGI;
-		_type = CGI_PHP;
+		_type = FTYPE_CGI_PHP;
 	}
 	else if (utils::endsWith(_path, ".html"))
-		_type = HTML;
+		_type = FTYPE_HTML;
 	else if (utils::endsWith(_path, ".jpeg"))
-		_type = JPEG;
+		_type = FTYPE_JPEG;
 	else if (utils::endsWith(_path, ".png"))
-		_type = PNG;
+		_type = FTYPE_PNG;
 	else
-		_type = PLAIN;
+		_type = FTYPE_PLAIN;
 	return ;
 }
 
@@ -175,11 +175,11 @@ std::string	Resource::getMimeType(void) const
 {
 	switch(_type)
 	{
-		case HTML:	return "text/html";
-		case PLAIN:	return "text/plain";
-		case JPEG:	return "image/jpeg";
-		case PNG:	return "image/png";
-		default:	return "";
+		case FTYPE_HTML:	return "text/html";
+		case FTYPE_PLAIN:	return "text/plain";
+		case FTYPE_JPEG:	return "image/jpeg";
+		case FTYPE_PNG:		return "image/png";
+		default:			return "";
 	}
 }
 
@@ -192,12 +192,12 @@ std::string	Resource::getExtension(void) const
 {
 	switch(_type)
 	{
-		case HTML:		return ".html";
-		case JPEG:		return ".jpeg";
-		case PNG:		return ".png";
-		case CGI_PY:	return ".py";
-		case CGI_PHP:	return ".php";
-		default:		return "";
+		case FTYPE_HTML:		return ".html";
+		case FTYPE_JPEG:		return ".jpeg";
+		case FTYPE_PNG:			return ".png";
+		case FTYPE_CGI_PY:		return ".py";
+		case FTYPE_CGI_PHP:		return ".php";
+		default:				return "";
 	}
 }
 

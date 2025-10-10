@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/09 21:20:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 01:46:46 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,17 +90,17 @@ enum	ParseError
 	UNREADABLE_FILE
 };
 
-enum FileStatus
-{
-	FILE_NOT_FOUND	= 1 << 0,	// 0 0 0 0 0 0 0 0
-	PERM_ISSUE		= 1 << 1,	// 0 0 0 0 0 0 0 1
-	IS_DIR			= 1 << 2,	// 0 0 0 0 0 0 1 0
-	PERM_ROK		= 1 << 3,	// 0 0 0 0 0 1 0 0
-	PERM_WOK		= 1 << 4,	// 0 0 0 0 1 0 0 0
-	PERM_XOK		= 1 << 5,	// 0 0 0 1 0 0 0 0
-	IS_CGI			= 1 << 6,	// 0 0 1 0 0 0 0 0
-	EXISTS			= 1 << 7	// 1 0 0 0 0 0 0 0
-};
+// enum FileStatus
+// {
+// 	FILE_NOT_FOUND	= 1 << 0,	// 0 0 0 0 0 0 0 0
+// 	PERM_ISSUE		= 1 << 1,	// 0 0 0 0 0 0 0 1
+// 	IS_DIR			= 1 << 2,	// 0 0 0 0 0 0 1 0
+// 	PERM_ROK		= 1 << 3,	// 0 0 0 0 0 1 0 0
+// 	PERM_WOK		= 1 << 4,	// 0 0 0 0 1 0 0 0
+// 	PERM_XOK		= 1 << 5,	// 0 0 0 1 0 0 0 0
+// 	IS_CGI			= 1 << 6,	// 0 0 1 0 0 0 0 0
+// 	EXISTS			= 1 << 7	// 1 0 0 0 0 0 0 0
+// };
 
 enum ContentTypes
 {
@@ -121,15 +121,15 @@ enum ContentTypes
 enum	HttpStatus
 {
 	HTTP_OK = 200,
-	REDIRECT = 300,
-	REDIRECT_MOVE = 301,
-	REDIRECT_FOUND = 302,
-	REDIRECT_PERM = 308,
+	HTTP_REDIRECT = 300,
+	HTTP_REDIRECT_MOVE = 301,
+	HTTP_REDIRECT_FOUND = 302,
+	HTTP_REDIRECT_PERM = 308,
 	HTTP_BAD_REQUEST = 400,
 	HTTP_FORBIDDEN = 403,
 	HTTP_NOT_FOUND = 404,
-	INTERNAL_SERVER_ERROR = 500,
-	NOT_IMPLEMENTED = 501,
+	HTTP_INTERNAL_SERVER_ERROR = 500,
+	HTTP_NOT_IMPLEMENTED = 501,
 	HTTP_VERSION_NOT_SUPPORTED = 505
 };
 typedef struct s_pollRevent

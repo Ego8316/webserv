@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cookie.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 22:13:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 01:55:28 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,10 @@ void		Cookie::removeExpired(std::map<std::string, Cookie *> *sessions)
 		{
 			delete it->second;
 			(*sessions)[it->first] = NULL;
-			it = (*sessions).erase(it);
+			// it = (*sessions).erase(it);
+			std::map<std::string, Cookie*>::iterator toErase = it++;
+			sessions->erase(toErase);
+
 		}
 		else
 			++it;

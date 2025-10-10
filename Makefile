@@ -6,7 +6,7 @@
 #    By: ego <ego@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/10/07 14:21:11 by ego              ###   ########.fr        #
+#    Updated: 2025/10/10 01:01:37 by ego              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,8 +17,8 @@ ODIR		=	objs/
 
 SRC			=	main.cpp
 SRC			+=	serverSocket.cpp serverPoll.cpp Client.cpp Request.cpp \
-				Query.cpp utils.cpp Cookie.cpp Config.cpp WebServ.cpp \
-				Response.cpp
+				Response.cpp RequestHandler.cpp Resource.cpp \
+				utils.cpp Cookie.cpp Config.cpp WebServ.cpp
 
 OBJS		=	$(addprefix $(ODIR), $(SRC:.cpp=.o))
 SRCS		=	$(addprefix $(SDIR), $(SRC))
@@ -26,11 +26,11 @@ SRCS		=	$(addprefix $(SDIR), $(SRC))
 CC			=	c++
 CFLAGS		=	-Wall -Wextra -Werror -std=c++98
 
-IFLAGS	=	-I $(IDIR)
+IFLAGS		=	-I $(IDIR)
 
-RM		=	rm -rf
+RM			=	rm -rf
 
-NAME	=	webserv
+NAME		=	webserv
 
 all			:	$(NAME)
 

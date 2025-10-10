@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 23:53:51 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 01:33:40 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,10 +80,26 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 		
 int		Client::handleEvent()
 {
-	Query	query(this->_config, this, this->_all_cookies);
+	char		buffer[BUFFER_SIZE];
+	int			bytes_read;
+	std::string	request_str;
+	std::string	response_str;
 
-	std::cout << "Client handling event" << std::endl;
-	query.queryRespond();
+	bytes_read = _config->buffer_size;
+	while (bytes_read == _config->buffer_size)
+	{
+		bytes_read = socketRead(buffer, bytes_read);
+		if (bytes_read == SERV_ERROR)
+			return (SERV_ERROR);
+		request_str += std::string(buffer).substr(0, bytes_read);
+		
+	}
+	Request	request(_all_cookies);
+	request.parseRequest(request_str);
+	Response	response = RequestHandler::handle(request, *_config);
+	response_str = response.toString();
+	if (socketWrite(response_str.c_str(), response_str.length()) == SERV_ERROR)
+		return (SERV_ERROR);
 	return (0); //TODO return err code
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 20:07:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 01:57:05 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -276,7 +276,7 @@ std::vector<Config *> Config::parseMultipleConfigs(std::string filename)
 	std::vector<Config *>	configs;
 	std::string				config_section;
 	
-	conf_file.open(filename.c_str(), O_RDONLY);
+	conf_file.open(filename.c_str(), std::ios::in);
 	
 	configs.resize(0);
 	if (!conf_file.is_open())

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/09 18:24:20 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/09 23:29:14 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,31 +15,31 @@
 #include "headers.hpp"
 #include "utils.hpp"
 
+#include "Resource.hpp"
+#include "Response.hpp"
+#include "Request.hpp"
+
 class	Config;
 class	Client;
 class	Cookie;
 class	Request;
-class	Response;
 
 class	RequestHandler
 {
 	public:
+		static Response	handle(const Request &req, const Config &config);
+
+	private:
 		RequestHandler(void);
-		RequestHandler(const Config *config, const Client *client);
 		RequestHandler(const RequestHandler &other);
 		RequestHandler &operator=(const RequestHandler &other);
 		~RequestHandler(void);
 
-	private:
-		const Config	*_config;
-		const Client	*_client;
-		Request			*_request;
-
-		Response	handleGet(const Request &req);
-		Response	handlePost(const Request &req);
-		Response	handleDelete(const Request &req);
-		Response	handleCGI(const Request &req);
-		Response	handleError(HttpStatus code);
-
-		std::string	findResource(const std::string &target);
+		static Response	_handleGet(const Request &req, const Config &config, const Resource &res);
+		static Response	_handlePost(const Request &req, const Config &config, const Resource &res);
+		static Response	_handleDelete(const Request &req, const Config &config, const Resource &res);
+		static Response	_handleCGI(const Request &req, const Config &config, const Resource &res);
+		static Response	_handleRedirect(const Request &req, const Config &config, const Resource &res);
+		static Response	_handleListDir(const Request &req, const Config &config, const Resource &res);
+		static Response	_handleError(HttpStatus code, const Config &config);
 };

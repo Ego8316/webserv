@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 20:46:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 01:30:59 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
-#include "Query.hpp"
+#include "RequestHandler.hpp"
 #include "Config.hpp"
 #include "Cookie.hpp"
 
