@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:18:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:28:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,12 +103,12 @@ int WebServ::WebServRun()
 	for (std::vector<pollRevent>::iterator event = events.begin(); event != events.end(); ++event)
 	{
 		std::cout << "step 2" << std::endl;
-		if (event->is_error)
+		if (event->error)
 		{
 			std::cout << "step 2.1.1" << std::endl;
-			if (event->client_id == 0)
+			if (event->server == true)
 			{
-				std::cerr << "poll Wait failed" << std::endl;
+				std::cerr << "Server Error closed connection" << std::endl;
 				// TODO do a clean exit, probably will see that at the end when we know what need to be closed/cleaned
 				return (SERV_ERROR);
 			}
@@ -122,7 +122,7 @@ int WebServ::WebServRun()
 		else
 		{
 			std::cout << "step 2.2.1" << std::endl;
-			if (event->client_id == 0)
+			if (event->server == true)
 			{
 				if (this->newClient() == SERV_ERROR)
 					std::cerr << "Failed to accept new client" << std::endl;

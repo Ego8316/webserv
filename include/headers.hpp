@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 10:55:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:26:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,8 @@ enum	HttpStatus
 };
 typedef struct s_pollRevent
 {
-	bool	is_error;
+	bool	error;
+	bool	server;
 	short	revent;
 	int		client_id;
 }	pollRevent;

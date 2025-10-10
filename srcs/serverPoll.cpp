@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:19:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:28:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,12 @@ std::vector<pollRevent>	serverPoll::pollWatchRevent()
 			continue ;
 		if (this->_poll_fds[i].revents & POLLHUP || this->_poll_fds[i].revents & POLLERR)
 		{
-			revent.is_error = true;
+			revent.error = true;
 			revent.revent = this->_poll_fds[i].revents;
-			revent.client_id = i;
+			if (i == this->_poll_fds.size() - 1)
+				revent.server = true;
+			else
+				revent.client_id = i;
 			if (i == 0)
 				std::cerr << "Server ended connection." << std::endl;
 			else
@@ -89,9 +92,12 @@ std::vector<pollRevent>	serverPoll::pollWatchRevent()
 		}
         else if (this->_poll_fds[i].revents & POLLIN)
 		{
-			revent.is_error = false;
+			revent.error = false;
 			revent.revent = POLLIN;
-			revent.client_id = i;
+			if (i == this->_poll_fds.size() - 1)
+				revent.server = true;
+			else
+				revent.client_id = i;
 			ret.push_back(revent);
 			--num_event;
 		}
