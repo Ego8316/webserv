@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 11:16:14 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 15:04:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ Response	RequestHandler::_handleRedirect(const Request &req, const Config &confi
 
 Response	RequestHandler::_handleListDir(const Request &req, const Config &config, const Resource &res)
 {
-	Response	response;
+	Response		response;
 	std::string		response_body;
 	DIR				*dir;
 	struct dirent	*dir_ent;
