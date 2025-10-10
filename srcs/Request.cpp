@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 11:13:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:25:54 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,18 +45,18 @@ int		Request::parseRequest(std::string request)
 	std::string					line;
 	std::vector<std::string>	line_split;
 
-	_error = NONE;
+	_error = false;
 	if (!std::getline(stream, line))
 	{
 		std::cerr << "Empty request" << std::endl;
-		_error = INVALID_REQUEST_LINE;
+		_error = true;
 		return (SERV_ERROR);
 	}
 	line_split = utils::stringSplit(line, "\\r\\n");
 	if (line_split.size() == 0)
 	{
 		std::cerr << "Empty request" << std::endl;
-		_error = INVALID_REQUEST_LINE;
+		_error = true;
 		return (SERV_ERROR);
 	}
 	std::istringstream	firstLine(line_split[0]);
@@ -64,7 +64,7 @@ int		Request::parseRequest(std::string request)
 
 	if (!(firstLine >> methodStr >> _requestTarget >> _version))
 	{
-		_error = INVALID_REQUEST_LINE;
+		_error = true;
 		return (SERV_ERROR);
 	}
 	if (methodStr == "GET") _method = GET;
@@ -98,7 +98,7 @@ int		Request::parseRequest(std::string request)
 		if (_rawBody.size() != expected)
 		{
 			std::cerr << "Bad content length" << std::endl;
-			_error = BAD_CONTENT_LENGTH;
+			_error = true;
 			return (SERV_ERROR);
 		}
 	}
@@ -133,7 +133,7 @@ int		Request::parseHeaderLine(std::string line)
 	else
 	{
 		std::cerr << "Invalid Header in Request" << std::endl;
-		_error = INVALID_HEADER;
+		_error = true;
 		return (SERV_ERROR);
 	}
 	return (0);
@@ -164,7 +164,7 @@ std::map<std::string, std::string>	Request::getHeaders(void) const
 	return (_headers);
 }
 
-int	Request::getError(void) const
+bool	Request::getError(void) const
 {
 	return (_error);
 }
@@ -197,7 +197,7 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 	const std::map<std::string, std::string>	&headers = src.getHeaders();
 	std::string									methodStr;
 
-	if (src.getError() != NONE)
+	if (src.getError())
 	{
 		os << "Parse error detected: " << src.getError() << std::endl;
 		return (os);

@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 00:43:52 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 18:49:12 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
  * @brief Default constructor. Initializes status code to 200 OK.
  */
 Response::Response(void)
-	:	_statusCode(HTTP_OK)
+	:	status_code(HTTP_OK)
 {
 	return ;
 }
@@ -40,7 +40,7 @@ Response	&Response::operator=(const Response &other)
 {
 	if (this != &other)
 	{
-		_statusCode = other._statusCode;
+		status_code = other.status_code;
 		_header = other._header;
 		_body = other._body;
 		_headers = other._headers;
@@ -62,7 +62,7 @@ Response::~Response(void)
  */
 void	Response::setStatus(HttpStatus code)
 {
-	_statusCode = code;
+	status_code = code;
 	return ;
 }
 
@@ -151,8 +151,8 @@ void	Response::buildHeader(void)
 	if (!utils::mapHasEntry(_headers, std::string("Connection")))
 		_headers["Connection"] = "close";
 
-	_header = "HTTP/1.0 " + utils::toString(_statusCode)
-		+ " " + httpStatusToStr(_statusCode) + "\r\n";
+	_header = "HTTP/1.0 " + utils::toString(status_code)
+		+ " " + httpStatusToStr(status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
 		_header += it->first + ": " + it->second + "\r\n";
 	_header += "\r\n";

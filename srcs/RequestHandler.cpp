@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 15:05:38 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 18:34:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,12 @@ RequestHandler::~RequestHandler(void)
 Response	RequestHandler::handle(const Request &req, const Config &config, std::vector<Cookie *> cookies)
 {
 	(void)cookies;
-	if (req.getError() == UNSUPPORTED_METHOD)
-		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
-	else if (req.getError() >= INVALID_REQUEST_LINE)
+	if (req.getError())
 		return _handleError(HTTP_BAD_REQUEST, config);
+	if (req.getMethod() == UNKNOWN)
+		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
+	if (req.getVersion() != "HTTP/0.9" || req.getVersion() != "HTTP/1.0")
+		return (_handleError(HTTP_VERSION_NOT_SUPPORTED, config));
 
 	Resource	res;
 	res.build(req.getRequestTarget(), config);
@@ -49,8 +51,6 @@ Response	RequestHandler::handle(const Request &req, const Config &config, std::v
 		return (_handleError(HTTP_NOT_FOUND, config));
 	if (res.isForbidden())
 		return (_handleError(HTTP_FORBIDDEN, config));
-	if (res.isDirectory())
-		return (_handleListDir(req, config, res));
 	if (res.isCGI())
 		return (_handleCGI(req, config, res));
 

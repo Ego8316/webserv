@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 11:14:14 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:23:57 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class Request
 		std::string							getVersion(void) const;
 		std::string							getRawBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
-		int									getError(void) const;
+		bool								getError(void) const;
 		std::vector<Cookie *>				getQueryCookies();
 
 		void								setMethod(Method method);
@@ -47,7 +47,7 @@ class Request
 		std::string							_version;
 		std::string							_rawBody;
 		std::map<std::string, std::string>	_headers;
-		int									_error;
+		bool								_error;
 		std::map<std::string, Cookie *>		*_all_cookies;
 		std::vector<Cookie *>				_query_cookies; //TODO
 };

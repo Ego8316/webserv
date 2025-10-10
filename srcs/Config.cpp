@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:45:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:33:35 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ Config::Config(std::string config)
 	std::string			newline;
 	std::string			field, equal, value;
 
-	this->parse_error = NONE;
 	while (std::getline(conf_stream, newline))
 	{
 		if (utils::stringTrim(newline, " \t").length() == 0)
@@ -91,7 +90,6 @@ Config::Config(const Config &other)
 	this->default_error_pages = other.default_error_pages;
 	this->accept_list = other.accept_list;
 	this->http_redir = other.http_redir;
-	this->parse_error = other.parse_error;
 }
 
 Config &Config::operator=(const Config &other)
@@ -114,18 +112,11 @@ Config &Config::operator=(const Config &other)
 		this->default_error_pages = other.default_error_pages;
 		this->http_redir = other.http_redir;
 		this->accept_list = other.accept_list;
-		this->parse_error = other.parse_error;
 	}
 	return (*this);
 }
 
 Config::~Config() {}
-
-
-ParseError		Config::getParseError()
-{
-	return (this->parse_error);
-}
 
 void			Config::setIP(std::string ip_str)
 {
@@ -273,7 +264,6 @@ std::ostream	&operator<<(std::ostream &os, const Config &item)
 	os << "buffer_size :" << item.buffer_size << std::endl;
 	os << "ServHome :" << item.server_home << std::endl;
 	os << "default_page :" << item.default_page << std::endl;
-	os << "parse_error :" << item.parse_error << std::endl;
 	os << "cookie_life_time :" << item.cookie_life_time << std::endl;
 	os << "cookie_sessions_max :" << item.cookie_sessions_max << std::endl;
 	return (os);

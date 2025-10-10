@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 14:59:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:34:26 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,18 +76,7 @@ enum	Method
 	GET,
 	POST,
 	DELETE,
-	CGI_RUN,
-	ERROR
-};
-
-enum	ParseError
-{
-	NONE,
-	UNSUPPORTED_METHOD,
-	INVALID_REQUEST_LINE,
-	INVALID_HEADER,
-	BAD_CONTENT_LENGTH,
-	UNREADABLE_FILE
+	UNKNOWN
 };
 
 enum	ResourceStatus

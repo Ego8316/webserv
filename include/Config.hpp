@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 13:40:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:33:45 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ class Config {
 	//DESTUCTORS
 		~Config();
 	//GETTERS
-		ParseError		getParseError();
 		void			setIP(std::string ip_str);
 		void			parseDefaultErrorPages(std::istringstream &conf_stream);
 		void			parseAccept(std::istringstream &conf_stream);
@@ -51,8 +50,6 @@ class Config {
 		std::map<int, std::string>				default_error_pages;
 		std::vector<ContentTypes>				accept_list;
 		std::map<std::string, Redirection>		http_redir; //TODO finish this shit
-
-		ParseError								parse_error;
 	private :
 };
 
