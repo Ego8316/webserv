@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 15:04:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 15:05:38 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,11 +134,11 @@ Response	RequestHandler::_handleRedirect(const Request &req, const Config &confi
 		raw_path_requested.erase(0, 8);
 	if (utils::startsWith(raw_path_requested, "www"))
 		raw_path_requested.erase(0, raw_path_requested.find("/"));
-	// for (std::map<std::string, Redirection>::iterator it = config.http_redir.begin(); it != config.http_redir.end(); ++it)
-	// {
-	// 	raw_redir_key = it->first;
-	// 	response.setStatus(HTTP_OK); // mettre le bon statut
-	// }
+	/*for (std::map<std::string, Redirection>::iterator it = config.http_redir.begin(); it != config.http_redir.end(); ++it)
+	{
+		raw_redir_key = it->first;
+		response.setStatus(HTTP_OK); // mettre le bon statut
+	}*/
 	return (response);
 }
 
