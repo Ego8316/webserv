@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 18:01:36 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:52:56 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,6 @@ bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &co
 	std::string							raw_path_requested(requestTarget);
 	std::map<std::string, Redirection>	redirs = config.getRedirections();
 	
-	std::cout << "raw_path_requested = " << raw_path_requested << std::endl;
 	if (raw_path_requested.length() == 0)
 		return (false);
 	if (utils::startsWith(raw_path_requested, "https://"))
@@ -93,12 +92,10 @@ bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &co
 		raw_path_requested.erase(0, raw_path_requested.find("/"));
 	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
 	{
-		std::cout << "Cecking for reroute match with >" << it->first << "<" << std::endl;
 		if (raw_path_requested == it->first)
 		{
 			_path = it->second.dest;
 			_status = it->second.error_code;
-			std::cout << "Found redirection from " << it->first << " to " << it->second.dest << std::endl;
 			return (true);
 		}
 	}
@@ -124,9 +121,7 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
 	struct stat	fileStat;
 	struct stat	indexStat;
 
-	std::cout << "requested path as is" << requestTarget << std::endl;
 	_path = config.server_home + requestTarget;
-	std::cout << "requested path is now" << _path << std::endl;
 	_status &= ~(EXISTS | IS_DIR);
 	if (stat(_path.c_str(), &fileStat) == -1)
 	{

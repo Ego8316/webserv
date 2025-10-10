@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 18:33:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:52:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,8 +241,6 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
 			std::cerr << "Could not parse config line " << newline << " in http redirections"  << std::endl;
 			continue;
 		}
-		std::cout << "COUCOU 1" << std::endl;
-		std::cout << path << " mapped to " << dest << std::endl;
 		this->http_redir[path].dest = dest;
 		if ((300 <= error_code && error_code <= 302) || error_code == 308)
 			this->http_redir[path].error_code = static_cast<HttpStatus>(error_code);

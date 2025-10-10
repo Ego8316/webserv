@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 18:40:49 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 18:52:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,6 @@ Response	RequestHandler::_handleRedirect(const Request &request, const Config &c
 
 	(void)request;
 	(void)config;
-	std::cout << "HANDLING REDIRECT" << std::endl;
 	response.setStatus(static_cast<HttpStatus>(resource.getStatus()));
 	response.setHeaders("Location", resource.getPath());
 	response.setContentType("text/html");
