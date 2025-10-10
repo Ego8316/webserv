@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 13:40:19 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:45:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@ Config::Config(std::string config)
 	this->parse_error = NONE;
 	while (std::getline(conf_stream, newline))
 	{
+		if (utils::stringTrim(newline, " \t").length() == 0)
+			continue ;
 		std::istringstream 			line(newline);
 	
 		if (!(line >> field >> equal >> value) || (equal != "=" && equal != ":"))
@@ -167,7 +169,9 @@ void		Config::parseDefaultErrorPages(std::istringstream &conf_stream)
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (newline.find("end") != std::string::npos)
+		if (utils::stringTrim(newline, " \t").length() == 0)
+			continue;
+		else if (utils::stringTrim(newline, " \t") == "end")
 			return ;
 		std::istringstream 	line(newline);
 		
@@ -192,7 +196,9 @@ void	Config::parseAccept(std::istringstream &conf_stream)
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (newline.find("end") != std::string::npos)
+		if (utils::stringTrim(newline, " \t").length() == 0)
+			continue;
+		else if (utils::stringTrim(newline, " \t") == "end")
 			return ;
 		std::istringstream 	line(newline);
 		
@@ -218,7 +224,9 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (newline.find("end") != std::string::npos)
+		if (utils::stringTrim(newline, " \t").length() == 0)
+			continue;
+		else if (utils::stringTrim(newline, " \t") == "end")
 			return ;
 		std::istringstream 	line(newline);
 		

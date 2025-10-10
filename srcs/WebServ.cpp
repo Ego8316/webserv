@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:28:57 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:32:41 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,14 +98,10 @@ int WebServ::WebServRun()
 	events = this->_poll->pollWatchRevent();
 	if (events.size() == 0)
 		return (0);
-	std::cout << "step 1" << std::endl;
-	std::cout << *this->_poll << std::endl;
 	for (std::vector<pollRevent>::iterator event = events.begin(); event != events.end(); ++event)
 	{
-		std::cout << "step 2" << std::endl;
 		if (event->error)
 		{
-			std::cout << "step 2.1.1" << std::endl;
 			if (event->server == true)
 			{
 				std::cerr << "Server Error closed connection" << std::endl;
@@ -114,33 +110,24 @@ int WebServ::WebServRun()
 			}
 			else
 			{
-				std::cout << "step 2.1.2" << std::endl;
 				std::cout << "removing client " << event->client_id << std::endl;
 				removeClient(event->client_id);
 			}
 		}
 		else
 		{
-			std::cout << "step 2.2.1" << std::endl;
 			if (event->server == true)
 			{
 				if (this->newClient() == SERV_ERROR)
 					std::cerr << "Failed to accept new client" << std::endl;
-				else
-				{
-					std::cout << "step 2.2.2" << std::endl;
-				}
 			}
 			else
 			{
-				std::cout << "step 2.2.3" << std::endl;
 				std::cout << "Client " << event->client_id << " handles event" << std::endl;
 				this->_clients[event->client_id]->handleEvent();
 			}
 		}
-		std::cout << "step 3" << std::endl;
 	}
-	std::cout << "step 4" << std::endl;
 	return (0);
 }
 

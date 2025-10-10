@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 13:57:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:32:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,6 @@ std::vector<Config *> parseMultipleConfigs(std::string filename)
 		{
 			config_section += newline.substr(0, newline.find("}")) + "\n";
 			configs.push_back(new Config(config_section));
-			std::cout << *configs[0] << std::endl;
 			config_section = "";
 		}
 		else if (newline.length())
@@ -89,14 +88,12 @@ int main(int argc, char *argv[])
 	}
 	if (configs.size() == 0)
 		return (1);
-	std::cout << "Found " << configs.size() << " configurations" << std::endl;
 	for (unsigned int i = 0; i < configs.size(); ++i)
 		web_servers.push_back(new WebServ(configs[i]));
 	for (unsigned int i = 0; i < web_servers.size(); ++i)
 	{
 		if (web_servers[i]->WebServInit() == SERV_ERROR)
 		{
-			std::cout << "WEBSERVER ERROR !!!!!" << std::endl;
 			delete web_servers[i];
 			it_web = web_servers.begin() + i;
 			web_servers.erase(it_web);
@@ -112,7 +109,6 @@ int main(int argc, char *argv[])
 		{
 			if (web_servers[i]->WebServRun() == SERV_ERROR)
 			{
-				std::cout << "WEBSERVER ERROR !!!!!" << std::endl;
 				if (web_servers[i]->WebServReboot() == SERV_ERROR)
 				{
 					delete web_servers[i];
