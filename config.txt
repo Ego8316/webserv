@@ -9,7 +9,7 @@ MyServer1 I can write whatever here {
 	INCOMMING_QUEUE_BACKLOG = 100
 	BUFFER_SIZE = 1024
 	COOKIE_SESSIONS_MAX = 10000
-	COOKIE_LIFE_TIME = 2
+	COOKIE_LIFE_TIME = 1000
 	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite
 	ENABLE_LISTDIR = true
 	DEFAULT_PAGE = /index.html
@@ -38,7 +38,7 @@ Website 2 {
 	INCOMMING_QUEUE_BACKLOG = 100
 	BUFFER_SIZE = 1024
 	COOKIE_SESSIONS_MAX = 10000
-	COOKIE_LIFE_TIME = 2
+	COOKIE_LIFE_TIME = 1000
 
 	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite2
 	ENABLE_LISTDIR = true

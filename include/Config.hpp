@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 21:36:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 13:40:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,6 @@ class Config {
 		std::map<std::string, Redirection>		http_redir; //TODO finish this shit
 
 		ParseError								parse_error;
-		
-		static std::vector<Config *>	parseMultipleConfigs(std::string filename);
-		static void						deleteAllConfigs(std::vector<Config *> &configs);
 	private :
 };
 

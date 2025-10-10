@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 01:50:26 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 11:16:14 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,9 @@ RequestHandler::~RequestHandler(void)
 	return ;
 }
 
-Response	RequestHandler::handle(const Request &req, const Config &config)
+Response	RequestHandler::handle(const Request &req, const Config &config, std::vector<Cookie *> cookies)
 {
+	(void)cookies;
 	if (req.getError() == UNSUPPORTED_METHOD)
 		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
 	else if (req.getError() >= INVALID_REQUEST_LINE)

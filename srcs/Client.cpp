@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 01:33:40 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 12:12:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,18 +85,31 @@ int		Client::handleEvent()
 	std::string	request_str;
 	std::string	response_str;
 
+	std::cout << "step 2.2.2.0" << std::endl;
+	std::cout << "I say CONFIG IS " << std::endl;
+	std::cout << "config is " << this->_config << std::endl;
+	std::cout << "and *config is " << std::endl;
+	std::cout << *this->_config << std::endl;
 	bytes_read = _config->buffer_size;
+	std::cout << "step 2.2.2.0.1" << std::endl;
 	while (bytes_read == _config->buffer_size)
 	{
+		std::cout << "step 2.2.2.0.2" << std::endl;
 		bytes_read = socketRead(buffer, bytes_read);
 		if (bytes_read == SERV_ERROR)
 			return (SERV_ERROR);
+		std::cout << "step 2.2.2.0.3" << std::endl;
 		request_str += std::string(buffer).substr(0, bytes_read);
-		
+		std::cout << "step 2.2.2.1" << std::endl;
 	}
+	std::cout << "step 2.2.2.2" << std::endl;
 	Request	request(_all_cookies);
+	std::cout << "step 2.2.2.3" << std::endl;
 	request.parseRequest(request_str);
-	Response	response = RequestHandler::handle(request, *_config);
+	std::cout << "step 2.2.2.4" << std::endl;
+	std::vector<Cookie *> cookies = request.getQueryCookies();
+	std::cout << "cookies ! " << cookies.size() << std::endl;
+	Response	response = RequestHandler::handle(request, *_config, cookies);
 	response_str = response.toString();
 	if (socketWrite(response_str.c_str(), response_str.length()) == SERV_ERROR)
 		return (SERV_ERROR);

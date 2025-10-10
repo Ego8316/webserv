@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:15 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 14:56:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:00:05 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ class Client;
 class serverSocket;
 class Config;
 
-class serverPoll{
+class serverPoll
+{
 	public :
 	// CONSTRUCTORS
 		serverPoll(Config *config);
@@ -30,6 +31,7 @@ class serverPoll{
 	//DESTUCTORS
 		~serverPoll();
 	//GETTERS
+		std::vector<struct pollfd>			getPollFds();
 	//SETTERS
 	//MEMBER FUNCTIONS
 		void						pollAdd(int fd, int event, int indx);
@@ -40,3 +42,5 @@ class serverPoll{
 		std::vector<struct pollfd>			_poll_fds;
 		Config								*_config;
 };
+
+std::ostream	&operator<<(std::ostream &os, serverPoll &poll);

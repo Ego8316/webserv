@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/09 23:29:14 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 11:15:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class	Request;
 class	RequestHandler
 {
 	public:
-		static Response	handle(const Request &req, const Config &config);
+		static Response	handle(const Request &req, const Config &config, std::vector<Cookie *> cookies);
 
 	private:
 		RequestHandler(void);

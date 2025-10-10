@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 14:29:27 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:00:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,12 @@ void	serverPoll::pollAdd(int fd, int event, int indx)
 	new_poll_fd.events = event;
 	this->_poll_fds[indx] = new_poll_fd;
 }
+
+std::vector<struct pollfd>		serverPoll::getPollFds()
+{
+	return (this->_poll_fds);
+}
+
 
 void	serverPoll::pollRemove(int indx)
 {
@@ -88,4 +94,17 @@ std::vector<pollRevent>	serverPoll::pollWatchRevent()
 		this->_poll_fds[i].revents = 0;
 	}
 	return (ret);
+}
+
+std::ostream	&operator<<(std::ostream &os, serverPoll &poll)
+{
+	os << "poll stored at " << &poll << " monitor the followings fd\n[";
+	std::vector<struct pollfd>	pollfds = poll.getPollFds();
+	for (unsigned int i = 0; i < pollfds.size(); ++i)
+	{
+		if (pollfds[i].fd != 0)
+			os << pollfds[i].fd << std::endl;
+	}
+	os << "]" << std::endl;
+	return (os);
 }

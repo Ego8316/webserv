@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 01:57:05 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/10 13:40:19 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,6 +240,8 @@ ContentTypes		Config::strToContentType(std::string input)
 		return (FTYPE_ANY);
 	if (input == "text/*")
 		return (FTYPE_TEXT);
+	if (input == "text/plain")
+		return (FTYPE_PLAIN);
 	if (input == "image/*")
 		return (FTYPE_IMAGE);
 	if (input == "text/html")
@@ -267,62 +269,4 @@ std::ostream	&operator<<(std::ostream &os, const Config &item)
 	os << "cookie_life_time :" << item.cookie_life_time << std::endl;
 	os << "cookie_sessions_max :" << item.cookie_sessions_max << std::endl;
 	return (os);
-}
-
-std::vector<Config *> Config::parseMultipleConfigs(std::string filename)
-{
-	std::ifstream 			conf_file;
-	std::string				newline;
-	std::vector<Config *>	configs;
-	std::string				config_section;
-	
-	conf_file.open(filename.c_str(), std::ios::in);
-	
-	configs.resize(0);
-	if (!conf_file.is_open())
-	{
-		std::cerr << "Could not open config file" << std::endl;
-		return (configs);
-	}
-	while (std::getline(conf_file, newline))
-	{
-		if (newline.find("{") != std::string::npos)
-		{
-			if (config_section.length() != 0)
-			{
-				std::cerr << "Nested configs not supported" << std::endl;
-				deleteAllConfigs(configs);
-				return (configs);
-			}
-			else if (newline.find("}") != std::string::npos)
-			{
-				std::cerr << "Format not recognized" << std::endl;
-				deleteAllConfigs(configs);
-				return (configs);
-			}
-			else
-				config_section = newline.erase(0, newline.find("{") + 1) + "\n";
-		}
-		else if (newline.find("}") != std::string::npos)
-		{
-			config_section += newline.substr(0, newline.find("}")) + "\n";
-			configs.push_back(new Config(config_section));
-			std::cout << *configs[0] << std::endl;
-			config_section = "";
-		}
-		else if (newline.length())
-			config_section += newline + "\n";
-	}
-	conf_file.close();
-	return (configs);
-}
-
-void	Config::deleteAllConfigs(std::vector<Config *> &configs)
-{
-	for (unsigned int i = 0; i < configs.size(); ++i)
-	{
-		if (configs[i] != NULL)
-			delete configs[i];
-	}
-	configs.resize(0);
 }

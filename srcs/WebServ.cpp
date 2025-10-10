@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/08 21:15:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:04:13 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,30 +98,49 @@ int WebServ::WebServRun()
 	events = this->_poll->pollWatchRevent();
 	if (events.size() == 0)
 		return (0);
+	std::cout << "step 1" << std::endl;
+	std::cout << *this->_poll << std::endl;
 	for (std::vector<pollRevent>::iterator event = events.begin(); event != events.end(); ++event)
 	{
+		std::cout << "step 2" << std::endl;
 		if (event->is_error)
 		{
+			std::cout << "step 2.1.1" << std::endl;
 			if (event->client_id == 0)
 			{
 				std::cerr << "poll Wait failed" << std::endl;
-				// TODO do a clean exit, probably will see that at the end when we know what need to be closes/cleaned
+				// TODO do a clean exit, probably will see that at the end when we know what need to be closed/cleaned
 				return (SERV_ERROR);
 			}
 			else
-				removeClient(event->client_id);
+			{
+				std::cout << "step 2.1.2" << std::endl;
+				std::cout << "removing client " << event->client_id - 1 << std::endl;
+				removeClient(event->client_id - 1);
+			}
 		}
 		else
 		{
+			std::cout << "step 2.2.1" << std::endl;
 			if (event->client_id == 0)
 			{
 				if (this->newClient() == SERV_ERROR)
 					std::cerr << "Failed to accept new client" << std::endl;
+				else
+				{
+					std::cout << "step 2.2.2" << std::endl;
+				}
 			}
 			else
+			{
+				std::cout << "step 2.2.3" << std::endl;
+				std::cout << "Client " << event->client_id - 1 << " handles event" << std::endl;
 				this->_clients[event->client_id - 1]->handleEvent();
+			}
 		}
+		std::cout << "step 3" << std::endl;
 	}
+	std::cout << "step 4" << std::endl;
 	return (0);
 }
 
@@ -147,6 +166,7 @@ int WebServ::newClient()
 	}
 	this->_clients[indx]->setClientId(indx);
 	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN, indx + 1);
+	std::cout << "Accepted client " << indx << std::endl;
 	return (0);
 }
 
