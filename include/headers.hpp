@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 14:26:27 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/10 14:59:07 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,8 @@ enum	ResourceStatus
 	IS_CGI				= 1 << 2,
 	PERM_ROK			= 1 << 3,
 	PERM_WOK			= 1 << 4,
-	PERM_XOK			= 1 << 5
+	PERM_XOK			= 1 << 5,
+	IS_REDIRECT			= 1 << 6
 };
 
 enum ContentTypes
