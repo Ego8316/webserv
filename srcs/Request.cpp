@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/12 19:40:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 21:54:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,49 +70,73 @@ int		Request::parseRequest(std::string request, const Config &config)
 		return (SERV_ERROR);
 	}
 	_method = utils::strToMethod(methodStr);
-	if (!utils::isAcceptedMethod(config.accepted_methods, _method))
+	if (!config.isAcceptedMethod(_method))
 	{
 		_error = UNSUPPORTED_METHOD;
 	}
 	for (unsigned int i = 1; i < line_split.size(); ++i)
 	{
-		if (utils::stringTrim(line, "\\r\\n \t").length() == 0)
+		if (utils::stringTrim(line, "\r\n \t").length() == 0)
 			continue;
-		this->parseHeaderLine(line_split[i]);
+		parseHeaderLine(line_split[i]);
 	}
-	Cookie::removeExpired(this->_all_cookies);
+	Cookie::removeExpired(_all_cookies);
 	while (std::getline(stream, line) && line != "\r")
 	{
 		line_split = utils::stringSplit(line, "\\r\\n");
 		for (unsigned int i = 1; i < line_split.size(); ++i)
 		{
-			if (utils::stringTrim(line, "\\r\\n \t").length() == 0)
+			if (utils::stringTrim(line, "\r\n \t").length() == 0)
 				continue;
-			this->parseHeaderLine(line_split[i]);
+			parseHeaderLine(line_split[i]);
 		}
 	}
-	if (this->_query_cookies.size() == 0)
-		this->_query_cookies.push_back(Cookie::createSession(this->_all_cookies));
-	if (this->_accept == FTYPE_NONE)
-		this->_accept = FTYPE_ANY;
-	std::ostringstream	bodyStream;
-	bodyStream << stream.rdbuf();
-	_rawBody = bodyStream.str();
+	if (_query_cookies.size() == 0)
+		_query_cookies.push_back(Cookie::createSession(_all_cookies));
+	if (_accept == FTYPE_NONE)
+		_accept = FTYPE_ANY;
+
+	size_t			expected_size = 0;
+	char			*buffer;
+	size_t			bytes_read = 0;
+	std::string		body_str = "";
+
 	if (_headers.count("Content-Length"))
 	{
-		size_t	expected = std::atoi(_headers["Content-Length"].c_str());
-		if (_rawBody.size() != expected)
+		expected_size = std::atoi(_headers["Content-Length"].c_str());
+		if (expected_size > config.max_body_size)
 		{
-			std::cerr << "Bad content length" << std::endl;
-			_error = BAD_CONTENT_LENGTH;
+			_error = BODY_TOO_LONG;
 			return (SERV_ERROR);
 		}
 	}
+	else
+		expected_size = config.max_body_size;
+
+	buffer = new char[config.buffer_size];
+	stream.read(buffer, config.buffer_size);
+	bytes_read = stream.gcount();
+	while (stream && bytes_read && body_str.size() < expected_size)
+	{
+		body_str += std::string(buffer).substr(0, bytes_read);
+		stream.read(buffer, config.buffer_size);
+       	bytes_read = stream.gcount();
+	}
+	if (_rawBody.size() >= expected_size)
+	{
+		std::cerr << "Bad content length" << std::endl;
+		_error = BAD_CONTENT_LENGTH;
+		delete buffer;
+		return (SERV_ERROR);
+	}
+	delete buffer;
 	return (0);
 }
 
 int		Request::parseHeaderLine(std::string line)
 {
+	if (utils::stringTrim(line, "\r\n\\rn \t").length() == 0)
+		return (0);
 	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
 	Cookie						*cookie;
 

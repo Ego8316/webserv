@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/12 17:23:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 21:46:29 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ Config::Config(std::string config)
 			this->protocol = atoi(value.c_str());
 		else if (field == "METHODS")
 			this->parseMethod(conf_stream);
+		else if (field == "MAX_BODY_SIZE")
+			this->max_body_size = atoi(value.c_str());
 		else if (field == "CLIENT_LIMIT")
 			this->client_limit = atoi(value.c_str());
 		else if (field == "INCOMMING_QUEUE_BACKLOG")
@@ -249,6 +251,16 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
 		if (newline.find("}") != std::string::npos)
 			return ;
 	}
+}
+
+bool	Config::isAcceptedMethod( Method element) const
+{
+	for (unsigned int i = 0; i < this->accepted_methods.size(); ++i)
+	{
+		if (element == this->accepted_methods[i])
+			return (true);
+	}
+	return (false);
 }
 
 std::ostream	&operator<<(std::ostream &os, const Config &item)

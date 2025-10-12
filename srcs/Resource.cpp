@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/12 19:17:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 20:49:49 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,13 +93,13 @@ bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &co
 		raw_path_requested.erase(0, raw_path_requested.find("/"));
 	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
 	{
-		if (raw_path_requested == it->first)
+		if ((raw_path_requested == it->first) || (raw_path_requested + config.default_page == it->first))
 		{
 			_path = it->second.dest;
 			_redir_code = it->second.error_code;
 			_status = IS_REDIRECT;
 			return (true);
-		}
+		}	
 	}
 	return (false);
 }

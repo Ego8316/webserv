@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/12 18:01:36 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 21:29:55 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ int		Client::handleEvent()
 	std::string	request_str;
 	std::string	response_str;
 	
-	char	*buffer = new char[_config->buffer_size];
+	char	*buffer = new char[_config->buffer_size]; //TODO std::vector<char> buffer(1024);
 	bytes_read = _config->buffer_size;
 	while (bytes_read == _config->buffer_size)
 	{

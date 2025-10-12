@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/12 16:50:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 21:46:06 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class Config {
 		void			parseDefaultErrorPages(std::istringstream &conf_stream);
 		void			parseMethod(std::istringstream &conf_stream);
 		void			parseHttpRedir(std::istringstream &conf_stream);
+		bool			isAcceptedMethod(Method method) const;
 	//SETTERS
 	//MEMBER FUNCTIONS
 		unsigned int 							ip;
@@ -39,6 +40,7 @@ class Config {
 		int										domain;
 		int										type;
 		int										protocol;
+		size_t									max_body_size;
 		int										client_limit;
 		int										incoming_queue_backlog;
 		int										buffer_size;

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/12 18:04:08 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 20:34:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,14 +167,4 @@ Method			utils::strToMethod(std::string method_str)
 	else if (method_str == "DELETE")
 		return (DELETE);
 	return (ERROR);
-}
-
-bool	utils::isAcceptedMethod(std::vector<Method> vec, Method element)
-{
-	for (unsigned int i = 0; i < vec.size(); ++i)
-	{
-		if (element == vec[i])
-			return (true);
-	}
-	return (false);
 }

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/12 17:06:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 21:21:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ enum	ParseError
 	INVALID_HEADER,
 	BAD_CONTENT_LENGTH,
 	UNREADABLE_FILE,
-	INVALID_ACCEPT
+	BODY_TOO_LONG
 };
 
 enum	ResourceStatus
