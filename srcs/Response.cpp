@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 17:29:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 16:20:15 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
  * @brief Default constructor. Initializes status code to 200 OK.
  */
 Response::Response(void)
-	:	_statusCode(HTTP_OK)
+	:	_status_code(HTTP_OK)
 {
 	return ;
 }
@@ -40,7 +40,7 @@ Response	&Response::operator=(const Response &other)
 {
 	if (this != &other)
 	{
-		_statusCode = other._statusCode;
+		_status_code = other._status_code;
 		_header = other._header;
 		_body = other._body;
 		_headers = other._headers;
@@ -62,7 +62,7 @@ Response::~Response(void)
  */
 void	Response::setStatus(HttpStatus code)
 {
-	_statusCode = code;
+	_status_code = code;
 	return ;
 }
 
@@ -127,10 +127,6 @@ std::string	Response::httpStatusToStr(HttpStatus code)
 	switch(code)
 	{
 		case HTTP_OK:						return "OK";
-		case HTTP_REDIRECT:					return "Multiple Choices"; //TODO : le virer ?
-		case HTTP_REDIRECT_MOVE:			return "Moved Permanently";
-		case HTTP_REDIRECT_FOUND:			return "Found";
-		case HTTP_REDIRECT_PERM:			return "Permanent Redirect";
 		case HTTP_BAD_REQUEST:				return "Bad Request";
 		case HTTP_FORBIDDEN:				return "Forbidden";
 		case HTTP_NOT_FOUND:				return "Not Found";
@@ -154,8 +150,9 @@ void	Response::buildHeader(void)
 		_headers["Server"] = "Webserv/1.0 (Unix)";
 	if (!utils::mapHasEntry(_headers, std::string("Connection")))
 		_headers["Connection"] = "close";
-	_header = "HTTP/1.0 " + utils::toString(_statusCode)
-		+ " " + httpStatusToStr(_statusCode) + "\r\n";
+
+	_header = "HTTP/1.0 " + utils::toString(_status_code)
+		+ " " + httpStatusToStr(_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
 		_header += it->first + ": " + it->second + "\r\n";
 	_header += "\r\n";

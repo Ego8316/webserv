@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 18:52:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 17:23:18 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ Config::Config(std::string config)
 		}
 		else if (field == "PROTOCOL")
 			this->protocol = atoi(value.c_str());
+		else if (field == "METHODS")
+			this->parseMethod(conf_stream);
 		else if (field == "CLIENT_LIMIT")
 			this->client_limit = atoi(value.c_str());
 		else if (field == "INCOMMING_QUEUE_BACKLOG")
@@ -66,8 +68,6 @@ Config::Config(std::string config)
 			this->default_page = value;
 		else if (field == "DEFAULT_ERROR_PAGES" && value == "list")
 			this->parseDefaultErrorPages(conf_stream);
-		else if (field == "ACCEPT")
-			this->parseAccept(conf_stream);
 		else if (field == "HTTP_REDIR")
 			this->parseHttpRedir(conf_stream);
 	}
@@ -90,7 +90,7 @@ Config::Config(const Config &other)
 	this->enable_listdir = other.enable_listdir;
 	this->default_page = other.default_page;
 	this->default_error_pages = other.default_error_pages;
-	this->accept_list = other.accept_list;
+	this->accepted_methods = other.accepted_methods;
 	this->http_redir = other.http_redir;
 	this->parse_error = other.parse_error;
 }
@@ -115,7 +115,7 @@ Config &Config::operator=(const Config &other)
 		this->default_page = other.default_page;
 		this->default_error_pages = other.default_error_pages;
 		this->http_redir = other.http_redir;
-		this->accept_list = other.accept_list;
+		this->accepted_methods = other.accepted_methods;
 		this->parse_error = other.parse_error;
 	}
 	return (*this);
@@ -195,7 +195,7 @@ void		Config::parseDefaultErrorPages(std::istringstream &conf_stream)
 	}
 }
 
-void	Config::parseAccept(std::istringstream &conf_stream)
+void	Config::parseMethod(std::istringstream &conf_stream)
 {
 	std::string			newline;
 	std::string			field;
@@ -210,15 +210,15 @@ void	Config::parseAccept(std::istringstream &conf_stream)
 		
 		if (!(line >> field))
 		{
-			std::cerr << "Could not parse config line " << newline << " in accept"  << std::endl;
+			std::cerr << "Could not parse config line " << newline << " in methods"  << std::endl;
 			continue;
 		}
-		if (this->strToContentType(field) == FTYPE_NONE)
+		if (utils::strToMethod(field) == ERROR)
 		{
-			std::cerr << "Could not interpret Accept section in config: " << newline << std::endl;
+			std::cerr << "Could not interpret methods section in config: " << newline << std::endl;
 			continue;
 		}
-		this->accept_list.push_back(this->strToContentType(field));
+		this->accepted_methods.push_back(utils::strToMethod(field));
 	}
 }
 
@@ -251,25 +251,6 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
 	}
 }
 
-ContentTypes		Config::strToContentType(std::string input)
-{
-	if (input == "*/*")
-		return (FTYPE_ANY);
-	if (input == "text/*")
-		return (FTYPE_TEXT);
-	if (input == "text/plain")
-		return (FTYPE_PLAIN);
-	if (input == "image/*")
-		return (FTYPE_IMAGE);
-	if (input == "text/html")
-		return (FTYPE_HTML);
-	if (input == "image/png")
-		return (FTYPE_PNG);
-	if (input == "image/jpeg")
-		return (FTYPE_JPEG);
-	return (FTYPE_NONE);
-}
-
 std::ostream	&operator<<(std::ostream &os, const Config &item)
 {
 	os << "IP :" << item.ip << std::endl;
@@ -293,9 +274,9 @@ std::ostream	&operator<<(std::ostream &os, const Config &item)
 	for (dep_it = dep.begin(); dep_it != dep.end(); ++dep_it)
 		os << dep_it->first << ": " << dep_it->second << "\n";
 	os << std::endl;
-	os << "Accept list:" << std::endl;
-	for (unsigned int i = 0; i < item.accept_list.size(); ++i)
-		os << static_cast<int>(item.accept_list[i]);
+	os << "Accepted Methods:" << std::endl;
+	for (unsigned int i = 0; i < item.accepted_methods.size(); ++i)
+		os << item.accepted_methods[i] << "\n";
 	os << std::endl;
 	os << "Redirections:" << std::endl;
 	std::map<std::string, Redirection>		red = item.http_redir;

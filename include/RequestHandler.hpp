@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 16:35:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 15:56:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ class	Config;
 class	Client;
 class	Cookie;
 class	Request;
+class	Resource;
 
 class	RequestHandler
 {

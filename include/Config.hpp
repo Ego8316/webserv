@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 17:07:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 16:50:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,8 @@ class Config {
 		ParseError		getParseError();
 		void			setIP(std::string ip_str);
 		void			parseDefaultErrorPages(std::istringstream &conf_stream);
-		void			parseAccept(std::istringstream &conf_stream);
+		void			parseMethod(std::istringstream &conf_stream);
 		void			parseHttpRedir(std::istringstream &conf_stream);
-		ContentTypes	strToContentType(std::string input);
 	//SETTERS
 	//MEMBER FUNCTIONS
 		unsigned int 							ip;
@@ -50,7 +49,7 @@ class Config {
 		std::string								default_page;
 		
 		std::map<int, std::string>				default_error_pages;
-		std::vector<ContentTypes>				accept_list;
+		std::vector<Method>						accepted_methods;
 		std::map<std::string, Redirection>		http_redir; //TODO finish this shit
 
 		ParseError								parse_error;

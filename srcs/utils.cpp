@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:46:13 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 18:04:08 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ std::vector<std::string>	utils::stringSplit(std::string str, std::string del)
 	return (split_str);
 }
 
-std::string					utils::stringTrim(std::string str, std::string set)
+std::string			utils::stringTrim(std::string str, std::string set)
 {
 	unsigned int	last_size = str.size() + 1;
 
@@ -69,4 +69,112 @@ size_t	utils::getFileSize(const std::string &path)
 	if (stat(path.c_str(), &st) == 0)
 		return (st.st_size);
 	return (0);
+}
+
+ContentTypes		utils::strToContentType(std::string input)
+{
+	if (input == "*/*")
+		return (FTYPE_ANY);
+	if (input == "text/*")
+		return (FTYPE_TEXT);
+	if (input == "text/plain")
+		return (FTYPE_PLAIN);
+	if (input == "image/*")
+		return (FTYPE_IMAGE);
+	if (input == "text/html")
+		return (FTYPE_HTML);
+	if (input == "image/png")
+		return (FTYPE_PNG);
+	if (input == "image/jpeg")
+		return (FTYPE_JPEG);
+	return (FTYPE_NONE);
+}
+
+/**
+ * @brief Get MIME type string based on detected content type.
+ * 
+ * @return The MIME type (e.g., "text/html", "image/png").
+ */
+std::string	utils::contentTypeToStr(ContentTypes type)
+{
+	switch(type)
+	{
+		case FTYPE_HTML:	return "text/html";
+		case FTYPE_PLAIN:	return "text/plain";
+		case FTYPE_JPEG:	return "image/jpeg";
+		case FTYPE_PNG:		return "image/png";
+		default:			return "";
+	}
+}
+
+/**
+ * @brief Detects the type of the resource based on the file extension.
+ * 
+ * Updates _status to include IS_CGI for Python and PHP scripts.
+ */
+ContentTypes		utils::extensionToContentTypes(std::string fname)
+{
+	if (utils::endsWith(fname, ".py"))
+		return (FTYPE_CGI_PY);
+	else if (utils::endsWith(fname, ".php"))
+		return (FTYPE_CGI_PHP);
+	else if (utils::endsWith(fname, ".html"))
+		return (FTYPE_HTML);
+	else if (utils::endsWith(fname, ".jpeg"))
+		return (FTYPE_JPEG);
+	else if (utils::endsWith(fname, ".png"))
+		return (FTYPE_PNG);
+	else
+		return (FTYPE_PLAIN);
+}
+
+/**
+ * @brief Get the file extension associated with the content type.
+ * 
+ * @return File extension (e.g., ".html", ".png", ".php").
+ */
+std::string	utils::contentTypeToExtensions(ContentTypes type)
+{
+	switch(type)
+	{
+		case FTYPE_HTML:		return ".html";
+		case FTYPE_JPEG:		return ".jpeg";
+		case FTYPE_PNG:			return ".png";
+		case FTYPE_CGI_PY:		return ".py";
+		case FTYPE_CGI_PHP:		return ".php";
+		default:				return "";
+	}
+}
+
+
+std::string		utils::methodToStr(Method method)
+{
+	if (method == GET)
+		return ("GET");
+	else if (method == POST)
+		return ("POST");
+	else
+		return ("DELETE");
+	return ("");
+}
+
+Method			utils::strToMethod(std::string method_str)
+{
+	if (method_str == "GET")
+		return (GET);
+	else if (method_str == "POST")
+		return (POST);
+	else if (method_str == "DELETE")
+		return (DELETE);
+	return (ERROR);
+}
+
+bool	utils::isAcceptedMethod(std::vector<Method> vec, Method element)
+{
+	for (unsigned int i = 0; i < vec.size(); ++i)
+	{
+		if (element == vec[i])
+			return (true);
+	}
+	return (false);
 }

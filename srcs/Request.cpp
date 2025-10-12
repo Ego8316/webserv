@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 11:13:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 19:31:04 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 Request::Request(std::map<std::string, Cookie *> *all_cookies) : _all_cookies(all_cookies)
 {
 	this->_query_cookies.resize(0);
+	this->_accept = FTYPE_NONE;
 }
 
 Request::Request(const Request &other)
@@ -33,13 +34,14 @@ Request &Request::operator=(const Request &other)
 		_rawBody = other._rawBody;
 		_headers = other._headers;
 		_error = other._error;
+		_accept = other._accept;
 	}
 	return (*this);
 }
 
 Request::~Request(void) {}
 
-int		Request::parseRequest(std::string request)
+int		Request::parseRequest(std::string request, const Config &config)
 {
 	std::istringstream			stream(request);
 	std::string					line;
@@ -67,12 +69,14 @@ int		Request::parseRequest(std::string request)
 		_error = INVALID_REQUEST_LINE;
 		return (SERV_ERROR);
 	}
-	if (methodStr == "GET") _method = GET;
-	else if (methodStr == "POST") _method = POST;
-	else _method = DELETE;
+	_method = utils::strToMethod(methodStr);
+	if (!utils::isAcceptedMethod(config.accepted_methods, _method))
+	{
+		_error = UNSUPPORTED_METHOD;
+	}
 	for (unsigned int i = 1; i < line_split.size(); ++i)
 	{
-		if (line == "\\r\\n")
+		if (utils::stringTrim(line, "\\r\\n \t").length() == 0)
 			continue;
 		this->parseHeaderLine(line_split[i]);
 	}
@@ -82,13 +86,15 @@ int		Request::parseRequest(std::string request)
 		line_split = utils::stringSplit(line, "\\r\\n");
 		for (unsigned int i = 1; i < line_split.size(); ++i)
 		{
-			if (line == "\\r\\n")
+			if (utils::stringTrim(line, "\\r\\n \t").length() == 0)
 				continue;
 			this->parseHeaderLine(line_split[i]);
 		}
 	}
 	if (this->_query_cookies.size() == 0)
 		this->_query_cookies.push_back(Cookie::createSession(this->_all_cookies));
+	if (this->_accept == FTYPE_NONE)
+		this->_accept = FTYPE_ANY;
 	std::ostringstream	bodyStream;
 	bodyStream << stream.rdbuf();
 	_rawBody = bodyStream.str();
@@ -125,14 +131,16 @@ int		Request::parseHeaderLine(std::string line)
 				this->_query_cookies.push_back(cookie);
 			//TODO add filter on 
 		}
-		if (headerHasField(key))
+		else if (key == "Accept")
+			this->_accept = static_cast<ContentTypes>(this->_accept | utils::strToContentType(value));
+		else if (headerHasField(key))
 			this->_headers[key] = _headers[key] + "; " + value;
 		else
 			this->_headers[key] = value;
 	}
 	else
 	{
-		std::cerr << "Invalid Header in Request" << std::endl;
+		std::cerr << "Invalid Header in Request >" << line << "<" << std::endl;
 		_error = INVALID_HEADER;
 		return (SERV_ERROR);
 	}
@@ -169,6 +177,12 @@ int	Request::getError(void) const
 	return (_error);
 }
 		
+
+ContentTypes	Request::getAccept(void) const
+{
+	return (this->_accept);
+}
+
 void	Request::setMethod(Method method)
 {
 	this->_method = method;
@@ -202,12 +216,7 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 		os << "Parse error detected: " << src.getError() << std::endl;
 		return (os);
 	}
-	if (method == GET)
-		methodStr = "GET";
-	else if (method == POST)
-		methodStr = "POST";
-	else
-		methodStr = "DELETE";
+	methodStr = utils::methodToStr(method);
 	os << "Method:\t\t" << methodStr << std::endl
 		<< "Target:\t\t" << src.getRequestTarget() << std::endl
 		<< "Version:\t" << src.getVersion() << std::endl

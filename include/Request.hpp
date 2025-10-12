@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 11:14:14 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 17:12:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Request
 		Request	&operator=(const Request &other);
 		~Request(void);
 
-		int									parseRequest(std::string request);
+		int									parseRequest(std::string request, const Config &config);
 		int									parseHeaderLine(std::string line);
 		Method								getMethod(void) const;
 		std::string							getRequestTarget(void) const;
@@ -36,6 +36,7 @@ class Request
 		std::map<std::string, std::string>	getHeaders(void) const;
 		int									getError(void) const;
 		std::vector<Cookie *>				getQueryCookies();
+		ContentTypes						getAccept() const;
 
 		void								setMethod(Method method);
 		bool								headerHasField(const std::string field);
@@ -48,6 +49,7 @@ class Request
 		std::string							_rawBody;
 		std::map<std::string, std::string>	_headers;
 		int									_error;
+		ContentTypes						_accept;
 		std::map<std::string, Cookie *>		*_all_cookies;
 		std::vector<Cookie *>				_query_cookies; //TODO
 };

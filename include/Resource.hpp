@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 20:10:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 18:58:15 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 #include "headers.hpp"
 #include "utils.hpp"
 #include "Config.hpp"
+#include "Request.hpp"
+
+class Request;
 
 /**
  * @class Resource
@@ -30,13 +33,13 @@ class	Resource
 		Resource	&operator=(const Resource &other);
 		~Resource(void);
 
-		void	build(const std::string &requestTarget, const Config &config);
+		void				build(const Request &request, const Config &config);
 
 		std::string	getMimeType(void) const;
 		std::string	getExtension(void) const;
 
 		const std::string	&getPath(void) const;
-		int					getStatus(void) const;
+		ResourceStatus		getStatus(void) const;
 		size_t				getSize(void) const;
 		HttpStatus			getHttpStatus(void)	const;
 		ContentTypes		getType(void) const;
@@ -52,12 +55,13 @@ class	Resource
 
 	private:
 		std::string		_path;
-		int				_status;
+		ResourceStatus	_status;
 		size_t			_size;
 		ContentTypes	_type;
 		HttpStatus		_redir_code;
 		
 		bool	_checkRedirect(const std::string &requestTarget, const Config &config);
+		bool	_checkAccept(const Request &request);
 		int		_resolvePath(const std::string &requestTarget, const Config &config);
 		void	_evaluatePermissions(void);
 		void	_detectType(void);

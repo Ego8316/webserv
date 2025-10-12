@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:34:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 17:12:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,13 @@ bool 						startsWith(const std::string& str, const std::string& prefix);
 std::vector<std::string>	stringSplit(std::string str, std::string del);
 std::string					stringTrim(std::string str, std::string set);
 size_t						getFileSize(const std::string &path);
+ContentTypes				strToContentType(std::string input);
+std::string					contentTypeToStr(ContentTypes type);
+ContentTypes				extensionToContentTypes(std::string fname);
+std::string					contentTypeToExtensions(ContentTypes type);
+std::string					methodToStr(Method method);
+Method						strToMethod(std::string method);
+bool						isAcceptedMethod(std::vector<Method> vec, Method element);
 
 template <typename T>
 std::string	toString(const T &src)

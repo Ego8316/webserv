@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 16:52:09 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/12 17:06:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,8 @@ enum	ParseError
 	INVALID_REQUEST_LINE,
 	INVALID_HEADER,
 	BAD_CONTENT_LENGTH,
-	UNREADABLE_FILE
+	UNREADABLE_FILE,
+	INVALID_ACCEPT
 };
 
 enum	ResourceStatus
@@ -98,7 +99,8 @@ enum	ResourceStatus
 	PERM_ROK			= 1 << 3,
 	PERM_WOK			= 1 << 4,
 	PERM_XOK			= 1 << 5,
-	IS_REDIRECT			= 1 << 6
+	IS_REDIRECT			= 1 << 6,
+	ACCEPT_ERROR		= 1 << 7
 };
 
 enum ContentTypes
@@ -114,6 +116,7 @@ enum ContentTypes
 		FTYPE_IMAGE		= 56,	// 0 0 1 1 1 0 0 0
 		FTYPE_CGI_PY	= 64,	// 0 1 0 0 0 0 0 0
 		FTYPE_CGI_PHP	= 128,	// 1 0 0 0 0 0 0 0
+		FTYPE_IS_CGI	= 192,	// 1 1 0 0 0 0 0 0
 		FTYPE_ANY		= 255	// 1 1 1 1 1 1 1 1
 };
 
