@@ -6,41 +6,43 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 16:59:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:10:11 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGI.hpp"
 
-CGI::CGI() {}
+cgi::cgi() {}
 
-CGI::CGI(const CGI &other)
+cgi::cgi(const cgi &other)
 {
+	(void)other;
 }
 
-CGI &CGI::operator=(const CGI &other)
+cgi &cgi::operator=(const cgi &other)
 {
+	(void)other;
+	return (*this);
 }
 
-CGI::~CGI() {}
+cgi::~cgi() {}
 
 
-void		CGI::CGIRun(Request &request)
+void		cgi::cgiRun(Client &client, Request &request, Config &config)
 {
-	int		pipeToCGI[2];
-	int		pipeFromCGI[2];
+	int		pipe_to_CGI[2];
+	int		pipe_from_CGI[2];
 	pid_t	pid[2];
 
-	setenv("METHOD", utils::methodToStr(request.getMethod()).c_str(), 1);
-	setenv("QUERY_STRING", request.getQueryString().c_str(), 1);
+	//setenv("METHOD", utils::methodToStr(request.getMethod()).c_str(), 1);
+	//setenv("QUERY_STRING", request.getQueryString().c_str(), 1);
 
-	
-	if (pipe(pipeToCGI) == -1)
+	if (pipe(pipe_to_CGI) == -1)
 	{
 		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
 		return ;
 	}
-	if (pipe(pipeFromCGI) == -1)
+	if (pipe(pipe_from_CGI) == -1)
 	{
 		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
 		return ;
@@ -48,48 +50,108 @@ void		CGI::CGIRun(Request &request)
 	pid[0] = fork();
 	if (pid[0] == 0)
 	{
-		this->CGICommunication(pid, pipeToCGI, pipeFromCGI);
+		this->cgiCommunication(client, request, config, pipe_to_CGI, pipe_from_CGI);
 	}
 	else
 	{
-		this->CGIExecute(request, pipeToCGI, pipeFromCGI);
+		this->cgiExecute(request, config, pipe_to_CGI, pipe_from_CGI);
 	}
 	//waitpid();
 }
 
-void	CGI::CGICommunication(int *pid, int *pipeToCGI, int *pipeFromCGI)
+void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int *pipe_to_CGI, int *pipe_from_CGI)
 {
-	close(pipeToCGI[PIPE_READ_END]);
-	close(pipeFromCGI[PIPE_WRITE_END]);
-	if (dup2(pipeToCGI[PIPE_WRITE_END], STDOUT_FILENO) == -1)
+	int		original_standards_fds[2];
+
+	close(pipe_to_CGI[PIPE_READ_END]);
+	close(pipe_from_CGI[PIPE_WRITE_END]);
+	/*original_standards_fds[STDIN_FILENO] = dup(STDIN_FILENO);
+	original_standards_fds[STDOUT_FILENO] = dup(STDOUT_FILENO);
+	if (dup2(pipe_to_CGI[PIPE_WRITE_END], STDOUT_FILENO) == -1
+		|| dup2(pipe_from_CGI[PIPE_READ_END], STDIN_FILENO) == -1)
 	{
+		std::cerr << "dup2 initialisation failed" << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
-		close(pipeToCGI[PIPE_WRITE_END]);
-		close(pipeFromCGI[PIPE_READ_END]);
 	}
-	if (dup2(pipeFromCGI[PIPE_READ_END], STDIN_FILENO) == -1)
+	close(pipe_to_CGI[PIPE_WRITE_END]);
+	close(pipe_from_CGI[PIPE_READ_END]);*/
+	
+	size_t				bytes_sent;
+	size_t				total_count;
+	const std::string	&request_str = request.getRawBody();
+	size_t				mssg_len = request_str.size();
+	std::vector<char>	buffer(config.buffer_size);
+	size_t				bytes_read;
+
+	total_count = 0;
+	
+	while (total_count < mssg_len)
 	{
-		this->_status = HTTP_INTERNAL_SERVER_ERROR;
-		close(pipeToCGI[PIPE_WRITE_END]);
-		close(pipeFromCGI[PIPE_READ_END]);
+		bytes_sent = write(pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + total_count, config.buffer_size);
+		if (bytes_sent == -1)
+		{
+			std::cerr << "Failed to send body to CGI" << std::endl;
+			_status = HTTP_INTERNAL_SERVER_ERROR;
+			return ;
+		}
+		total_count += bytes_sent;
 	}
+	close(pipe_to_CGI[PIPE_WRITE_END]);
+	total_count = 0;
+	bytes_read = config.buffer_size;
+	while (bytes_read == config.buffer_size)
+	{
+		bytes_read = read(pipe_from_CGI[PIPE_READ_END], &buffer[0] , buffer.size());
+		if (bytes_sent == -1)
+		{
+			std::cerr << "Failed to send body to CGI" << std::endl;
+			_status = HTTP_INTERNAL_SERVER_ERROR;
+			return ;
+		}
+		if (client.socketWrite(&buffer[0], buffer.size()) == -1)
+			return ;
+		total_count += bytes_sent;
+	}
+
+	if (dup2(original_standards_fds[STDOUT_FILENO], STDOUT_FILENO) == -1
+		|| dup2(original_standards_fds[STDIN_FILENO], STDIN_FILENO) == -1)
+		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 }
 
-void	CGI::CGIExecute(Request &request, int *pipeToCGI, int *pipeFromCGI)
+void	cgi::cgiExecute(Request &request, Config &config, int *pipe_to_CGI, int *pipe_from_CGI)
 {
-	close(pipeToCGI[PIPE_WRITE_END]);
-	close(pipeFromCGI[PIPE_READ_END]);
+	int		original_standards_fds[2];
+
+	close(pipe_to_CGI[PIPE_WRITE_END]);
+	close(pipe_from_CGI[PIPE_READ_END]);
+	if (dup2(pipe_to_CGI[PIPE_READ_END], STDIN_FILENO) == -1
+		|| dup2(pipe_from_CGI[PIPE_WRITE_END], STDOUT_FILENO) == -1)
+	{
+		std::cerr << "dup2 initialisation failed" << std::endl;
+		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+	}
+	close(pipe_to_CGI[PIPE_READ_END]);
+	close(pipe_from_CGI[PIPE_WRITE_END]);
+	
+	(void)request;
+	
+	if (dup2(original_standards_fds[STDOUT_FILENO], STDOUT_FILENO) == -1
+		|| dup2(original_standards_fds[STDIN_FILENO], STDIN_FILENO) == -1)
+		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+}
+
+std::string	&cgi::cgiPassOutput()
+{
+	std::string *a = new std::string("lala");
+	return (*a);
+}
+
+void		cgi::cgiReadInput(std::string &input)
+{
+	(void)input;
+}
+
+void		cgi::cgiRestor()
+{
 	
 }
-
-std::string	&CGI::CGIPassOutput()
-{
-	
-}
-
-void		CGI::CGIReadInput(std::string &input)
-{
-	
-}
-
-

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 16:08:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 17:22:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ ContentTypes				extensionToContentTypes(std::string fname);
 std::string					contentTypeToExtensions(ContentTypes type);
 std::string					methodToStr(Method method);
 Method						strToMethod(std::string method);
-bool						isAcceptedMethod(std::vector<Method> vec, Method element);
 std::string					extractPath(std::string full_path); //TODO remove
 
 template <typename T>

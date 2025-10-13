@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 16:42:20 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 18:38:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,7 +196,7 @@ std::string Request::getVersion(void) const
 	return (_version);
 }
 
-std::string Request::getRawBody(void) const
+const std::string &Request::getRawBody(void) const
 {
 	return (_rawBody);
 }

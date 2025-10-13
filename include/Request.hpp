@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 15:01:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 18:24:42 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class Request
 		Method								getMethod(void) const;
 		std::string							getRequestTarget(void) const;
 		std::string							getVersion(void) const;
-		std::string							getRawBody(void) const;
+		const std::string					&getRawBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
 		int									getError(void) const;
 		std::vector<Cookie *>				getQueryCookies();
@@ -57,4 +57,4 @@ class Request
 		std::vector<Cookie *>				_query_cookies; //TODO
 };
 
-std::ostream	&operator<<(std::ostream &os, const Request &src);
+std::ostream	&operator<<(std::ostream &os, Request &src);
