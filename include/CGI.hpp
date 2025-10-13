@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 20:04:02 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:16:06 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class cgi {
 		void		cgiExecute(Request &request, Config &config, int *pipeToCGI, int *pipeFromCGI);
 		std::string	&cgiPassOutput();
 		void		cgiReadInput(std::string &input);
+		void		cgiRestoreFds(int *original_standard_fds);
 	private :
 		HttpStatus	_status;
 };

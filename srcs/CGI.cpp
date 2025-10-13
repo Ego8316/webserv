@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 20:10:11 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:22:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,21 +61,7 @@ void		cgi::cgiRun(Client &client, Request &request, Config &config)
 
 void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int *pipe_to_CGI, int *pipe_from_CGI)
 {
-	int		original_standards_fds[2];
-
-	close(pipe_to_CGI[PIPE_READ_END]);
-	close(pipe_from_CGI[PIPE_WRITE_END]);
-	/*original_standards_fds[STDIN_FILENO] = dup(STDIN_FILENO);
-	original_standards_fds[STDOUT_FILENO] = dup(STDOUT_FILENO);
-	if (dup2(pipe_to_CGI[PIPE_WRITE_END], STDOUT_FILENO) == -1
-		|| dup2(pipe_from_CGI[PIPE_READ_END], STDIN_FILENO) == -1)
-	{
-		std::cerr << "dup2 initialisation failed" << std::endl;
-		this->_status = HTTP_INTERNAL_SERVER_ERROR;
-	}
-	close(pipe_to_CGI[PIPE_WRITE_END]);
-	close(pipe_from_CGI[PIPE_READ_END]);*/
-	
+	int					original_standard_fds[2];
 	size_t				bytes_sent;
 	size_t				total_count;
 	const std::string	&request_str = request.getRawBody();
@@ -83,8 +69,9 @@ void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int
 	std::vector<char>	buffer(config.buffer_size);
 	size_t				bytes_read;
 
+	close(pipe_to_CGI[PIPE_READ_END]);
+	close(pipe_from_CGI[PIPE_WRITE_END]);
 	total_count = 0;
-	
 	while (total_count < mssg_len)
 	{
 		bytes_sent = write(pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + total_count, config.buffer_size);
@@ -108,14 +95,11 @@ void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int
 			_status = HTTP_INTERNAL_SERVER_ERROR;
 			return ;
 		}
-		if (client.socketWrite(&buffer[0], buffer.size()) == -1)
+		if (client.socketWrite(&buffer[0], buffer.size()) == SERV_ERROR)
 			return ;
 		total_count += bytes_sent;
 	}
-
-	if (dup2(original_standards_fds[STDOUT_FILENO], STDOUT_FILENO) == -1
-		|| dup2(original_standards_fds[STDIN_FILENO], STDIN_FILENO) == -1)
-		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+	this->cgiRestoreFds(original_standard_fds);
 }
 
 void	cgi::cgiExecute(Request &request, Config &config, int *pipe_to_CGI, int *pipe_from_CGI)
@@ -133,7 +117,7 @@ void	cgi::cgiExecute(Request &request, Config &config, int *pipe_to_CGI, int *pi
 	close(pipe_to_CGI[PIPE_READ_END]);
 	close(pipe_from_CGI[PIPE_WRITE_END]);
 	
-	(void)request;
+	
 	
 	if (dup2(original_standards_fds[STDOUT_FILENO], STDOUT_FILENO) == -1
 		|| dup2(original_standards_fds[STDIN_FILENO], STDIN_FILENO) == -1)
@@ -151,7 +135,9 @@ void		cgi::cgiReadInput(std::string &input)
 	(void)input;
 }
 
-void		cgi::cgiRestor()
+void		cgi::cgiRestoreFds(int *original_standard_fds)
 {
-	
+	if (dup2(original_standard_fds[STDOUT_FILENO], STDOUT_FILENO) == -1
+		|| dup2(original_standard_fds[STDIN_FILENO], STDIN_FILENO) == -1)
+		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 }
