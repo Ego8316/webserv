@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 18:34:26 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 15:10:29 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <arpa/inet.h>
 #include <cerrno>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <strings.h>
@@ -109,6 +110,8 @@ enum ContentTypes
 enum	HttpStatus
 {
 	HTTP_OK = 200,
+	HTTP_CREATED = 201,
+	HTTP_NO_CONTENT = 204,
 	HTTP_REDIRECT = 300,
 	HTTP_REDIRECT_MOVE = 301,
 	HTTP_REDIRECT_FOUND = 302,
@@ -116,6 +119,7 @@ enum	HttpStatus
 	HTTP_BAD_REQUEST = 400,
 	HTTP_FORBIDDEN = 403,
 	HTTP_NOT_FOUND = 404,
+	HTTP_CONFLICT = 409,
 	HTTP_INTERNAL_SERVER_ERROR = 500,
 	HTTP_NOT_IMPLEMENTED = 501,
 	HTTP_VERSION_NOT_SUPPORTED = 505

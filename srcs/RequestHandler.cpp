@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 19:58:53 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 15:22:12 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,11 @@ Response	RequestHandler::_handlePost(const Request &req, const Config &config, c
 	Response	response;
 
 	(void)req;
-	(void)config;
-	(void)res;
+	if (!res.isWritable())
+		return (_handleError(HTTP_FORBIDDEN, config));
+	if (req.getRawBody().empty())
+		return (_handleError(HTTP_BAD_REQUEST, config));
+	
 	
 	return (response);
 }
@@ -112,9 +115,21 @@ Response	RequestHandler::_handleDelete(const Request &req, const Config &config,
 	Response	response;
 
 	(void)req;
-	(void)config;
-	(void)res;
-	
+	if (res.isDirectory() && !utils::endsWith(res.getPath(), "/"))
+		return (_handleError(HTTP_CONFLICT, config));
+	if (std::remove(res.getPath().c_str()) != 0)
+	{
+		if (errno == EACCES || errno == EPERM)
+			return (_handleError(HTTP_FORBIDDEN, config));
+		if (errno == ENOENT)
+			return (_handleError(HTTP_NOT_FOUND, config));
+		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
+	}
+
+	response.setStatus(HTTP_NO_CONTENT);
+	response.setBody("");
+	response.setContentLength(0);
+	response.buildHeader();
 	return (response);
 }
 
