@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/12 21:21:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 16:02:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,9 @@
 #define BUFFER_SIZE 1024
 #define CLIENT_LIMIT 1000
 
+# define PIPE_READ_END 0
+# define PIPE_WRITE_END 1
+
 // Default error pages
 #define ERROR_PAGE_400 "<html><head><title>400 Bad Request</title></head>" \
                        "<body><h1>400 Bad Request</h1>" \
@@ -76,7 +79,6 @@ enum	Method
 	GET,
 	POST,
 	DELETE,
-	CGI_RUN,
 	ERROR
 };
 

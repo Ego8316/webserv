@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 12:31:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 13:34:11 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,15 +90,15 @@ int		Client::handleEvent()
 	int			bytes_read;
 	std::string	request_str;
 	std::string	response_str;
-	
-	char	*buffer = new char[_config->buffer_size]; //TODO std::vector<char> buffer(1024);
+	std::vector<char> buffer(_config->buffer_size);
+
 	bytes_read = _config->buffer_size;
-	while (bytes_read == _config->buffer_size)
+	while (bytes_read == _config->buffer_size && request_str.size() < this->_config->max_body_size)
 	{
-		bytes_read = socketRead(buffer, bytes_read);
+		bytes_read = socketRead(&buffer[0], buffer.size());
 		if (bytes_read == SERV_ERROR)
 			return (SERV_ERROR);
-		request_str += std::string(buffer).substr(0, bytes_read);
+		request_str += std::string(buffer.begin(), buffer.end()).substr(0, bytes_read);
 	}
 	std::cout << "REQUEST = " << std::endl;
 	std::cout << request_str << std::endl;
@@ -117,7 +117,6 @@ int		Client::handleEvent()
 	std::cout << response_str << std::endl;
 	if (socketWrite(response_str.c_str(), response_str.length()) == SERV_ERROR)
 		return (SERV_ERROR);
-	delete[] buffer;
 	return (0); //TODO return err code
 }
 

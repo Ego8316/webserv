@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 12:33:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 15:01:41 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ int		Request::parseRequest(std::string request, const Config &config)
 		_error = INVALID_REQUEST_LINE;
 		return (SERV_ERROR);
 	}
+	parseRequestTarget();
 	_method = utils::strToMethod(methodStr);
 	if (!config.isAcceptedMethod(_method))
 	{
@@ -97,7 +98,6 @@ int		Request::parseRequest(std::string request, const Config &config)
 		_accept = FTYPE_ANY;
 
 	size_t			expected_size = 0;
-	char			*buffer;
 	size_t			bytes_read = 0;
 	std::string		body_str = "";
 
@@ -113,23 +113,35 @@ int		Request::parseRequest(std::string request, const Config &config)
 	else
 		expected_size = config.max_body_size;
 
-	buffer = new char[config.buffer_size];
-	stream.read(buffer, config.buffer_size);
+	std::vector<char> buffer(config.buffer_size);
+	stream.read(&buffer[0], buffer.size());
 	bytes_read = stream.gcount();
 	while (stream && bytes_read && body_str.size() < expected_size)
 	{
-		body_str += std::string(buffer).substr(0, bytes_read);
-		stream.read(buffer, config.buffer_size);
+		body_str += std::string(buffer.begin(), buffer.end()).substr(0, bytes_read);
+		stream.read(&buffer[0], buffer.size());
        	bytes_read = stream.gcount();
 	}
 	if (_rawBody.size() >= expected_size)
 	{
 		std::cerr << "Bad content length" << std::endl;
 		_error = BAD_CONTENT_LENGTH;
-		delete buffer;
 		return (SERV_ERROR);
 	}
-	delete buffer;
+	return (0);
+}
+
+int		Request::parseRequestTarget()
+{
+	if (_requestTarget.find("?") != std::string::npos)
+	{
+		_query_string = _requestTarget.substr(_requestTarget.find("?") + 1, _requestTarget.length());
+		_requestTarget.erase(_requestTarget.find("?"), _requestTarget.length());
+	}
+	if (utils::startsWith(_requestTarget, "http://"))
+		_requestTarget.erase(0, 8);
+	if (utils::startsWith(_requestTarget, "www"))
+		_requestTarget.erase(0, _requestTarget.find("/"));
 	return (0);
 }
 
@@ -225,6 +237,11 @@ std::string		Request::headerGetField(const std::string field)
 std::vector<Cookie *>		Request::getQueryCookies()
 {
 	return (this->_query_cookies);
+}
+
+std::string					Request::getQueryString() const
+{
+	return (this->_query_string);
 }
 
 std::ostream	&operator<<(std::ostream &os, const Request &src)

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: white;
+            font-family: Arial, sans-serif;
+            color: black;
+        }
+        
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome</h1>
+    <button onclick="switchToDarkTheme()">Switch to Dark Theme</button>
+
+    <script>
+        function switchToDarkTheme() {
+            // This would typically send a request to your server
+            // For now, we'll just show an alert since there's no actual server
+            alert('Request sent to server to switch to dark theme!');
+            
+            // In a real application, you would use something like:
+            // fetch('/switch-theme', { method: 'POST', body: JSON.stringify({theme: 'dark'}) })
+            //   .then(response => response.json())
+            //   .then(data => {
+            //       if (data.success) {
+            //           window.location.reload(); // Reload to get the dark theme from server
+            //       }
+            //   });
+        }
+    </script>
+</body>
+</html>

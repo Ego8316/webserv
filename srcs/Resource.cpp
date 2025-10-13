@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 12:45:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 15:56:36 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,14 +83,6 @@ bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &co
 	std::string							raw_path_requested(requestTarget);
 	std::map<std::string, Redirection>	redirs = config.getRedirections();
 	
-	if (raw_path_requested.length() == 0)
-		return (false);
-	if (utils::startsWith(raw_path_requested, "https://"))
-		raw_path_requested.erase(0, 9);
-	if (utils::startsWith(raw_path_requested, "http://"))
-		raw_path_requested.erase(0, 8);
-	if (utils::startsWith(raw_path_requested, "www"))
-		raw_path_requested.erase(0, raw_path_requested.find("/"));
 	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
 	{
 		if ((raw_path_requested == it->first) || (raw_path_requested + config.default_page == it->first))

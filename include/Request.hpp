@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/12 17:12:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 15:01:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class Request
 		~Request(void);
 
 		int									parseRequest(std::string request, const Config &config);
+		int									parseRequestTarget();
 		int									parseHeaderLine(std::string line);
 		Method								getMethod(void) const;
 		std::string							getRequestTarget(void) const;
@@ -37,6 +38,7 @@ class Request
 		int									getError(void) const;
 		std::vector<Cookie *>				getQueryCookies();
 		ContentTypes						getAccept() const;
+		std::string							getQueryString() const;
 
 		void								setMethod(Method method);
 		bool								headerHasField(const std::string field);
@@ -45,6 +47,7 @@ class Request
 	private:
 		Method								_method;
 		std::string							_requestTarget;
+		std::string							_query_string;
 		std::string							_version;
 		std::string							_rawBody;
 		std::map<std::string, std::string>	_headers;
