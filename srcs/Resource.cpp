@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 16:31:18 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 17:10:54 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,13 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
 	}
 	_status = static_cast<ResourceStatus>(_status | EXISTS);
 	if (S_ISDIR(file_stat.st_mode))
-		_status = static_cast<ResourceStatus>(_status | IS_DIR);
+	{
+		std::string	index_path = _path + config.default_page;
+		if (stat(index_path.c_str(), &file_stat) == 0)
+			_path = index_path;
+		else
+			_status = static_cast<ResourceStatus>(_status | IS_DIR);
+	}
 	return (0);
 }
 

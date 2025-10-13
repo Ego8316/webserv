@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 17:03:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 18:03:19 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,6 @@ Response	RequestHandler::handle(const Request &request, const Config &config, st
 		return (_handleError(HTTP_FORBIDDEN, config));
 	if (resource.getStatus() & ACCEPT_ERROR)
 		return (_handleError(HTTP_BAD_REQUEST, config));
-	if (resource.isDirectory()) //TODO -> pareil pour delete
-		return (_handleListDir(request, config, resource));
 	if (resource.isCGI())
 		return (_handleCGI(request, config, resource));
 	switch (request.getMethod())
@@ -111,7 +109,7 @@ Response	RequestHandler::_handlePost(const Request &request, const Config &confi
 	(void)request;
 	if (!resource.isWritable())
 		return (_handleError(HTTP_FORBIDDEN, config));
-	if (request.getRawBody().empty())
+	if (request.getRawBody().empty() || resource.isDirectory())
 		return (_handleError(HTTP_BAD_REQUEST, config));
 	
 	
