@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 18:33:45 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:01:43 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,19 +25,22 @@ class Config {
 	//DESTUCTORS
 		~Config();
 	//GETTERS
+		std::map<std::string, Redirection>		getRedirections() const;
+		ParseError		getParseError();
 		void			setIP(std::string ip_str);
 		void			parseDefaultErrorPages(std::istringstream &conf_stream);
-		void			parseAccept(std::istringstream &conf_stream);
+		void			parseMethod(std::istringstream &conf_stream);
 		void			parseHttpRedir(std::istringstream &conf_stream);
-		ContentTypes	strToContentType(std::string input);
+		bool			isAcceptedMethod(Method method) const;
 	//SETTERS
 	//MEMBER FUNCTIONS
 		unsigned int 							ip;
 		int										port_number;
-		std::string								host_name; //TODO
+		//std::string								host_name; //TODO ?
 		int										domain;
 		int										type;
 		int										protocol;
+		size_t									max_body_size;
 		int										client_limit;
 		int										incoming_queue_backlog;
 		int										buffer_size;
@@ -48,7 +51,7 @@ class Config {
 		std::string								default_page;
 		
 		std::map<int, std::string>				default_error_pages;
-		std::vector<ContentTypes>				accept_list;
+		std::vector<Method>						accepted_methods;
 		std::map<std::string, Redirection>		http_redir; //TODO finish this shit
 	private :
 };

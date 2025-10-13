@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 15:10:29 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:02:57 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,8 @@ enum	ResourceStatus
 	PERM_ROK			= 1 << 3,
 	PERM_WOK			= 1 << 4,
 	PERM_XOK			= 1 << 5,
-	IS_REDIRECT			= 1 << 6
+	IS_REDIRECT			= 1 << 6,
+	ACCEPT_ERROR		= 1 << 7
 };
 
 enum ContentTypes
@@ -101,9 +102,10 @@ enum ContentTypes
 		FTYPE_JPEG		= 8,	// 0 0 0 0 1 0 0 0
 		FTYPE_PNG		= 16,	// 0 0 0 1 0 0 0 0
 								// 0 0 1 0 0 0 0 0
-		FTYPE_IMAGE		= 56,	// 0 0 1 1 1 0 0 
+		FTYPE_IMAGE		= 56,	// 0 0 1 1 1 0 0 0
 		FTYPE_CGI_PY	= 64,	// 0 1 0 0 0 0 0 0
 		FTYPE_CGI_PHP	= 128,	// 1 0 0 0 0 0 0 0
+		FTYPE_IS_CGI	= 192,	// 1 1 0 0 0 0 0 0
 		FTYPE_ANY		= 255	// 1 1 1 1 1 1 1 1
 };
 
@@ -135,7 +137,7 @@ typedef struct s_pollRevent
 typedef struct s_Redirection
 {
 	std::string		dest;
-	int				error_code;
+	HttpStatus		error_code;
 }	Redirection;
 
 #define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 01:30:59 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 12:16:29 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,17 @@
 #include "RequestHandler.hpp"
 #include "Config.hpp"
 #include "Cookie.hpp"
+#include "serverPoll.hpp"
 
 class Query;
 class Config;
 class Cookie;
+class serverPoll;
 
 class Client {
 	public :
 	// CONSTRUCTORS
-		Client(Config *config, std::map<std::string, Cookie *> *all_cookies);
+		Client(Config *config, std::map<std::string, Cookie *> *all_cookies, serverPoll *poll);
 		Client(const Client &other);
 		Client &operator=(const Client &other);
 	//DESTUCTORS
@@ -47,4 +49,5 @@ class Client {
 		int								_client_id;
 		std::map<std::string, Cookie *> *_all_cookies;
 		Config							*_config;
+		serverPoll						*_poll;
 };

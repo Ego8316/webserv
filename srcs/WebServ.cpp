@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 18:35:24 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:11:17 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,14 +141,14 @@ int WebServ::newClient()
 		std::cerr << "Cannot accept new clients" << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions);
+	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions, this->_poll);
 	if (this->_server->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
 		return (SERV_ERROR);
 	}
 	this->_clients[indx]->setClientId(indx);
-	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN, indx);
+	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN | POLLOUT, indx);
 	std::cout << "Accepted client " << indx << std::endl;
 	return (0);
 }

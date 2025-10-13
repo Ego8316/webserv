@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:28:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 12:31:42 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ serverPoll &serverPoll::operator=(const serverPoll &other)
 
 serverPoll::~serverPoll() {}
 
-void	serverPoll::pollAdd(int fd, int event, int indx)
+void	serverPoll::pollAdd(int fd, nfds_t event, int indx)
 {
 	if (indx == -1)
 		indx = this->_poll_fds.size() - 1;
@@ -106,6 +106,24 @@ std::vector<pollRevent>	serverPoll::pollWatchRevent()
 	return (ret);
 }
 
+bool			serverPoll::pollAvailFor(int indx, nfds_t operation)
+{
+	int		ret = poll(&this->_poll_fds[indx], 1, 0);
+
+	if (ret == -1)
+	{
+		std::cerr << "Poll failed when checking for operation " << operation << " for client " << indx << std::endl;
+		return (false);
+	}
+	else if (ret == 0)
+	{
+		std::cerr << "Poll timed out for operation " << operation << " for client " << indx << std::endl;
+		return (false);
+	}
+	else
+		return (this->_poll_fds[indx].revents & operation);
+}
+		
 std::ostream	&operator<<(std::ostream &os, serverPoll &poll)
 {
 	os << "poll stored at " << &poll << " monitor the followings fd\n[";

@@ -5,6 +5,14 @@ MyServer1 I can write whatever here {
 	DOMAIN = AF_INET
 	TYPE = SOCK_STREAM
 	PROTOCOL = 0
+
+	METHODS = list
+		GET
+		POST
+		DELETE
+	end
+
+	MAX_BODY_SIZE = 4048000
 	CLIENT_LIMIT = 1000
 	INCOMMING_QUEUE_BACKLOG = 100
 	BUFFER_SIZE = 1024
@@ -13,18 +21,14 @@ MyServer1 I can write whatever here {
 	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite
 	ENABLE_LISTDIR = true
 	DEFAULT_PAGE = /index.html
+
 	DEFAULT_ERROR_PAGES = dict
 		404 : error/404.html
 		403 : error/403.html
 	end
 
-	ACCEPT = unsep_list
-		text/plain
-		text/html
-	end
-
-	REDIRECT = dict
-		WebSite/redirect_test/redi_test.txt = WebSite/some_pagew/page.html
+	HTTP_REDIR = dict
+		/redirect_test/redi_test.txt = /some_page/page.html 301
 	end
 }
 
@@ -34,6 +38,14 @@ Website 2 {
 	DOMAIN = AF_INET
 	TYPE = SOCK_STREAM
 	PROTOCOL = 0
+
+	METHODS = list
+		GET
+		POST
+		DELETE
+	end
+
+	MAX_BODY_SIZE = 4048000
 	CLIENT_LIMIT = 1000
 	INCOMMING_QUEUE_BACKLOG = 100
 	BUFFER_SIZE = 1024
@@ -48,12 +60,7 @@ Website 2 {
 		403 : error/403.html
 	end
 
-	ACCEPT = unsep_list
-		text/plain
-		text/html
-	end
-
-	REDIRECT = dict
-		/index.html = WebSite/some_pagew/page.html 308
+	HTTP_REDIR = dict
+		/index.html = /some_page/page2.html 301
 	end
 }

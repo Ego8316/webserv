@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 18:33:35 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:14:33 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,21 +20,21 @@ Config::Config(std::string config)
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (utils::stringTrim(newline, " \t").length() == 0)
+		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue ;
 		std::istringstream 			line(newline);
 	
 		if (!(line >> field >> equal >> value) || (equal != "=" && equal != ":"))
 		{
-			std::cerr << "Could not parse config line " << newline << std::endl;
+			std::cerr << "Could not parse config line " << newline << " in global"   << std::endl;
 			continue;
 		}
 		if (field == "IP")
 			this->setIP(value);
 		if (field == "PORT")
 			this->port_number = atoi(value.c_str());
-		if (field == "HOST_NAME")
-			this->host_name = value;
+		//if (field == "HOST_NAME")
+		//	this->host_name = value;
 		else if (field == "DOMAIN")
 		{
 			if (value == "AF_INET")
@@ -47,6 +47,10 @@ Config::Config(std::string config)
 		}
 		else if (field == "PROTOCOL")
 			this->protocol = atoi(value.c_str());
+		else if (field == "METHODS")
+			this->parseMethod(conf_stream);
+		else if (field == "MAX_BODY_SIZE")
+			this->max_body_size = atoi(value.c_str());
 		else if (field == "CLIENT_LIMIT")
 			this->client_limit = atoi(value.c_str());
 		else if (field == "INCOMMING_QUEUE_BACKLOG")
@@ -65,8 +69,6 @@ Config::Config(std::string config)
 			this->default_page = value;
 		else if (field == "DEFAULT_ERROR_PAGES" && value == "list")
 			this->parseDefaultErrorPages(conf_stream);
-		else if (field == "ACCEPT")
-			this->parseAccept(conf_stream);
 		else if (field == "HTTP_REDIR")
 			this->parseHttpRedir(conf_stream);
 	}
@@ -74,9 +76,10 @@ Config::Config(std::string config)
 
 Config::Config(const Config &other)
 {
+	this->ip = other.ip;
 	this->port_number = other.port_number;
 	this->domain = other.domain;
-	this->host_name = other.host_name;
+	//this->host_name = other.host_name;
 	this->type = other.type;
 	this->protocol = other.protocol;
 	this->client_limit = other.client_limit;
@@ -88,7 +91,7 @@ Config::Config(const Config &other)
 	this->enable_listdir = other.enable_listdir;
 	this->default_page = other.default_page;
 	this->default_error_pages = other.default_error_pages;
-	this->accept_list = other.accept_list;
+	this->accepted_methods = other.accepted_methods;
 	this->http_redir = other.http_redir;
 }
 
@@ -96,9 +99,10 @@ Config &Config::operator=(const Config &other)
 {
 	if (this != &other)
 	{
+		this->ip = other.ip;
 		this->port_number = other.port_number;
 		this->domain = other.domain;
-		this->host_name = other.host_name;
+		//this->host_name = other.host_name;
 		this->type = other.type;
 		this->protocol = other.protocol;
 		this->client_limit = other.client_limit;
@@ -111,12 +115,22 @@ Config &Config::operator=(const Config &other)
 		this->default_page = other.default_page;
 		this->default_error_pages = other.default_error_pages;
 		this->http_redir = other.http_redir;
-		this->accept_list = other.accept_list;
+		this->accepted_methods = other.accepted_methods;
 	}
 	return (*this);
 }
 
 Config::~Config() {}
+
+std::map<std::string, Redirection>		Config::getRedirections() const
+{
+	return (this->http_redir);
+}
+		
+ParseError		Config::getParseError()
+{
+	return (this->parse_error);
+}
 
 void			Config::setIP(std::string ip_str)
 {
@@ -160,15 +174,15 @@ void		Config::parseDefaultErrorPages(std::istringstream &conf_stream)
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (utils::stringTrim(newline, " \t").length() == 0)
+		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue;
-		else if (utils::stringTrim(newline, " \t") == "end")
+		else if (utils::stringTrim(newline, " \t\n") == "end")
 			return ;
 		std::istringstream 	line(newline);
 		
 		if (!(line >> field >> equal >> value) || (equal != "=" && equal != ":"))
 		{
-			std::cerr << "Could not parse config line " << newline << std::endl;
+			std::cerr << "Could not parse config line " << newline << " in default error pages" << std::endl;
 			continue;
 		}
 		if (field < 200 || field > 600)
@@ -180,30 +194,30 @@ void		Config::parseDefaultErrorPages(std::istringstream &conf_stream)
 	}
 }
 
-void	Config::parseAccept(std::istringstream &conf_stream)
+void	Config::parseMethod(std::istringstream &conf_stream)
 {
 	std::string			newline;
 	std::string			field;
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (utils::stringTrim(newline, " \t").length() == 0)
+		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue;
-		else if (utils::stringTrim(newline, " \t") == "end")
+		else if (utils::stringTrim(newline, " \t\n") == "end")
 			return ;
 		std::istringstream 	line(newline);
 		
 		if (!(line >> field))
 		{
-			std::cerr << "Could not parse config line " << newline << std::endl;
+			std::cerr << "Could not parse config line " << newline << " in methods"  << std::endl;
 			continue;
 		}
-		if (this->strToContentType(field) == FTYPE_NONE)
+		if (utils::strToMethod(field) == ERROR)
 		{
-			std::cerr << "Could not interpret Accept section in config: " << newline << std::endl;
+			std::cerr << "Could not interpret methods section in config: " << newline << std::endl;
 			continue;
 		}
-		this->accept_list.push_back(this->strToContentType(field));
+		this->accepted_methods.push_back(utils::strToMethod(field));
 	}
 }
 
@@ -215,56 +229,68 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
 
 	while (std::getline(conf_stream, newline))
 	{
-		if (utils::stringTrim(newline, " \t").length() == 0)
+		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue;
-		else if (utils::stringTrim(newline, " \t") == "end")
+		else if (utils::stringTrim(newline, " \t\n") == "end")
 			return ;
 		std::istringstream 	line(newline);
 		
 		if (!(line >> path >> equal >> dest >> error_code) || (equal != "=" && equal != ":"))
 		{
-			std::cerr << "Could not parse config line " << newline << std::endl;
+			std::cerr << "Could not parse config line " << newline << " in http redirections"  << std::endl;
 			continue;
 		}
 		this->http_redir[path].dest = dest;
-		this->http_redir[path].error_code = error_code;
+		if ((300 <= error_code && error_code <= 302) || error_code == 308)
+			this->http_redir[path].error_code = static_cast<HttpStatus>(error_code);
+		else
+			this->http_redir[path].error_code = HTTP_REDIRECT;
 		if (newline.find("}") != std::string::npos)
 			return ;
 	}
 }
 
-ContentTypes		Config::strToContentType(std::string input)
+bool	Config::isAcceptedMethod( Method element) const
 {
-	if (input == "*/*")
-		return (FTYPE_ANY);
-	if (input == "text/*")
-		return (FTYPE_TEXT);
-	if (input == "text/plain")
-		return (FTYPE_PLAIN);
-	if (input == "image/*")
-		return (FTYPE_IMAGE);
-	if (input == "text/html")
-		return (FTYPE_HTML);
-	if (input == "image/png")
-		return (FTYPE_PNG);
-	if (input == "image/jpeg")
-		return (FTYPE_JPEG);
-	return (FTYPE_NONE);
+	for (unsigned int i = 0; i < this->accepted_methods.size(); ++i)
+	{
+		if (element == this->accepted_methods[i])
+			return (true);
+	}
+	return (false);
 }
 
 std::ostream	&operator<<(std::ostream &os, const Config &item)
 {
 	os << "IP :" << item.ip << std::endl;
 	os << "port_number :" << item.port_number << std::endl;
-	os << "incoming_queue_backlog :" << item.incoming_queue_backlog << std::endl;
-	os << "client_limit :" << item.client_limit << std::endl;
+	//os << "host_name :" << item.host_name << std::endl;
 	os << "domain :" << item.domain << std::endl;
 	os << "type :" << item.type << std::endl;
 	os << "protocol :" << item.protocol << std::endl;
+	os << "client_limit :" << item.client_limit << std::endl;
+	os << "incoming_queue_backlog :" << item.incoming_queue_backlog << std::endl;
 	os << "buffer_size :" << item.buffer_size << std::endl;
-	os << "ServHome :" << item.server_home << std::endl;
-	os << "default_page :" << item.default_page << std::endl;
-	os << "cookie_life_time :" << item.cookie_life_time << std::endl;
 	os << "cookie_sessions_max :" << item.cookie_sessions_max << std::endl;
+	os << "cookie_life_time :" << item.cookie_life_time << std::endl;
+	os << "ServHome :" << item.server_home << std::endl;
+	os << "enable_listdir :" << item.enable_listdir << std::endl;
+	os << "default_page :" << item.default_page << std::endl;
+	os << "Default error pages:" << std::endl;
+	std::map<int, std::string>		dep = item.default_error_pages;
+	std::map<int, std::string>::iterator		dep_it;
+	for (dep_it = dep.begin(); dep_it != dep.end(); ++dep_it)
+		os << dep_it->first << ": " << dep_it->second << "\n";
+	os << std::endl;
+	os << "Accepted Methods:" << std::endl;
+	for (unsigned int i = 0; i < item.accepted_methods.size(); ++i)
+		os << item.accepted_methods[i] << "\n";
+	os << std::endl;
+	os << "Redirections:" << std::endl;
+	std::map<std::string, Redirection>		red = item.http_redir;
+	std::map<std::string, Redirection>::iterator	red_it;
+	for (red_it = red.begin(); red_it != red.end(); ++red_it)
+		os << red_it->first << " -> " << red_it->second.dest << " with errcode " << red_it->second.error_code << "\n";
+	os << std::endl;
 	return (os);
 }

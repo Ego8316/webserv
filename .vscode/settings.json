@@ -75,6 +75,6 @@
         "__nullptr": "cpp",
         "cerrno": "cpp",
         "codecvt": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
     }
 }

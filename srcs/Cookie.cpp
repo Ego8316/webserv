@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cookie.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 01:55:28 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 12:05:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,6 +240,14 @@ std::string			Cookie::genHeader()
 	return (header);
 }
 
+bool		Cookie::applyToPath(std::string path)
+{
+	if (this->_path.length() == 0 || this->_path == "/")
+		return (true);
+	if (utils::startsWith(path, _path))
+		return (true);
+	return (false);
+}
 
 std::ostream	&operator<<(std::ostream &os, const Cookie &item)
 {

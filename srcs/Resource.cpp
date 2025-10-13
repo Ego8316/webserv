@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/10 18:49:33 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:10:07 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@
  */
 Resource::Resource(void)
 	:	_path(""),
-		_status(0),
+		_status(EXISTS),
 		_size(0),
-		_type(FTYPE_PLAIN)
+		_type(FTYPE_ANY)
 {
 	return ;
 }
@@ -66,13 +66,50 @@ Resource::~Resource(void)
  * @param requestTarget Requested path from the HTTP request.
  * @param config Server configuration.
  */
-void	Resource::build(const std::string &requestTarget, const Config &config)
+void	Resource::build(const Request &request, const Config &config)
 {
-	if (_resolvePath(requestTarget, config) == SERV_ERROR)
+	if (_checkRedirect(request.getRequestTarget(), config))
+		return ;
+	if (_resolvePath(request.getRequestTarget(), config) == SERV_ERROR)
 		return ;
 	_evaluatePermissions();
 	_detectType();
+	_checkAccept(request);
 	return ;
+}
+
+bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &config)
+{
+	std::string							raw_path_requested(requestTarget);
+	std::map<std::string, Redirection>	redirs = config.getRedirections();
+	
+	if (raw_path_requested.length() == 0)
+		return (false);
+	if (utils::startsWith(raw_path_requested, "https://"))
+		raw_path_requested.erase(0, 9);
+	if (utils::startsWith(raw_path_requested, "http://"))
+		raw_path_requested.erase(0, 8);
+	if (utils::startsWith(raw_path_requested, "www"))
+		raw_path_requested.erase(0, raw_path_requested.find("/"));
+	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
+	{
+		if ((raw_path_requested == it->first) || (raw_path_requested + config.default_page == it->first))
+		{
+			_path = it->second.dest;
+			_redir_code = it->second.error_code;
+			_status = IS_REDIRECT;
+			return (true);
+		}	
+	}
+	return (false);
+}
+
+bool	Resource::_checkAccept(const Request &request)
+{
+
+	if (!(this->_type & request.getAccept()))
+		_status = static_cast<ResourceStatus>(_status | ACCEPT_ERROR);
+	return (this->_type & request.getAccept());
 }
 
 /**
@@ -94,11 +131,12 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
 	struct stat	file_stat;
 
 	_path = config.server_home + requestTarget;
-	_status &= ~(EXISTS | IS_DIR);
+	_status = static_cast<ResourceStatus>(_status & ~(EXISTS | IS_DIR));
 	if (stat(_path.c_str(), &file_stat) == -1)
 	{
 		if (errno == EACCES)
-			_status |= EXISTS;
+			_status = static_cast<ResourceStatus>(_status | EXISTS);
+		std::cerr << "Cannot find ressource " << _path << std::endl;
 		return (SERV_ERROR);
 	}
 	_status |= EXISTS;
@@ -116,15 +154,15 @@ void	Resource::_evaluatePermissions(void)
 {
 	struct stat	file_stat;
 
-	_status &= ~(PERM_ROK | PERM_WOK | PERM_XOK);
-	if (stat(_path.c_str(), &file_stat) == -1)
+	_status = static_cast<ResourceStatus>(_status & ~(PERM_ROK | PERM_WOK | PERM_XOK));
+	if (stat(_path.c_str(), &fileStat) == -1)
 		return ;
-	if (file_stat.st_mode & S_IRUSR)
-		_status |= PERM_ROK;
-	if (file_stat.st_mode & S_IWUSR)
-		_status |= PERM_WOK;
-	if (file_stat.st_mode & S_IXUSR)
-		_status |= PERM_XOK;
+	if (fileStat.st_mode & S_IRUSR)
+		_status = static_cast<ResourceStatus>(_status | PERM_ROK);
+	if (fileStat.st_mode & S_IWUSR)
+		_status = static_cast<ResourceStatus>(_status | PERM_WOK);
+	if (fileStat.st_mode & S_IXUSR)
+		_status = static_cast<ResourceStatus>(_status | PERM_XOK);
 }
 
 /**
@@ -134,61 +172,10 @@ void	Resource::_evaluatePermissions(void)
  */
 void	Resource::_detectType(void)
 {
-	_status &= ~IS_CGI;
-	if (utils::endsWith(_path, ".py"))
-	{
-		_status |= IS_CGI;
-		_type = FTYPE_CGI_PY;
-	}
-	else if (utils::endsWith(_path, ".php"))
-	{
-		_status |= IS_CGI;
-		_type = FTYPE_CGI_PHP;
-	}
-	else if (utils::endsWith(_path, ".html"))
-		_type = FTYPE_HTML;
-	else if (utils::endsWith(_path, ".jpeg"))
-		_type = FTYPE_JPEG;
-	else if (utils::endsWith(_path, ".png"))
-		_type = FTYPE_PNG;
-	else
-		_type = FTYPE_PLAIN;
+	_type = utils::extensionToContentTypes(_path);
+	_status = static_cast<ResourceStatus>(_status & ~IS_CGI);
+	_status = static_cast<ResourceStatus>(_status | (IS_CGI * ((FTYPE_IS_CGI & _type) != 0)));
 	return ;
-}
-
-/**
- * @brief Get MIME type string based on detected content type.
- * 
- * @return The MIME type (e.g., "text/html", "image/png").
- */
-std::string	Resource::getMimeType(void) const
-{
-	switch(_type)
-	{
-		case FTYPE_HTML:	return "text/html";
-		case FTYPE_PLAIN:	return "text/plain";
-		case FTYPE_JPEG:	return "image/jpeg";
-		case FTYPE_PNG:		return "image/png";
-		default:			return "";
-	}
-}
-
-/**
- * @brief Get the file extension associated with the content type.
- * 
- * @return File extension (e.g., ".html", ".png", ".php").
- */
-std::string	Resource::getExtension(void) const
-{
-	switch(_type)
-	{
-		case FTYPE_HTML:		return ".html";
-		case FTYPE_JPEG:		return ".jpeg";
-		case FTYPE_PNG:			return ".png";
-		case FTYPE_CGI_PY:		return ".py";
-		case FTYPE_CGI_PHP:		return ".php";
-		default:				return "";
-	}
 }
 
 /**
@@ -204,7 +191,7 @@ const std::string	&Resource::getPath(void) const
  * @brief Returns the status.
  * @return Status.
  */
-int	Resource::getStatus(void) const
+ResourceStatus	Resource::getStatus(void) const
 {
 	return (_status);
 }
@@ -243,6 +230,11 @@ bool	Resource::exists(void) const
 bool	Resource::isCGI(void) const
 {
 	return (_status & IS_CGI);
+}
+
+bool	Resource::isRedirect(void) const
+{
+	return (_status & IS_REDIRECT);
 }
 
 /**

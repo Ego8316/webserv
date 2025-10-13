@@ -6,13 +6,16 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:30:57 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 12:31:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies) : _all_cookies(all_cookies), _config(config)
+Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies, serverPoll *poll)
+	:	_all_cookies(all_cookies),
+		_config(config),
+		_poll(poll)
 {
 	this->_client_len = sizeof(this->_client_addr);
 }
@@ -58,6 +61,8 @@ void    Client::setFd(int fd)
 		
 int		Client::socketRead(char *buffer, int bytes_read) //TODO
 {
+	if (!this->_poll->pollAvailFor(this->_client_id, POLLIN))
+		return (0);
 	bytes_read = recv(this->_client_fd, buffer, bytes_read, 0);
 	if (bytes_read == SERV_ERROR)
 	{
@@ -70,9 +75,11 @@ int		Client::socketRead(char *buffer, int bytes_read) //TODO
 
 int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 
 {
+	if (!this->_poll->pollAvailFor(this->_client_id, POLLOUT))
+		return (0);
 	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR)
 	{
-		std::cerr << "Receive failed\n";
+		std::cerr << "Send failed\n";
 		return (SERV_ERROR);
 	}
 	return (0);
@@ -80,11 +87,11 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 		
 int		Client::handleEvent()
 {
-	char		buffer[BUFFER_SIZE];
 	int			bytes_read;
 	std::string	request_str;
 	std::string	response_str;
 	
+	char	*buffer = new char[_config->buffer_size]; //TODO std::vector<char> buffer(1024);
 	bytes_read = _config->buffer_size;
 	while (bytes_read == _config->buffer_size)
 	{
@@ -93,13 +100,24 @@ int		Client::handleEvent()
 			return (SERV_ERROR);
 		request_str += std::string(buffer).substr(0, bytes_read);
 	}
+	std::cout << "REQUEST = " << std::endl;
+	std::cout << request_str << std::endl;
+	if (request_str.length() == 0)
+	{
+		std::cerr << "Empty request. Ignoring..." << std::endl;
+		return (SERV_ERROR);
+	}
 	Request	request(_all_cookies);
-	request.parseRequest(request_str);
-	std::vector<Cookie *> cookies = request.getQueryCookies();
+	request.parseRequest(request_str, *_config);
+	std::cout << request << std::endl;
+	std::vector<Cookie *>	cookies = request.getQueryCookies();
 	Response	response = RequestHandler::handle(request, *_config, cookies);
 	response_str = response.toString();
+	std::cout << "RESPONSE =" << std::endl;
+	std::cout << response_str << std::endl;
 	if (socketWrite(response_str.c_str(), response_str.length()) == SERV_ERROR)
 		return (SERV_ERROR);
+	delete[] buffer;
 	return (0); //TODO return err code
 }
 
