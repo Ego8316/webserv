@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/12 20:49:49 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 12:45:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,13 +183,8 @@ void	Resource::_evaluatePermissions(void)
 void	Resource::_detectType(void)
 {
 	_type = utils::extensionToContentTypes(_path);
-	std::cout << _type << std::endl;
-	std::cout << _status << std::endl;
 	_status = static_cast<ResourceStatus>(_status & ~IS_CGI);
-	std::cout << _type << std::endl;
-	std::cout << IS_CGI << " * " << FTYPE_IS_CGI << "|" << _type << " " << (FTYPE_IS_CGI | _type) << " " << ((FTYPE_IS_CGI & _type) != 0) << std::endl;
 	_status = static_cast<ResourceStatus>(_status | (IS_CGI * ((FTYPE_IS_CGI & _type) != 0)));
-	std::cout << _status << std::endl;
 	return ;
 }
 

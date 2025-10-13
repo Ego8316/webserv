@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/12 20:25:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 12:46:09 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,43 +37,29 @@ RequestHandler::~RequestHandler(void)
 Response	RequestHandler::handle(const Request &request, const Config &config, std::vector<Cookie *> cookies)
 {
 	(void)cookies;
-	std::cout << "step 1" << std::endl;
 	if (request.getError() == UNSUPPORTED_METHOD)
-	{
-		std::cout << "step 2" << std::endl;
 		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
-	}
 	else if (request.getError() >= INVALID_REQUEST_LINE)
-	{
-		std::cout << "step 3" << std::endl;
-		std::cout << request.getError() << std::endl;
 		return _handleError(HTTP_BAD_REQUEST, config);
-	}
 
 	Resource	resource;
 	resource.build(request, config);
 
 	if (resource.isRedirect())
 		return (_handleRedirect(request, config, resource));
-	std::cout << "step 4" << std::endl;
 	if (!resource.exists()) //TODO -> @Hugo faut corriger ca du coup par ex. pour un post c'est OK
 	{
-		std::cout << "Resource not found" << std::endl;
+		std::cerr << "Resource not found" << std::endl;
 		return (_handleError(HTTP_NOT_FOUND, config));
 	}
-	std::cout << "step 5" << std::endl;
 	if (resource.isForbidden())
 		return (_handleError(HTTP_FORBIDDEN, config));
-	std::cout << "step 6" << std::endl;
 	if (resource.getStatus() & ACCEPT_ERROR)
 		return (_handleError(HTTP_BAD_REQUEST, config));
-	std::cout << "step 7" << std::endl;
 	if (resource.isDirectory()) //TODO -> pareil pour delete
 		return (_handleListDir(request, config, resource));
-	std::cout << "step 8" << std::endl;
 	if (resource.isCGI())
 		return (_handleCGI(request, config, resource));
-	std::cout << "step 9" << std::endl;
 	switch (request.getMethod())
 	{
 		case GET:		return _handleGet(request, config, resource);
@@ -190,7 +176,6 @@ Response	RequestHandler::_handleError(HttpStatus code, const Config &config)
 	Response	response;
 	std::string	content;
 
-	std::cout << "HandleError" << std::endl;
 	if (utils::mapHasEntry(config.default_error_pages, (int)code))
 	{
 		std::ifstream	file(config.default_error_pages.at((int)code).c_str());
