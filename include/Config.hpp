@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 11:17:47 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:40:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ class Config {
 		~Config();
 	//GETTERS
 		std::map<std::string, Redirection>		getRedirections() const;
-		ParseError		getParseError();
 		void			setIP(std::string ip_str);
 		void			parseDefaultErrorPages(std::istringstream &conf_stream);
 		void			parseMethod(std::istringstream &conf_stream);
@@ -52,9 +51,7 @@ class Config {
 		
 		std::map<int, std::string>				default_error_pages;
 		std::vector<Method>						accepted_methods;
-		std::map<std::string, Redirection>		http_redir; //TODO finish this shit
-
-		ParseError								parse_error;
+		std::map<std::string, Redirection>		http_redir;
 	private :
 };
 

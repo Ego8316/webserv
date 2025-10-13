@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 11:18:11 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 16:31:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ Config::Config(std::string config)
 	std::string			newline;
 	std::string			field, equal, value;
 
-	this->parse_error = NONE;
 	while (std::getline(conf_stream, newline))
 	{
 		if (utils::stringTrim(newline, " \t\n").length() == 0)
@@ -94,7 +93,6 @@ Config::Config(const Config &other)
 	this->default_error_pages = other.default_error_pages;
 	this->accepted_methods = other.accepted_methods;
 	this->http_redir = other.http_redir;
-	this->parse_error = other.parse_error;
 }
 
 Config &Config::operator=(const Config &other)
@@ -118,7 +116,6 @@ Config &Config::operator=(const Config &other)
 		this->default_error_pages = other.default_error_pages;
 		this->http_redir = other.http_redir;
 		this->accepted_methods = other.accepted_methods;
-		this->parse_error = other.parse_error;
 	}
 	return (*this);
 }
@@ -128,11 +125,6 @@ Config::~Config() {}
 std::map<std::string, Redirection>		Config::getRedirections() const
 {
 	return (this->http_redir);
-}
-		
-ParseError		Config::getParseError()
-{
-	return (this->parse_error);
 }
 
 void			Config::setIP(std::string ip_str)
@@ -215,7 +207,7 @@ void	Config::parseMethod(std::istringstream &conf_stream)
 			std::cerr << "Could not parse config line " << newline << " in methods"  << std::endl;
 			continue;
 		}
-		if (utils::strToMethod(field) == ERROR)
+		if (utils::strToMethod(field) == UNKNOWN)
 		{
 			std::cerr << "Could not interpret methods section in config: " << newline << std::endl;
 			continue;
@@ -279,7 +271,6 @@ std::ostream	&operator<<(std::ostream &os, const Config &item)
 	os << "ServHome :" << item.server_home << std::endl;
 	os << "enable_listdir :" << item.enable_listdir << std::endl;
 	os << "default_page :" << item.default_page << std::endl;
-	os << "parse_error :" << item.parse_error << std::endl;
 	os << "Default error pages:" << std::endl;
 	std::map<int, std::string>		dep = item.default_error_pages;
 	std::map<int, std::string>::iterator		dep_it;

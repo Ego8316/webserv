@@ -1,0 +1,32 @@
+MyServer1 I can write whatever here {
+	IP : localhost
+	PORT : 8080
+	DOMAIN = AF_INET
+	TYPE = SOCK_STREAM
+	PROTOCOL = 0
+
+	METHODS = list
+		GET
+		POST
+		DELETE
+	end
+
+	MAX_BODY_SIZE = 4048000
+	CLIENT_LIMIT = 1000
+	INCOMMING_QUEUE_BACKLOG = 100
+	BUFFER_SIZE = 1024
+	COOKIE_SESSIONS_MAX = 10000
+	COOKIE_LIFE_TIME = 1000
+	SERVER_HOME = ./WebSite
+	ENABLE_LISTDIR = true
+	DEFAULT_PAGE = /index.html
+
+	DEFAULT_ERROR_PAGES = dict
+		404 : error/404.html
+		403 : error/403.html
+	end
+
+	HTTP_REDIR = dict
+		/redirect_test/redi_test.txt = /some_page/page.html 301
+	end
+}

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 20:22:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:37:07 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,12 @@ void		cgi::cgiRun(Client &client, Request &request, Config &config)
 void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int *pipe_to_CGI, int *pipe_from_CGI)
 {
 	int					original_standard_fds[2];
-	size_t				bytes_sent;
+	int					bytes_sent;
 	size_t				total_count;
 	const std::string	&request_str = request.getRawBody();
 	size_t				mssg_len = request_str.size();
 	std::vector<char>	buffer(config.buffer_size);
-	size_t				bytes_read;
+	int					bytes_read;
 
 	close(pipe_to_CGI[PIPE_READ_END]);
 	close(pipe_from_CGI[PIPE_WRITE_END]);
@@ -75,7 +75,7 @@ void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int
 	while (total_count < mssg_len)
 	{
 		bytes_sent = write(pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + total_count, config.buffer_size);
-		if (bytes_sent == -1)
+		if (bytes_sent == SERV_ERROR)
 		{
 			std::cerr << "Failed to send body to CGI" << std::endl;
 			_status = HTTP_INTERNAL_SERVER_ERROR;
@@ -117,11 +117,10 @@ void	cgi::cgiExecute(Request &request, Config &config, int *pipe_to_CGI, int *pi
 	close(pipe_to_CGI[PIPE_READ_END]);
 	close(pipe_from_CGI[PIPE_WRITE_END]);
 	
+	(void)request;
+	(void)config;
 	
-	
-	if (dup2(original_standards_fds[STDOUT_FILENO], STDOUT_FILENO) == -1
-		|| dup2(original_standards_fds[STDIN_FILENO], STDIN_FILENO) == -1)
-		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+	cgiRestoreFds(original_standards_fds);
 }
 
 std::string	&cgi::cgiPassOutput()

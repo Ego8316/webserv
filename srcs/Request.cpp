@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 18:38:38 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:42:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,18 +47,18 @@ int		Request::parseRequest(std::string request, const Config &config)
 	std::string					line;
 	std::vector<std::string>	line_split;
 
-	_error = NONE;
+	_error = false;
 	if (!std::getline(stream, line))
 	{
 		std::cerr << "Empty request" << std::endl;
-		_error = INVALID_REQUEST_LINE;
+		_error = true;
 		return (SERV_ERROR);
 	}
 	line_split = utils::stringSplit(line, "\\r\\n");
 	if (line_split.size() == 0)
 	{
 		std::cerr << "Empty request" << std::endl;
-		_error = INVALID_REQUEST_LINE;
+		_error = true;
 		return (SERV_ERROR);
 	}
 	std::istringstream	firstLine(line_split[0]);
@@ -66,14 +66,14 @@ int		Request::parseRequest(std::string request, const Config &config)
 
 	if (!(firstLine >> methodStr >> _requestTarget >> _version))
 	{
-		_error = INVALID_REQUEST_LINE;
+		_error = true;
 		return (SERV_ERROR);
 	}
 	parseRequestTarget();
 	_method = utils::strToMethod(methodStr);
 	if (!config.isAcceptedMethod(_method))
 	{
-		_error = UNSUPPORTED_METHOD;
+		_error = true;
 	}
 	Cookie::removeExpired(_all_cookies);
 	for (unsigned int i = 1; i < line_split.size(); ++i)
@@ -106,7 +106,8 @@ int		Request::parseRequest(std::string request, const Config &config)
 		expected_size = std::atoi(_headers["Content-Length"].c_str());
 		if (expected_size > config.max_body_size)
 		{
-			_error = BODY_TOO_LONG;
+			std::cerr << "Bad content length" << std::endl;
+			_error = true;
 			return (SERV_ERROR);
 		}
 	}
@@ -125,7 +126,7 @@ int		Request::parseRequest(std::string request, const Config &config)
 	if (_rawBody.size() >= expected_size)
 	{
 		std::cerr << "Bad content length" << std::endl;
-		_error = BAD_CONTENT_LENGTH;
+		_error = true;
 		return (SERV_ERROR);
 	}
 	return (0);
@@ -163,7 +164,6 @@ int		Request::parseHeaderLine(std::string line)
 			cookie = Cookie::getSession(this->_all_cookies, value);
 			if (cookie && cookie->applyToPath(_requestTarget))
 				this->_query_cookies.push_back(cookie);
-			//TODO add filter on 
 		}
 		else if (key == "Accept")
 			this->_accept = static_cast<ContentTypes>(this->_accept | utils::strToContentType(value));
@@ -174,8 +174,8 @@ int		Request::parseHeaderLine(std::string line)
 	}
 	else
 	{
-		std::cerr << "Invalid Header in Request >" << line << "<" << std::endl;
-		_error = INVALID_HEADER;
+		std::cerr << "Invalid Header in Request" << std::endl;
+		_error = true;
 		return (SERV_ERROR);
 	}
 	return (0);
@@ -206,7 +206,7 @@ std::map<std::string, std::string>	Request::getHeaders(void) const
 	return (_headers);
 }
 
-int	Request::getError(void) const
+bool	Request::getError(void) const
 {
 	return (_error);
 }
@@ -250,7 +250,7 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 	const std::map<std::string, std::string>	&headers = src.getHeaders();
 	std::string									methodStr;
 
-	if (src.getError() != NONE)
+	if (src.getError())
 	{
 		os << "Parse error detected: " << src.getError() << std::endl;
 		return (os);

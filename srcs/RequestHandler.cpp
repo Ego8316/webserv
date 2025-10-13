@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 14:39:11 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:33:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,13 @@ RequestHandler::~RequestHandler(void)
 Response	RequestHandler::handle(const Request &request, const Config &config, std::vector<Cookie *> cookies)
 {
 	(void)cookies;
-	if (request.getError() == UNSUPPORTED_METHOD)
-		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
-	else if (request.getError() >= INVALID_REQUEST_LINE)
+	if (request.getError())
 		return _handleError(HTTP_BAD_REQUEST, config);
+	if (request.getMethod() == UNKNOWN)
+		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
+	// BIEN PENSER A CHANGER AVANT DE RENDRE
+	// if (request.getVersion() != "HTTP/1.1" || request.getVersion() != "HTTP/1.0")
+	// 	return (_handleError(HTTP_VERSION_NOT_SUPPORTED, config));
 
 	Resource	resource;
 	resource.build(request, config);
@@ -56,8 +59,6 @@ Response	RequestHandler::handle(const Request &request, const Config &config, st
 		return (_handleError(HTTP_FORBIDDEN, config));
 	if (resource.getStatus() & ACCEPT_ERROR)
 		return (_handleError(HTTP_BAD_REQUEST, config));
-	if (resource.isDirectory()) //TODO -> pareil pour delete
-		return (_handleListDir(request, config, resource));
 	if (resource.isCGI())
 		return (_handleCGI(request, config, resource));
 	switch (request.getMethod())
@@ -74,19 +75,28 @@ Response	RequestHandler::_handleGet(const Request &request, const Config &config
 	Response			response;
 	std::ifstream		file;
 	std::ostringstream	buffer;
-	std::string			content;
 
-	(void)request;
+	if (!resource.isReadable())
+		return (_handleError(HTTP_FORBIDDEN, config));
+
+	if (resource.isDirectory())
+	{
+		if (!utils::endsWith(resource.getPath(), "/"))
+			return (_handleError(HTTP_REDIRECT_MOVE, config));
+		if (config.enable_listdir)
+			return (_handleListDir(request, config, resource));
+		return (_handleError(HTTP_FORBIDDEN, config));
+	}
+
 	file.open(resource.getPath().c_str(), std::ios::in | std::ios::binary);
 	if (!file.is_open())
 		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
 	buffer << file.rdbuf();
-	content = buffer.str();
 	file.close();
 
 	response.setStatus(HTTP_OK);
-	response.setBody(content);
-	response.setContentLength(content.size());
+	response.setBody(buffer.str());
+	response.setContentLength(buffer.str().size());
 	response.setContentType(utils::contentTypeToStr(resource.getType()));
 	response.buildHeader();
 	return (response);
@@ -97,8 +107,11 @@ Response	RequestHandler::_handlePost(const Request &request, const Config &confi
 	Response	response;
 
 	(void)request;
-	(void)config;
-	(void)resource;
+	if (!resource.isWritable())
+		return (_handleError(HTTP_FORBIDDEN, config));
+	if (request.getRawBody().empty() || resource.isDirectory())
+		return (_handleError(HTTP_BAD_REQUEST, config));
+	
 	
 	return (response);
 }
@@ -108,9 +121,21 @@ Response	RequestHandler::_handleDelete(const Request &request, const Config &con
 	Response	response;
 
 	(void)request;
-	(void)config;
-	(void)resource;
-	
+	if (resource.isDirectory() && !utils::endsWith(resource.getPath(), "/"))
+		return (_handleError(HTTP_CONFLICT, config));
+	if (std::remove(resource.getPath().c_str()) != 0)
+	{
+		if (errno == EACCES || errno == EPERM)
+			return (_handleError(HTTP_FORBIDDEN, config));
+		if (errno == ENOENT)
+			return (_handleError(HTTP_NOT_FOUND, config));
+		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
+	}
+
+	response.setStatus(HTTP_NO_CONTENT);
+	response.setBody("");
+	response.setContentLength(0);
+	response.buildHeader();
 	return (response);
 }
 

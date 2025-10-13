@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 16:02:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:29:42 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <arpa/inet.h>
 #include <cerrno>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <strings.h>
@@ -79,18 +80,7 @@ enum	Method
 	GET,
 	POST,
 	DELETE,
-	ERROR
-};
-
-enum	ParseError
-{
-	NONE,
-	UNSUPPORTED_METHOD,
-	INVALID_REQUEST_LINE,
-	INVALID_HEADER,
-	BAD_CONTENT_LENGTH,
-	UNREADABLE_FILE,
-	BODY_TOO_LONG
+	UNKNOWN
 };
 
 enum	ResourceStatus
@@ -125,6 +115,8 @@ enum ContentTypes
 enum	HttpStatus
 {
 	HTTP_OK = 200,
+	HTTP_CREATED = 201,
+	HTTP_NO_CONTENT = 204,
 	HTTP_REDIRECT = 300,
 	HTTP_REDIRECT_MOVE = 301,
 	HTTP_REDIRECT_FOUND = 302,
@@ -132,6 +124,7 @@ enum	HttpStatus
 	HTTP_BAD_REQUEST = 400,
 	HTTP_FORBIDDEN = 403,
 	HTTP_NOT_FOUND = 404,
+	HTTP_CONFLICT = 409,
 	HTTP_INTERNAL_SERVER_ERROR = 500,
 	HTTP_NOT_IMPLEMENTED = 501,
 	HTTP_VERSION_NOT_SUPPORTED = 505

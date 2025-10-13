@@ -76,5 +76,6 @@
         "cerrno": "cpp",
         "codecvt": "cpp",
         "fstream": "cpp",
+        "diffgit": "cpp"
     }
 }

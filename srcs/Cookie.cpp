@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 12:05:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:41:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,8 +93,8 @@ int			Cookie::updateCookie(std::string header)
 		field_value = field_split[i].erase(0, pos + 1);
 		if (field_name == "Path")
 			this->_path = field_value;
-		else if (field_name == "Domain")
-			this->_domain = field_value;
+		//else if (field_name == "Domain")
+		//	this->_domain = field_value;
 		else
 			writeAttribute(field_name, field_value);
 	}

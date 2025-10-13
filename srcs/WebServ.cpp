@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 12:13:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 16:11:17 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 WebServ::WebServ(Config *config)
 {
 	this->_config = config;
-	if (this->_config->getParseError() != NONE)
-		return ;
 	std::cout << *this->_config << std::endl;
 	Cookie(this->_config);
 	this->_cookie_sessions = new std::map<std::string, Cookie *>;
@@ -30,8 +28,6 @@ WebServ::WebServ(Config *config)
 WebServ::WebServ(std::string config_file)
 {
 	this->_config = new Config(config_file);
-	if (this->_config->getParseError() != NONE)
-		return ;
 	Cookie(this->_config);
 	this->_cookie_sessions = new std::map<std::string, Cookie *>;
 	this->_server = new serverSocket(this->_config);

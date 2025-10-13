@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 12:03:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:39:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,8 @@ class Cookie {
 		bool										_http_only;
 		bool										_secure;
 		int											_generation_time;
-		std::string									_path; //TODO
-		std::string									_domain; //TODO
+		std::string									_path;
+		//std::string									_domain; //TODO
 		static Config								*_config;
 };
 

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 15:56:36 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 20:34:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,12 +120,11 @@ bool	Resource::_checkAccept(const Request &request)
  */
 int	Resource::_resolvePath(const std::string &requestTarget, const Config &config)
 {
-	struct stat	fileStat;
-	struct stat	indexStat;
+	struct stat	file_stat;
 
 	_path = config.server_home + requestTarget;
 	_status = static_cast<ResourceStatus>(_status & ~(EXISTS | IS_DIR));
-	if (stat(_path.c_str(), &fileStat) == -1)
+	if (stat(_path.c_str(), &file_stat) == -1)
 	{
 		if (errno == EACCES)
 			_status = static_cast<ResourceStatus>(_status | EXISTS);
@@ -133,16 +132,13 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
 		return (SERV_ERROR);
 	}
 	_status = static_cast<ResourceStatus>(_status | EXISTS);
-	if (S_ISDIR(fileStat.st_mode))
+	if (S_ISDIR(file_stat.st_mode))
 	{
-		std::string	indexPath = _path + config.default_page;
-		if (stat(indexPath.c_str(), &indexStat) == 0)
-			_path = indexPath;
+		std::string	index_path = _path + config.default_page;
+		if (stat(index_path.c_str(), &file_stat) == 0)
+			_path = index_path;
 		else
-		{
 			_status = static_cast<ResourceStatus>(_status | IS_DIR);
-			return (SERV_ERROR);
-		}
 	}
 	return (0);
 }
@@ -154,16 +150,16 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
  */
 void	Resource::_evaluatePermissions(void)
 {
-	struct stat	fileStat;
+	struct stat	file_stat;
 
 	_status = static_cast<ResourceStatus>(_status & ~(PERM_ROK | PERM_WOK | PERM_XOK));
-	if (stat(_path.c_str(), &fileStat) == -1)
+	if (stat(_path.c_str(), &file_stat) == -1)
 		return ;
-	if (fileStat.st_mode & S_IRUSR)
+	if (file_stat.st_mode & S_IRUSR)
 		_status = static_cast<ResourceStatus>(_status | PERM_ROK);
-	if (fileStat.st_mode & S_IWUSR)
+	if (file_stat.st_mode & S_IWUSR)
 		_status = static_cast<ResourceStatus>(_status | PERM_WOK);
-	if (fileStat.st_mode & S_IXUSR)
+	if (file_stat.st_mode & S_IXUSR)
 		_status = static_cast<ResourceStatus>(_status | PERM_XOK);
 }
 
