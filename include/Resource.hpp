@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/12 18:58:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 12:43:44 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,6 @@ class	Resource
 		~Resource(void);
 
 		void				build(const Request &request, const Config &config);
-
-		std::string	getMimeType(void) const;
-		std::string	getExtension(void) const;
 
 		const std::string	&getPath(void) const;
 		ResourceStatus		getStatus(void) const;

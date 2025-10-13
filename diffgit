@@ -1,0 +1,1789 @@
+
+@@ -16,15 +16,17 @@
+ #include "RequestHandler.hpp"
+ #include "Config.hpp"
+ #include "Cookie.hpp"
++#include "serverPoll.hpp"
+ 
+ class Query;
+ class Config;
+ class Cookie;
++class serverPoll;
+ 
+ class Client {
+ 	public :
+ 	// CONSTRUCTORS
+-		Client(Config *config, std::map<std::string, Cookie *> *all_cookies);
++		Client(Config *config, std::map<std::string, Cookie *> *all_cookies, serverPoll *poll);
+ 		Client(const Client &other);
+ 		Client &operator=(const Client &other);
+ 	//DESTUCTORS
+@@ -47,4 +49,5 @@ class Client {
+ 		int								_client_id;
+ 		std::map<std::string, Cookie *> *_all_cookies;
+ 		Config							*_config;
++		serverPoll						*_poll;
+ };
+diff --git a/include/Config.hpp b/include/Config.hpp
+index 92a53ba..cf72083 100644
+--- a/include/Config.hpp
++++ b/include/Config.hpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   Config.hpp                                         :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/10 18:33:45 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/13 11:17:47 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -25,19 +25,22 @@ class Config {
+ 	//DESTUCTORS
+ 		~Config();
+ 	//GETTERS
++		std::map<std::string, Redirection>		getRedirections() const;
++		ParseError		getParseError();
+ 		void			setIP(std::string ip_str);
+ 		void			parseDefaultErrorPages(std::istringstream &conf_stream);
+-		void			parseAccept(std::istringstream &conf_stream);
++		void			parseMethod(std::istringstream &conf_stream);
+ 		void			parseHttpRedir(std::istringstream &conf_stream);
+-		ContentTypes	strToContentType(std::string input);
++		bool			isAcceptedMethod(Method method) const;
+ 	//SETTERS
+ 	//MEMBER FUNCTIONS
+ 		unsigned int 							ip;
+ 		int										port_number;
+-		std::string								host_name; //TODO
++		//std::string								host_name; //TODO ?
+ 		int										domain;
+ 		int										type;
+ 		int										protocol;
++		size_t									max_body_size;
+ 		int										client_limit;
+ 		int										incoming_queue_backlog;
+ 		int										buffer_size;
+@@ -48,8 +51,10 @@ class Config {
+ 		std::string								default_page;
+ 		
+ 		std::map<int, std::string>				default_error_pages;
+-		std::vector<ContentTypes>				accept_list;
++		std::vector<Method>						accepted_methods;
+ 		std::map<std::string, Redirection>		http_redir; //TODO finish this shit
++
++		ParseError								parse_error;
+ 	private :
+ };
+ 
+diff --git a/include/Cookie.hpp b/include/Cookie.hpp
+index 84a9427..2d1da79 100644
+--- a/include/Cookie.hpp
++++ b/include/Cookie.hpp
+@@ -6,7 +6,7 @@
+ /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/09 15:58:15 by victorviter      ###   ########.fr       */
++/*   Updated: 2025/10/13 12:03:48 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -49,6 +49,7 @@ class Cookie {
+ 		bool				isExpired() const;
+ 		int					updateCookie(std::string header);
+ 		std::string			genHeader();
++		bool				applyToPath(std::string path);
+ 	//VARIABLES
+ 	private :
+ 		std::string									_session_uid;
+diff --git a/include/Request.hpp b/include/Request.hpp
+index 956a48d..68808b2 100644
+--- a/include/Request.hpp
++++ b/include/Request.hpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   Request.hpp                                        :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
+-/*   Updated: 2025/10/10 18:23:57 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/12 17:12:43 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -27,15 +27,16 @@ class Request
+ 		Request	&operator=(const Request &other);
+ 		~Request(void);
+ 
+-		int									parseRequest(std::string request);
++		int									parseRequest(std::string request, const Config &config);
+ 		int									parseHeaderLine(std::string line);
+ 		Method								getMethod(void) const;
+ 		std::string							getRequestTarget(void) const;
+ 		std::string							getVersion(void) const;
+ 		std::string							getRawBody(void) const;
+ 		std::map<std::string, std::string>	getHeaders(void) const;
+-		bool								getError(void) const;
++		int									getError(void) const;
+ 		std::vector<Cookie *>				getQueryCookies();
++		ContentTypes						getAccept() const;
+ 
+ 		void								setMethod(Method method);
+ 		bool								headerHasField(const std::string field);
+@@ -47,7 +48,8 @@ class Request
+ 		std::string							_version;
+ 		std::string							_rawBody;
+ 		std::map<std::string, std::string>	_headers;
+-		bool								_error;
++		int									_error;
++		ContentTypes						_accept;
+ 		std::map<std::string, Cookie *>		*_all_cookies;
+ 		std::vector<Cookie *>				_query_cookies; //TODO
+ };
+diff --git a/include/RequestHandler.hpp b/include/RequestHandler.hpp
+index c991f46..319c379 100644
+--- a/include/RequestHandler.hpp
++++ b/include/RequestHandler.hpp
+@@ -6,7 +6,7 @@
+ /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
+-/*   Updated: 2025/10/10 11:15:46 by victorviter      ###   ########.fr       */
++/*   Updated: 2025/10/12 15:56:48 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -23,11 +23,12 @@ class	Config;
+ class	Client;
+ class	Cookie;
+ class	Request;
++class	Resource;
+ 
+ class	RequestHandler
+ {
+ 	public:
+-		static Response	handle(const Request &req, const Config &config, std::vector<Cookie *> cookies);
++		static Response	handle(const Request &reqest, const Config &config, std::vector<Cookie *> cookies);
+ 
+ 	private:
+ 		RequestHandler(void);
+@@ -35,11 +36,11 @@ class	RequestHandler
+ 		RequestHandler &operator=(const RequestHandler &other);
+ 		~RequestHandler(void);
+ 
+-		static Response	_handleGet(const Request &req, const Config &config, const Resource &res);
+-		static Response	_handlePost(const Request &req, const Config &config, const Resource &res);
+-		static Response	_handleDelete(const Request &req, const Config &config, const Resource &res);
+-		static Response	_handleCGI(const Request &req, const Config &config, const Resource &res);
+-		static Response	_handleRedirect(const Request &req, const Config &config, const Resource &res);
+-		static Response	_handleListDir(const Request &req, const Config &config, const Resource &res);
++		static Response	_handleGet(const Request &reqest, const Config &config, const Resource &resource);
++		static Response	_handlePost(const Request &reqest, const Config &config, const Resource &resource);
++		static Response	_handleDelete(const Request &reqest, const Config &config, const Resource &resource);
++		static Response	_handleCGI(const Request &reqest, const Config &config, const Resource &resource);
++		static Response	_handleRedirect(const Request &reqest, const Config &config, const Resource &resource);
++		static Response	_handleListDir(const Request &reqest, const Config &config, const Resource &resource);
+ 		static Response	_handleError(HttpStatus code, const Config &config);
+ };
+diff --git a/include/Resource.hpp b/include/Resource.hpp
+index d5aaac7..8f0c053 100644
+--- a/include/Resource.hpp
++++ b/include/Resource.hpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   Resource.hpp                                       :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
+-/*   Updated: 2025/10/10 02:28:43 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/12 18:58:15 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -15,6 +15,9 @@
+ #include "headers.hpp"
+ #include "utils.hpp"
+ #include "Config.hpp"
++#include "Request.hpp"
++
++class Request;
+ 
+
+  * @class Resource
+@@ -30,19 +33,20 @@ class	Resource
+ 		Resource	&operator=(const Resource &other);
+ 		~Resource(void);
+ 
+-		void	build(const std::string &requestTarget, const Config &config);
++		void				build(const Request &request, const Config &config);
+ 
+ 		std::string	getMimeType(void) const;
+ 		std::string	getExtension(void) const;
+ 
+ 		const std::string	&getPath(void) const;
+-		int					getStatus(void) const;
++		ResourceStatus		getStatus(void) const;
+ 		size_t				getSize(void) const;
+ 		HttpStatus			getHttpStatus(void)	const;
+ 		ContentTypes		getType(void) const;
+ 
+ 		bool	exists(void) const;
+ 		bool	isCGI(void) const;
++		bool	isRedirect(void) const;
+ 		bool	isDirectory(void) const;
+ 		bool	isReadable(void) const;
+ 		bool	isWritable(void) const;
+@@ -51,12 +55,14 @@ class	Resource
+ 
+ 	private:
+ 		std::string		_path;
+-		int				_status;
++		ResourceStatus	_status;
+ 		size_t			_size;
+ 		ContentTypes	_type;
+-
++		HttpStatus		_redir_code;
++		
++		bool	_checkRedirect(const std::string &requestTarget, const Config &config);
++		bool	_checkAccept(const Request &request);
+ 		int		_resolvePath(const std::string &requestTarget, const Config &config);
+ 		void	_evaluatePermissions(void);
+ 		void	_detectType(void);
+-
+ };
+diff --git a/include/Response.hpp b/include/Response.hpp
+index fa9eadc..1a05500 100644
+--- a/include/Response.hpp
++++ b/include/Response.hpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   Response.hpp                                       :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
+-/*   Updated: 2025/10/10 18:49:12 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/12 16:19:17 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -25,7 +25,7 @@
+ class	Response
+ {
+ 	private:
+-		HttpStatus							status_code;
++		HttpStatus							_status_code;
+ 		std::string							_header;
+ 		std::string							_body;
+ 		std::map<std::string, std::string>	_headers;
+diff --git a/include/headers.hpp b/include/headers.hpp
+index c114e38..d979df4 100644
+--- a/include/headers.hpp
++++ b/include/headers.hpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   headers.hpp                                        :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
+-/*   Updated: 2025/10/10 18:34:26 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/12 21:21:28 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -76,7 +76,19 @@ enum	Method
+ 	GET,
+ 	POST,
+ 	DELETE,
+-	UNKNOWN
++	CGI_RUN,
++	ERROR
++};
++
++enum	ParseError
++{
++	NONE,
++	UNSUPPORTED_METHOD,
++	INVALID_REQUEST_LINE,
++	INVALID_HEADER,
++	BAD_CONTENT_LENGTH,
++	UNREADABLE_FILE,
++	BODY_TOO_LONG
+ };
+ 
+ enum	ResourceStatus
+@@ -87,7 +99,8 @@ enum	ResourceStatus
+ 	PERM_ROK			= 1 << 3,
+ 	PERM_WOK			= 1 << 4,
+ 	PERM_XOK			= 1 << 5,
+-	IS_REDIRECT			= 1 << 6
++	IS_REDIRECT			= 1 << 6,
++	ACCEPT_ERROR		= 1 << 7
+ };
+ 
+ enum ContentTypes
+@@ -100,9 +113,10 @@ enum ContentTypes
+ 		FTYPE_JPEG		= 8,	// 0 0 0 0 1 0 0 0
+ 		FTYPE_PNG		= 16,	// 0 0 0 1 0 0 0 0
+ 								// 0 0 1 0 0 0 0 0
+-		FTYPE_IMAGE		= 56,	// 0 0 1 1 1 0 0 
++		FTYPE_IMAGE		= 56,	// 0 0 1 1 1 0 0 0
+ 		FTYPE_CGI_PY	= 64,	// 0 1 0 0 0 0 0 0
+ 		FTYPE_CGI_PHP	= 128,	// 1 0 0 0 0 0 0 0
++		FTYPE_IS_CGI	= 192,	// 1 1 0 0 0 0 0 0
+ 		FTYPE_ANY		= 255	// 1 1 1 1 1 1 1 1
+ };
+ 
+@@ -131,7 +145,7 @@ typedef struct s_pollRevent
+ typedef struct s_Redirection
+ {
+ 	std::string		dest;
+-	int				error_code;
++	HttpStatus		error_code;
+ }	Redirection;
+ 
+ #define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
+diff --git a/include/serverPoll.hpp b/include/serverPoll.hpp
+index 3e26d76..b60d995 100644
+--- a/include/serverPoll.hpp
++++ b/include/serverPoll.hpp
+@@ -6,7 +6,7 @@
+ /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/22 14:25:15 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/10 14:00:05 by victorviter      ###   ########.fr       */
++/*   Updated: 2025/10/13 12:22:39 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -34,10 +34,11 @@ class serverPoll
+ 		std::vector<struct pollfd>			getPollFds();
+ 	//SETTERS
+ 	//MEMBER FUNCTIONS
+-		void						pollAdd(int fd, int event, int indx);
++		void						pollAdd(int fd, nfds_t event, int indx);
+ 		void						pollRemove(int indx);
+ 		int							pollWait();
+ 		std::vector<pollRevent>		pollWatchRevent();
++		bool						pollAvailFor(int indx, nfds_t operation);
+ 	private :
+ 		std::vector<struct pollfd>			_poll_fds;
+ 		Config								*_config;
+diff --git a/include/utils.hpp b/include/utils.hpp
+index 084f92e..13df8a2 100644
+--- a/include/utils.hpp
++++ b/include/utils.hpp
+@@ -6,7 +6,7 @@
+ /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/10 14:34:48 by victorviter      ###   ########.fr       */
++/*   Updated: 2025/10/13 11:48:20 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -22,6 +22,14 @@ bool 						startsWith(const std::string& str, const std::string& prefix);
+ std::vector<std::string>	stringSplit(std::string str, std::string del);
+ std::string					stringTrim(std::string str, std::string set);
+ size_t						getFileSize(const std::string &path);
++ContentTypes				strToContentType(std::string input);
++std::string					contentTypeToStr(ContentTypes type);
++ContentTypes				extensionToContentTypes(std::string fname);
++std::string					contentTypeToExtensions(ContentTypes type);
++std::string					methodToStr(Method method);
++Method						strToMethod(std::string method);
++bool						isAcceptedMethod(std::vector<Method> vec, Method element);
++std::string					extractPath(std::string full_path);
+ 
+ template <typename T>
+ std::string	toString(const T &src)
+diff --git a/srcs/Client.cpp b/srcs/Client.cpp
+index c0a8b94..e046275 100644
+--- a/srcs/Client.cpp
++++ b/srcs/Client.cpp
+@@ -6,13 +6,16 @@
+ /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/10 14:30:57 by victorviter      ###   ########.fr       */
++/*   Updated: 2025/10/13 12:31:17 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+ #include "Client.hpp"
+ 
+-Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies) : _all_cookies(all_cookies), _config(config)
++Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies, serverPoll *poll)
++	:	_all_cookies(all_cookies),
++		_config(config),
++		_poll(poll)
+ {
+ 	this->_client_len = sizeof(this->_client_addr);
+ }
+@@ -58,6 +61,8 @@ void    Client::setFd(int fd)
+ 		
+ int		Client::socketRead(char *buffer, int bytes_read) //TODO
+ {
++	if (!this->_poll->pollAvailFor(this->_client_id, POLLIN))
++		return (0);
+ 	bytes_read = recv(this->_client_fd, buffer, bytes_read, 0);
+ 	if (bytes_read == SERV_ERROR)
+ 	{
+@@ -70,9 +75,11 @@ int		Client::socketRead(char *buffer, int bytes_read) //TODO
+ 
+ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 
+ {
++	if (!this->_poll->pollAvailFor(this->_client_id, POLLOUT))
++		return (0);
+ 	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR)
+ 	{
+-		std::cerr << "Receive failed\n";
++		std::cerr << "Send failed\n";
+ 		return (SERV_ERROR);
+ 	}
+ 	return (0);
+@@ -80,11 +87,11 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
+ 		
+ int		Client::handleEvent()
+ {
+-	char		buffer[BUFFER_SIZE];
+ 	int			bytes_read;
+ 	std::string	request_str;
+ 	std::string	response_str;
+ 	
++	char	*buffer = new char[_config->buffer_size]; //TODO std::vector<char> buffer(1024);
+ 	bytes_read = _config->buffer_size;
+ 	while (bytes_read == _config->buffer_size)
+ 	{
+@@ -93,13 +100,24 @@ int		Client::handleEvent()
+ 			return (SERV_ERROR);
+ 		request_str += std::string(buffer).substr(0, bytes_read);
+ 	}
++	std::cout << "REQUEST = " << std::endl;
++	std::cout << request_str << std::endl;
++	if (request_str.length() == 0)
++	{
++		std::cerr << "Empty request. Ignoring..." << std::endl;
++		return (SERV_ERROR);
++	}
+ 	Request	request(_all_cookies);
+-	request.parseRequest(request_str);
+-	std::vector<Cookie *> cookies = request.getQueryCookies();
++	request.parseRequest(request_str, *_config);
++	std::cout << request << std::endl;
++	std::vector<Cookie *>	cookies = request.getQueryCookies();
+ 	Response	response = RequestHandler::handle(request, *_config, cookies);
+ 	response_str = response.toString();
++	std::cout << "RESPONSE =" << std::endl;
++	std::cout << response_str << std::endl;
+ 	if (socketWrite(response_str.c_str(), response_str.length()) == SERV_ERROR)
+ 		return (SERV_ERROR);
++	delete[] buffer;
+ 	return (0); //TODO return err code
+ }
+ 
+diff --git a/srcs/Config.cpp b/srcs/Config.cpp
+index 2fd96d3..759a86a 100644
+--- a/srcs/Config.cpp
++++ b/srcs/Config.cpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   Config.cpp                                         :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/10 18:33:35 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/13 11:18:11 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -18,23 +18,24 @@ Config::Config(std::string config)
+ 	std::string			newline;
+ 	std::string			field, equal, value;
+ 
++	this->parse_error = NONE;
+ 	while (std::getline(conf_stream, newline))
+ 	{
+-		if (utils::stringTrim(newline, " \t").length() == 0)
++		if (utils::stringTrim(newline, " \t\n").length() == 0)
+ 			continue ;
+ 		std::istringstream 			line(newline);
+ 	
+ 		if (!(line >> field >> equal >> value) || (equal != "=" && equal != ":"))
+ 		{
+-			std::cerr << "Could not parse config line " << newline << std::endl;
++			std::cerr << "Could not parse config line " << newline << " in global"   << std::endl;
+ 			continue;
+ 		}
+ 		if (field == "IP")
+ 			this->setIP(value);
+ 		if (field == "PORT")
+ 			this->port_number = atoi(value.c_str());
+-		if (field == "HOST_NAME")
+-			this->host_name = value;
++		//if (field == "HOST_NAME")
++		//	this->host_name = value;
+ 		else if (field == "DOMAIN")
+ 		{
+ 			if (value == "AF_INET")
+@@ -47,6 +48,10 @@ Config::Config(std::string config)
+ 		}
+ 		else if (field == "PROTOCOL")
+ 			this->protocol = atoi(value.c_str());
++		else if (field == "METHODS")
++			this->parseMethod(conf_stream);
++		else if (field == "MAX_BODY_SIZE")
++			this->max_body_size = atoi(value.c_str());
+ 		else if (field == "CLIENT_LIMIT")
+ 			this->client_limit = atoi(value.c_str());
+ 		else if (field == "INCOMMING_QUEUE_BACKLOG")
+@@ -65,8 +70,6 @@ Config::Config(std::string config)
+ 			this->default_page = value;
+ 		else if (field == "DEFAULT_ERROR_PAGES" && value == "list")
+ 			this->parseDefaultErrorPages(conf_stream);
+-		else if (field == "ACCEPT")
+-			this->parseAccept(conf_stream);
+ 		else if (field == "HTTP_REDIR")
+ 			this->parseHttpRedir(conf_stream);
+ 	}
+@@ -74,9 +77,10 @@ Config::Config(std::string config)
+ 
+ Config::Config(const Config &other)
+ {
++	this->ip = other.ip;
+ 	this->port_number = other.port_number;
+ 	this->domain = other.domain;
+-	this->host_name = other.host_name;
++	//this->host_name = other.host_name;
+ 	this->type = other.type;
+ 	this->protocol = other.protocol;
+ 	this->client_limit = other.client_limit;
+@@ -88,17 +92,19 @@ Config::Config(const Config &other)
+ 	this->enable_listdir = other.enable_listdir;
+ 	this->default_page = other.default_page;
+ 	this->default_error_pages = other.default_error_pages;
+-	this->accept_list = other.accept_list;
++	this->accepted_methods = other.accepted_methods;
+ 	this->http_redir = other.http_redir;
++	this->parse_error = other.parse_error;
+ }
+ 
+ Config &Config::operator=(const Config &other)
+ {
+ 	if (this != &other)
+ 	{
++		this->ip = other.ip;
+ 		this->port_number = other.port_number;
+ 		this->domain = other.domain;
+-		this->host_name = other.host_name;
++		//this->host_name = other.host_name;
+ 		this->type = other.type;
+ 		this->protocol = other.protocol;
+ 		this->client_limit = other.client_limit;
+@@ -111,13 +117,24 @@ Config &Config::operator=(const Config &other)
+ 		this->default_page = other.default_page;
+ 		this->default_error_pages = other.default_error_pages;
+ 		this->http_redir = other.http_redir;
+-		this->accept_list = other.accept_list;
++		this->accepted_methods = other.accepted_methods;
++		this->parse_error = other.parse_error;
+ 	}
+ 	return (*this);
+ }
+ 
+ Config::~Config() {}
+ 
++std::map<std::string, Redirection>		Config::getRedirections() const
++{
++	return (this->http_redir);
++}
++		
++ParseError		Config::getParseError()
++{
++	return (this->parse_error);
++}
++
+ void			Config::setIP(std::string ip_str)
+ {
+ 	int octets[4];
+@@ -160,15 +177,15 @@ void		Config::parseDefaultErrorPages(std::istringstream &conf_stream)
+ 
+ 	while (std::getline(conf_stream, newline))
+ 	{
+-		if (utils::stringTrim(newline, " \t").length() == 0)
++		if (utils::stringTrim(newline, " \t\n").length() == 0)
+ 			continue;
+-		else if (utils::stringTrim(newline, " \t") == "end")
++		else if (utils::stringTrim(newline, " \t\n") == "end")
+ 			return ;
+ 		std::istringstream 	line(newline);
+ 		
+ 		if (!(line >> field >> equal >> value) || (equal != "=" && equal != ":"))
+ 		{
+-			std::cerr << "Could not parse config line " << newline << std::endl;
++			std::cerr << "Could not parse config line " << newline << " in default error pages" << std::endl;
+ 			continue;
+ 		}
+ 		if (field < 200 || field > 600)
+@@ -180,30 +197,30 @@ void		Config::parseDefaultErrorPages(std::istringstream &conf_stream)
+ 	}
+ }
+ 
+-void	Config::parseAccept(std::istringstream &conf_stream)
++void	Config::parseMethod(std::istringstream &conf_stream)
+ {
+ 	std::string			newline;
+ 	std::string			field;
+ 
+ 	while (std::getline(conf_stream, newline))
+ 	{
+-		if (utils::stringTrim(newline, " \t").length() == 0)
++		if (utils::stringTrim(newline, " \t\n").length() == 0)
+ 			continue;
+-		else if (utils::stringTrim(newline, " \t") == "end")
++		else if (utils::stringTrim(newline, " \t\n") == "end")
+ 			return ;
+ 		std::istringstream 	line(newline);
+ 		
+ 		if (!(line >> field))
+ 		{
+-			std::cerr << "Could not parse config line " << newline << std::endl;
++			std::cerr << "Could not parse config line " << newline << " in methods"  << std::endl;
+ 			continue;
+ 		}
+-		if (this->strToContentType(field) == FTYPE_NONE)
++		if (utils::strToMethod(field) == ERROR)
+ 		{
+-			std::cerr << "Could not interpret Accept section in config: " << newline << std::endl;
++			std::cerr << "Could not interpret methods section in config: " << newline << std::endl;
+ 			continue;
+ 		}
+-		this->accept_list.push_back(this->strToContentType(field));
++		this->accepted_methods.push_back(utils::strToMethod(field));
+ 	}
+ }
+ 
+@@ -215,56 +232,69 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
+ 
+ 	while (std::getline(conf_stream, newline))
+ 	{
+-		if (utils::stringTrim(newline, " \t").length() == 0)
++		if (utils::stringTrim(newline, " \t\n").length() == 0)
+ 			continue;
+-		else if (utils::stringTrim(newline, " \t") == "end")
++		else if (utils::stringTrim(newline, " \t\n") == "end")
+ 			return ;
+ 		std::istringstream 	line(newline);
+ 		
+ 		if (!(line >> path >> equal >> dest >> error_code) || (equal != "=" && equal != ":"))
+ 		{
+-			std::cerr << "Could not parse config line " << newline << std::endl;
++			std::cerr << "Could not parse config line " << newline << " in http redirections"  << std::endl;
+ 			continue;
+ 		}
+ 		this->http_redir[path].dest = dest;
+-		this->http_redir[path].error_code = error_code;
++		if ((300 <= error_code && error_code <= 302) || error_code == 308)
++			this->http_redir[path].error_code = static_cast<HttpStatus>(error_code);
++		else
++			this->http_redir[path].error_code = HTTP_REDIRECT;
+ 		if (newline.find("}") != std::string::npos)
+ 			return ;
+ 	}
+ }
+ 
+-ContentTypes		Config::strToContentType(std::string input)
++bool	Config::isAcceptedMethod( Method element) const
+ {
+-	if (input == "*/*")
+-		return (FTYPE_ANY);
+-	if (input == "text/*")
+-		return (FTYPE_TEXT);
+-	if (input == "text/plain")
+-		return (FTYPE_PLAIN);
+-	if (input == "image/*")
+-		return (FTYPE_IMAGE);
+-	if (input == "text/html")
+-		return (FTYPE_HTML);
+-	if (input == "image/png")
+-		return (FTYPE_PNG);
+-	if (input == "image/jpeg")
+-		return (FTYPE_JPEG);
+-	return (FTYPE_NONE);
++	for (unsigned int i = 0; i < this->accepted_methods.size(); ++i)
++	{
++		if (element == this->accepted_methods[i])
++			return (true);
++	}
++	return (false);
+ }
+ 
+ std::ostream	&operator<<(std::ostream &os, const Config &item)
+ {
+ 	os << "IP :" << item.ip << std::endl;
+ 	os << "port_number :" << item.port_number << std::endl;
+-	os << "incoming_queue_backlog :" << item.incoming_queue_backlog << std::endl;
+-	os << "client_limit :" << item.client_limit << std::endl;
++	//os << "host_name :" << item.host_name << std::endl;
+ 	os << "domain :" << item.domain << std::endl;
+ 	os << "type :" << item.type << std::endl;
+ 	os << "protocol :" << item.protocol << std::endl;
++	os << "client_limit :" << item.client_limit << std::endl;
++	os << "incoming_queue_backlog :" << item.incoming_queue_backlog << std::endl;
+ 	os << "buffer_size :" << item.buffer_size << std::endl;
++	os << "cookie_sessions_max :" << item.cookie_sessions_max << std::endl;
++	os << "cookie_life_time :" << item.cookie_life_time << std::endl;
+ 	os << "ServHome :" << item.server_home << std::endl;
++	os << "enable_listdir :" << item.enable_listdir << std::endl;
+ 	os << "default_page :" << item.default_page << std::endl;
+-	os << "cookie_life_time :" << item.cookie_life_time << std::endl;
+-	os << "cookie_sessions_max :" << item.cookie_sessions_max << std::endl;
++	os << "parse_error :" << item.parse_error << std::endl;
++	os << "Default error pages:" << std::endl;
++	std::map<int, std::string>		dep = item.default_error_pages;
++	std::map<int, std::string>::iterator		dep_it;
++	for (dep_it = dep.begin(); dep_it != dep.end(); ++dep_it)
++		os << dep_it->first << ": " << dep_it->second << "\n";
++	os << std::endl;
++	os << "Accepted Methods:" << std::endl;
++	for (unsigned int i = 0; i < item.accepted_methods.size(); ++i)
++		os << item.accepted_methods[i] << "\n";
++	os << std::endl;
++	os << "Redirections:" << std::endl;
++	std::map<std::string, Redirection>		red = item.http_redir;
++	std::map<std::string, Redirection>::iterator	red_it;
++	for (red_it = red.begin(); red_it != red.end(); ++red_it)
++		os << red_it->first << " -> " << red_it->second.dest << " with errcode " << red_it->second.error_code << "\n";
++	os << std::endl;
+ 	return (os);
+ }
+diff --git a/srcs/Cookie.cpp b/srcs/Cookie.cpp
+index 2c3780a..c36742e 100644
+--- a/srcs/Cookie.cpp
++++ b/srcs/Cookie.cpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   Cookie.cpp                                         :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/10 01:55:28 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/13 12:05:45 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -240,6 +240,14 @@ std::string			Cookie::genHeader()
+ 	return (header);
+ }
+ 
++bool		Cookie::applyToPath(std::string path)
++{
++	if (this->_path.length() == 0 || this->_path == "/")
++		return (true);
++	if (utils::startsWith(path, _path))
++		return (true);
++	return (false);
++}
+ 
+ std::ostream	&operator<<(std::ostream &os, const Cookie &item)
+ {
+diff --git a/srcs/Request.cpp b/srcs/Request.cpp
+index 8368cb1..2a172a7 100644
+--- a/srcs/Request.cpp
++++ b/srcs/Request.cpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   Request.cpp                                        :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
+-/*   Updated: 2025/10/10 18:25:54 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/13 12:33:22 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -15,6 +15,7 @@
+ Request::Request(std::map<std::string, Cookie *> *all_cookies) : _all_cookies(all_cookies)
+ {
+ 	this->_query_cookies.resize(0);
++	this->_accept = FTYPE_NONE;
+ }
+ 
+ Request::Request(const Request &other)
+@@ -33,30 +34,31 @@ Request &Request::operator=(const Request &other)
+ 		_rawBody = other._rawBody;
+ 		_headers = other._headers;
+ 		_error = other._error;
++		_accept = other._accept;
+ 	}
+ 	return (*this);
+ }
+ 
+ Request::~Request(void) {}
+ 
+-int		Request::parseRequest(std::string request)
++int		Request::parseRequest(std::string request, const Config &config)
+ {
+ 	std::istringstream			stream(request);
+ 	std::string					line;
+ 	std::vector<std::string>	line_split;
+ 
+-	_error = false;
++	_error = NONE;
+ 	if (!std::getline(stream, line))
+ 	{
+ 		std::cerr << "Empty request" << std::endl;
+-		_error = true;
++		_error = INVALID_REQUEST_LINE;
+ 		return (SERV_ERROR);
+ 	}
+ 	line_split = utils::stringSplit(line, "\\r\\n");
+ 	if (line_split.size() == 0)
+ 	{
+ 		std::cerr << "Empty request" << std::endl;
+-		_error = true;
++		_error = INVALID_REQUEST_LINE;
+ 		return (SERV_ERROR);
+ 	}
+ 	std::istringstream	firstLine(line_split[0]);
+@@ -64,44 +66,70 @@ int		Request::parseRequest(std::string request)
+ 
+ 	if (!(firstLine >> methodStr >> _requestTarget >> _version))
+ 	{
+-		_error = true;
++		_error = INVALID_REQUEST_LINE;
+ 		return (SERV_ERROR);
+ 	}
+-	if (methodStr == "GET") _method = GET;
+-	else if (methodStr == "POST") _method = POST;
+-	else _method = DELETE;
++	_method = utils::strToMethod(methodStr);
++	if (!config.isAcceptedMethod(_method))
++	{
++		_error = UNSUPPORTED_METHOD;
++	}
++	Cookie::removeExpired(_all_cookies);
+ 	for (unsigned int i = 1; i < line_split.size(); ++i)
+ 	{
+-		if (line == "\\r\\n")
++		if (utils::stringTrim(line, "\r\n \t").length() == 0)
+ 			continue;
+-		this->parseHeaderLine(line_split[i]);
++		parseHeaderLine(line_split[i]);
+ 	}
+-	Cookie::removeExpired(this->_all_cookies);
+ 	while (std::getline(stream, line) && line != "\r")
+ 	{
+ 		line_split = utils::stringSplit(line, "\\r\\n");
+ 		for (unsigned int i = 1; i < line_split.size(); ++i)
+ 		{
+-			if (line == "\\r\\n")
++			if (utils::stringTrim(line, "\r\n \t").length() == 0)
+ 				continue;
+-			this->parseHeaderLine(line_split[i]);
++			parseHeaderLine(line_split[i]);
+ 		}
+ 	}
+-	if (this->_query_cookies.size() == 0)
+-		this->_query_cookies.push_back(Cookie::createSession(this->_all_cookies));
+-	std::ostringstream	bodyStream;
+-	bodyStream << stream.rdbuf();
+-	_rawBody = bodyStream.str();
++	if (_query_cookies.size() == 0)
++		_query_cookies.push_back(Cookie::createSession(_all_cookies));
++	if (_accept == FTYPE_NONE)
++		_accept = FTYPE_ANY;
++
++	size_t			expected_size = 0;
++	char			*buffer;
++	size_t			bytes_read = 0;
++	std::string		body_str = "";
++
+ 	if (_headers.count("Content-Length"))
+ 	{
+-		size_t	expected = std::atoi(_headers["Content-Length"].c_str());
+-		if (_rawBody.size() != expected)
++		expected_size = std::atoi(_headers["Content-Length"].c_str());
++		if (expected_size > config.max_body_size)
+ 		{
+-			std::cerr << "Bad content length" << std::endl;
+-			_error = true;
++			_error = BODY_TOO_LONG;
+ 			return (SERV_ERROR);
+ 		}
+ 	}
++	else
++		expected_size = config.max_body_size;
++
++	buffer = new char[config.buffer_size];
++	stream.read(buffer, config.buffer_size);
++	bytes_read = stream.gcount();
++	while (stream && bytes_read && body_str.size() < expected_size)
++	{
++		body_str += std::string(buffer).substr(0, bytes_read);
++		stream.read(buffer, config.buffer_size);
++       	bytes_read = stream.gcount();
++	}
++	if (_rawBody.size() >= expected_size)
++	{
++		std::cerr << "Bad content length" << std::endl;
++		_error = BAD_CONTENT_LENGTH;
++		delete buffer;
++		return (SERV_ERROR);
++	}
++	delete buffer;
+ 	return (0);
+ }
+ 
+@@ -109,7 +137,7 @@ int		Request::parseHeaderLine(std::string line)
+ {
+ 	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
+ 	Cookie						*cookie;
+-
++	
+ 	if (field_split.size() == 2)
+ 	{
+ 		std::string	key = field_split[0];
+@@ -121,19 +149,21 @@ int		Request::parseHeaderLine(std::string line)
+ 		if (key == "Cookie")
+ 		{
+ 			cookie = Cookie::getSession(this->_all_cookies, value);
+-			if (cookie)
++			if (cookie && cookie->applyToPath(_requestTarget))
+ 				this->_query_cookies.push_back(cookie);
+ 			//TODO add filter on 
+ 		}
+-		if (headerHasField(key))
++		else if (key == "Accept")
++			this->_accept = static_cast<ContentTypes>(this->_accept | utils::strToContentType(value));
++		else if (headerHasField(key))
+ 			this->_headers[key] = _headers[key] + "; " + value;
+ 		else
+ 			this->_headers[key] = value;
+ 	}
+ 	else
+ 	{
+-		std::cerr << "Invalid Header in Request" << std::endl;
+-		_error = true;
++		std::cerr << "Invalid Header in Request >" << line << "<" << std::endl;
++		_error = INVALID_HEADER;
+ 		return (SERV_ERROR);
+ 	}
+ 	return (0);
+@@ -164,11 +194,17 @@ std::map<std::string, std::string>	Request::getHeaders(void) const
+ 	return (_headers);
+ }
+ 
+-bool	Request::getError(void) const
++int	Request::getError(void) const
+ {
+ 	return (_error);
+ }
+ 		
++
++ContentTypes	Request::getAccept(void) const
++{
++	return (this->_accept);
++}
++
+ void	Request::setMethod(Method method)
+ {
+ 	this->_method = method;
+@@ -197,17 +233,12 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
+ 	const std::map<std::string, std::string>	&headers = src.getHeaders();
+ 	std::string									methodStr;
+ 
+-	if (src.getError())
++	if (src.getError() != NONE)
+ 	{
+ 		os << "Parse error detected: " << src.getError() << std::endl;
+ 		return (os);
+ 	}
+-	if (method == GET)
+-		methodStr = "GET";
+-	else if (method == POST)
+-		methodStr = "POST";
+-	else
+-		methodStr = "DELETE";
++	methodStr = utils::methodToStr(method);
+ 	os << "Method:\t\t" << methodStr << std::endl
+ 		<< "Target:\t\t" << src.getRequestTarget() << std::endl
+ 		<< "Version:\t" << src.getVersion() << std::endl
+diff --git a/srcs/RequestHandler.cpp b/srcs/RequestHandler.cpp
+index b58b681..988eda5 100644
+--- a/srcs/RequestHandler.cpp
++++ b/srcs/RequestHandler.cpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
+-/*   Updated: 2025/10/10 19:58:53 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/12 20:25:25 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -34,133 +34,135 @@ RequestHandler::~RequestHandler(void)
+ 	return ;
+ }
+ 
+-Response	RequestHandler::handle(const Request &req, const Config &config, std::vector<Cookie *> cookies)
++Response	RequestHandler::handle(const Request &request, const Config &config, std::vector<Cookie *> cookies)
+ {
+ 	(void)cookies;
+-	if (req.getError())
+-		return _handleError(HTTP_BAD_REQUEST, config);
+-	if (req.getMethod() == UNKNOWN)
++	std::cout << "step 1" << std::endl;
++	if (request.getError() == UNSUPPORTED_METHOD)
++	{
++		std::cout << "step 2" << std::endl;
+ 		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
+-	// BIEN PENSER A CHANGER AVANT DE RENDRE
+-	if (req.getVersion() != "HTTP/1.1" || req.getVersion() != "HTTP/1.0")
+-		return (_handleError(HTTP_VERSION_NOT_SUPPORTED, config));
++	}
++	else if (request.getError() >= INVALID_REQUEST_LINE)
++	{
++		std::cout << "step 3" << std::endl;
++		std::cout << request.getError() << std::endl;
++		return _handleError(HTTP_BAD_REQUEST, config);
++	}
+ 
+-	Resource	res;
+-	res.build(req.getRequestTarget(), config);
++	Resource	resource;
++	resource.build(request, config);
+ 
+-	if (!res.exists())
++	if (resource.isRedirect())
++		return (_handleRedirect(request, config, resource));
++	std::cout << "step 4" << std::endl;
++	if (!resource.exists()) //TODO -> @Hugo faut corriger ca du coup par ex. pour un post c'est OK
++	{
++		std::cout << "Resource not found" << std::endl;
+ 		return (_handleError(HTTP_NOT_FOUND, config));
+-	if (res.isForbidden())
++	}
++	std::cout << "step 5" << std::endl;
++	if (resource.isForbidden())
+ 		return (_handleError(HTTP_FORBIDDEN, config));
+-	if (res.isCGI())
+-		return (_handleCGI(req, config, res));
+-
+-	switch (req.getMethod())
++	std::cout << "step 6" << std::endl;
++	if (resource.getStatus() & ACCEPT_ERROR)
++		return (_handleError(HTTP_BAD_REQUEST, config));
++	std::cout << "step 7" << std::endl;
++	if (resource.isDirectory()) //TODO -> pareil pour delete
++		return (_handleListDir(request, config, resource));
++	std::cout << "step 8" << std::endl;
++	if (resource.isCGI())
++		return (_handleCGI(request, config, resource));
++	std::cout << "step 9" << std::endl;
++	switch (request.getMethod())
+ 	{
+-		case GET:		return _handleGet(req, config, res);
+-		case POST:		return _handlePost(req, config, res);
+-		case DELETE:	return _handleDelete(req, config, res);
++		case GET:		return _handleGet(request, config, resource);
++		case POST:		return _handlePost(request, config, resource);
++		case DELETE:	return _handleDelete(request, config, resource);
+ 		default:		return _handleError(HTTP_NOT_IMPLEMENTED, config);
+ 	}
+ }
+ 
+-Response	RequestHandler::_handleGet(const Request &req, const Config &config, const Resource &res)
++Response	RequestHandler::_handleGet(const Request &request, const Config &config, const Resource &resource)
+ {
+ 	Response			response;
+ 	std::ifstream		file;
+ 	std::ostringstream	buffer;
++	std::string			content;
+ 
+-	if (!res.isReadable())
+-		return (_handleError(HTTP_FORBIDDEN, config));
+-
+-	if (res.isDirectory())
+-	{
+-		if (!utils::endsWith(res.getPath(), "/"))
+-			return (_handleError(HTTP_REDIRECT_MOVE, config));
+-		if (config.enable_listdir)
+-			return (_handleListDir(req, config, res));
+-		return (_handleError(HTTP_FORBIDDEN, config));
+-	}
+-
+-	file.open(res.getPath().c_str(), std::ios::in | std::ios::binary);
++	(void)request;
++	file.open(resource.getPath().c_str(), std::ios::in | std::ios::binary);
+ 	if (!file.is_open())
+ 		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
+ 	buffer << file.rdbuf();
++	content = buffer.str();
+ 	file.close();
+ 
+ 	response.setStatus(HTTP_OK);
+-	response.setBody(buffer.str());
+-	response.setContentLength(buffer.str().size());
+-	response.setContentType(res.getMimeType());
++	response.setBody(content);
++	response.setContentLength(content.size());
++	response.setContentType(utils::contentTypeToStr(resource.getType()));
+ 	response.buildHeader();
+ 	return (response);
+ }
+ 
+-Response	RequestHandler::_handlePost(const Request &req, const Config &config, const Resource &res)
++Response	RequestHandler::_handlePost(const Request &request, const Config &config, const Resource &resource)
+ {
+ 	Response	response;
+ 
+-	(void)req;
++	(void)request;
+ 	(void)config;
+-	(void)res;
++	(void)resource;
+ 	
+ 	return (response);
+ }
+ 
+-Response	RequestHandler::_handleDelete(const Request &req, const Config &config, const Resource &res)
++Response	RequestHandler::_handleDelete(const Request &request, const Config &config, const Resource &resource)
+ {
+ 	Response	response;
+ 
+-	(void)req;
++	(void)request;
+ 	(void)config;
+-	(void)res;
++	(void)resource;
+ 	
+ 	return (response);
+ }
+ 
+-Response	RequestHandler::_handleCGI(const Request &req, const Config &config, const Resource &res)
++Response	RequestHandler::_handleCGI(const Request &request, const Config &config, const Resource &resource)
+ {
+ 	Response	response;
+ 
+-	(void)req;
++	(void)request;
+ 	(void)config;
+-	(void)res;
++	(void)resource;
+ 	
+ 	return (response);
+ }
+ 
+-Response	RequestHandler::_handleRedirect(const Request &req, const Config &config, const Resource &res)
++Response	RequestHandler::_handleRedirect(const Request &request, const Config &config, const Resource &resource)
+ {
+ 	Response		response;
+-	std::string		raw_path_requested;
+-	std::string		raw_redir_key;
++	std::string		response_body;
+ 
+-	(void)req;
++	(void)request;
+ 	(void)config;
+-	raw_path_requested = res.getPath();
+-	if (utils::startsWith(raw_path_requested, "https://"))
+-		raw_path_requested.erase(0, 9);
+-	if (utils::startsWith(raw_path_requested, "http://"))
+-		raw_path_requested.erase(0, 8);
+-	if (utils::startsWith(raw_path_requested, "www"))
+-		raw_path_requested.erase(0, raw_path_requested.find("/"));
+-	/*for (std::map<std::string, Redirection>::iterator it = config.http_redir.begin(); it != config.http_redir.end(); ++it)
+-	{
+-		raw_redir_key = it->first;
+-		response.setStatus(HTTP_OK); // mettre le bon statut
+-	}*/
++	response.setStatus(static_cast<HttpStatus>(resource.getStatus()));
++	response.setHeaders("Location", resource.getPath());
++	response.setContentType("text/html");
++	response.setContentLength(0);
++	response.buildHeader();
+ 	return (response);
+ }
+ 
+-Response	RequestHandler::_handleListDir(const Request &req, const Config &config, const Resource &res)
++Response	RequestHandler::_handleListDir(const Request &request, const Config &config, const Resource &resource)
+ {
+-	Response		response;
++	Response	response;
+ 	std::string		response_body;
+ 	DIR				*dir;
+ 	struct dirent	*dir_ent;
+ 	
+-	(void)req;
+-	dir = opendir(res.getPath().c_str());
++	(void)request;
++	dir = opendir(resource.getPath().c_str());
+ 	if (dir == NULL)
+ 	{
+ 		std::cerr << "Cannot open directory\n" << std::endl;
+@@ -188,6 +190,7 @@ Response	RequestHandler::_handleError(HttpStatus code, const Config &config)
+ 	Response	response;
+ 	std::string	content;
+ 
++	std::cout << "HandleError" << std::endl;
+ 	if (utils::mapHasEntry(config.default_error_pages, (int)code))
+ 	{
+ 		std::ifstream	file(config.default_error_pages.at((int)code).c_str());
+diff --git a/srcs/Resource.cpp b/srcs/Resource.cpp
+index 00f4bdf..9a31a21 100644
+--- a/srcs/Resource.cpp
++++ b/srcs/Resource.cpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   Resource.cpp                                       :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
+-/*   Updated: 2025/10/10 18:49:33 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/12 20:49:49 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -18,9 +18,9 @@
+  */
+ Resource::Resource(void)
+ 	:	_path(""),
+-		_status(0),
++		_status(EXISTS),
+ 		_size(0),
+-		_type(FTYPE_PLAIN)
++		_type(FTYPE_ANY)
+ {
+ 	return ;
+ }
+@@ -66,15 +66,52 @@ Resource::~Resource(void)
+  * @param requestTarget Requested path from the HTTP request.
+  * @param config Server configuration.
+  */
+-void	Resource::build(const std::string &requestTarget, const Config &config)
++void	Resource::build(const Request &request, const Config &config)
+ {
+-	if (_resolvePath(requestTarget, config) == SERV_ERROR)
++	if (_checkRedirect(request.getRequestTarget(), config))
++		return ;
++	if (_resolvePath(request.getRequestTarget(), config) == SERV_ERROR)
+ 		return ;
+ 	_evaluatePermissions();
+ 	_detectType();
++	_checkAccept(request);
+ 	return ;
+ }
+ 
++bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &config)
++{
++	std::string							raw_path_requested(requestTarget);
++	std::map<std::string, Redirection>	redirs = config.getRedirections();
++	
++	if (raw_path_requested.length() == 0)
++		return (false);
++	if (utils::startsWith(raw_path_requested, "https://"))
++		raw_path_requested.erase(0, 9);
++	if (utils::startsWith(raw_path_requested, "http://"))
++		raw_path_requested.erase(0, 8);
++	if (utils::startsWith(raw_path_requested, "www"))
++		raw_path_requested.erase(0, raw_path_requested.find("/"));
++	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
++	{
++		if ((raw_path_requested == it->first) || (raw_path_requested + config.default_page == it->first))
++		{
++			_path = it->second.dest;
++			_redir_code = it->second.error_code;
++			_status = IS_REDIRECT;
++			return (true);
++		}	
++	}
++	return (false);
++}
++
++bool	Resource::_checkAccept(const Request &request)
++{
++
++	if (!(this->_type & request.getAccept()))
++		_status = static_cast<ResourceStatus>(_status | ACCEPT_ERROR);
++	return (this->_type & request.getAccept());
++}
++
+ /**
+  * @brief Resolves the filesystem path for the resource.
+  *
+@@ -91,19 +128,30 @@ void	Resource::build(const std::string &requestTarget, const Config &config)
+  */
+ int	Resource::_resolvePath(const std::string &requestTarget, const Config &config)
+ {
+-	struct stat	file_stat;
++	struct stat	fileStat;
++	struct stat	indexStat;
+ 
+ 	_path = config.server_home + requestTarget;
+-	_status &= ~(EXISTS | IS_DIR);
+-	if (stat(_path.c_str(), &file_stat) == -1)
++	_status = static_cast<ResourceStatus>(_status & ~(EXISTS | IS_DIR));
++	if (stat(_path.c_str(), &fileStat) == -1)
+ 	{
+ 		if (errno == EACCES)
+-			_status |= EXISTS;
++			_status = static_cast<ResourceStatus>(_status | EXISTS);
++		std::cerr << "Cannot find ressource " << _path << std::endl;
+ 		return (SERV_ERROR);
+ 	}
+-	_status |= EXISTS;
+-	if (S_ISDIR(file_stat.st_mode))
+-		_status |= IS_DIR;
++	_status = static_cast<ResourceStatus>(_status | EXISTS);
++	if (S_ISDIR(fileStat.st_mode))
++	{
++		std::string	indexPath = _path + config.default_page;
++		if (stat(indexPath.c_str(), &indexStat) == 0)
++			_path = indexPath;
++		else
++		{
++			_status = static_cast<ResourceStatus>(_status | IS_DIR);
++			return (SERV_ERROR);
++		}
++	}
+ 	return (0);
+ }
+ 
+@@ -114,17 +162,17 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
+  */
+ void	Resource::_evaluatePermissions(void)
+ {
+-	struct stat	file_stat;
++	struct stat	fileStat;
+ 
+-	_status &= ~(PERM_ROK | PERM_WOK | PERM_XOK);
+-	if (stat(_path.c_str(), &file_stat) == -1)
++	_status = static_cast<ResourceStatus>(_status & ~(PERM_ROK | PERM_WOK | PERM_XOK));
++	if (stat(_path.c_str(), &fileStat) == -1)
+ 		return ;
+-	if (file_stat.st_mode & S_IRUSR)
+-		_status |= PERM_ROK;
+-	if (file_stat.st_mode & S_IWUSR)
+-		_status |= PERM_WOK;
+-	if (file_stat.st_mode & S_IXUSR)
+-		_status |= PERM_XOK;
++	if (fileStat.st_mode & S_IRUSR)
++		_status = static_cast<ResourceStatus>(_status | PERM_ROK);
++	if (fileStat.st_mode & S_IWUSR)
++		_status = static_cast<ResourceStatus>(_status | PERM_WOK);
++	if (fileStat.st_mode & S_IXUSR)
++		_status = static_cast<ResourceStatus>(_status | PERM_XOK);
+ }
+ 
+ /**
+@@ -134,63 +182,17 @@ void	Resource::_evaluatePermissions(void)
+  */
+ void	Resource::_detectType(void)
+ {
+-	_status &= ~IS_CGI;
+-	if (utils::endsWith(_path, ".py"))
+-	{
+-		_status |= IS_CGI;
+-		_type = FTYPE_CGI_PY;
+-	}
+-	else if (utils::endsWith(_path, ".php"))
+-	{
+-		_status |= IS_CGI;
+-		_type = FTYPE_CGI_PHP;
+-	}
+-	else if (utils::endsWith(_path, ".html"))
+-		_type = FTYPE_HTML;
+-	else if (utils::endsWith(_path, ".jpeg"))
+-		_type = FTYPE_JPEG;
+-	else if (utils::endsWith(_path, ".png"))
+-		_type = FTYPE_PNG;
+-	else
+-		_type = FTYPE_PLAIN;
++	_type = utils::extensionToContentTypes(_path);
++	std::cout << _type << std::endl;
++	std::cout << _status << std::endl;
++	_status = static_cast<ResourceStatus>(_status & ~IS_CGI);
++	std::cout << _type << std::endl;
++	std::cout << IS_CGI << " * " << FTYPE_IS_CGI << "|" << _type << " " << (FTYPE_IS_CGI | _type) << " " << ((FTYPE_IS_CGI & _type) != 0) << std::endl;
++	_status = static_cast<ResourceStatus>(_status | (IS_CGI * ((FTYPE_IS_CGI & _type) != 0)));
++	std::cout << _status << std::endl;
+ 	return ;
+ }
+ 
+-/**
+- * @brief Get MIME type string based on detected content type.
+- * 
+- * @return The MIME type (e.g., "text/html", "image/png").
+- */
+-std::string	Resource::getMimeType(void) const
+-{
+-	switch(_type)
+-	{
+-		case FTYPE_HTML:	return "text/html";
+-		case FTYPE_PLAIN:	return "text/plain";
+-		case FTYPE_JPEG:	return "image/jpeg";
+-		case FTYPE_PNG:		return "image/png";
+-		default:			return "";
+-	}
+-}
+-
+-/**
+- * @brief Get the file extension associated with the content type.
+- * 
+- * @return File extension (e.g., ".html", ".png", ".php").
+- */
+-std::string	Resource::getExtension(void) const
+-{
+-	switch(_type)
+-	{
+-		case FTYPE_HTML:		return ".html";
+-		case FTYPE_JPEG:		return ".jpeg";
+-		case FTYPE_PNG:			return ".png";
+-		case FTYPE_CGI_PY:		return ".py";
+-		case FTYPE_CGI_PHP:		return ".php";
+-		default:				return "";
+-	}
+-}
+-
+ /**
+  * @brief Returns the path.
+  * @return Reference to the path.
+@@ -204,7 +206,7 @@ const std::string	&Resource::getPath(void) const
+  * @brief Returns the status.
+  * @return Status.
+  */
+-int	Resource::getStatus(void) const
++ResourceStatus	Resource::getStatus(void) const
+ {
+ 	return (_status);
+ }
+@@ -245,6 +247,11 @@ bool	Resource::isCGI(void) const
+ 	return (_status & IS_CGI);
+ }
+ 
++bool	Resource::isRedirect(void) const
++{
++	return (_status & IS_REDIRECT);
++}
++
+ /**
+  * @brief Checks if the resource is a directory.
+  * @return True if it is, false otherwise.
+diff --git a/srcs/Response.cpp b/srcs/Response.cpp
+index a2c7203..c78f7c7 100644
+--- a/srcs/Response.cpp
++++ b/srcs/Response.cpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   Response.cpp                                       :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
+-/*   Updated: 2025/10/10 18:49:12 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/12 16:20:15 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -16,7 +16,7 @@
+  * @brief Default constructor. Initializes status code to 200 OK.
+  */
+ Response::Response(void)
+-	:	status_code(HTTP_OK)
++	:	_status_code(HTTP_OK)
+ {
+ 	return ;
+ }
+@@ -40,7 +40,7 @@ Response	&Response::operator=(const Response &other)
+ {
+ 	if (this != &other)
+ 	{
+-		status_code = other.status_code;
++		_status_code = other._status_code;
+ 		_header = other._header;
+ 		_body = other._body;
+ 		_headers = other._headers;
+@@ -62,7 +62,7 @@ Response::~Response(void)
+  */
+ void	Response::setStatus(HttpStatus code)
+ {
+-	status_code = code;
++	_status_code = code;
+ 	return ;
+ }
+ 
+@@ -151,8 +151,8 @@ void	Response::buildHeader(void)
+ 	if (!utils::mapHasEntry(_headers, std::string("Connection")))
+ 		_headers["Connection"] = "close";
+ 
+-	_header = "HTTP/1.0 " + utils::toString(status_code)
+-		+ " " + httpStatusToStr(status_code) + "\r\n";
++	_header = "HTTP/1.0 " + utils::toString(_status_code)
++		+ " " + httpStatusToStr(_status_code) + "\r\n";
+ 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
+ 		_header += it->first + ": " + it->second + "\r\n";
+ 	_header += "\r\n";
+diff --git a/srcs/WebServ.cpp b/srcs/WebServ.cpp
+index 4e99602..711202f 100644
+--- a/srcs/WebServ.cpp
++++ b/srcs/WebServ.cpp
+@@ -3,10 +3,10 @@
+ /*                                                        :::      ::::::::   */
+ /*   WebServ.cpp                                        :+:      :+:    :+:   */
+ /*                                                    +:+ +:+         +:+     */
+-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
++/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/10 18:35:24 by ego              ###   ########.fr       */
++/*   Updated: 2025/10/13 12:13:53 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -15,6 +15,8 @@
+ WebServ::WebServ(Config *config)
+ {
+ 	this->_config = config;
++	if (this->_config->getParseError() != NONE)
++		return ;
+ 	std::cout << *this->_config << std::endl;
+ 	Cookie(this->_config);
+ 	this->_cookie_sessions = new std::map<std::string, Cookie *>;
+@@ -28,6 +30,8 @@ WebServ::WebServ(Config *config)
+ WebServ::WebServ(std::string config_file)
+ {
+ 	this->_config = new Config(config_file);
++	if (this->_config->getParseError() != NONE)
++		return ;
+ 	Cookie(this->_config);
+ 	this->_cookie_sessions = new std::map<std::string, Cookie *>;
+ 	this->_server = new serverSocket(this->_config);
+@@ -141,14 +145,14 @@ int WebServ::newClient()
+ 		std::cerr << "Cannot accept new clients" << std::endl;
+ 		return (SERV_ERROR);
+ 	}
+-	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions);
++	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions, this->_poll);
+ 	if (this->_server->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
+ 	{
+ 		std::cerr << "Failed to accept new client" << std::endl;
+ 		return (SERV_ERROR);
+ 	}
+ 	this->_clients[indx]->setClientId(indx);
+-	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN, indx);
++	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN | POLLOUT, indx);
+ 	std::cout << "Accepted client " << indx << std::endl;
+ 	return (0);
+ }
+diff --git a/srcs/serverPoll.cpp b/srcs/serverPoll.cpp
+index 03e3064..cde4215 100644
+--- a/srcs/serverPoll.cpp
++++ b/srcs/serverPoll.cpp
+@@ -6,7 +6,7 @@
+ /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/22 14:25:07 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/10 14:28:43 by victorviter      ###   ########.fr       */
++/*   Updated: 2025/10/13 12:31:42 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -28,7 +28,7 @@ serverPoll &serverPoll::operator=(const serverPoll &other)
+ 
+ serverPoll::~serverPoll() {}
+ 
+-void	serverPoll::pollAdd(int fd, int event, int indx)
++void	serverPoll::pollAdd(int fd, nfds_t event, int indx)
+ {
+ 	if (indx == -1)
+ 		indx = this->_poll_fds.size() - 1;
+@@ -106,6 +106,24 @@ std::vector<pollRevent>	serverPoll::pollWatchRevent()
+ 	return (ret);
+ }
+ 
++bool			serverPoll::pollAvailFor(int indx, nfds_t operation)
++{
++	int		ret = poll(&this->_poll_fds[indx], 1, 0);
++
++	if (ret == -1)
++	{
++		std::cerr << "Poll failed when checking for operation " << operation << " for client " << indx << std::endl;
++		return (false);
++	}
++	else if (ret == 0)
++	{
++		std::cerr << "Poll timed out for operation " << operation << " for client " << indx << std::endl;
++		return (false);
++	}
++	else
++		return (this->_poll_fds[indx].revents & operation);
++}
++		
+ std::ostream	&operator<<(std::ostream &os, serverPoll &poll)
+ {
+ 	os << "poll stored at " << &poll << " monitor the followings fd\n[";
+diff --git a/srcs/utils.cpp b/srcs/utils.cpp
+index 20409f5..38339e5 100644
+--- a/srcs/utils.cpp
++++ b/srcs/utils.cpp
+@@ -6,7 +6,7 @@
+ /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+ /*                                                +#+#+#+#+#+   +#+           */
+ /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
+-/*   Updated: 2025/10/10 14:46:13 by victorviter      ###   ########.fr       */
++/*   Updated: 2025/10/13 12:05:28 by victorviter      ###   ########.fr       */
+ /*                                                                            */
+ /* ************************************************************************** */
+ 
+@@ -48,7 +48,7 @@ std::vector<std::string>	utils::stringSplit(std::string str, std::string del)
+ 	return (split_str);
+ }
+ 
+-std::string					utils::stringTrim(std::string str, std::string set)
++std::string			utils::stringTrim(std::string str, std::string set)
+ {
+ 	unsigned int	last_size = str.size() + 1;
+ 
+@@ -70,3 +70,116 @@ size_t	utils::getFileSize(const std::string &path)
+ 		return (st.st_size);
+ 	return (0);
+ }
++
++ContentTypes		utils::strToContentType(std::string input)
++{
++	if (input == "*/*")
++		return (FTYPE_ANY);
++	if (input == "text/*")
++		return (FTYPE_TEXT);
++	if (input == "text/plain")
++		return (FTYPE_PLAIN);
++	if (input == "image/*")
++		return (FTYPE_IMAGE);
++	if (input == "text/html")
++		return (FTYPE_HTML);
++	if (input == "image/png")
++		return (FTYPE_PNG);
++	if (input == "image/jpeg")
++		return (FTYPE_JPEG);
++	return (FTYPE_NONE);
++}
++
++/**
++ * @brief Get MIME type string based on detected content type.
++ * 
++ * @return The MIME type (e.g., "text/html", "image/png").
++ */
++std::string	utils::contentTypeToStr(ContentTypes type)
++{
++	switch(type)
++	{
++		case FTYPE_HTML:	return "text/html";
++		case FTYPE_PLAIN:	return "text/plain";
++		case FTYPE_JPEG:	return "image/jpeg";
++		case FTYPE_PNG:		return "image/png";
++		default:			return "";
++	}
++}
++
++/**
++ * @brief Detects the type of the resource based on the file extension.
++ * 
++ * Updates _status to include IS_CGI for Python and PHP scripts.
++ */
++ContentTypes		utils::extensionToContentTypes(std::string fname)
++{
++	if (utils::endsWith(fname, ".py"))
++		return (FTYPE_CGI_PY);
++	else if (utils::endsWith(fname, ".php"))
++		return (FTYPE_CGI_PHP);
++	else if (utils::endsWith(fname, ".html"))
++		return (FTYPE_HTML);
++	else if (utils::endsWith(fname, ".jpeg"))
++		return (FTYPE_JPEG);
++	else if (utils::endsWith(fname, ".png"))
++		return (FTYPE_PNG);
++	else
++		return (FTYPE_PLAIN);
++}
++
++/**
++ * @brief Get the file extension associated with the content type.
++ * 
++ * @return File extension (e.g., ".html", ".png", ".php").
++ */
++std::string	utils::contentTypeToExtensions(ContentTypes type)
++{
++	switch(type)
++	{
++		case FTYPE_HTML:		return ".html";
++		case FTYPE_JPEG:		return ".jpeg";
++		case FTYPE_PNG:			return ".png";
++		case FTYPE_CGI_PY:		return ".py";
++		case FTYPE_CGI_PHP:		return ".php";
++		default:				return "";
++	}
++}
++
++
++std::string		utils::methodToStr(Method method)
++{
++	if (method == GET)
++		return ("GET");
++	else if (method == POST)
++		return ("POST");
++	else
++		return ("DELETE");
++	return ("");
++}
++
++Method			utils::strToMethod(std::string method_str)
++{
++	if (method_str == "GET")
++		return (GET);
++	else if (method_str == "POST")
++		return (POST);
++	else if (method_str == "DELETE")
++		return (DELETE);
++	return (ERROR);
++}
++
++/**
++ * @brief Get the file prefix of the full path
++ * 
++ * @return File prefix : if input is /some/directory/file the return value will be /some/directory
++ * TODO ? remove ? not used anymore
++ */
++std::string		utils::extractPath(std::string full_path)
++{
++	if (full_path.find("/") == std::string::npos)
++		return ("");
++	else if (full_path.rfind("/") == full_path.size() - 1)
++		return (full_path);
++	return (full_path.substr(0, full_path.rfind("/")));
++}
+\ No newline at end of file
