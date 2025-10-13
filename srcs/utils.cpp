@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/12 20:34:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 12:05:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,4 +167,19 @@ Method			utils::strToMethod(std::string method_str)
 	else if (method_str == "DELETE")
 		return (DELETE);
 	return (ERROR);
+}
+
+/**
+ * @brief Get the file prefix of the full path
+ * 
+ * @return File prefix : if input is /some/directory/file the return value will be /some/directory
+ * TODO ? remove ? not used anymore
+ */
+std::string		utils::extractPath(std::string full_path)
+{
+	if (full_path.find("/") == std::string::npos)
+		return ("");
+	else if (full_path.rfind("/") == full_path.size() - 1)
+		return (full_path);
+	return (full_path.substr(0, full_path.rfind("/")));
 }

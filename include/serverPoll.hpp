@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 14:25:15 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:00:05 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 12:22:39 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,11 @@ class serverPoll
 		std::vector<struct pollfd>			getPollFds();
 	//SETTERS
 	//MEMBER FUNCTIONS
-		void						pollAdd(int fd, int event, int indx);
+		void						pollAdd(int fd, nfds_t event, int indx);
 		void						pollRemove(int indx);
 		int							pollWait();
 		std::vector<pollRevent>		pollWatchRevent();
+		bool						pollAvailFor(int indx, nfds_t operation);
 	private :
 		std::vector<struct pollfd>			_poll_fds;
 		Config								*_config;

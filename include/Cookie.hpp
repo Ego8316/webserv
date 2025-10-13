@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/09 15:58:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 12:03:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ class Cookie {
 		bool				isExpired() const;
 		int					updateCookie(std::string header);
 		std::string			genHeader();
+		bool				applyToPath(std::string path);
 	//VARIABLES
 	private :
 		std::string									_session_uid;

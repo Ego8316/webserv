@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/12 21:54:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 12:33:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,13 +74,13 @@ int		Request::parseRequest(std::string request, const Config &config)
 	{
 		_error = UNSUPPORTED_METHOD;
 	}
+	Cookie::removeExpired(_all_cookies);
 	for (unsigned int i = 1; i < line_split.size(); ++i)
 	{
 		if (utils::stringTrim(line, "\r\n \t").length() == 0)
 			continue;
 		parseHeaderLine(line_split[i]);
 	}
-	Cookie::removeExpired(_all_cookies);
 	while (std::getline(stream, line) && line != "\r")
 	{
 		line_split = utils::stringSplit(line, "\\r\\n");
@@ -135,11 +135,9 @@ int		Request::parseRequest(std::string request, const Config &config)
 
 int		Request::parseHeaderLine(std::string line)
 {
-	if (utils::stringTrim(line, "\r\n\\rn \t").length() == 0)
-		return (0);
 	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
 	Cookie						*cookie;
-
+	
 	if (field_split.size() == 2)
 	{
 		std::string	key = field_split[0];
@@ -151,7 +149,7 @@ int		Request::parseHeaderLine(std::string line)
 		if (key == "Cookie")
 		{
 			cookie = Cookie::getSession(this->_all_cookies, value);
-			if (cookie)
+			if (cookie && cookie->applyToPath(_requestTarget))
 				this->_query_cookies.push_back(cookie);
 			//TODO add filter on 
 		}

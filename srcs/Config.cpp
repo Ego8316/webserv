@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/12 21:46:29 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 11:18:11 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ Config::Config(std::string config)
 			this->setIP(value);
 		if (field == "PORT")
 			this->port_number = atoi(value.c_str());
-		if (field == "HOST_NAME")
-			this->host_name = value;
+		//if (field == "HOST_NAME")
+		//	this->host_name = value;
 		else if (field == "DOMAIN")
 		{
 			if (value == "AF_INET")
@@ -80,7 +80,7 @@ Config::Config(const Config &other)
 	this->ip = other.ip;
 	this->port_number = other.port_number;
 	this->domain = other.domain;
-	this->host_name = other.host_name;
+	//this->host_name = other.host_name;
 	this->type = other.type;
 	this->protocol = other.protocol;
 	this->client_limit = other.client_limit;
@@ -104,7 +104,7 @@ Config &Config::operator=(const Config &other)
 		this->ip = other.ip;
 		this->port_number = other.port_number;
 		this->domain = other.domain;
-		this->host_name = other.host_name;
+		//this->host_name = other.host_name;
 		this->type = other.type;
 		this->protocol = other.protocol;
 		this->client_limit = other.client_limit;
@@ -267,7 +267,7 @@ std::ostream	&operator<<(std::ostream &os, const Config &item)
 {
 	os << "IP :" << item.ip << std::endl;
 	os << "port_number :" << item.port_number << std::endl;
-	os << "host_name :" << item.host_name << std::endl;
+	//os << "host_name :" << item.host_name << std::endl;
 	os << "domain :" << item.domain << std::endl;
 	os << "type :" << item.type << std::endl;
 	os << "protocol :" << item.protocol << std::endl;
