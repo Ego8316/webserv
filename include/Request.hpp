@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 16:03:40 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:33:35 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ class Request
 		std::string							_rawBody;
 		std::map<std::string, std::string>	_headers;
 		bool								_error;
+		ContentTypes						_accept;
 		std::map<std::string, Cookie *>		*_all_cookies;
 		std::vector<Cookie *>				_query_cookies; //TODO
 };

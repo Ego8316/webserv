@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 16:10:07 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:31:18 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,9 +139,9 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
 		std::cerr << "Cannot find ressource " << _path << std::endl;
 		return (SERV_ERROR);
 	}
-	_status |= EXISTS;
+	_status = static_cast<ResourceStatus>(_status | EXISTS);
 	if (S_ISDIR(file_stat.st_mode))
-		_status |= IS_DIR;
+		_status = static_cast<ResourceStatus>(_status | IS_DIR);
 	return (0);
 }
 
@@ -155,13 +155,13 @@ void	Resource::_evaluatePermissions(void)
 	struct stat	file_stat;
 
 	_status = static_cast<ResourceStatus>(_status & ~(PERM_ROK | PERM_WOK | PERM_XOK));
-	if (stat(_path.c_str(), &fileStat) == -1)
+	if (stat(_path.c_str(), &file_stat) == -1)
 		return ;
-	if (fileStat.st_mode & S_IRUSR)
+	if (file_stat.st_mode & S_IRUSR)
 		_status = static_cast<ResourceStatus>(_status | PERM_ROK);
-	if (fileStat.st_mode & S_IWUSR)
+	if (file_stat.st_mode & S_IWUSR)
 		_status = static_cast<ResourceStatus>(_status | PERM_WOK);
-	if (fileStat.st_mode & S_IXUSR)
+	if (file_stat.st_mode & S_IXUSR)
 		_status = static_cast<ResourceStatus>(_status | PERM_XOK);
 }
 

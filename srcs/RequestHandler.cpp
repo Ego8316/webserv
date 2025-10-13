@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 16:24:01 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 17:03:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,11 @@ Response	RequestHandler::handle(const Request &request, const Config &config, st
 	(void)cookies;
 	if (request.getError())
 		return _handleError(HTTP_BAD_REQUEST, config);
-	if (req.getMethod() == UNKNOWN)
+	if (request.getMethod() == UNKNOWN)
 		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
 	// BIEN PENSER A CHANGER AVANT DE RENDRE
-	if (request.getVersion() != "HTTP/1.1" || req.getVersion() != "HTTP/1.0")
-		return (_handleError(HTTP_VERSION_NOT_SUPPORTED, config));
+	// if (request.getVersion() != "HTTP/1.1" || request.getVersion() != "HTTP/1.0")
+	// 	return (_handleError(HTTP_VERSION_NOT_SUPPORTED, config));
 
 	Resource	resource;
 	resource.build(request, config);
@@ -78,27 +78,27 @@ Response	RequestHandler::_handleGet(const Request &request, const Config &config
 	std::ifstream		file;
 	std::ostringstream	buffer;
 
-	if (!res.isReadable())
+	if (!resource.isReadable())
 		return (_handleError(HTTP_FORBIDDEN, config));
 
-	if (res.isDirectory())
+	if (resource.isDirectory())
 	{
-		if (!utils::endsWith(res.getPath(), "/"))
+		if (!utils::endsWith(resource.getPath(), "/"))
 			return (_handleError(HTTP_REDIRECT_MOVE, config));
 		if (config.enable_listdir)
-			return (_handleListDir(req, config, res));
+			return (_handleListDir(request, config, resource));
 		return (_handleError(HTTP_FORBIDDEN, config));
 	}
 
-	file.open(res.getPath().c_str(), std::ios::in | std::ios::binary);
+	file.open(resource.getPath().c_str(), std::ios::in | std::ios::binary);
 	if (!file.is_open())
 		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
 	buffer << file.rdbuf();
 	file.close();
 
 	response.setStatus(HTTP_OK);
-	response.setBody(content);
-	response.setContentLength(content.size());
+	response.setBody(buffer.str());
+	response.setContentLength(buffer.str().size());
 	response.setContentType(utils::contentTypeToStr(resource.getType()));
 	response.buildHeader();
 	return (response);
@@ -108,10 +108,10 @@ Response	RequestHandler::_handlePost(const Request &request, const Config &confi
 {
 	Response	response;
 
-	(void)req;
-	if (!res.isWritable())
+	(void)request;
+	if (!resource.isWritable())
 		return (_handleError(HTTP_FORBIDDEN, config));
-	if (req.getRawBody().empty())
+	if (request.getRawBody().empty())
 		return (_handleError(HTTP_BAD_REQUEST, config));
 	
 	
@@ -122,10 +122,10 @@ Response	RequestHandler::_handleDelete(const Request &request, const Config &con
 {
 	Response	response;
 
-	(void)req;
-	if (res.isDirectory() && !utils::endsWith(res.getPath(), "/"))
+	(void)request;
+	if (resource.isDirectory() && !utils::endsWith(resource.getPath(), "/"))
 		return (_handleError(HTTP_CONFLICT, config));
-	if (std::remove(res.getPath().c_str()) != 0)
+	if (std::remove(resource.getPath().c_str()) != 0)
 	{
 		if (errno == EACCES || errno == EPERM)
 			return (_handleError(HTTP_FORBIDDEN, config));

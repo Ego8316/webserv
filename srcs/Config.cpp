@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 16:14:33 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:31:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,11 +126,6 @@ std::map<std::string, Redirection>		Config::getRedirections() const
 {
 	return (this->http_redir);
 }
-		
-ParseError		Config::getParseError()
-{
-	return (this->parse_error);
-}
 
 void			Config::setIP(std::string ip_str)
 {
@@ -212,7 +207,7 @@ void	Config::parseMethod(std::istringstream &conf_stream)
 			std::cerr << "Could not parse config line " << newline << " in methods"  << std::endl;
 			continue;
 		}
-		if (utils::strToMethod(field) == ERROR)
+		if (utils::strToMethod(field) == UNKNOWN)
 		{
 			std::cerr << "Could not interpret methods section in config: " << newline << std::endl;
 			continue;

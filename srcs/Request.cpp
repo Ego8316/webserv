@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 16:07:11 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:37:36 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ int		Request::parseRequest(std::string request, const Config &config)
 	_method = utils::strToMethod(methodStr);
 	if (!config.isAcceptedMethod(_method))
 	{
-		_error = UNSUPPORTED_METHOD;
+		_error = true;
 	}
 	Cookie::removeExpired(_all_cookies);
 	for (unsigned int i = 1; i < line_split.size(); ++i)
@@ -126,11 +126,11 @@ int		Request::parseRequest(std::string request, const Config &config)
 	if (_rawBody.size() >= expected_size)
 	{
 		std::cerr << "Bad content length" << std::endl;
-		_error = BAD_CONTENT_LENGTH;
-		delete buffer;
+		_error = true;
+		delete[] buffer;
 		return (SERV_ERROR);
 	}
-	delete buffer;
+	delete[] buffer;
 	return (0);
 }
 

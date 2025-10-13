@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 16:01:43 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 16:32:03 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ class Config {
 		~Config();
 	//GETTERS
 		std::map<std::string, Redirection>		getRedirections() const;
-		ParseError		getParseError();
 		void			setIP(std::string ip_str);
 		void			parseDefaultErrorPages(std::istringstream &conf_stream);
 		void			parseMethod(std::istringstream &conf_stream);
