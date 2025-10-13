@@ -28,7 +28,7 @@ MyServer1 I can write whatever here {
 	end
 
 	HTTP_REDIR = dict
-		/redirect_test/redi_test.txt = /some_page/page.html 301
+		/redirect_test/redi_test.txt : /some_page/page.html 301
 	end
 }
 
@@ -61,6 +61,6 @@ Website 2 {
 	end
 
 	HTTP_REDIR = dict
-		/index.html = /some_page/page2.html 301
+		/index.html : /some_page/page2.html 301
 	end
 }

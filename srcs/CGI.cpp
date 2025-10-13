@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 16:15:55 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 16:54:19 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,11 +59,26 @@ void		CGI::CGIRun(Request &request)
 
 void	CGI::CGICommunication(int *pid, int *pipeToCGI, int *pipeFromCGI)
 {
-	if (dup2(fd, STDOUT_FILENO)
+	close(pipeToCGI[PIPE_READ_END]);
+	close(pipeFromCGI[PIPE_WRITE_END]);
+	if (dup2(pipeToCGI[PIPE_READ_END], STDIN_FILENO) == -1)
+	{
+		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+		close(pipeToCGI[PIPE_WRITE_END]);
+		close(pipeFromCGI[PIPE_READ_END]);
+	}
+	if (dup2(pipeToCGI[PIPE_READ_END], STDIN_FILENO) == -1)
+	{
+		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+		close(pipeToCGI[PIPE_WRITE_END]);
+		close(pipeFromCGI[PIPE_READ_END]);
+	}
 }
 
 void	CGI::CGIExecute(Request &request, int *pipeToCGI, int *pipeFromCGI)
 {
+	close(pipeToCGI[PIPE_WRITE_END]);
+	close(pipeFromCGI[PIPE_READ_END]);
 	
 }
 
