@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 22:47:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 11:55:44 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,6 +169,18 @@ Method			utils::strToMethod(std::string method_str)
 	return (UNKNOWN);
 }
 
+long		utils::getTime()
+{
+	time_t		t;
+	
+	t = time(NULL);
+	if (t == -1)
+	{
+		std::cerr << "Clock error in Cookie. Considering Cookie as expired" << std::endl;
+		return (SERV_ERROR);
+	}
+	return (static_cast<long>(t));
+}
 
 /**
  * @brief Get the file prefix of the full path

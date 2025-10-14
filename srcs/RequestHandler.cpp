@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 20:33:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 12:30:39 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ RequestHandler::~RequestHandler(void)
 	return ;
 }
 
-Response	RequestHandler::handle(const Request &request, const Config &config, std::vector<Cookie *> cookies)
+Response	RequestHandler::handle(const Request &request, const Config &config, const Cookie &cookies)
 {
 	(void)cookies;
 	if (request.getError())
@@ -60,7 +60,7 @@ Response	RequestHandler::handle(const Request &request, const Config &config, st
 	if (resource.getStatus() & ACCEPT_ERROR)
 		return (_handleError(HTTP_BAD_REQUEST, config));
 	if (resource.isCGI())
-		return (_handleCGI(request, config, resource));
+		return (_handleCGI(request, config, resource, cookies));
 	switch (request.getMethod())
 	{
 		case GET:		return _handleGet(request, config, resource);
@@ -139,13 +139,14 @@ Response	RequestHandler::_handleDelete(const Request &request, const Config &con
 	return (response);
 }
 
-Response	RequestHandler::_handleCGI(const Request &request, const Config &config, const Resource &resource)
+Response	RequestHandler::_handleCGI(const Request &request, const Config &config, const Resource &resource, const Cookie &cookies)
 {
 	Response	response;
 
 	(void)request;
 	(void)config;
 	(void)resource;
+	(void)cookies;
 	
 	return (response);
 }

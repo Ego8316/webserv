@@ -6,16 +6,24 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/14 10:55:42 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 12:37:05 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-Request::Request(std::map<std::string, Cookie *> *all_cookies) : _all_cookies(all_cookies)
+Request::Request()
 {
-	this->_query_cookies.resize(0);
+	this->_method = UNKNOWN;
+	this->_requestTarget = "";
+	this->_query_string = "";
+	this->_version = "";
+	this->_rawBody = "";
+	this->_headers = std::map<std::string, std::string>();
+	this->_error = false;
 	this->_accept = FTYPE_NONE;
+	this->_query_cookies = NULL;
+	return ;
 }
 
 Request::Request(const Request &other)
@@ -30,18 +38,20 @@ Request &Request::operator=(const Request &other)
 	{
 		_method = other._method;
 		_requestTarget = other._requestTarget;
+		_query_string = other._query_string;
 		_version = other._version;
 		_rawBody = other._rawBody;
 		_headers = other._headers;
 		_error = other._error;
 		_accept = other._accept;
+		_query_cookies = other._query_cookies;
 	}
 	return (*this);
 }
 
 Request::~Request(void) {}
 
-int		Request::parseRequest(std::string request, Config *config)
+int		Request::parseRequest(std::string request, const Config &config)
 {
 	std::istringstream			stream(request);
 	std::string					line;
@@ -71,16 +81,15 @@ int		Request::parseRequest(std::string request, Config *config)
 	}
 	parseRequestTarget();
 	_method = utils::strToMethod(methodStr);
-	if (!config->isAcceptedMethod(_method))
+	if (!config.isAcceptedMethod(_method))
 	{
 		_error = true;
 	}
-	Cookie::removeExpired(_all_cookies);
 	for (unsigned int i = 1; i < line_split.size(); ++i)
 	{
 		if (utils::stringTrim(line, "\r\n \t").length() == 0)
 			continue;
-		parseHeaderLine(config, line_split[i]);
+		parseHeaderLine(line_split[i]);
 	}
 	while (std::getline(stream, line) && line != "\r")
 	{
@@ -89,11 +98,9 @@ int		Request::parseRequest(std::string request, Config *config)
 		{
 			if (utils::stringTrim(line, "\r\n \t").length() == 0)
 				continue;
-			parseHeaderLine(config, line_split[i]);
+			parseHeaderLine(line_split[i]);
 		}
 	}
-	if (_query_cookies.size() == 0)
-		_query_cookies.push_back(Cookie::createSession(config, _all_cookies));
 	if (_accept == FTYPE_NONE)
 		_accept = FTYPE_ANY;
 
@@ -104,7 +111,7 @@ int		Request::parseRequest(std::string request, Config *config)
 	if (_headers.count("Content-Length"))
 	{
 		expected_size = std::atoi(_headers["Content-Length"].c_str());
-		if (expected_size > config->max_body_size)
+		if (expected_size > config.max_body_size)
 		{
 			std::cerr << "Bad content length" << std::endl;
 			_error = true;
@@ -112,8 +119,8 @@ int		Request::parseRequest(std::string request, Config *config)
 		}
 	}
 	else
-		expected_size = config->max_body_size;
-	std::vector<char> buffer(config->buffer_size);
+		expected_size = config.max_body_size;
+	std::vector<char> buffer(config.buffer_size);
 	stream.read(&buffer[0], buffer.size());
 	bytes_read = stream.gcount();
 	while (stream && bytes_read && body_str.size() < expected_size)
@@ -145,7 +152,7 @@ int		Request::parseRequestTarget()
 	return (0);
 }
 
-int		Request::parseHeaderLine(Config *config, std::string line)
+int		Request::parseHeaderLine(std::string line)
 {
 	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
 	Cookie						*cookie;
@@ -160,9 +167,9 @@ int		Request::parseHeaderLine(Config *config, std::string line)
 			value.erase(value.size() - 1);
 		if (key == "Cookie")
 		{
-			cookie = Cookie::getSession(config, this->_all_cookies, value);
+			cookie = new Cookie(value);
 			if (cookie && cookie->applyToPath(_requestTarget))
-				this->_query_cookies.push_back(cookie);
+				this->_query_cookies = cookie;
 		}
 		else if (key == "Accept")
 			this->_accept = static_cast<ContentTypes>(this->_accept | utils::strToContentType(value));
@@ -216,12 +223,12 @@ ContentTypes	Request::getAccept(void) const
 	return (this->_accept);
 }
 
-void	Request::setMethod(Method method)
+void			Request::setMethod(Method method)
 {
 	this->_method = method;
 }
 
-bool	Request::headerHasField(const std::string field)
+bool			Request::headerHasField(const std::string field)
 {
 	return (_headers.find(field) != _headers.end());
 }
@@ -233,12 +240,12 @@ std::string		Request::headerGetField(const std::string field)
 	return ("");
 }
 
-std::vector<Cookie *>		Request::getQueryCookies()
+const Cookie	&Request::getQueryCookies()
 {
-	return (this->_query_cookies);
+	return (*this->_query_cookies);
 }
 
-std::string					Request::getQueryString() const
+std::string			Request::getQueryString() const
 {
 	return (this->_query_string);
 }

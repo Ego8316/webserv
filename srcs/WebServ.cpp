@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 16:11:17 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/14 11:44:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,6 @@ WebServ::WebServ(Config *config)
 {
 	this->_config = config;
 	std::cout << *this->_config << std::endl;
-	Cookie(this->_config);
-	this->_cookie_sessions = new std::map<std::string, Cookie *>;
 	this->_server = new serverSocket(this->_config);
 	if (this->_server->getFd() < 0)
 		return ;
@@ -28,8 +26,6 @@ WebServ::WebServ(Config *config)
 WebServ::WebServ(std::string config_file)
 {
 	this->_config = new Config(config_file);
-	Cookie(this->_config);
-	this->_cookie_sessions = new std::map<std::string, Cookie *>;
 	this->_server = new serverSocket(this->_config);
 	if (this->_server->getFd() < 0)
 		return ;
@@ -58,13 +54,6 @@ WebServ::~WebServ()
 		if (this->_clients[i] != NULL)
 			delete this->_clients[i];
 	}
-	for (std::map<std::string, Cookie *>::iterator it = (*this->_cookie_sessions).begin(); it != (*this->_cookie_sessions).end(); ++it)
-	{
-		if (it->second != NULL)
-			delete it->second;
-	}
-	if (this->_cookie_sessions)
-		delete this->_cookie_sessions;
 	if (this->_server)
 		delete this->_server;
 	if (this->_poll)
@@ -73,7 +62,7 @@ WebServ::~WebServ()
 
 int WebServ::WebServInit()
 {
-	if (!this->_config || !this->_cookie_sessions || !this->_server || !this->_poll)
+	if (!this->_config || !this->_server || !this->_poll)
 		return (SERV_ERROR);
 	this->_poll->pollAdd(this->_server->getFd(), POLLIN, -1);
 	std::cout << "pollAdd \t ok !" << std::endl;
@@ -141,7 +130,7 @@ int WebServ::newClient()
 		std::cerr << "Cannot accept new clients" << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions, this->_poll);
+	this->_clients[indx] = new Client(this->_config, this->_poll);
 	if (this->_server->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;

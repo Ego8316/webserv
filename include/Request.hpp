@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/14 10:55:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 12:34:56 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,21 +22,21 @@ class Cookie;
 class Request
 {
 	public:
-		Request(std::map<std::string, Cookie *> *all_cookies);
+		Request();
 		Request(const Request &other);
 		Request	&operator=(const Request &other);
 		~Request(void);
 
-		int									parseRequest(std::string request, Config *config);
+		int									parseRequest(std::string request, const Config &config);
 		int									parseRequestTarget();
-		int									parseHeaderLine(Config *config, std::string line);
+		int									parseHeaderLine(std::string line);
 		Method								getMethod(void) const;
 		std::string							getRequestTarget(void) const;
 		std::string							getVersion(void) const;
 		const std::string					&getRawBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
 		bool								getError(void) const;
-		std::vector<Cookie *>				getQueryCookies();
+		const Cookie						&getQueryCookies();
 		ContentTypes						getAccept() const;
 		std::string							getQueryString() const;
 
@@ -53,8 +53,7 @@ class Request
 		std::map<std::string, std::string>	_headers;
 		bool								_error;
 		ContentTypes						_accept;
-		std::map<std::string, Cookie *>		*_all_cookies;
-		std::vector<Cookie *>				_query_cookies;
+		Cookie 								*_query_cookies;
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);

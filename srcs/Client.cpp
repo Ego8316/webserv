@@ -6,15 +6,14 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/14 10:56:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 12:35:20 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies, serverPoll *poll)
-	:	_all_cookies(all_cookies),
-		_config(config),
+Client::Client(Config *config, serverPoll *poll)
+	:	_config(config),
 		_poll(poll)
 {
 	this->_client_len = sizeof(this->_client_addr);
@@ -107,10 +106,10 @@ int		Client::handleEvent()
 		std::cerr << "Empty request. Ignoring..." << std::endl;
 		return (SERV_ERROR);
 	}
-	Request	request(_all_cookies);
-	request.parseRequest(request_str, _config);
+	Request	request = Request();
+	request.parseRequest(request_str, *_config);
 	std::cout << request << std::endl;
-	std::vector<Cookie *>	cookies = request.getQueryCookies();
+	const Cookie		cookies = request.getQueryCookies();
 	Response	response = RequestHandler::handle(request, *_config, cookies);
 	response_str = response.toString();
 	std::cout << "RESPONSE =" << std::endl;

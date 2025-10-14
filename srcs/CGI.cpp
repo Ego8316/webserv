@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/14 11:41:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 13:00:19 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ cgi &cgi::operator=(const cgi &other)
 cgi::~cgi() {}
 
 
-void		cgi::cgiRun(Client &client, Request &request, Config &config, std::vector<Cookie *> cookies)
+void		cgi::cgiRun(Client &client, Request &request, Config &config, Cookie *cookies)
 {
 	int		pipe_to_CGI[2];
 	int		pipe_from_CGI[2];
@@ -52,7 +52,7 @@ void		cgi::cgiRun(Client &client, Request &request, Config &config, std::vector<
 	else
 	{
 		char	**env = cgiGenEnvVar(request, cookies);
-		this->cgiExecute(request, config, env, pipe_to_CGI, pipe_from_CGI);
+		this->cgiExecute(request, env, pipe_to_CGI, pipe_from_CGI);
 	}
 	//waitpid();
 }
@@ -100,7 +100,7 @@ void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int
 	this->cgiRestoreFds(original_standard_fds);
 }
 
-void	cgi::cgiExecute(Request &request, Config &config, char	**env, int *pipe_to_CGI, int *pipe_from_CGI)
+void	cgi::cgiExecute(Request &request, char	**env, int *pipe_to_CGI, int *pipe_from_CGI)
 {
 	int		original_standards_fds[2];
 
@@ -114,22 +114,13 @@ void	cgi::cgiExecute(Request &request, Config &config, char	**env, int *pipe_to_
 	}
 	close(pipe_to_CGI[PIPE_READ_END]);
 	close(pipe_from_CGI[PIPE_WRITE_END]);
-	
-	(void)request;
-	(void)config;
+	char	**argv = new char *[2];
+	argv[0] = &request.getRequestTarget()[0];
+	argv[1] = NULL;
+	if (execve(request.getRequestTarget().c_str(), argv, env) == -1)
+		std::cerr << "HOUSTON" << std::endl;
 	
 	cgiRestoreFds(original_standards_fds);
-}
-
-std::string	&cgi::cgiPassOutput()
-{
-	std::string *a = new std::string("lala");
-	return (*a);
-}
-
-void		cgi::cgiReadInput(std::string &input)
-{
-	(void)input;
 }
 
 void		cgi::cgiRestoreFds(int *original_standard_fds)
@@ -139,7 +130,7 @@ void		cgi::cgiRestoreFds(int *original_standard_fds)
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 }
 
-char	**cgi::cgiGenEnvVar(Request &request, std::vector<Cookie *> cookies)
+char	**cgi::cgiGenEnvVar(Request &request, Cookie *cookies)
 {
 	std::vector<std::string>	env;
 	std::string					varvalue;
@@ -147,15 +138,17 @@ char	**cgi::cgiGenEnvVar(Request &request, std::vector<Cookie *> cookies)
 	
 	env.push_back("METHOD=" + utils::methodToStr(request.getMethod()));
 	env.push_back("QUERY_STRING=" + request.getQueryString());
-	for (unsigned int i = 0; i < cookies.size(); ++i)
+	if (cookies != NULL)
 	{
-		varvalue = cookies[i]->getSessionUID();
-		env.push_back("HTTP_COOKIE=" + varvalue.substr(0, varvalue.find("=")));
-		env.push_back("COOKIE_ID_VALUE=" + varvalue.erase(0, varvalue.find("=") + 1));
-		env.push_back("COOKIE_EXP_TIME=" + utils::toString(cookies[i]->getExpirationTime()));
-		std::map<std::string, std::string>	attr = cookies[i];
+		varvalue = cookies->getSessionUID();
+		env.push_back("HTTP_COOKIE_IDFIELD=" + varvalue.substr(0, varvalue.find("=")));
+		env.push_back("HTTP_COOKIE_IDVALUE=" + varvalue.erase(0, varvalue.find("=") + 1));
+		std::map<std::string, std::string>	attr = cookies->getAllAttributes();
+		for (std::map<std::string, std::string>::iterator it = attr.begin(); it != attr.end(); ++it)
+		{
+			env.push_back("HTTP_COOKIE_" + it->first + "=" + it->second);
+		}
 	}
-
 	ret = new char *[env.size() + 1];
 	for (unsigned int i = 0; i < env.size(); ++i)
 		ret[i] = &env[i][0];

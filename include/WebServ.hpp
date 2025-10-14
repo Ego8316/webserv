@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 13:45:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 11:43:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,5 @@ class WebServ {
 		Config								*_config;
 		serverSocket						*_server;
 		serverPoll							*_poll;
-		std::map<std::string, Cookie *>		*_cookie_sessions;
 		std::vector<Client *>				_clients;
 };
