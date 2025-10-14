@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 19:43:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 10:56:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int		Client::handleEvent()
 		return (SERV_ERROR);
 	}
 	Request	request(_all_cookies);
-	request.parseRequest(request_str, *_config);
+	request.parseRequest(request_str, _config);
 	std::cout << request << std::endl;
 	std::vector<Cookie *>	cookies = request.getQueryCookies();
 	Response	response = RequestHandler::handle(request, *_config, cookies);

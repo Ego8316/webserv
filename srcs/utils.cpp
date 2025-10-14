@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 20:41:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/13 22:47:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,7 @@ Method			utils::strToMethod(std::string method_str)
 		return (DELETE);
 	return (UNKNOWN);
 }
+
 
 /**
  * @brief Get the file prefix of the full path

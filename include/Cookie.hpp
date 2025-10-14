@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 20:39:57 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 10:57:40 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,36 +30,34 @@ class Cookie {
 		~Cookie();
 	//GETTERS
 		std::map<std::string, std::string>	const	&getAllAttributes() const;
-		std::string			getSessionUID() const;
-		static Cookie		*getSessionByUID(std::map<std::string, Cookie *> *sessions, std::string uid);
-		std::string const	getAttribute(std::string key) const;
-		void				writeAttribute(std::string key, std::string newvalue);
+		std::string									getSessionUID() const;
+		long										getExpirationTime() const;
+		static Cookie								*getSessionByUID(std::map<std::string, Cookie *> *sessions, std::string uid);
+		std::string const							getAttribute(std::string key) const;
+		void										writeAttribute(std::string key, std::string newvalue);
 		
 	//SETTERS
 		void				setSessionUID(std::string uid);
 	//MEMBER FUNCTIONS
-		static Cookie		*getSession(std::map<std::string, Cookie *> *sessions, std::string header);
-		static Cookie		*createSession(std::map<std::string, Cookie *> *sessions);
+		static Cookie		*getSession(Config *config, std::map<std::string, Cookie *> *sessions, std::string header);
+		static Cookie		*createSession(Config *config, std::map<std::string, Cookie *> *sessions);
 		static int			removeSession(std::map<std::string, Cookie *> *sessions, std::string uid);
 		static bool			sessionExists(std::map<std::string, Cookie *> *sessions, std::string uid);
 		static void			removeExpired(std::map<std::string, Cookie *> *sessions);
 		static int			getTime();
+
 		int					updateAttribute(std::string field_name, std::string field_value);
 		bool				hasAttribute(std::string key) const;
 		bool				isExpired() const;
 		int					updateCookie(std::string header);
-		std::string			genHeader();
 		bool				applyToPath(std::string path);
 	//VARIABLES
 	private :
 		std::string									_session_uid;
-		time_t										_life_time;
 		std::map<std::string, std::string>			_attributes;
-		bool										_http_only;
-		bool										_secure;
-		int											_generation_time;
+		time_t										_expiration_time;
 		std::string									_path;
-		//std::string									_domain; //TODO
+		//std::string								_domain; //TODO
 		static Config								*_config;
 };
 

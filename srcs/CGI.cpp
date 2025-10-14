@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 20:37:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 11:41:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,11 @@ cgi &cgi::operator=(const cgi &other)
 cgi::~cgi() {}
 
 
-void		cgi::cgiRun(Client &client, Request &request, Config &config)
+void		cgi::cgiRun(Client &client, Request &request, Config &config, std::vector<Cookie *> cookies)
 {
 	int		pipe_to_CGI[2];
 	int		pipe_from_CGI[2];
 	pid_t	pid[2];
-
-	//setenv("METHOD", utils::methodToStr(request.getMethod()).c_str(), 1);
-	//setenv("QUERY_STRING", request.getQueryString().c_str(), 1);
 
 	if (pipe(pipe_to_CGI) == -1)
 	{
@@ -54,7 +51,8 @@ void		cgi::cgiRun(Client &client, Request &request, Config &config)
 	}
 	else
 	{
-		this->cgiExecute(request, config, pipe_to_CGI, pipe_from_CGI);
+		char	**env = cgiGenEnvVar(request, cookies);
+		this->cgiExecute(request, config, env, pipe_to_CGI, pipe_from_CGI);
 	}
 	//waitpid();
 }
@@ -75,7 +73,7 @@ void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int
 	while (total_count < mssg_len)
 	{
 		bytes_sent = write(pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + total_count, config.buffer_size);
-		if (bytes_sent == SERV_ERROR)
+		if (bytes_sent == -1)
 		{
 			std::cerr << "Failed to send body to CGI" << std::endl;
 			_status = HTTP_INTERNAL_SERVER_ERROR;
@@ -102,7 +100,7 @@ void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int
 	this->cgiRestoreFds(original_standard_fds);
 }
 
-void	cgi::cgiExecute(Request &request, Config &config, int *pipe_to_CGI, int *pipe_from_CGI)
+void	cgi::cgiExecute(Request &request, Config &config, char	**env, int *pipe_to_CGI, int *pipe_from_CGI)
 {
 	int		original_standards_fds[2];
 
@@ -139,4 +137,28 @@ void		cgi::cgiRestoreFds(int *original_standard_fds)
 	if (dup2(original_standard_fds[STDOUT_FILENO], STDOUT_FILENO) == -1
 		|| dup2(original_standard_fds[STDIN_FILENO], STDIN_FILENO) == -1)
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+}
+
+char	**cgi::cgiGenEnvVar(Request &request, std::vector<Cookie *> cookies)
+{
+	std::vector<std::string>	env;
+	std::string					varvalue;
+	char						**ret;
+	
+	env.push_back("METHOD=" + utils::methodToStr(request.getMethod()));
+	env.push_back("QUERY_STRING=" + request.getQueryString());
+	for (unsigned int i = 0; i < cookies.size(); ++i)
+	{
+		varvalue = cookies[i]->getSessionUID();
+		env.push_back("HTTP_COOKIE=" + varvalue.substr(0, varvalue.find("=")));
+		env.push_back("COOKIE_ID_VALUE=" + varvalue.erase(0, varvalue.find("=") + 1));
+		env.push_back("COOKIE_EXP_TIME=" + utils::toString(cookies[i]->getExpirationTime()));
+		std::map<std::string, std::string>	attr = cookies[i];
+	}
+
+	ret = new char *[env.size() + 1];
+	for (unsigned int i = 0; i < env.size(); ++i)
+		ret[i] = &env[i][0];
+	ret[env.size()] = NULL;
+	return (ret);
 }

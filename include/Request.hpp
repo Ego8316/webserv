@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 20:39:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/14 10:55:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,9 @@ class Request
 		Request	&operator=(const Request &other);
 		~Request(void);
 
-		int									parseRequest(std::string request, const Config &config);
+		int									parseRequest(std::string request, Config *config);
 		int									parseRequestTarget();
-		int									parseHeaderLine(std::string line);
+		int									parseHeaderLine(Config *config, std::string line);
 		Method								getMethod(void) const;
 		std::string							getRequestTarget(void) const;
 		std::string							getVersion(void) const;
