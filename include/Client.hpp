@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/17 15:02:45 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/17 17:59:41 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,17 @@
 #include "RequestHandler.hpp"
 #include "Config.hpp"
 #include "Cookie.hpp"
-#include "serverPoll.hpp"
+#include "ServerCore.hpp"
 
 class	Query;
 class	Config;
 class	Cookie;
-class	serverPoll;
+class	ServerCore;
 
 class	Client
 {
 	public:
-		Client(Config *config, std::map<std::string, Cookie *> *all_cookies, serverPoll *poll);
+		Client(Config *config, std::map<std::string, Cookie *> *all_cookies, ServerCore *core);
 		Client(const Client &other);
 		Client	&operator=(const Client &other);
 		~Client(void);
@@ -48,5 +48,5 @@ class	Client
 		int								_client_id;
 		std::map<std::string, Cookie *> *_all_cookies;
 		Config							*_config;
-		serverPoll						*_poll;
+		ServerCore						*_core;
 };

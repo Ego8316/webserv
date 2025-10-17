@@ -3,19 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 12:31:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/17 17:58:50 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies, serverPoll *poll)
+Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies, ServerCore *core)
 	:	_all_cookies(all_cookies),
 		_config(config),
-		_poll(poll)
+		_core(core)
 {
 	this->_client_len = sizeof(this->_client_addr);
 }
@@ -61,7 +61,7 @@ void    Client::setFd(int fd)
 		
 int		Client::socketRead(char *buffer, int bytes_read) //TODO
 {
-	if (!this->_poll->pollAvailFor(this->_client_id, POLLIN))
+	if (!this->_core->pollAvailFor(this->_client_id, POLLIN))
 		return (0);
 	bytes_read = recv(this->_client_fd, buffer, bytes_read, 0);
 	if (bytes_read == SERV_ERROR)
@@ -75,7 +75,7 @@ int		Client::socketRead(char *buffer, int bytes_read) //TODO
 
 int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 
 {
-	if (!this->_poll->pollAvailFor(this->_client_id, POLLOUT))
+	if (!this->_core->pollAvailFor(this->_client_id, POLLOUT))
 		return (0);
 	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR)
 	{

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 13:45:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/17 17:55:12 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,33 +14,30 @@
 
 #include "headers.hpp"
 #include "Client.hpp"
-#include "serverSocket.hpp"
-#include "serverPoll.hpp"
+#include "ServerCore.hpp"
 #include "Cookie.hpp"
 #include "Config.hpp"
 
-class WebServ {
-	public :
-	// CONSTRUCTORS
+class WebServ
+{
+	public:
 		WebServ(Config *config);
 		WebServ(std::string config_file);
 		WebServ(const WebServ &other);
-		WebServ &operator=(const WebServ &other);
-	//DESTUCTORS
+		WebServ	&operator=(const WebServ &other);
 		~WebServ();
-	//GETTERS
+
 		Client 				*getClient(int uid);
-	//SETTERS
-	//MEMBER FUNCTIONS
-		int					WebServInit();
-		int					WebServRun();
-		int					newClient();
-		int					removeClient(int indx);
-		int					WebServReboot();
+
+		int	WebServInit();
+		int	WebServRun();
+		int	newClient();
+		int	removeClient(int indx);
+		int	WebServReboot();
+
 	private :
-		Config								*_config;
-		serverSocket						*_server;
-		serverPoll							*_poll;
-		std::map<std::string, Cookie *>		*_cookie_sessions;
-		std::vector<Client *>				_clients;
+		Config							*_config;
+		ServerCore						*_core;
+		std::map<std::string, Cookie *>	*_cookie_sessions;
+		std::vector<Client *>			_clients;
 };

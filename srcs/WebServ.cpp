@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 16:11:17 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/17 18:15:13 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,7 @@ WebServ::WebServ(Config *config)
 	std::cout << *this->_config << std::endl;
 	Cookie(this->_config);
 	this->_cookie_sessions = new std::map<std::string, Cookie *>;
-	this->_server = new serverSocket(this->_config);
-	if (this->_server->getFd() < 0)
-		return ;
-	this->_poll = new serverPoll(this->_config);
+	this->_core = new ServerCore(config);
 	this->_clients.resize(this->_config->client_limit);
 }
 
@@ -30,22 +27,19 @@ WebServ::WebServ(std::string config_file)
 	this->_config = new Config(config_file);
 	Cookie(this->_config);
 	this->_cookie_sessions = new std::map<std::string, Cookie *>;
-	this->_server = new serverSocket(this->_config);
-	if (this->_server->getFd() < 0)
-		return ;
-	this->_poll = new serverPoll(this->_config);
+	this->_core = new ServerCore(this->_config);
 	this->_clients.resize(this->_config->client_limit);
 }
 
-WebServ::WebServ(const WebServ &other) : _config(other._config), _server(other._server), _poll(other._poll), _clients(other._clients) {}
+WebServ::WebServ(const WebServ &other) : _config(other._config), _core(other._core), _clients(other._clients) {}
 
 WebServ &WebServ::operator=(const WebServ &other)
 {
 	if (this != &other)
 	{
 		this->_config = other._config;
-		this->_server = other._server;
-		this->_poll = other._poll;
+		this->_core = other._core;
+		this->_core = other._core;
 		this->_clients = other._clients;
 	}
 	return (*this);
@@ -65,25 +59,20 @@ WebServ::~WebServ()
 	}
 	if (this->_cookie_sessions)
 		delete this->_cookie_sessions;
-	if (this->_server)
-		delete this->_server;
-	if (this->_poll)
-		delete this->_poll;
+	if (this->_core)
+		delete this->_core;
+	if (this->_core)
+		delete this->_core;
 }
 
 int WebServ::WebServInit()
 {
-	if (!this->_config || !this->_cookie_sessions || !this->_server || !this->_poll)
+	if (!this->_config || !this->_cookie_sessions || !this->_core || !this->_core)
 		return (SERV_ERROR);
-	this->_poll->pollAdd(this->_server->getFd(), POLLIN, -1);
-	std::cout << "pollAdd \t ok !" << std::endl;
-	if (this->_server->socketBind() == SERV_ERROR)
+	if (_core->init() == SERV_ERROR)
 		return (SERV_ERROR);
-	std::cout << "Socket Bind \t ok !" << std::endl;
-	if (this->_server->socketListen() == SERV_ERROR)
-		return (SERV_ERROR);
-	std::cout << "Socket Listen \t ok !" << std::endl;
-	std::cout << "WebServ Init \t ok !" << std::endl;
+	this->_core->pollAdd(this->_core->getFd(), POLLIN, -1);
+	std::cout << BOLD_GREEN << "[OK] WebServ initialized!" << RESET << std::endl;
 	return (0);
 }
 
@@ -91,9 +80,10 @@ int WebServ::WebServRun()
 {
 	std::vector<pollRevent>	events;
 
-	events = this->_poll->pollWatchRevent();
+	events = this->_core->pollWatchRevent();
 	if (events.size() == 0)
 		return (0);
+	std::cout << "ALLO" << std::endl;
 	for (std::vector<pollRevent>::iterator event = events.begin(); event != events.end(); ++event)
 	{
 		if (event->error)
@@ -141,21 +131,21 @@ int WebServ::newClient()
 		std::cerr << "Cannot accept new clients" << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions, this->_poll);
-	if (this->_server->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
+	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions, this->_core);
+	if (this->_core->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
 		return (SERV_ERROR);
 	}
 	this->_clients[indx]->setClientId(indx);
-	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN | POLLOUT, indx);
+	this->_core->pollAdd(this->_clients[indx]->getFd(), POLLIN | POLLOUT, indx);
 	std::cout << "Accepted client " << indx << std::endl;
 	return (0);
 }
 
 int WebServ::removeClient(int indx)
 {
-	this->_poll->pollRemove(indx);
+	this->_core->pollRemove(indx);
 	if (this->_clients[indx] != NULL)
 		delete this->_clients[indx];
 	this->_clients[indx] = NULL;
