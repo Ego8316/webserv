@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 12:16:29 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/17 15:02:45 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,20 +18,19 @@
 #include "Cookie.hpp"
 #include "serverPoll.hpp"
 
-class Query;
-class Config;
-class Cookie;
-class serverPoll;
+class	Query;
+class	Config;
+class	Cookie;
+class	serverPoll;
 
-class Client {
-	public :
-	// CONSTRUCTORS
+class	Client
+{
+	public:
 		Client(Config *config, std::map<std::string, Cookie *> *all_cookies, serverPoll *poll);
 		Client(const Client &other);
-		Client &operator=(const Client &other);
-	//DESTUCTORS
-		~Client();
-	//GETTERS
+		Client	&operator=(const Client &other);
+		~Client(void);
+
 		int					getFd();
 		struct sockaddr_in	&getClientAddr();
 		socklen_t			&getClientLen();

@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 16:02:57 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/17 17:21:17 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 #include <strings.h>
 #include <algorithm>
+#include <deque>
+#include <dirent.h>
 #include <vector>
 #include <map>
 #include <iomanip>
@@ -36,15 +39,22 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <cmath>
-#include <dirent.h>
+#include "colors.hpp"
+
+#if defined(__APPLE__)
+	#define OS_NAME "macOS"
+#elif defined(__linux__)
+	#define OS_NAME "Linux"
+#else
+	#define OS_NAME "Unknown"
+#endif
 
 #define SERV_ERROR -1
 #define NEW_CLIENT 1
 
 #define NO_TIMEOUT -1
-#define BUFFER_SIZE 1024
 #define CLIENT_LIMIT 1000
+#define MAX_BODY_SIZE_LIMIT 157286400
 
 // Default error pages
 #define ERROR_PAGE_400 "<html><head><title>400 Bad Request</title></head>" \
@@ -71,6 +81,14 @@
                        "<body><h1>505 HTTP Version Not Supported</h1>" \
                        "<p>The server does not support the HTTP protocol version used in the request.</p></body></html>"
 
+enum	ConnectionState
+{
+	READING_REQUEST,
+	PROCESSING_REQUEST,
+	CGI_RUNNING,
+	WRITING_RESPONSE,
+	CLOSED
+};
 
 enum	Method
 {
@@ -126,6 +144,7 @@ enum	HttpStatus
 	HTTP_NOT_IMPLEMENTED = 501,
 	HTTP_VERSION_NOT_SUPPORTED = 505
 };
+
 typedef struct s_pollRevent
 {
 	bool	error;
