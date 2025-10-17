@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 18:03:19 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/13 20:31:25 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ Response	RequestHandler::handle(const Request &request, const Config &config, st
 
 	if (resource.isRedirect())
 		return (_handleRedirect(request, config, resource));
-	if (!resource.exists()) //TODO -> @Hugo faut corriger ca du coup par ex. pour un post c'est OK
+	if (!resource.exists() && request.getMethod() != POST)
 	{
 		std::cerr << "Resource not found" << std::endl;
 		return (_handleError(HTTP_NOT_FOUND, config));
@@ -104,15 +104,24 @@ Response	RequestHandler::_handleGet(const Request &request, const Config &config
 
 Response	RequestHandler::_handlePost(const Request &request, const Config &config, const Resource &resource)
 {
-	Response	response;
+	Response		response;
+	std::ofstream	outfile;
 
 	(void)request;
-	if (!resource.isWritable())
-		return (_handleError(HTTP_FORBIDDEN, config));
 	if (request.getRawBody().empty() || resource.isDirectory())
 		return (_handleError(HTTP_BAD_REQUEST, config));
-	
-	
+
+	outfile.open(resource.getPath().c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
+	if (!outfile.is_open())
+		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
+	outfile << request.getRawBody();
+	outfile.close();
+
+	response.setStatus(HTTP_CREATED);
+	response.setBody("Sahtek frerot");
+	response.setContentType("text/html");
+	response.setContentLength(response.getBody().size());
+	response.buildHeader();
 	return (response);
 }
 
