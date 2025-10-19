@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 17:19:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 17:39:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,13 @@ int WebServ::UpdateQueue()
 		else
 		{
 			if (event->server == true)
-				this->_processing_queue.push_back(newClient());
+			{
+				Client	*new_client = newClient();
+				if (new_client)
+					this->_processing_queue.push_back(new_client);
+				else
+					std::cerr << "Error while creating Client instance" << std::endl;
+			}
 			else
 			{
 				if (this->_clients[event->client_id]->getState() == DONE)

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 13:40:05 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 17:35:21 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,6 +243,8 @@ std::string		Request::headerGetField(const std::string field)
 
 const Cookie	&Request::getQueryCookies()
 {
+	if (!this->_query_cookies)
+		this->_query_cookies = new Cookie();
 	return (*this->_query_cookies);
 }
 
