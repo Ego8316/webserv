@@ -6,15 +6,15 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:12:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:27:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(Config *config, serverPoll *poll)
+Client::Client(Config *config, serverPoll *server)
 	:	_config(config),
-		_poll(poll)
+		_server(server)
 {
 	this->_client_len = sizeof(this->_client_addr);
 	this->_state = TRY_ACCEPTING;
@@ -25,7 +25,7 @@ Client::Client(Config *config, serverPoll *poll)
 
 Client::Client(const Client &other)
 	:	_config(other._config),
-		_poll(other._poll)
+		_server(other._)
 {
 	*this = other;
 }
@@ -88,7 +88,7 @@ void    Client::setState(RequestStage state)
 
 int		Client::socketRead(char *buffer, int bytes_read) //TODO
 {
-	if (!this->_poll->pollAvailFor(this->_client_id, POLLIN))
+	if (!this->_server->pollAvailFor(this->_client_id, POLLIN))
 		return (0);
 	bytes_read = recv(this->_client_fd, buffer, bytes_read, 0); //MSG_DONTWAIT
 	if (bytes_read == SERV_ERROR)
@@ -102,7 +102,7 @@ int		Client::socketRead(char *buffer, int bytes_read) //TODO
 
 int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 
 {
-	if (!this->_poll->pollAvailFor(this->_client_id, POLLOUT))
+	if (!this->_server->pollAvailFor(this->_client_id, POLLOUT))
 		return (0);
 	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR) //MSG_DONTWAIT
 	{
@@ -122,6 +122,7 @@ int		Client::handleEvent()
 
 	//TODO NOW ALSO NEEDS TO PREFORM INITIAL CONNEXTION WITH ACCEPT TO BE FULLY NON BLOCKING
 	// SEE LOGIC IN NOW DEPRECATED newClient IN WEBSERV
+	client->start_time = getTime();
 	if (this->_state == TRY_ACCEPTING)
 		this->tryAccepting();
 	bytes_read = _config->buffer_size;
@@ -156,11 +157,19 @@ int		Client::handleEvent()
 
 int 	Client::tryAccepting()
 {
-	if (this->_core->socketAcceptClient(_clients[indx]) == SERV_ERROR)
+	while (this->_server->socketAcceptClient(this) == SERV_ERROR && getTime < this->start_time + this->_config->time_limit)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
+		std::cerr << "Retrying..." << std::endl;
 		return (SERV_ERROR);
 	}
-	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN | POLLOUT, indx);
-	std::cout << "Accepted client " << indx << std::endl;
+	if (this->getFd() <= 0)
+	{
+		this->_state = ABORTING;
+		return ;
+	}
+	else
+		this->_state = INPUT_READING;
+	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id); //TODO Set non blocking;
+	std::cout << "Accepted client " << this->_client_id << std::endl;
 }

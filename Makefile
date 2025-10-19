@@ -6,7 +6,7 @@
 #    By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/10/14 11:11:22 by victorviter      ###   ########.fr        #
+#    Updated: 2025/10/19 16:27:51 by victorviter      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ LDIR		=	lib/
 ODIR		=	objs/
 
 SRC			=	main.cpp
-SRC			+=	serverSocket.cpp serverPoll.cpp Client.cpp Request.cpp \
+SRC			+=	ServerCore.cpp Client.cpp Request.cpp \
 				Response.cpp RequestHandler.cpp Resource.cpp \
 				utils.cpp Cookie.cpp Config.cpp CGI.cpp WebServ.cpp
 

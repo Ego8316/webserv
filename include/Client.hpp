@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 14:33:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:28:04 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,22 +16,21 @@
 #include "RequestHandler.hpp"
 #include "Config.hpp"
 #include "Cookie.hpp"
-#include "serverPoll.hpp"
+#include "ServerCore.hpp"
 
-class Query;
-class Config;
-class Cookie;
-class serverPoll;
+class	Query;
+class	Config;
+class	Cookie;
+class	serverPoll;
 
 class Client {
 	public :
 	// CONSTRUCTORS
 		Client(Config *config, serverPoll *poll);
 		Client(const Client &other);
-		Client &operator=(const Client &other);
-	//DESTUCTORS
-		~Client();
-	//GETTERS
+		Client	&operator=(const Client &other);
+		~Client(void);
+
 		int					getFd();
 		struct sockaddr_in	&getClientAddr();
 		socklen_t			&getClientLen();
@@ -44,6 +43,7 @@ class Client {
 		int					handleEvent();
 		int					socketRead(char *buffer, int bytes_read);
 		int					socketWrite(const char *buffer, int bytes_write);
+		int 				tryAccepting();
 	private :
 		int								_client_fd;
 		struct sockaddr_in				_client_addr;
@@ -56,5 +56,5 @@ class Client {
 		int								_cgi_pid;
 		
 		Config							*_config;
-		serverPoll						*_poll;
+		ServerCore						*_server;
 };

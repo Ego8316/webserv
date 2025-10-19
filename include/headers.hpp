@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 16:04:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:23:08 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 #include <strings.h>
 #include <algorithm>
+#include <deque>
+#include <dirent.h>
 #include <vector>
 #include <map>
 #include <iomanip>
@@ -39,13 +42,22 @@
 #include <cmath>
 #include <dirent.h>
 #include <deque>
+#include "colors.hpp"
+
+#if defined(__APPLE__)
+	#define OS_NAME "macOS"
+#elif defined(__linux__)
+	#define OS_NAME "Linux"
+#else
+	#define OS_NAME "Unknown"
+#endif
 
 #define SERV_ERROR -1
 #define NEW_CLIENT 1
 
 #define NO_TIMEOUT -1
-#define BUFFER_SIZE 1024
 #define CLIENT_LIMIT 1000
+#define MAX_BODY_SIZE_LIMIT 157286400
 
 # define PIPE_READ_END 0
 # define PIPE_WRITE_END 1
@@ -74,7 +86,6 @@
 #define ERROR_PAGE_505 "<html><head><title>505 HTTP Version Not Supported</title></head>" \
                        "<body><h1>505 HTTP Version Not Supported</h1>" \
                        "<p>The server does not support the HTTP protocol version used in the request.</p></body></html>"
-
 
 enum	Method
 {
@@ -140,6 +151,7 @@ enum	RequestStage //should be set to DONE whenever not in the queue
 	PROCESSING_REQUEST,
 	OUTPUT_SENDING,
 	CGI_WAITING,
+	ABORTING,
 	DONE
 };
 
