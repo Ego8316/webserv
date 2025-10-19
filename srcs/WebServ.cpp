@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/17 18:15:13 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 16:38:11 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,13 +61,11 @@ WebServ::~WebServ()
 		delete this->_cookie_sessions;
 	if (this->_core)
 		delete this->_core;
-	if (this->_core)
-		delete this->_core;
 }
 
 int WebServ::WebServInit()
 {
-	if (!this->_config || !this->_cookie_sessions || !this->_core || !this->_core)
+	if (!this->_config || !this->_cookie_sessions || !this->_core)
 		return (SERV_ERROR);
 	if (_core->init() == SERV_ERROR)
 		return (SERV_ERROR);
