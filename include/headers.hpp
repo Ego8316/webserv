@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/17 17:21:17 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 16:23:08 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,9 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cmath>
+#include <dirent.h>
+#include <deque>
 #include "colors.hpp"
 
 #if defined(__APPLE__)
@@ -55,6 +58,9 @@
 #define NO_TIMEOUT -1
 #define CLIENT_LIMIT 1000
 #define MAX_BODY_SIZE_LIMIT 157286400
+
+# define PIPE_READ_END 0
+# define PIPE_WRITE_END 1
 
 // Default error pages
 #define ERROR_PAGE_400 "<html><head><title>400 Bad Request</title></head>" \
@@ -80,15 +86,6 @@
 #define ERROR_PAGE_505 "<html><head><title>505 HTTP Version Not Supported</title></head>" \
                        "<body><h1>505 HTTP Version Not Supported</h1>" \
                        "<p>The server does not support the HTTP protocol version used in the request.</p></body></html>"
-
-enum	ConnectionState
-{
-	READING_REQUEST,
-	PROCESSING_REQUEST,
-	CGI_RUNNING,
-	WRITING_RESPONSE,
-	CLOSED
-};
 
 enum	Method
 {
@@ -131,18 +128,31 @@ enum	HttpStatus
 {
 	HTTP_OK = 200,
 	HTTP_CREATED = 201,
+	HTTP_ACCEPTED = 202,
 	HTTP_NO_CONTENT = 204,
 	HTTP_REDIRECT = 300,
-	HTTP_REDIRECT_MOVE = 301,
-	HTTP_REDIRECT_FOUND = 302,
-	HTTP_REDIRECT_PERM = 308,
+	HTTP_REDIRECT_PERM = 301,
+	HTTP_REDIRECT_TEMP = 302,
 	HTTP_BAD_REQUEST = 400,
+	HTTP_UNAUTHORIZED = 401,
 	HTTP_FORBIDDEN = 403,
 	HTTP_NOT_FOUND = 404,
 	HTTP_CONFLICT = 409,
 	HTTP_INTERNAL_SERVER_ERROR = 500,
 	HTTP_NOT_IMPLEMENTED = 501,
+	HTTP_BAD_GATEWAY = 502,
 	HTTP_VERSION_NOT_SUPPORTED = 505
+};
+
+enum	RequestStage //should be set to DONE whenever not in the queue
+{
+	TRY_ACCEPTING,
+	INPUT_READING,
+	PROCESSING_REQUEST,
+	OUTPUT_SENDING,
+	CGI_WAITING,
+	ABORTING,
+	DONE
 };
 
 typedef struct s_pollRevent

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.cpp                                          :+:      :+:    :+:   */
+/*   Utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/13 16:37:53 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 16:11:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,17 +169,15 @@ Method			utils::strToMethod(std::string method_str)
 	return (UNKNOWN);
 }
 
-/**
- * @brief Get the file prefix of the full path
- * 
- * @return File prefix : if input is /some/directory/file the return value will be /some/directory
- * TODO ? remove ? not used anymore
- */
-std::string		utils::extractPath(std::string full_path)
+long		utils::getTime()
 {
-	if (full_path.find("/") == std::string::npos)
-		return ("");
-	else if (full_path.rfind("/") == full_path.size() - 1)
-		return (full_path);
-	return (full_path.substr(0, full_path.rfind("/")));
+	time_t		t;
+	
+	t = time(NULL);
+	if (t == -1)
+	{
+		std::cerr << "Clock error in Cookie. Considering Cookie as expired" << std::endl;
+		return (SERV_ERROR);
+	}
+	return (static_cast<long>(t));
 }

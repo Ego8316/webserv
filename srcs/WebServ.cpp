@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:38:11 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 17:11:52 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,6 @@ WebServ::WebServ(Config *config)
 {
 	this->_config = config;
 	std::cout << *this->_config << std::endl;
-	Cookie(this->_config);
-	this->_cookie_sessions = new std::map<std::string, Cookie *>;
 	this->_core = new ServerCore(config);
 	this->_clients.resize(this->_config->client_limit);
 }
@@ -25,8 +23,6 @@ WebServ::WebServ(Config *config)
 WebServ::WebServ(std::string config_file)
 {
 	this->_config = new Config(config_file);
-	Cookie(this->_config);
-	this->_cookie_sessions = new std::map<std::string, Cookie *>;
 	this->_core = new ServerCore(this->_config);
 	this->_clients.resize(this->_config->client_limit);
 }
@@ -52,20 +48,13 @@ WebServ::~WebServ()
 		if (this->_clients[i] != NULL)
 			delete this->_clients[i];
 	}
-	for (std::map<std::string, Cookie *>::iterator it = (*this->_cookie_sessions).begin(); it != (*this->_cookie_sessions).end(); ++it)
-	{
-		if (it->second != NULL)
-			delete it->second;
-	}
-	if (this->_cookie_sessions)
-		delete this->_cookie_sessions;
 	if (this->_core)
 		delete this->_core;
 }
 
 int WebServ::WebServInit()
 {
-	if (!this->_config || !this->_cookie_sessions || !this->_core)
+	if (!this->_config || !this->_core)
 		return (SERV_ERROR);
 	if (_core->init() == SERV_ERROR)
 		return (SERV_ERROR);
@@ -76,12 +65,18 @@ int WebServ::WebServInit()
 
 int WebServ::WebServRun()
 {
+	this->WebServUpdateQueue();
+	this->WebServProcessQueue();
+	return (0);
+}
+
+int WebServ::WebServUpdateQueue()
+{
 	std::vector<pollRevent>	events;
 
 	events = this->_core->pollWatchRevent();
 	if (events.size() == 0)
 		return (0);
-	std::cout << "ALLO" << std::endl;
 	for (std::vector<pollRevent>::iterator event = events.begin(); event != events.end(); ++event)
 	{
 		if (event->error)
@@ -101,21 +96,36 @@ int WebServ::WebServRun()
 		else
 		{
 			if (event->server == true)
-			{
-				if (this->newClient() == SERV_ERROR)
-					std::cerr << "Failed to accept new client" << std::endl;
-			}
+				this->_processing_queue.push_back(newClient());
 			else
 			{
-				std::cout << "Client " << event->client_id << " handles event" << std::endl;
-				this->_clients[event->client_id]->handleEvent();
+				if (this->_clients[event->client_id]->getState() == DONE)
+				{
+					std::cout << "Client " << event->client_id << " added to processing queue" << std::endl;
+					this->_clients[event->client_id]->setState(INPUT_READING);
+					this->_processing_queue.push_back(this->_clients[event->client_id]);
+				}
 			}
 		}
 	}
 	return (0);
 }
 
-int WebServ::newClient()
+int WebServ::WebServProcessQueue()
+{
+	Client	*next_client;
+
+	if (this->_processing_queue.empty())
+		return (0);
+	next_client = this->_processing_queue.front();
+	this->_processing_queue.pop_front();
+	next_client->handleEvent();
+	if (next_client->getState() != DONE)
+		this->_processing_queue.push_back(next_client);
+	return (0);
+}
+
+Client	 *WebServ::newClient()
 {
 	int indx;
 
@@ -127,31 +137,40 @@ int WebServ::newClient()
 	if (indx == this->_config->client_limit)
 	{
 		std::cerr << "Cannot accept new clients" << std::endl;
-		return (SERV_ERROR);
+		return (NULL);
 	}
-	this->_clients[indx] = new Client(this->_config, this->_cookie_sessions, this->_core);
-	if (this->_core->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
-	{
-		std::cerr << "Failed to accept new client" << std::endl;
-		return (SERV_ERROR);
-	}
+	this->_clients[indx] = new Client(this->_config, this->_core);
 	this->_clients[indx]->setClientId(indx);
-	this->_core->pollAdd(this->_clients[indx]->getFd(), POLLIN | POLLOUT, indx);
-	std::cout << "Accepted client " << indx << std::endl;
-	return (0);
+	return (this->_clients[indx]);
 }
 
 int WebServ::removeClient(int indx)
 {
 	this->_core->pollRemove(indx);
 	if (this->_clients[indx] != NULL)
+	{
+		if (this->_clients[indx]->getState() != DONE)
+		{
+			std::deque<Client *>::iterator it = this->_processing_queue.begin();
+			while (it != this->_processing_queue.end())
+			{
+				if (*it == this->_clients[indx])
+				{
+					this->_processing_queue.erase(it);
+					break ;
+				}
+				++it;
+			}
+		}
 		delete this->_clients[indx];
+	}
 	this->_clients[indx] = NULL;
 	return (0);
 }
 
 int WebServ::WebServReboot()
 {
+	//TODO
 	std::cerr << "Gné gné gné ca marche pas" << std::endl;
 	return (SERV_ERROR);
 }

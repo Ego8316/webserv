@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/17 17:55:12 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 16:42:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,18 @@ class WebServ
 		~WebServ();
 
 		Client 				*getClient(int uid);
-
-		int	WebServInit();
-		int	WebServRun();
-		int	newClient();
-		int	removeClient(int indx);
-		int	WebServReboot();
-
+	//SETTERS
+	//MEMBER FUNCTIONS
+		int					WebServInit();
+		int					WebServRun();
+		int 				WebServUpdateQueue();
+		int 				WebServProcessQueue();
+		Client				*newClient();
+		int					removeClient(int indx);
+		int					WebServReboot();
 	private :
-		Config							*_config;
-		ServerCore						*_core;
-		std::map<std::string, Cookie *>	*_cookie_sessions;
-		std::vector<Client *>			_clients;
+		Config								*_config;
+		ServerCore							*_core;
+		std::vector<Client *>				_clients;
+		std::deque<Client *>				_processing_queue;
 };

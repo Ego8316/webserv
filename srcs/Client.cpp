@@ -3,24 +3,32 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/17 17:58:50 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 16:58:58 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(Config *config, std::map<std::string, Cookie *> *all_cookies, ServerCore *core)
-	:	_all_cookies(all_cookies),
-		_config(config),
-		_core(core)
+Client::Client(Config *config, ServerCore *server)
+	:	_config(config),
+		_server(server)
 {
 	this->_client_len = sizeof(this->_client_addr);
+	this->_state = TRY_ACCEPTING;
+	this-> _preprend_response = "";
+	this->_response_fd = 0;
+	this->_cgi_pid = 0;
 }
 
-Client::Client(const Client &other) : _client_addr(other._client_addr), _client_len(other._client_len), _config(other._config) {}
+Client::Client(const Client &other)
+	:	_config(other._config),
+		_server(other._server)
+{
+	*this = other;
+}
 
 Client &Client::operator=(const Client &other)
 {
@@ -29,6 +37,10 @@ Client &Client::operator=(const Client &other)
 		this->_client_addr = other._client_addr;
 		this->_client_len = other._client_len;
 		this->_config = other._config;
+		this->_state = other._state;
+		this-> _preprend_response = other._preprend_response;
+		this->_response_fd = other._response_fd;
+		this->_cgi_pid = other._cgi_pid;
 	}
 	return (*this);
 }
@@ -54,16 +66,31 @@ int     Client::getFd()
 	return (this->_client_fd);
 }
 
+RequestStage	Client::getState()
+{
+	return (this->_state);
+}
+
+void	Client::setClientId(int id)
+{
+	this->_client_id = id;
+}
+
 void    Client::setFd(int fd)
 {
 	this->_client_fd = fd;
 }
-		
+
+void    Client::setState(RequestStage state)
+{
+	this->_state = state;
+}
+
 int		Client::socketRead(char *buffer, int bytes_read) //TODO
 {
-	if (!this->_core->pollAvailFor(this->_client_id, POLLIN))
+	if (!this->_server->pollAvailFor(this->_client_id, POLLIN))
 		return (0);
-	bytes_read = recv(this->_client_fd, buffer, bytes_read, 0);
+	bytes_read = recv(this->_client_fd, buffer, bytes_read, 0); //MSG_DONTWAIT
 	if (bytes_read == SERV_ERROR)
 	{
 		std::cerr << "Receive failed\n";
@@ -75,53 +102,77 @@ int		Client::socketRead(char *buffer, int bytes_read) //TODO
 
 int		Client::socketWrite(const char *buffer, int bytes_write) //TODO 
 {
-	if (!this->_core->pollAvailFor(this->_client_id, POLLOUT))
+	if (!this->_server->pollAvailFor(this->_client_id, POLLOUT))
 		return (0);
-	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR)
+	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR) //MSG_DONTWAIT
 	{
 		std::cerr << "Send failed\n";
 		return (SERV_ERROR);
 	}
 	return (0);
 }
-		
+
 int		Client::handleEvent()
 {
 	int			bytes_read;
 	std::string	request_str;
 	std::string	response_str;
-	
-	char	*buffer = new char[_config->buffer_size]; //TODO std::vector<char> buffer(1024);
-	bytes_read = _config->buffer_size;
-	while (bytes_read == _config->buffer_size)
+	std::vector<char> buffer(_config->buffer_size);
+
+
+	//TODO NOW ALSO NEEDS TO PREFORM INITIAL CONNEXTION WITH ACCEPT TO BE FULLY NON BLOCKING
+	// SEE LOGIC IN NOW DEPRECATED newClient IN WEBSERV
+	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
+	if (this->_state == TRY_ACCEPTING)
 	{
-		bytes_read = socketRead(buffer, bytes_read);
+		this->tryAccepting();
+		return (0);
+	}
+	bytes_read = _config->buffer_size;
+	while (bytes_read == _config->buffer_size && request_str.size() < this->_config->max_body_size)
+	{
+		bytes_read = socketRead(&buffer[0], buffer.size());
 		if (bytes_read == SERV_ERROR)
 			return (SERV_ERROR);
-		request_str += std::string(buffer).substr(0, bytes_read);
+		request_str += std::string(buffer.begin(), buffer.end()).substr(0, bytes_read);
 	}
-	std::cout << "REQUEST = " << std::endl;
-	std::cout << request_str << std::endl;
 	if (request_str.length() == 0)
 	{
 		std::cerr << "Empty request. Ignoring..." << std::endl;
 		return (SERV_ERROR);
 	}
-	Request	request(_all_cookies);
+	std::cout << "REQUEST = " << std::endl;
+	std::cout << request_str << std::endl;
+	Request	request = Request();
 	request.parseRequest(request_str, *_config);
 	std::cout << request << std::endl;
-	std::vector<Cookie *>	cookies = request.getQueryCookies();
+	const Cookie		cookies = request.getQueryCookies();
 	Response	response = RequestHandler::handle(request, *_config, cookies);
 	response_str = response.toString();
 	std::cout << "RESPONSE =" << std::endl;
 	std::cout << response_str << std::endl;
+	this->_state = DONE;
 	if (socketWrite(response_str.c_str(), response_str.length()) == SERV_ERROR)
 		return (SERV_ERROR);
-	delete[] buffer;
 	return (0); //TODO return err code
 }
 
-void	Client::setClientId(int id)
+int 	Client::tryAccepting()
 {
-	this->_client_id = id;
+	while (this->_server->socketAcceptClient(this) == SERV_ERROR && utils::getTime() < this->_time_limit)
+	{
+		std::cerr << "Failed to accept new client" << std::endl;
+		std::cerr << "Retrying..." << std::endl;
+		return (SERV_ERROR);
+	}
+	if (this->getFd() <= 0)
+	{
+		this->_state = ABORTING;
+		return (SERV_ERROR);
+	}
+	else
+		this->_state = DONE;
+	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id); //TODO Set non blocking;
+	std::cout << "Accepted client " << this->_client_id << std::endl;
+	return (0);
 }

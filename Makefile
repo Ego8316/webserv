@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ego <ego@student.42.fr>                    +#+  +:+       +#+         #
+#    By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/10/17 17:59:27 by ego              ###   ########.fr        #
+#    Updated: 2025/10/19 16:35:59 by victorviter      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@ ODIR		=	objs/
 SRC			=	main.cpp
 SRC			+=	ServerCore.cpp Client.cpp Request.cpp \
 				Response.cpp RequestHandler.cpp Resource.cpp \
-				utils.cpp Cookie.cpp Config.cpp WebServ.cpp 
+				utils.cpp Cookie.cpp Config.cpp CGI.cpp WebServ.cpp
 
 OBJS		=	$(addprefix $(ODIR), $(SRC:.cpp=.o))
 SRCS		=	$(addprefix $(SDIR), $(SRC))

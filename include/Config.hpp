@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/16 16:25:45 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 16:41:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Config {
 		int										protocol;
 		size_t									max_body_size;
 		int										client_limit;
+		int										processing_time_limit;
 		int										incoming_queue_backlog;
 		int										buffer_size;
 		int										cookie_sessions_max;
@@ -51,7 +52,7 @@ class Config {
 		
 		std::map<int, std::string>				default_error_pages;
 		std::vector<Method>						accepted_methods;
-		std::map<std::string, Redirection>		http_redir; //TODO finish this shit
+		std::map<std::string, Redirection>		http_redir;
 	private :
 };
 
