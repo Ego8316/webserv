@@ -6,29 +6,29 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 13:46:57 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 17:17:23 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGI.hpp"
 
-cgi::cgi() {}
+CGI::CGI() {}
 
-cgi::cgi(const cgi &other)
+CGI::CGI(const CGI &other)
 {
 	(void)other;
 }
 
-cgi &cgi::operator=(const cgi &other)
+CGI &CGI::operator=(const CGI &other)
 {
 	(void)other;
 	return (*this);
 }
 
-cgi::~cgi() {}
+CGI::~CGI() {}
 
 
-void		cgi::cgiRun(Client &client, Request &request, Config &config, Cookie *cookies)
+void		CGI::Run(Client &client, Request &request, Config &config, Cookie *cookies)
 {
 	int		pipe_to_CGI[2];
 	int		pipe_from_CGI[2];
@@ -47,17 +47,17 @@ void		cgi::cgiRun(Client &client, Request &request, Config &config, Cookie *cook
 	pid[0] = fork();
 	if (pid[0] == 0)
 	{
-		this->cgiCommunication(client, request, config, pipe_to_CGI, pipe_from_CGI);
+		this->Communication(client, request, config, pipe_to_CGI, pipe_from_CGI);
 	}
 	else
 	{
-		char	**env = cgiGenEnvVar(request, cookies);
-		this->cgiExecute(request, env, pipe_to_CGI, pipe_from_CGI);
+		char	**env = GenEnvVar(request, cookies);
+		this->Execute(request, env, pipe_to_CGI, pipe_from_CGI);
 	}
 	//waitpid();
 }
 
-void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int *pipe_to_CGI, int *pipe_from_CGI)
+void	CGI::Communication(Client &client, Request &request, Config &config, int *pipe_to_CGI, int *pipe_from_CGI)
 {
 	int					original_standard_fds[2];
 	int					bytes_sent;
@@ -97,10 +97,10 @@ void	cgi::cgiCommunication(Client &client, Request &request, Config &config, int
 			return ;
 		total_count += bytes_sent;
 	}
-	this->cgiRestoreFds(original_standard_fds);
+	this->RestoreFds(original_standard_fds);
 }
 
-void	cgi::cgiExecute(Request &request, char	**env, int *pipe_to_CGI, int *pipe_from_CGI)
+void	CGI::Execute(Request &request, char	**env, int *pipe_to_CGI, int *pipe_from_CGI)
 {
 	int		original_standards_fds[2];
 
@@ -122,17 +122,17 @@ void	cgi::cgiExecute(Request &request, char	**env, int *pipe_to_CGI, int *pipe_f
 		std::cerr << "CGI execution failed" << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 	}
-	cgiRestoreFds(original_standards_fds);
+	RestoreFds(original_standards_fds);
 }
 
-void		cgi::cgiRestoreFds(int *original_standard_fds)
+void		CGI::RestoreFds(int *original_standard_fds)
 {
 	if (dup2(original_standard_fds[STDOUT_FILENO], STDOUT_FILENO) == -1
 		|| dup2(original_standard_fds[STDIN_FILENO], STDIN_FILENO) == -1)
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 }
 
-char	**cgi::cgiGenEnvVar(Request &request, Cookie *cookies)
+char	**CGI::GenEnvVar(Request &request, Cookie *cookies)
 {
 	std::vector<std::string>	env;
 	std::string					varvalue;

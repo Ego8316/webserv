@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:42:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 17:19:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,13 +30,13 @@ class WebServ
 		Client 				*getClient(int uid);
 	//SETTERS
 	//MEMBER FUNCTIONS
-		int					WebServInit();
-		int					WebServRun();
-		int 				WebServUpdateQueue();
-		int 				WebServProcessQueue();
+		int					Init();
+		int					Run();
+		int 				UpdateQueue();
+		int 				ProcessQueue();
 		Client				*newClient();
 		int					removeClient(int indx);
-		int					WebServReboot();
+		int					Reboot();
 	private :
 		Config								*_config;
 		ServerCore							*_core;

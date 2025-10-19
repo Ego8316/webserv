@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/10 14:32:57 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 17:20:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 		web_servers.push_back(new WebServ(configs[i]));
 	for (unsigned int i = 0; i < web_servers.size(); ++i)
 	{
-		if (web_servers[i]->WebServInit() == SERV_ERROR)
+		if (web_servers[i]->Init() == SERV_ERROR)
 		{
 			delete web_servers[i];
 			it_web = web_servers.begin() + i;
@@ -107,9 +107,9 @@ int main(int argc, char *argv[])
 	{
 		for (unsigned int i = 0; i < web_servers.size(); ++i)
 		{
-			if (web_servers[i]->WebServRun() == SERV_ERROR)
+			if (web_servers[i]->Run() == SERV_ERROR)
 			{
-				if (web_servers[i]->WebServReboot() == SERV_ERROR)
+				if (web_servers[i]->Reboot() == SERV_ERROR)
 				{
 					delete web_servers[i];
 					it_web = web_servers.begin() + i;

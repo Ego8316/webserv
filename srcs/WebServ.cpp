@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 17:11:52 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 17:59:05 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ WebServ::~WebServ()
 		delete this->_core;
 }
 
-int WebServ::WebServInit()
+int WebServ::Init()
 {
 	if (!this->_config || !this->_core)
 		return (SERV_ERROR);
@@ -63,14 +63,14 @@ int WebServ::WebServInit()
 	return (0);
 }
 
-int WebServ::WebServRun()
+int WebServ::Run()
 {
-	this->WebServUpdateQueue();
-	this->WebServProcessQueue();
+	this->UpdateQueue();
+	this->ProcessQueue();
 	return (0);
 }
 
-int WebServ::WebServUpdateQueue()
+int WebServ::UpdateQueue()
 {
 	std::vector<pollRevent>	events;
 
@@ -96,7 +96,13 @@ int WebServ::WebServUpdateQueue()
 		else
 		{
 			if (event->server == true)
-				this->_processing_queue.push_back(newClient());
+			{
+				Client	*new_client = newClient();
+				if (new_client)
+					this->_processing_queue.push_back(new_client);
+				else
+					std::cerr << "Error while creating Client instance" << std::endl;
+			}
 			else
 			{
 				if (this->_clients[event->client_id]->getState() == DONE)
@@ -111,7 +117,7 @@ int WebServ::WebServUpdateQueue()
 	return (0);
 }
 
-int WebServ::WebServProcessQueue()
+int WebServ::ProcessQueue()
 {
 	Client	*next_client;
 
@@ -168,7 +174,7 @@ int WebServ::removeClient(int indx)
 	return (0);
 }
 
-int WebServ::WebServReboot()
+int WebServ::Reboot()
 {
 	//TODO
 	std::cerr << "Gné gné gné ca marche pas" << std::endl;

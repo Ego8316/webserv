@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 17:16:28 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 18:00:04 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@
 #include <stdlib.h>
 #include <cmath>
 #include <dirent.h>
-#include <deque>
 #include "colors.hpp"
 
 #if defined(__APPLE__)
