@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:28:04 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:46:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,13 @@
 class	Query;
 class	Config;
 class	Cookie;
-class	serverPoll;
+class	ServerCore;
 
-class Client {
+class Client
+{
 	public :
 	// CONSTRUCTORS
-		Client(Config *config, serverPoll *poll);
+		Client(Config *config, ServerCore *server);
 		Client(const Client &other);
 		Client	&operator=(const Client &other);
 		~Client(void);
@@ -54,6 +55,7 @@ class Client {
 		std::string						_preprend_response;
 		int								_response_fd;
 		int								_cgi_pid;
+		long							_time_limit;
 		
 		Config							*_config;
 		ServerCore						*_server;

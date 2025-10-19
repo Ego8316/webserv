@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 12:51:31 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:41:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Config {
 		int										protocol;
 		size_t									max_body_size;
 		int										client_limit;
+		int										processing_time_limit;
 		int										incoming_queue_backlog;
 		int										buffer_size;
 		int										cookie_sessions_max;

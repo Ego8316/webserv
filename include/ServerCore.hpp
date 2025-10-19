@@ -16,6 +16,9 @@
 #include "Client.hpp"
 #include "Config.hpp"
 
+class	Client;
+class	Config;
+
 /**
  * @class Handles socket setup and poll monitoring.
  */

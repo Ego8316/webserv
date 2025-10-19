@@ -6,13 +6,13 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:27:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:47:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(Config *config, serverPoll *server)
+Client::Client(Config *config, ServerCore *server)
 	:	_config(config),
 		_server(server)
 {
@@ -25,7 +25,7 @@ Client::Client(Config *config, serverPoll *server)
 
 Client::Client(const Client &other)
 	:	_config(other._config),
-		_server(other._)
+		_server(other._server)
 {
 	*this = other;
 }
@@ -122,7 +122,7 @@ int		Client::handleEvent()
 
 	//TODO NOW ALSO NEEDS TO PREFORM INITIAL CONNEXTION WITH ACCEPT TO BE FULLY NON BLOCKING
 	// SEE LOGIC IN NOW DEPRECATED newClient IN WEBSERV
-	client->start_time = getTime();
+	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
 	if (this->_state == TRY_ACCEPTING)
 		this->tryAccepting();
 	bytes_read = _config->buffer_size;
@@ -144,9 +144,7 @@ int		Client::handleEvent()
 	request.parseRequest(request_str, *_config);
 	std::cout << request << std::endl;
 	const Cookie		cookies = request.getQueryCookies();
-	std::cout << "step 1" << std::endl;
 	Response	response = RequestHandler::handle(request, *_config, cookies);
-	std::cout << "step 2" << std::endl;
 	response_str = response.toString();
 	std::cout << "RESPONSE =" << std::endl;
 	std::cout << response_str << std::endl;
@@ -157,7 +155,7 @@ int		Client::handleEvent()
 
 int 	Client::tryAccepting()
 {
-	while (this->_server->socketAcceptClient(this) == SERV_ERROR && getTime < this->start_time + this->_config->time_limit)
+	while (this->_server->socketAcceptClient(this) == SERV_ERROR && utils::getTime() < this->_time_limit)
 	{
 		std::cerr << "Failed to accept new client" << std::endl;
 		std::cerr << "Retrying..." << std::endl;
@@ -166,10 +164,11 @@ int 	Client::tryAccepting()
 	if (this->getFd() <= 0)
 	{
 		this->_state = ABORTING;
-		return ;
+		return (SERV_ERROR);
 	}
 	else
 		this->_state = INPUT_READING;
 	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id); //TODO Set non blocking;
 	std::cout << "Accepted client " << this->_client_id << std::endl;
+	return (0);
 }

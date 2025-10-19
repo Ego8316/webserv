@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/16 16:26:33 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/19 16:45:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ Config::Config(std::string config)
 			this->max_body_size = atoi(value.c_str());
 		else if (field == "CLIENT_LIMIT")
 			this->client_limit = atoi(value.c_str());
+		else if (field == "PROCESSING_TIME_LIMIT")
+			this->processing_time_limit = atoi(value.c_str());
 		else if (field == "INCOMMING_QUEUE_BACKLOG")
 			this->incoming_queue_backlog = atoi(value.c_str());
 		else if (field == "COOKIE_SESSIONS_MAX")
@@ -76,23 +78,7 @@ Config::Config(std::string config)
 
 Config::Config(const Config &other)
 {
-	this->ip = other.ip;
-	this->port_number = other.port_number;
-	this->domain = other.domain;
-	//this->host_name = other.host_name;
-	this->type = other.type;
-	this->protocol = other.protocol;
-	this->client_limit = other.client_limit;
-	this->incoming_queue_backlog = other.incoming_queue_backlog;
-	this->buffer_size = other.buffer_size;
-	this->cookie_sessions_max = other.cookie_sessions_max;
-	this->cookie_life_time = other.cookie_life_time;
-	this->server_home = other.server_home;
-	this->enable_listdir = other.enable_listdir;
-	this->default_page = other.default_page;
-	this->default_error_pages = other.default_error_pages;
-	this->accepted_methods = other.accepted_methods;
-	this->http_redir = other.http_redir;
+	*this = other;
 }
 
 Config &Config::operator=(const Config &other)
@@ -106,6 +92,7 @@ Config &Config::operator=(const Config &other)
 		this->type = other.type;
 		this->protocol = other.protocol;
 		this->client_limit = other.client_limit;
+		this->processing_time_limit = other.processing_time_limit;
 		this->incoming_queue_backlog = other.incoming_queue_backlog;
 		this->buffer_size = other.buffer_size;
 		this->cookie_sessions_max = other.cookie_sessions_max;

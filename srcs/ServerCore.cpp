@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 16:28:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:35:31 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ int	ServerCore::socketAcceptClient(Client	*new_client)
 		&new_client->getClientLen()));
 	if (new_client->getFd() == SERV_ERROR)
 		std::cerr << RED << "Accept failed: " << strerror(errno) << RESET << std::endl;
-	else if (OS_NAME == "macOs")
+	else if (std::string(OS_NAME) == "macOs")
 		_setNonBlocking(new_client->getFd());
 	return (new_client->getFd());
 }
@@ -137,8 +137,6 @@ std::vector<pollRevent>	ServerCore::pollWatchRevent(void)
 		return (ret);
 	for (unsigned int i = 0; i < _poll_fds.size(); ++i)
 	{
-		if (num_event == 0)
-			return (ret);
 		if (_poll_fds[i].fd == 0)
 			continue ;
 		if (_poll_fds[i].revents & POLLHUP || _poll_fds[i].revents & POLLERR)
@@ -153,6 +151,17 @@ std::vector<pollRevent>	ServerCore::pollWatchRevent(void)
 				std::cerr << ORANGE << "Server ended connection." << RESET << std::endl;
 			else
 				std::cerr << ORANGE << "Client " << i << " ended connection." << RESET << std::endl;
+			ret.push_back(revent);
+			--num_event;
+		}
+		else if (this->_poll_fds[i].revents & POLLIN)
+		{
+			revent.error = false;
+			revent.revent = POLLIN;
+			if (i == this->_poll_fds.size() - 1)
+				revent.server = true;
+			else
+				revent.client_id = i;
 			ret.push_back(revent);
 			--num_event;
 		}
@@ -201,10 +210,11 @@ bool	ServerCore::_socketBind(void)
 {
 	int	success;
 
+	std::memset(&this->_server_addr, 0, sizeof(this->_server_addr));
 	_server_addr.sin_family = _config->domain;
 	_server_addr.sin_addr.s_addr = _config->ip;
 	_server_addr.sin_port = htons(_config->port_number);
-	success = bind(_server_fd, (struct sockaddr *)&_server_addr, sizeof(_server_addr));
+	success = ::bind(_server_fd, (struct sockaddr *)&_server_addr, sizeof(_server_addr));
 	if (success == SERV_ERROR)
 		return (false);
 	return (true);

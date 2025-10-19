@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:07:57 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:42:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,21 +14,19 @@
 
 #include "headers.hpp"
 #include "Client.hpp"
-#include "serverSocket.hpp"
-#include "serverPoll.hpp"
+#include "ServerCore.hpp"
 #include "Cookie.hpp"
 #include "Config.hpp"
 
-class WebServ {
-	public :
-	// CONSTRUCTORS
+class WebServ
+{
+	public:
 		WebServ(Config *config);
 		WebServ(std::string config_file);
 		WebServ(const WebServ &other);
-		WebServ &operator=(const WebServ &other);
-	//DESTUCTORS
+		WebServ	&operator=(const WebServ &other);
 		~WebServ();
-	//GETTERS
+
 		Client 				*getClient(int uid);
 	//SETTERS
 	//MEMBER FUNCTIONS
@@ -41,8 +39,7 @@ class WebServ {
 		int					WebServReboot();
 	private :
 		Config								*_config;
-		serverSocket						*_server;
-		serverPoll							*_poll;
+		ServerCore							*_core;
 		std::vector<Client *>				_clients;
 		std::deque<Client *>				_processing_queue;
 };
