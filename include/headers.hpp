@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 16:23:08 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 17:16:28 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,29 +63,29 @@
 # define PIPE_WRITE_END 1
 
 // Default error pages
-#define ERROR_PAGE_400 "<html><head><title>400 Bad Request</title></head>" \
-                       "<body><h1>400 Bad Request</h1>" \
-                       "<p>Your browser sent a request that this server could not understand.</p></body></html>"
+#define ERROR_PAGE_400	"<html><head><title>400 Bad Request</title></head>" \
+						"<body><h1>400 Bad Request</h1>" \
+						"<p>Your browser sent a request that this server could not understand.</p></body></html>"
 
-#define ERROR_PAGE_403 "<html><head><title>403 Forbidden</title></head>" \
-                       "<body><h1>403 Forbidden</h1>" \
-                       "<p>You don't have permission to access this resource.</p></body></html>"
+#define ERROR_PAGE_403	"<html><head><title>403 Forbidden</title></head>" \
+						"<body><h1>403 Forbidden</h1>" \
+						"<p>You don't have permission to access this resource.</p></body></html>"
 
-#define ERROR_PAGE_404 "<html><head><title>404 Not Found</title></head>" \
-                       "<body><h1>404 Not Found</h1>" \
-                       "<p>The requested URL was not found on this server.</p></body></html>"
+#define ERROR_PAGE_404	"<html><head><title>404 Not Found</title></head>" \
+						"<body><h1>404 Not Found</h1>" \
+						"<p>The requested URL was not found on this server.</p></body></html>"
 
-#define ERROR_PAGE_500 "<html><head><title>500 Internal Server Error</title></head>" \
-                       "<body><h1>500 Internal Server Error</h1>" \
-                       "<p>The server encountered an unexpected condition.</p></body></html>"
+#define ERROR_PAGE_500	"<html><head><title>500 Internal Server Error</title></head>" \
+						"<body><h1>500 Internal Server Error</h1>" \
+						"<p>The server encountered an unexpected condition.</p></body></html>"
 
-#define ERROR_PAGE_501 "<html><head><title>501 Not Implemented</title></head>" \
-                       "<body><h1>501 Not Implemented</h1>" \
-                       "<p>This method is not supported by the server.</p></body></html>"
+#define ERROR_PAGE_501	"<html><head><title>501 Not Implemented</title></head>" \
+						"<body><h1>501 Not Implemented</h1>" \
+						"<p>This method is not supported by the server.</p></body></html>"
 
-#define ERROR_PAGE_505 "<html><head><title>505 HTTP Version Not Supported</title></head>" \
-                       "<body><h1>505 HTTP Version Not Supported</h1>" \
-                       "<p>The server does not support the HTTP protocol version used in the request.</p></body></html>"
+#define ERROR_PAGE_505	"<html><head><title>505 HTTP Version Not Supported</title></head>" \
+						"<body><h1>505 HTTP Version Not Supported</h1>" \
+						"<p>The server does not support the HTTP protocol version used in the request.</p></body></html>"
 
 enum	Method
 {
