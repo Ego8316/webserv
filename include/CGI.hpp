@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/14 13:00:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 17:19:18 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,22 +16,23 @@
 #include "Request.hpp"
 #include "utils.hpp"
 
-class cgi {
+class CGI
+{
 	public :
 	// CONSTRUCTORS
-		cgi();
-		cgi(const cgi &other);
-		cgi &operator=(const cgi &other);
+		CGI();
+		CGI(const CGI &other);
+		CGI &operator=(const CGI &other);
 	//DESTUCTORS
-		~cgi();
+		~CGI();
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-		void		cgiRun(Client &client, Request &request, Config &config, Cookie *cookies);
-		void		cgiCommunication(Client &client, Request &request, Config &config, int *pipeToCGI, int *pipeFromCGI);
-		void		cgiExecute(Request &request, char **env, int *pipeToCGI, int *pipeFromCGI);
-		void		cgiRestoreFds(int *original_standard_fds);
-		char		**cgiGenEnvVar(Request &request, Cookie *cookies);
+		void		Run(Client &client, Request &request, Config &config, Cookie *cookies);
+		void		Communication(Client &client, Request &request, Config &config, int *pipeToCGI, int *pipeFromCGI);
+		void		Execute(Request &request, char **env, int *pipeToCGI, int *pipeFromCGI);
+		void		RestoreFds(int *original_standard_fds);
+		char		**GenEnvVar(Request &request, Cookie *cookies);
 	private :
 		HttpStatus	_status;
 };

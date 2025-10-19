@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:59:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 17:19:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ WebServ::~WebServ()
 		delete this->_core;
 }
 
-int WebServ::WebServInit()
+int WebServ::Init()
 {
 	if (!this->_config || !this->_core)
 		return (SERV_ERROR);
@@ -63,14 +63,14 @@ int WebServ::WebServInit()
 	return (0);
 }
 
-int WebServ::WebServRun()
+int WebServ::Run()
 {
-	this->WebServUpdateQueue();
-	this->WebServProcessQueue();
+	this->UpdateQueue();
+	this->ProcessQueue();
 	return (0);
 }
 
-int WebServ::WebServUpdateQueue()
+int WebServ::UpdateQueue()
 {
 	std::vector<pollRevent>	events;
 
@@ -111,7 +111,7 @@ int WebServ::WebServUpdateQueue()
 	return (0);
 }
 
-int WebServ::WebServProcessQueue()
+int WebServ::ProcessQueue()
 {
 	Client	*next_client;
 
@@ -168,7 +168,7 @@ int WebServ::removeClient(int indx)
 	return (0);
 }
 
-int WebServ::WebServReboot()
+int WebServ::Reboot()
 {
 	//TODO
 	std::cerr << "Gné gné gné ca marche pas" << std::endl;
