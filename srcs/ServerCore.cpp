@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCore.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 16:59:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 17:41:58 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ int	ServerCore::init(void)
 	return (0);
 }
 
-int	ServerCore::socketAcceptClient(Client	*new_client)
+int	ServerCore::socketAcceptClient(Client *new_client)
 {
 	new_client->setFd(accept(_server_fd,
 		(struct sockaddr *)&new_client->getClientAddr(),
