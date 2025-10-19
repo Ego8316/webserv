@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/14 11:55:44 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:11:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,19 +180,4 @@ long		utils::getTime()
 		return (SERV_ERROR);
 	}
 	return (static_cast<long>(t));
-}
-
-/**
- * @brief Get the file prefix of the full path
- * 
- * @return File prefix : if input is /some/directory/file the return value will be /some/directory
- * TODO ? remove ? not used anymore
- */
-std::string		utils::extractPath(std::string full_path)
-{
-	if (full_path.find("/") == std::string::npos)
-		return ("");
-	else if (full_path.rfind("/") == full_path.size() - 1)
-		return (full_path);
-	return (full_path.substr(0, full_path.rfind("/")));
 }

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/14 11:43:38 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:07:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,9 @@ class WebServ {
 	//MEMBER FUNCTIONS
 		int					WebServInit();
 		int					WebServRun();
-		int					newClient();
+		int 				WebServUpdateQueue();
+		int 				WebServProcessQueue();
+		Client				*newClient();
 		int					removeClient(int indx);
 		int					WebServReboot();
 	private :
@@ -42,4 +44,5 @@ class WebServ {
 		serverSocket						*_server;
 		serverPoll							*_poll;
 		std::vector<Client *>				_clients;
+		std::deque<Client *>				_processing_queue;
 };

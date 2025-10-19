@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/14 11:44:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:10:20 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,13 @@ int WebServ::WebServInit()
 
 int WebServ::WebServRun()
 {
+	this->WebServUpdateQueue();
+	this->WebServProcessQueue();
+	return (0);
+}
+
+int WebServ::WebServUpdateQueue()
+{
 	std::vector<pollRevent>	events;
 
 	events = this->_poll->pollWatchRevent();
@@ -102,21 +109,36 @@ int WebServ::WebServRun()
 		else
 		{
 			if (event->server == true)
-			{
-				if (this->newClient() == SERV_ERROR)
-					std::cerr << "Failed to accept new client" << std::endl;
-			}
+				this->_processing_queue.push_back(newClient());
 			else
 			{
-				std::cout << "Client " << event->client_id << " handles event" << std::endl;
-				this->_clients[event->client_id]->handleEvent();
+				if (this->_clients[event->client_id]->getState() == DONE)
+				{
+					std::cout << "Client " << event->client_id << " added to processing queue" << std::endl;
+					this->_clients[event->client_id]->setState(TRY_ACCEPTING);
+					this->_processing_queue.push_back(this->_clients[event->client_id]);
+				}
 			}
 		}
 	}
 	return (0);
 }
 
-int WebServ::newClient()
+int WebServ::WebServProcessQueue()
+{
+	Client	*next_client;
+
+	if (this->_processing_queue.empty())
+		return (0);
+	next_client = this->_processing_queue.front();
+	this->_processing_queue.pop_front();
+	next_client->handleEvent();
+	if (next_client->getState() != DONE)
+		this->_processing_queue.push_back(next_client);
+	return (0);
+}
+
+Client	 *WebServ::newClient()
 {
 	int indx;
 
@@ -128,31 +150,41 @@ int WebServ::newClient()
 	if (indx == this->_config->client_limit)
 	{
 		std::cerr << "Cannot accept new clients" << std::endl;
-		return (SERV_ERROR);
+		return (NULL);
 	}
 	this->_clients[indx] = new Client(this->_config, this->_poll);
-	if (this->_server->socketAcceptClient(this->_clients[indx]) == SERV_ERROR)
-	{
-		std::cerr << "Failed to accept new client" << std::endl;
-		return (SERV_ERROR);
-	}
 	this->_clients[indx]->setClientId(indx);
-	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN | POLLOUT, indx);
-	std::cout << "Accepted client " << indx << std::endl;
-	return (0);
+	return (this->_clients[indx]);
 }
 
 int WebServ::removeClient(int indx)
 {
 	this->_poll->pollRemove(indx);
+	
 	if (this->_clients[indx] != NULL)
+	{
+		if (this->_clients[indx]->getState() != DONE)
+		{
+			std::deque<Client *>::iterator it = this->_processing_queue.begin();
+			while (it != this->_processing_queue.end())
+			{
+				if (*it == this->_clients[indx])
+				{
+					this->_processing_queue.erase(it);
+					break ;
+				}
+				++it;
+			}
+		}
 		delete this->_clients[indx];
+	}
 	this->_clients[indx] = NULL;
 	return (0);
 }
 
 int WebServ::WebServReboot()
 {
+	//TODO
 	std::cerr << "Gné gné gné ca marche pas" << std::endl;
 	return (SERV_ERROR);
 }

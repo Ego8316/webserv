@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/14 11:55:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:11:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ std::string					contentTypeToExtensions(ContentTypes type);
 std::string					methodToStr(Method method);
 Method						strToMethod(std::string method);
 long						getTime();
-std::string					extractPath(std::string full_path); //TODO remove
 
 template <typename T>
 std::string	toString(const T &src)

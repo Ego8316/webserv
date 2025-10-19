@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/17 15:45:14 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:12:53 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,18 @@ Client::Client(Config *config, serverPoll *poll)
 		_poll(poll)
 {
 	this->_client_len = sizeof(this->_client_addr);
+	this->_state = TRY_ACCEPTING;
+	this-> _preprend_response = "";
+	this->_response_fd = 0;
+	this->_cgi_pid = 0;
 }
 
-Client::Client(const Client &other) : _client_addr(other._client_addr), _client_len(other._client_len), _config(other._config) {}
+Client::Client(const Client &other)
+	:	_config(other._config),
+		_poll(other._poll)
+{
+	*this = other;
+}
 
 Client &Client::operator=(const Client &other)
 {
@@ -28,6 +37,10 @@ Client &Client::operator=(const Client &other)
 		this->_client_addr = other._client_addr;
 		this->_client_len = other._client_len;
 		this->_config = other._config;
+		this->_state = other._state;
+		this-> _preprend_response = other._preprend_response;
+		this->_response_fd = other._response_fd;
+		this->_cgi_pid = other._cgi_pid;
 	}
 	return (*this);
 }
@@ -53,11 +66,26 @@ int     Client::getFd()
 	return (this->_client_fd);
 }
 
+RequestStage	Client::getState()
+{
+	return (this->_state);
+}
+
+void	Client::setClientId(int id)
+{
+	this->_client_id = id;
+}
+
 void    Client::setFd(int fd)
 {
 	this->_client_fd = fd;
 }
-		
+
+void    Client::setState(RequestStage state)
+{
+	this->_state = state;
+}
+
 int		Client::socketRead(char *buffer, int bytes_read) //TODO
 {
 	if (!this->_poll->pollAvailFor(this->_client_id, POLLIN))
@@ -83,7 +111,7 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 	}
 	return (0);
 }
-		
+
 int		Client::handleEvent()
 {
 	int			bytes_read;
@@ -91,6 +119,11 @@ int		Client::handleEvent()
 	std::string	response_str;
 	std::vector<char> buffer(_config->buffer_size);
 
+
+	//TODO NOW ALSO NEEDS TO PREFORM INITIAL CONNEXTION WITH ACCEPT TO BE FULLY NON BLOCKING
+	// SEE LOGIC IN NOW DEPRECATED newClient IN WEBSERV
+	if (this->_state == TRY_ACCEPTING)
+		this->tryAccepting();
 	bytes_read = _config->buffer_size;
 	while (bytes_read == _config->buffer_size && request_str.size() < this->_config->max_body_size)
 	{
@@ -110,7 +143,9 @@ int		Client::handleEvent()
 	request.parseRequest(request_str, *_config);
 	std::cout << request << std::endl;
 	const Cookie		cookies = request.getQueryCookies();
+	std::cout << "step 1" << std::endl;
 	Response	response = RequestHandler::handle(request, *_config, cookies);
+	std::cout << "step 2" << std::endl;
 	response_str = response.toString();
 	std::cout << "RESPONSE =" << std::endl;
 	std::cout << response_str << std::endl;
@@ -119,7 +154,13 @@ int		Client::handleEvent()
 	return (0); //TODO return err code
 }
 
-void	Client::setClientId(int id)
+int 	Client::tryAccepting()
 {
-	this->_client_id = id;
+	if (this->_core->socketAcceptClient(_clients[indx]) == SERV_ERROR)
+	{
+		std::cerr << "Failed to accept new client" << std::endl;
+		return (SERV_ERROR);
+	}
+	this->_poll->pollAdd(this->_clients[indx]->getFd(), POLLIN | POLLOUT, indx);
+	std::cout << "Accepted client " << indx << std::endl;
 }

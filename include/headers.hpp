@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 13:23:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 16:04:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <cmath>
 #include <dirent.h>
+#include <deque>
 
 #define SERV_ERROR -1
 #define NEW_CLIENT 1
@@ -131,6 +132,17 @@ enum	HttpStatus
 	HTTP_BAD_GATEWAY = 502,
 	HTTP_VERSION_NOT_SUPPORTED = 505
 };
+
+enum	RequestStage //should be set to DONE whenever not in the queue
+{
+	TRY_ACCEPTING,
+	INPUT_READING,
+	PROCESSING_REQUEST,
+	OUTPUT_SENDING,
+	CGI_WAITING,
+	DONE
+};
+
 typedef struct s_pollRevent
 {
 	bool	error;

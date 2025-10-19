@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/14 12:37:05 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 13:40:05 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,8 @@ int		Request::parseRequest(std::string request, const Config &config)
 	}
 	if (_accept == FTYPE_NONE)
 		_accept = FTYPE_ANY;
-
+	if (this->_query_cookies == NULL)
+		this->_query_cookies = new Cookie();
 	size_t			expected_size = 0;
 	size_t			bytes_read = 0;
 	std::string		body_str = "";

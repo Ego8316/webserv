@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 13:20:41 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 13:46:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,9 +142,6 @@ char	**cgi::cgiGenEnvVar(Request &request, Cookie *cookies)
 	env.push_back("QUERY_STRING=" + request.getQueryString());
 	if (cookies != NULL)
 	{
-		varvalue = cookies->getSessionUID();
-		env.push_back("HTTP_COOKIE_IDFIELD=" + varvalue.substr(0, varvalue.find("=")));
-		env.push_back("HTTP_COOKIE_IDVALUE=" + varvalue.erase(0, varvalue.find("=") + 1));
 		std::map<std::string, std::string>	attr = cookies->getAllAttributes();
 		for (std::map<std::string, std::string>::iterator it = attr.begin(); it != attr.end(); ++it)
 		{
