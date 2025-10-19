@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/14 13:00:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 13:20:41 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,8 +118,10 @@ void	cgi::cgiExecute(Request &request, char	**env, int *pipe_to_CGI, int *pipe_f
 	argv[0] = &request.getRequestTarget()[0];
 	argv[1] = NULL;
 	if (execve(request.getRequestTarget().c_str(), argv, env) == -1)
-		std::cerr << "HOUSTON" << std::endl;
-	
+	{
+		std::cerr << "CGI execution failed" << std::endl;
+		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+	}
 	cgiRestoreFds(original_standards_fds);
 }
 

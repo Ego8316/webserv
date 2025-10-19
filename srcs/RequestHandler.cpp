@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 12:51:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 13:27:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ Response	RequestHandler::_handleGet(const Request &request, const Config &config
 	if (resource.isDirectory())
 	{
 		if (!utils::endsWith(resource.getPath(), "/"))
-			return (_handleError(HTTP_REDIRECT_MOVE, config));
+			return (_handleError(HTTP_REDIRECT_PERM, config));
 		if (config.enable_listdir)
 			return (_handleListDir(request, config, resource));
 		return (_handleError(HTTP_FORBIDDEN, config));
