@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 17:17:23 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/19 18:12:14 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void	CGI::Communication(Client &client, Request &request, Config &config, int *p
 	std::vector<char>	buffer(config.buffer_size);
 	int					bytes_read;
 
-	close(pipe_to_CGI[PIPE_READ_END]);
+	close(pipe_to_CGI[PIPE_READ_END]); //TODO mettre un petit socketpair pour pas avoir froid aux pieds
 	close(pipe_from_CGI[PIPE_WRITE_END]);
 	total_count = 0;
 	while (total_count < mssg_len)
@@ -150,7 +150,14 @@ char	**CGI::GenEnvVar(Request &request, Cookie *cookies)
 	}
 	ret = new char *[env.size() + 1];
 	for (unsigned int i = 0; i < env.size(); ++i)
-		ret[i] = &env[i][0];
+	{
+		ret[i] = strdup(env[i].c_str());
+		if (!ret[i])
+		{
+			//TODO niquer sa mere;
+			return (NULL);
+		}
+	}
 	ret[env.size()] = NULL;
 	return (ret);
 }
