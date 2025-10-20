@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 15:59:32 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 20:03:47 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "headers.hpp"
 #include "RequestHandler.hpp"
+#include "Response.hpp"
 #include "Config.hpp"
 #include "Cookie.hpp"
 #include "ServerCore.hpp"
@@ -22,42 +23,41 @@ class	Query;
 class	Config;
 class	Cookie;
 class	ServerCore;
+class	Request;
+class	Response;
 
 class Client
 {
-	public :
-	// CONSTRUCTORS
+	public:
 		Client(Config *config, ServerCore *server);
 		Client(const Client &other);
 		Client	&operator=(const Client &other);
 		~Client(void);
 
+		int					handleEvent();
 		int					getFd();
 		struct sockaddr_in	&getClientAddr();
 		socklen_t			&getClientLen();
+		int					getId();
 		RequestStage		getState();
 		long				getTimeLimit();
-	//SETTERS
 		void				setFd(int fd);
 		void				setClientId(int id);
 		void    			setState(RequestStage state);
-	//MEMBER FUNCTIONS
-		int					handleEvent();
-		int					socketRead(char *buffer, int bytes_read);
-		int					socketWrite(const char *buffer, int bytes_write);
-		int 				tryAccepting();
 	private :
+		Config							*_config;
+		ServerCore						*_server;
 		int								_client_fd;
 		struct sockaddr_in				_client_addr;
 		socklen_t						_client_len;
 		int								_client_id;
-		
 		RequestStage					_state;
-		std::string						_preprend_response; //either just header or full HTTP error response default
-		int								_response_fd; //can be 0 if no file has to be sent
-		
 		long							_time_limit;
+		Request							*_request;
+		Response						_response;
 		
-		Config							*_config;
-		ServerCore						*_server;
+		int				_tryAccepting();
+		int				_readInput();
+		void			_processRequest();
+		int				_sendOutput();
 };

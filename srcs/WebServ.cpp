@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 17:39:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 19:44:50 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ WebServ::WebServ(std::string config_file)
 
 WebServ::WebServ(const WebServ &other) : _config(other._config), _core(other._core), _clients(other._clients) {}
 
-WebServ &WebServ::operator=(const WebServ &other)
+WebServ	&WebServ::operator=(const WebServ &other)
 {
 	if (this != &other)
 	{
@@ -52,7 +52,7 @@ WebServ::~WebServ()
 		delete this->_core;
 }
 
-int WebServ::Init()
+int	WebServ::Init()
 {
 	if (!this->_config || !this->_core)
 		return (SERV_ERROR);
@@ -63,14 +63,14 @@ int WebServ::Init()
 	return (0);
 }
 
-int WebServ::Run()
+int	WebServ::Run()
 {
 	this->UpdateQueue();
 	this->ProcessQueue();
 	return (0);
 }
 
-int WebServ::UpdateQueue()
+int	WebServ::UpdateQueue()
 {
 	std::vector<pollRevent>	events;
 
@@ -108,7 +108,7 @@ int WebServ::UpdateQueue()
 				if (this->_clients[event->client_id]->getState() == DONE)
 				{
 					std::cout << "Client " << event->client_id << " added to processing queue" << std::endl;
-					this->_clients[event->client_id]->setState(INPUT_READING);
+					this->_clients[event->client_id]->setState(TRY_ACCEPTING);
 					this->_processing_queue.push_back(this->_clients[event->client_id]);
 				}
 			}
@@ -117,7 +117,7 @@ int WebServ::UpdateQueue()
 	return (0);
 }
 
-int WebServ::ProcessQueue()
+int	WebServ::ProcessQueue()
 {
 	Client	*next_client;
 
@@ -131,7 +131,7 @@ int WebServ::ProcessQueue()
 	return (0);
 }
 
-Client	 *WebServ::newClient()
+Client	*WebServ::newClient()
 {
 	int indx;
 
@@ -150,7 +150,7 @@ Client	 *WebServ::newClient()
 	return (this->_clients[indx]);
 }
 
-int WebServ::removeClient(int indx)
+int	WebServ::removeClient(int indx)
 {
 	this->_core->pollRemove(indx);
 	if (this->_clients[indx] != NULL)
@@ -174,7 +174,7 @@ int WebServ::removeClient(int indx)
 	return (0);
 }
 
-int WebServ::Reboot()
+int	WebServ::Reboot()
 {
 	//TODO
 	std::cerr << "Gné gné gné ca marche pas" << std::endl;

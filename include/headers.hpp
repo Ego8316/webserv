@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 18:50:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 19:59:56 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,9 @@
 	#define OS_NAME "Unknown"
 #endif
 
-#define SERV_ERROR -1
-#define NEW_CLIENT 1
+#define SERV_ERROR	-1
+#define	WBLOCK		-2
+#define NEW_CLIENT	1
 
 #define NO_TIMEOUT -1
 #define CLIENT_LIMIT 1000
@@ -62,29 +63,36 @@
 # define PIPE_WRITE_END 1
 
 // Default error pages
-#define ERROR_PAGE_400 "<html><head><title>400 Bad Request</title></head>" \
-					   "<body><h1>400 Bad Request</h1>" \
-					   "<p>Your browser sent a request that this server could not understand.</p></body></html>"
+#define ERROR_PAGE_400	"<html><head><title>400 Bad Request</title></head>" \
+						"<body><h1>400 Bad Request</h1>" \
+						"<p>Your browser sent a request that this server could not understand.</p></body></html>"
 
-#define ERROR_PAGE_403 "<html><head><title>403 Forbidden</title></head>" \
-					   "<body><h1>403 Forbidden</h1>" \
-					   "<p>You don't have permission to access this resource.</p></body></html>"
+#define ERROR_PAGE_403	"<html><head><title>403 Forbidden</title></head>" \
+						"<body><h1>403 Forbidden</h1>" \
+						"<p>You don't have permission to access this resource.</p></body></html>"
 
-#define ERROR_PAGE_404 "<html><head><title>404 Not Found</title></head>" \
-					   "<body><h1>404 Not Found</h1>" \
-					   "<p>The requested URL was not found on this server.</p></body></html>"
+#define ERROR_PAGE_404	"<html><head><title>404 Not Found</title></head>" \
+						"<body><h1>404 Not Found</h1>" \
+						"<p>The requested URL was not found on this server.</p></body></html>"
 
-#define ERROR_PAGE_500 "<html><head><title>500 Internal Server Error</title></head>" \
-					   "<body><h1>500 Internal Server Error</h1>" \
-					   "<p>The server encountered an unexpected condition.</p></body></html>"
+#define ERROR_PAGE_500	"<html><head><title>500 Internal Server Error</title></head>" \
+						"<body><h1>500 Internal Server Error</h1>" \
+						"<p>The server encountered an unexpected condition.</p></body></html>"
 
-#define ERROR_PAGE_501 "<html><head><title>501 Not Implemented</title></head>" \
-					   "<body><h1>501 Not Implemented</h1>" \
-					   "<p>This method is not supported by the server.</p></body></html>"
+#define ERROR_PAGE_501	"<html><head><title>501 Not Implemented</title></head>" \
+						"<body><h1>501 Not Implemented</h1>" \
+						"<p>This method is not supported by the server.</p></body></html>"
 
-#define ERROR_PAGE_505 "<html><head><title>505 HTTP Version Not Supported</title></head>" \
-					   "<body><h1>505 HTTP Version Not Supported</h1>" \
-					   "<p>The server does not support the HTTP protocol version used in the request.</p></body></html>"
+#define ERROR_PAGE_505	"<html><head><title>505 HTTP Version Not Supported</title></head>" \
+						"<body><h1>505 HTTP Version Not Supported</h1>" \
+						"<p>The server does not support the HTTP protocol version used in the request.</p></body></html>"
+
+#define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
+#define LISTDIR_PREFIX "  "
+#define LISTDIR_SUFFIX "<br>\n"
+#define LISTDIR_ENDING "</body>\n</html>"
+
+#define NULL_CHUNK "0\r\n\r\n"
 
 #define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
 #define LISTDIR_PREFIX "  "
@@ -153,7 +161,8 @@ enum	HttpStatus
 enum	RequestStage //should be set to DONE whenever not in the queue
 {
 	TRY_ACCEPTING,
-	INPUT_READING,
+	HEADER_READING,
+	BODY_READING,
 	PROCESSING_REQUEST,
 	CGI_INIT,
 	CGI_WAITING,
@@ -175,4 +184,3 @@ typedef struct s_Redirection
 	std::string		dest;
 	HttpStatus		error_code;
 }	Redirection;
-

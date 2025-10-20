@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 19:50:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 20:08:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,10 +99,14 @@ static bool CICharComp(char a, char b)
 
 long		utils::caseInsensitiveFind(std::string haystack, std::string needle)
 {
-	size_t		pos;
+	long		pos;
 	
-	pos = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
-	if (pos == haystack.end())
+	std::string::const_iterator it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
+	if (it == haystack.end())
+		pos = -1;
+	else
+		pos = it - haystack.begin();
+	return (pos);
 }
 
 size_t	utils::getFileSize(const std::string &path)

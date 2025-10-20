@@ -34,7 +34,9 @@ class	ServerCore
 		std::vector<struct pollfd>	&getPollFds(void);
 
 		int						init(void);
-		int						socketAcceptClient(Client	*new_client);
+		int						socketAcceptClient(Client *new_client);
+		int						socketRead(char *buffer, int bytes_read, Client *client);
+		int						socketWrite(const char *buffer, int bytes_write, Client *client);
 		void					pollAdd(int fd, nfds_t event, int idx);
 		void					pollRemove(int idx);
 		std::vector<pollRevent>	pollWatchRevent(void);

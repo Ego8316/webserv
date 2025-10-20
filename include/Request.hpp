@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/14 12:34:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 19:50:32 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,35 +25,44 @@ class Request
 		Request();
 		Request(const Request &other);
 		Request	&operator=(const Request &other);
-		~Request(void);
+		~Request();
 
-		int									parseRequest(std::string request, const Config &config);
-		int									parseRequestTarget();
-		int									parseHeaderLine(std::string line);
-		Method								getMethod(void) const;
-		std::string							getRequestTarget(void) const;
-		std::string							getVersion(void) const;
-		const std::string					&getRawBody(void) const;
-		std::map<std::string, std::string>	getHeaders(void) const;
-		bool								getError(void) const;
+		int	parseHeader(const Config &config);
+
+		std::string							&getRawHeader();
+		std::string							&getRawBody();
+		const std::string					&getRawBody() const;
+		Method								getMethod() const;
+		std::string							getRequestTarget() const;
+		std::string							getVersion() const;
+		size_t								getContentLength() const;
+		bool								isChunked() const;
+		std::map<std::string, std::string>	getHeaders() const;
+		bool								getError() const;
 		const Cookie						&getQueryCookies();
 		ContentTypes						getAccept() const;
 		std::string							getQueryString() const;
 
-		void								setMethod(Method method);
-		bool								headerHasField(const std::string field);
-		std::string							headerGetField(const std::string field);
+		void		setMethod(Method method);
+		bool		headerHasField(const std::string field);
+		std::string	headerGetField(const std::string field);
 
 	private:
+		std::string							_raw_header;
+		std::string							_raw_body;
 		Method								_method;
-		std::string							_requestTarget;
+		std::string							_request_target;
 		std::string							_query_string;
 		std::string							_version;
-		std::string							_rawBody;
+		size_t								_content_length;
+		bool								_chunked;
 		std::map<std::string, std::string>	_headers;
 		bool								_error;
 		ContentTypes						_accept;
 		Cookie 								*_query_cookies;
+
+		int	_parseRequestTarget();
+		int	_parseHeaderLine(std::string line, const Config &config);
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);

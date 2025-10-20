@@ -1,0 +1,15 @@
+In file included from include/Cookie.hpp:16,
+                 from include/Request.hpp:18,
+                 from srcs/Request.cpp:13:
+include/Client.hpp:55:49: error: field ‘_request’ has incomplete type ‘Request’
+   55 |                 Request                         _request;
+      |                                                 ^~~~~~~~
+In file included from include/RequestHandler.hpp:18,
+                 from include/Client.hpp:16,
+                 from include/Cookie.hpp:16,
+                 from include/Request.hpp:18,
+                 from srcs/Request.cpp:13:
+include/Resource.hpp:19:7: note: forward declaration of ‘class Request’
+   19 | class Request;
+      |       ^~~~~~~
+make: *** [Makefile:51: objs/Request.o] Error 1
