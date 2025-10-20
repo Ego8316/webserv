@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:46:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 14:52:46 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ class	ServerCore;
 
 class Client
 {
-	public :
+	public:
 	// CONSTRUCTORS
 		Client(Config *config, ServerCore *server);
 		Client(const Client &other);
@@ -45,9 +45,9 @@ class Client
 		int					socketRead(char *buffer, int bytes_read);
 		int					socketWrite(const char *buffer, int bytes_write);
 		int 				tryAccepting();
-	private :
+	private:
 		int								_client_fd;
-		struct sockaddr_in				_client_addr;
+		struct sockaddr_in				_client_addr; // remove?
 		socklen_t						_client_len;
 		int								_client_id;
 		
