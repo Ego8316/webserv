@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 19:09:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 19:33:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ std::vector<std::string>	stringSplit(std::string str, std::string del);
 std::string					stringTrim(std::string str, std::string set);
 std::string					toLower(const std::string &str);
 std::string					capitalize(const std::string &str);
+size_t						caseInsensitiveFind(std::string haystack, std::string needle);
 size_t						getFileSize(const std::string &path);
 ContentTypes				strToContentType(std::string input);
 std::string					contentTypeToStr(ContentTypes type);

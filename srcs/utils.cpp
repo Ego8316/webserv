@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 19:09:31 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 19:50:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,9 @@ std::vector<std::string>	utils::stringSplit(std::string str, std::string del)
 	pos = str.find(del);
 	while (pos != std::string::npos)
 	{
-        element = str.substr(0, pos);
-        split_str.push_back(element);
-        str.erase(0, pos + del.length());
+		element = str.substr(0, pos);
+		split_str.push_back(element);
+		str.erase(0, pos + del.length());
 		pos = str.find(del);
 	}
 	split_str.push_back(str);
@@ -90,6 +90,19 @@ std::string	utils::capitalize(const std::string &str)
 			new_word = true;
 	}
 	return (result);
+}
+
+static bool CICharComp(char a, char b)
+{
+	return (std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)));
+}
+
+long		utils::caseInsensitiveFind(std::string haystack, std::string needle)
+{
+	size_t		pos;
+	
+	pos = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
+	if (pos == haystack.end())
 }
 
 size_t	utils::getFileSize(const std::string &path)

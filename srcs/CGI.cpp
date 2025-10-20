@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 19:18:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 19:35:49 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,21 +124,23 @@ void	CGI::parseHeader()
 {
 	if (!this->_cgi_output.length())
 		return ;
-	std::string	lower_output = utils::toLower(this->_cgi_output);
-	if (lower_output.find("content-length: ") != std::string::npos)
+	if (utils::caseInsensitiveFind(this->_cgi_output, "Content-Length: ") != this->_cgi_output.end())
 	{
 		this->_bytes_to_send = atoi(this->_cgi_output.c_str()
-			+ this->_cgi_output.find("content-length: ")
-			+ std::string("content-length: ").length());
+			+ this->_cgi_output.find("Content-Length: ")
+			+ std::string("Content-Length: ").length());
 	}
-	else if (lower_output.find("transfer-encoding: chunked") != std::string::npos)
+	else if (this->_cgi_output, "Transfer-Encoding: chunked") != std::string::npos)
 		this->_chunked = true;
-	if (lower_output.find("\r\n\r\n") != std::string::npos)
+	if (this->_cgi_output.find("\r\n\r\n") != std::string::npos)
 		this->_header_parsed = true;
 }
 
 void	CGI::getFullHeader()
 {
+	if (!WIFEXITED(this->_process_status[1]))
+		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+	else if ()
 }
 
 void	CGI::sendOutput(Client &client, Config &config)
