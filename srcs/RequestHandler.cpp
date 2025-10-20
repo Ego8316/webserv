@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 23:42:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/21 00:49:08 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,13 +87,13 @@ Response	RequestHandler::_handleGet(const Request &request, const Config &config
 			return (_handleListDir(request, config, resource));
 		return (_handleError(HTTP_FORBIDDEN, config));
 	}
-
+	
 	file.open(resource.getPath().c_str(), std::ios::in | std::ios::binary);
 	if (!file.is_open())
 		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
 	buffer << file.rdbuf();
 	file.close();
-
+	
 	response.setStatus(HTTP_OK);
 	response.setBody(buffer.str());
 	response.setContentLength(buffer.str().size());
@@ -140,7 +140,6 @@ Response	RequestHandler::_handleDelete(const Request &request, const Config &con
 			return (_handleError(HTTP_NOT_FOUND, config));
 		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
 	}
-
 	response.setStatus(HTTP_NO_CONTENT);
 	response.setBody("");
 	response.setContentLength(0);
@@ -156,7 +155,6 @@ Response	RequestHandler::_handleCGI(const Request &request, const Config &config
 	(void)config;
 	(void)resource;
 	(void)cookies;
-	response._is_cgi = true;
 	return (response);
 }
 

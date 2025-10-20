@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 23:46:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/21 01:03:56 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ Client::Client(Config *config, ServerCore *server)
 
 Client::Client(const Client &other)
 	:	_config(other._config),
-		_server(other._server)
+		_server(other._server),
+		_response(other._response)
 {
 	*this = other;
 }
@@ -114,21 +115,16 @@ int		Client::handleEvent()
 			return (SERV_ERROR);
 		if (_state == PROCESSING_REQUEST)
 			_processRequest();
-		if (_state == CGI_INIT)
-			return (0);		// TODO
-		if (_state == CGI_WAITING)
-			return (0);		// TODO 
 		if (_state == OUTPUT_SENDING && _sendOutput() == SERV_ERROR)
 			return (SERV_ERROR);
 	}
-	
-	if (request_str.length() == 0)
+	if (this->_request_str.length() == 0)
 	{
 		std::cerr << "Empty request. Ignoring..." << std::endl;
 		return (SERV_ERROR);
 	}
 	this->_state = DONE;
-	if (_server->socketWrite(response_str.c_str(), response_str.length(), this) == SERV_ERROR)
+	if (_server->socketWrite(this->_response_str.c_str(), this->_response_str.length(), this) == SERV_ERROR)
 		return (SERV_ERROR);
 	return (0); //TODO return err code
 }
@@ -164,8 +160,7 @@ int	Client::_readInput()
 }
 
 void	Client::_processRequest()
-{	
-	// std::cout << request << std::endl;
+{
 	const Cookie		cookies = _request->getQueryCookies();
 	_response = RequestHandler::handle(*_request, *_config, cookies);
 	_state = OUTPUT_SENDING;

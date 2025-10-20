@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 19:40:25 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/21 01:19:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,12 @@
 
 #include "headers.hpp"
 #include "utils.hpp"
-
+#include "Response.hpp"
 #include "Cookie.hpp"
 #include "Resource.hpp"
-#include "Response.hpp"
 #include "Request.hpp"
 
+class	Response;
 class	Config;
 class	Client;
 class	Cookie;
@@ -32,10 +32,10 @@ class	RequestHandler
 		static Response	handle(const Request &request, const Config &config, const Cookie &cookies);
 
 	private:
-		RequestHandler(void);
+		RequestHandler();
 		RequestHandler(const RequestHandler &other);
 		RequestHandler &operator=(const RequestHandler &other);
-		~RequestHandler(void);
+		~RequestHandler();
 
 		static Response	_handleGet(const Request &request, const Config &config, const Resource &resource);
 		static Response	_handlePost(const Request &request, const Config &config, const Resource &resource);

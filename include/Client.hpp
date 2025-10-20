@@ -6,25 +6,24 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 23:32:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/21 01:20:06 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
-#include "RequestHandler.hpp"
 #include "Response.hpp"
 #include "Config.hpp"
 #include "Cookie.hpp"
 #include "ServerCore.hpp"
+#include "RequestHandler.hpp"
 
 class	Query;
 class	Config;
 class	Cookie;
 class	ServerCore;
 class	Request;
-class	Response;
 
 class Client
 {

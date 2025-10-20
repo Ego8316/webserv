@@ -6,15 +6,21 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 23:56:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/21 01:12:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
+#include "Client.hpp"
 #include "Request.hpp"
+#include "Cookie.hpp"
 #include "utils.hpp"
+
+class	Cookie;
+class	Client;
+class	Request;
 
 class CGI
 {
@@ -36,17 +42,16 @@ class CGI
 		std::string	&getOutput();
 		
 		void		parseHeader();
-		void		getFullHeader();
+		void		genFullOutput();
 
-		void		Execute(Request &request, char **env);
+		void		Execute(Request &request);
 		
 		void		RestoreFds(int *original_standard_fds);
-		char		**GenEnvVar(Request &request, Cookie *cookies);
+		void		GenEnvVar(Request &request, Cookie *cookies);
 	private :
 		HttpStatus	_status;
 		std::string	_output;
 		std::string	_header;
-		bool		_header_sent;
 		int			_header_len;
 		int			_content_len;
 		int			_pid;
@@ -58,4 +63,6 @@ class CGI
 		ssize_t		_total_bytes_read;
 		size_t		_total_bytes_to_read;
 		bool		_chunked;
+		char		**_args;
+		char		**_env;
 };

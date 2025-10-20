@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 23:45:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/21 01:21:00 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,10 @@
 /**
  * @brief Default constructor. Initializes status code to 200 OK.
  */
-Response::Response(void)
+Response::Response()
 	:	_status_code(HTTP_OK)
 {
+	this->_cgi = NULL;
 	return ;
 }
 
@@ -155,17 +156,6 @@ const std::string	&Response::getBody(void) const
 {
 	return (_body);
 }
-
-bool				Response::isCGI()
-{
-	return (this->_isCGI);
-}
-
-void				Response::setCGI(bool isCGI)
-{
-	this->_isCGI = isCGI;
-}
-
 
 /**
  * @brief Returns the full HTTP response (header + body) as a string.

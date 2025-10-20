@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 23:46:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/21 01:00:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 
 #include "headers.hpp"
 #include "utils.hpp"
+#include "CGI.hpp"
+
+class	CGI;
 
 /**
  * @class Response
@@ -29,7 +32,8 @@ class	Response
 		std::string							_header;
 		std::string							_body;
 		std::map<std::string, std::string>	_headers;
-
+		CGI									*_cgi;
+		
 	public:
 		Response(void);
 		Response(const Response &other);
