@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 16:04:30 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/20 20:35:06 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ class	Response
 		void	setContentLength(size_t len);
 		void	setCookie(const std::string &cookie);
 
-		std::string	httpStatusToStr(HttpStatus code);
 		void		buildHeader(void);
 
 		const std::string	&getHeader(void) const;

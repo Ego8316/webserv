@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 19:59:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 20:44:07 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,7 @@ enum ContentTypes
 
 enum	HttpStatus
 {
+	HTTP_UNKNOWN_STATUS = 0,
 	HTTP_OK = 200,
 	HTTP_CREATED = 201,
 	HTTP_ACCEPTED = 202,

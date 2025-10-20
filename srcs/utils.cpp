@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 20:08:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 20:45:52 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,16 +97,10 @@ static bool CICharComp(char a, char b)
 	return (std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)));
 }
 
-long		utils::caseInsensitiveFind(std::string haystack, std::string needle)
+std::string::iterator		utils::caseInsensitiveFind(std::string haystack, std::string needle)
 {
-	long		pos;
-	
-	std::string::const_iterator it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
-	if (it == haystack.end())
-		pos = -1;
-	else
-		pos = it - haystack.begin();
-	return (pos);
+	std::string::iterator it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
+	return (it);
 }
 
 size_t	utils::getFileSize(const std::string &path)
@@ -213,6 +207,68 @@ Method			utils::strToMethod(std::string method_str)
 	else if (method_str == "DELETE")
 		return (DELETE);
 	return (UNKNOWN);
+}
+
+/**
+ * @brief Converts an HTTP status code enum to its corresponding string.
+ * @param code The HTTP status code.
+ * @return `std::string` The string representation of the code.
+ */
+std::string	utils::httpStatusToStr(HttpStatus code)
+{
+	switch(code)
+	{
+		case HTTP_OK:						return "OK";
+		case HTTP_BAD_REQUEST:				return "Bad Request";
+		case HTTP_FORBIDDEN:				return "Forbidden";
+		case HTTP_NOT_FOUND:				return "Not Found";
+		case HTTP_INTERNAL_SERVER_ERROR:	return "Internal Server Error";
+		case HTTP_NOT_IMPLEMENTED:			return "Not Implemented";
+		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";
+		default:							return "Unknown";
+	}
+}
+
+/**
+ * @brief Converts an HTTP status code str to its corresponding enum.
+ * @param code The HTTP status code.
+ * @return `std::string` The string representation of the code.
+ */
+HttpStatus	utils::strToHttpStatus(std::string status)
+{
+	if (utils::startsWith(status, "200"))
+		return (HTTP_OK);
+	if (utils::startsWith(status, "201"))
+		return (HTTP_CREATED);
+	if (utils::startsWith(status, "202"))
+		return (HTTP_ACCEPTED);
+	if (utils::startsWith(status, "204"))
+		return (HTTP_NO_CONTENT);
+	if (utils::startsWith(status, "300"))
+		return (HTTP_REDIRECT);
+	if (utils::startsWith(status, "301"))
+		return (HTTP_REDIRECT_PERM);
+	if (utils::startsWith(status, "302"))
+		return (HTTP_REDIRECT_TEMP);
+	if (utils::startsWith(status, "400"))
+		return (HTTP_BAD_REQUEST);
+	if (utils::startsWith(status, "401"))
+		return (HTTP_UNAUTHORIZED);
+	if (utils::startsWith(status, "403"))
+		return (HTTP_FORBIDDEN);
+	if (utils::startsWith(status, "404"))
+		return (HTTP_NOT_FOUND);
+	if (utils::startsWith(status, "409"))
+		return (HTTP_CONFLICT);
+	if (utils::startsWith(status, "500"))
+		return (HTTP_INTERNAL_SERVER_ERROR);
+	if (utils::startsWith(status, "501"))
+		return (HTTP_NOT_IMPLEMENTED);
+	if (utils::startsWith(status, "502"))
+		return (HTTP_BAD_GATEWAY);
+	if (utils::startsWith(status, "505"))
+		return (HTTP_VERSION_NOT_SUPPORTED);
+	return (HTTP_UNKNOWN_STATUS);
 }
 
 long		utils::getTime()

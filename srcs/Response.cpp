@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/16 16:02:19 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 20:35:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,26 +118,6 @@ void	Response::setCookie(const std::string &cookie)
 }
 
 /**
- * @brief Converts an HTTP status code enum to its corresponding string.
- * @param code The HTTP status code.
- * @return `std::string` The string representation of the code.
- */
-std::string	Response::httpStatusToStr(HttpStatus code)
-{
-	switch(code)
-	{
-		case HTTP_OK:						return "OK";
-		case HTTP_BAD_REQUEST:				return "Bad Request";
-		case HTTP_FORBIDDEN:				return "Forbidden";
-		case HTTP_NOT_FOUND:				return "Not Found";
-		case HTTP_INTERNAL_SERVER_ERROR:	return "Internal Server Error";
-		case HTTP_NOT_IMPLEMENTED:			return "Not Implemented";
-		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";
-		default:							return "Unknown";
-	}
-}
-
-/**
  * @brief Builds the HTTP response header string from the status code and
  * currently set headers.
  * 
@@ -152,7 +132,7 @@ void	Response::buildHeader(void)
 		_headers["Connection"] = "close";
 
 	_header = "HTTP/1.0 " + utils::toString(_status_code)
-		+ " " + httpStatusToStr(_status_code) + "\r\n";
+		+ " " + utils::httpStatusToStr(_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
 		_header += it->first + ": " + it->second + "\r\n";
 	_header += "\r\n";
