@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 20:02:52 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 23:46:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,11 @@ RequestStage	Client::getState()
 	return (this->_state);
 }
 
+ServerCore	&Client::getServer()
+{
+	return (*this->_server);
+}
+
 long			Client::getTimeLimit()
 {
 	return (this->_time_limit);
@@ -98,11 +103,6 @@ void	Client::setState(RequestStage state)
 
 int		Client::handleEvent()
 {
-	int					bytes_read;
-	std::string			request_str;
-	std::string			response_str;
-	std::vector<char>	buffer(_config->buffer_size);
-
 	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
 	while (utils::getTime() < this->_time_limit)
 	{
@@ -121,14 +121,7 @@ int		Client::handleEvent()
 		if (_state == OUTPUT_SENDING && _sendOutput() == SERV_ERROR)
 			return (SERV_ERROR);
 	}
-	bytes_read = _config->buffer_size;
-	while (bytes_read == _config->buffer_size && request_str.size() < this->_config->max_body_size)
-	{
-		bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
-		if (bytes_read == SERV_ERROR)
-			return (SERV_ERROR);
-		request_str += std::string(buffer.begin(), buffer.end()).substr(0, bytes_read);
-	}
+	
 	if (request_str.length() == 0)
 	{
 		std::cerr << "Empty request. Ignoring..." << std::endl;
@@ -157,6 +150,16 @@ int	Client::_tryAccepting()
 
 int	Client::_readInput()
 {
+	ssize_t		bytes_read = _config->buffer_size;
+	std::vector<char>	buffer(_config->buffer_size);
+	
+	while (bytes_read  && this->_request_str.size() < this->_config->max_body_size)
+	{
+		bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
+		if (bytes_read == SERV_ERROR)
+			return (SERV_ERROR);
+		this->_request_str += std::string(buffer.begin(), buffer.end()).substr(0, bytes_read);
+	}
 	return (0);
 }
 
@@ -165,7 +168,6 @@ void	Client::_processRequest()
 	// std::cout << request << std::endl;
 	const Cookie		cookies = _request->getQueryCookies();
 	_response = RequestHandler::handle(*_request, *_config, cookies);
-	// _state = _response.isCGI() ? CGI_INIT : OUTPUT_SENDING;
 	_state = OUTPUT_SENDING;
 	return ;
 }

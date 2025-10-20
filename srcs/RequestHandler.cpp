@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 18:17:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 23:42:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,6 +156,7 @@ Response	RequestHandler::_handleCGI(const Request &request, const Config &config
 	(void)config;
 	(void)resource;
 	(void)cookies;
+	response._is_cgi = true;
 	return (response);
 }
 

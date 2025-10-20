@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 21:33:55 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 23:59:00 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,15 +148,13 @@ void	CGI::parseHeader()
 		this->_header_sent = true;
 	if (utils::caseInsensitiveFind(this->_output, "Content-Length: ") != this->_output.end())
 	{
-		this->_bytes_to_send = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ")
+		this->_content_len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ")
 			+ std::string("Content-Length: ").length());
 	}
 	else if (utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: chunked") != this->_output.end())
 		this->_chunked = true;
 	if (this->_output.find("\r\n\r\n") != std::string::npos)
-	{
-		this->_header_len = true;
-	}
+		this->_header_len = this->_output.find("\r\n\r\n") + 4;
 }
 
 void	CGI::getFullHeader()
@@ -175,13 +173,34 @@ void	CGI::getFullHeader()
 	}
 	else
 		this->_status = HTTP_OK;
-	
+	this->_header = "HTTP/1.0 " + utils::toString(this->_status)
+		+ " " + utils::httpStatusToStr(this->_status) + "\r\n";
+	this->_header += "Server: Webserv/1.0 (Unix)\r\n";
+	if (!this->_content_len && !this->_chunked)
+		this->_header += "Content-Length: " + utils::toString(this->_output.length() - this->_header_len) + "\r\n";
+	this->_output = this->_header + this->_output;
+	return ;
 }
 
 void	CGI::sendOutput(Client &client, Config &config)
 {
-	std::vector<char>	buffer(config.buffer_size);
-
+	char				buffer[config.buffer_size];
+	ssize_t				bytes_sent = 0;
+	int					bufsize;
+	
+	while (utils::getTime() < client.getTimeLimit())
+	{
+		if (this->_total_bytes_sent < this->_header.length())
+		{
+			bufsize = std::min(config.buffer_size, static_cast<int>(this->_header.length() - this->_total_bytes_sent));
+			client.getServer().socketWrite(this->_header.c_str() + this->_total_bytes_sent, bufsize, &client);
+		}
+		else
+		{
+			bufsize = std::min(config.buffer_size, static_cast<int>(this->_output.length() + this->_header.length() - this->_total_bytes_sent));
+			client.getServer().socketWrite(this->_output.c_str() + this->_total_bytes_sent, bufsize, &client);
+		}
+	}
 }
 
 void	CGI::Execute(Request &request, char	**env)
@@ -206,9 +225,6 @@ void	CGI::Execute(Request &request, char	**env)
 		std::cerr << "CGI execution failed" << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 	}
-	RestoreFds(original_standard_fds);
-	delete[] env;
-	delete env;
 }
 
 void		CGI::RestoreFds(int *original_standard_fds)
@@ -230,9 +246,7 @@ char	**CGI::GenEnvVar(Request &request, Cookie *cookies)
 	{
 		std::map<std::string, std::string>	attr = cookies->getAllAttributes();
 		for (std::map<std::string, std::string>::iterator it = attr.begin(); it != attr.end(); ++it)
-		{
 			env.push_back("HTTP_COOKIE_" + it->first + "=" + it->second);
-		}
 	}
 	ret = new char *[env.size() + 1];
 	for (unsigned int i = 0; i < env.size(); ++i)

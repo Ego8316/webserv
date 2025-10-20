@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 21:29:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 23:56:56 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class CGI
 		void		Communicate(Client &client, Request &request, Config &config);
 		void		writeToCGI(Request &request, Config &config);
 		void		readFromCGI(Config &config);
-		void		sendOutput(Client &client, Config &config);
+		std::string	&getOutput();
 		
 		void		parseHeader();
 		void		getFullHeader();
@@ -45,6 +45,10 @@ class CGI
 	private :
 		HttpStatus	_status;
 		std::string	_output;
+		std::string	_header;
+		bool		_header_sent;
+		int			_header_len;
+		int			_content_len;
 		int			_pid;
 		int			_process_status[2];
 		int			_pipe_to_CGI[2];
@@ -53,7 +57,5 @@ class CGI
 		size_t		_bytes_to_send;
 		ssize_t		_total_bytes_read;
 		size_t		_total_bytes_to_read;
-		bool		_header_sent;
-		int			_header_len;
 		bool		_chunked;
 };

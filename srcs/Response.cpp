@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 21:27:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 23:45:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,6 +155,17 @@ const std::string	&Response::getBody(void) const
 {
 	return (_body);
 }
+
+bool				Response::isCGI()
+{
+	return (this->_isCGI);
+}
+
+void				Response::setCGI(bool isCGI)
+{
+	this->_isCGI = isCGI;
+}
+
 
 /**
  * @brief Returns the full HTTP response (header + body) as a string.

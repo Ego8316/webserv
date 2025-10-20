@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 20:03:47 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 23:32:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,16 +34,17 @@ class Client
 		Client	&operator=(const Client &other);
 		~Client(void);
 
-		int					handleEvent();
-		int					getFd();
-		struct sockaddr_in	&getClientAddr();
-		socklen_t			&getClientLen();
-		int					getId();
-		RequestStage		getState();
-		long				getTimeLimit();
-		void				setFd(int fd);
-		void				setClientId(int id);
-		void    			setState(RequestStage state);
+		int						handleEvent();
+		int						getFd();
+		struct sockaddr_in		&getClientAddr();
+		socklen_t				&getClientLen();
+		int						getId();
+		RequestStage			getState();
+		ServerCore				&getServer();
+		long					getTimeLimit();
+		void					setFd(int fd);
+		void					setClientId(int id);
+		void    				setState(RequestStage state);
 	private :
 		Config							*_config;
 		ServerCore						*_server;
@@ -52,12 +53,14 @@ class Client
 		socklen_t						_client_len;
 		int								_client_id;
 		RequestStage					_state;
+		std::string						_request_str;
+		std::string						_response_str;
 		long							_time_limit;
 		Request							*_request;
 		Response						_response;
 		
-		int				_tryAccepting();
-		int				_readInput();
-		void			_processRequest();
-		int				_sendOutput();
+		int					_tryAccepting();
+		int					_readInput();
+		void				_processRequest();
+		int					_sendOutput();
 };
