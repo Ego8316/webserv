@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 19:17:55 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 21:29:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class CGI
 		char		**GenEnvVar(Request &request, Cookie *cookies);
 	private :
 		HttpStatus	_status;
-		std::string	_cgi_output;
+		std::string	_output;
 		int			_pid;
 		int			_process_status[2];
 		int			_pipe_to_CGI[2];
@@ -54,6 +54,6 @@ class CGI
 		ssize_t		_total_bytes_read;
 		size_t		_total_bytes_to_read;
 		bool		_header_sent;
-		bool		_header_parsed;
+		int			_header_len;
 		bool		_chunked;
 };

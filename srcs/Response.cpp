@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 20:35:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 21:27:18 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,6 @@ void	Response::buildHeader(void)
 		_headers["Server"] = "Webserv/1.0 (Unix)";
 	if (!utils::mapHasEntry(_headers, std::string("Connection")))
 		_headers["Connection"] = "close";
-
 	_header = "HTTP/1.0 " + utils::toString(_status_code)
 		+ " " + utils::httpStatusToStr(_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)

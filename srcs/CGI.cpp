@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 20:46:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 21:33:55 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,19 +17,38 @@ CGI::CGI()
 	this->_total_bytes_sent = 0;
 	this->_bytes_to_send = 0;
 	this->_total_bytes_to_read = 0;
-	this->_cgi_output = "";
+	this->_output = "";
 	this->_process_status[0] = 0;
 	this->_process_status[1] = 0;
+	this->_header_len = 0;
 }
 
 CGI::CGI(const CGI &other)
 {
-	(void)other;
+	*this = other;
 }
 
 CGI &CGI::operator=(const CGI &other)
 {
-	(void)other;
+	if (this != &other)
+	{
+		this->_status = other._status;
+		this->_output = other._output;
+		this->_pid = other._pid;
+		this->_process_status[0] = other._process_status[0];
+		this->_process_status[1] = other._process_status[1];
+		this->_pipe_to_CGI[0] = other._pipe_to_CGI[0];
+		this->_pipe_to_CGI[1] = other._pipe_to_CGI[1];
+		this->_pipe_from_CGI[0] = other._pipe_from_CGI[0];
+		this->_pipe_from_CGI[1] = other._pipe_from_CGI[1];
+		this->_total_bytes_sent = other._total_bytes_sent;
+		this->_bytes_to_send = other._bytes_to_send;
+		this->_total_bytes_read = other._total_bytes_read;
+		this->_total_bytes_to_read = other._total_bytes_to_read;
+		this->_header_sent = other._header_sent;
+		this->_header_len = other._header_len;
+		this->_chunked = other._chunked;
+	}
 	return (*this);
 }
 
@@ -73,7 +92,7 @@ void	CGI::Communicate(Client &client, Request &request, Config &config)
 	{
 		if (this->_total_bytes_sent < this->_bytes_to_send)
 			this->writeToCGI(request, config);
-		if (!this->_header_parsed || this->_total_bytes_read < this->_total_bytes_to_read)
+		if (!this->_header_len || this->_total_bytes_read < this->_total_bytes_to_read)
 			readFromCGI(config);
 		else if (this->_process_status[0] == 0)
 			this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
@@ -115,35 +134,48 @@ void	CGI::readFromCGI(Config &config)
 		_status = HTTP_INTERNAL_SERVER_ERROR;
 		return ;
 	}
-	this->_cgi_output += std::string(buffer.begin(), buffer.end() + bytes_read);
+	this->_output += std::string(buffer.begin(), buffer.end() + bytes_read);
 	this->_total_bytes_sent += bytes_read;
-	if (!this->_header_parsed)
+	if (!this->_header_len)
 		this->parseHeader();
 }
 
 void	CGI::parseHeader()
 {
-	if (!this->_cgi_output.length())
+	if (!this->_output.length())
 		return ;
-	if (utils::caseInsensitiveFind(this->_cgi_output, "Content-Length: ") != this->_cgi_output.end())
+	if (utils::startsWith(this->_output, "HTTP/"))
+		this->_header_sent = true;
+	if (utils::caseInsensitiveFind(this->_output, "Content-Length: ") != this->_output.end())
 	{
-		this->_bytes_to_send = atoi(&*utils::caseInsensitiveFind(this->_cgi_output, "Content-Length: ")
+		this->_bytes_to_send = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ")
 			+ std::string("Content-Length: ").length());
 	}
-	else if (utils::caseInsensitiveFind(this->_cgi_output, "Transfer-Encoding: chunked") != this->_cgi_output.end())
+	else if (utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: chunked") != this->_output.end())
 		this->_chunked = true;
-	if (this->_cgi_output.find("\r\n\r\n") != std::string::npos)
-		this->_header_parsed = true;
+	if (this->_output.find("\r\n\r\n") != std::string::npos)
+	{
+		this->_header_len = true;
+	}
 }
 
 void	CGI::getFullHeader()
 {
 	if (!WIFEXITED(this->_process_status[1]))
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
-	else if (utils::caseInsensitiveFind(this->_cgi_output, "status: "))
-		this->_status = utils::strToHttpStatus(this->_cgi_output +
-			utils::caseInsensitiveFind(this->_cgi_output, "status: ")
+	else if (this->_header_sent)
+		return ;
+	else if (utils::caseInsensitiveFind(this->_output, "status: ") != this->_output.end())
+	{
+		this->_status = utils::strToHttpStatus(&*utils::caseInsensitiveFind(this->_output, "status: ")
 			+ std::string("status: ").length());
+		if (this->_status == HTTP_UNKNOWN_STATUS)
+			this->_status = HTTP_INTERNAL_SERVER_ERROR;
+		this->_output.erase(0, this->_output.find("\r\n"));
+	}
+	else
+		this->_status = HTTP_OK;
+	
 }
 
 void	CGI::sendOutput(Client &client, Config &config)
@@ -207,8 +239,9 @@ char	**CGI::GenEnvVar(Request &request, Cookie *cookies)
 	{
 		ret[i] = new char[env[i].length() + 1];
 		if (!ret[i])
-		{
-			//TODO niquer sa mere;
+		{	//TODO test
+			delete[] ret;
+			delete ret;
 			return (NULL);
 		}
 		strcpy(ret[i], env[i].c_str());
