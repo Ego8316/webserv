@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 16:40:30 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 18:17:10 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ Response	RequestHandler::handle(const Request &request, const Config &config, co
 		return _handleError(HTTP_BAD_REQUEST, config);
 	if (request.getMethod() == UNKNOWN)
 		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
-	// BIEN PENSER A CHANGER AVANT DE RENDRE
+	// TODO : BIEN PENSER A CHANGER AVANT DE RENDRE
 	// if (request.getVersion() != "HTTP/1.1" || request.getVersion() != "HTTP/1.0")
 	// 	return (_handleError(HTTP_VERSION_NOT_SUPPORTED, config));
 
@@ -156,7 +156,6 @@ Response	RequestHandler::_handleCGI(const Request &request, const Config &config
 	(void)config;
 	(void)resource;
 	(void)cookies;
-	
 	return (response);
 }
 
@@ -177,7 +176,7 @@ Response	RequestHandler::_handleRedirect(const Request &request, const Config &c
 
 Response	RequestHandler::_handleListDir(const Request &request, const Config &config, const Resource &resource)
 {
-	Response	response;
+	Response		response;
 	std::string		response_body;
 	DIR				*dir;
 	struct dirent	*dir_ent;

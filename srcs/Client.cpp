@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 17:51:27 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 16:49:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ Client::Client(Config *config, ServerCore *server)
 	this->_state = TRY_ACCEPTING;
 	this-> _preprend_response = "";
 	this->_response_fd = 0;
-	this->_cgi_pid = 0;
 }
 
 Client::Client(const Client &other)
@@ -40,7 +39,6 @@ Client &Client::operator=(const Client &other)
 		this->_state = other._state;
 		this-> _preprend_response = other._preprend_response;
 		this->_response_fd = other._response_fd;
-		this->_cgi_pid = other._cgi_pid;
 	}
 	return (*this);
 }
@@ -71,6 +69,11 @@ RequestStage	Client::getState()
 	return (this->_state);
 }
 
+long			Client::getTimeLimit()
+{
+	return (this->_time_limit);
+}
+
 void	Client::setClientId(int id)
 {
 	this->_client_id = id;
@@ -90,7 +93,7 @@ int		Client::socketRead(char *buffer, int bytes_read) //TODO
 {
 	if (!this->_server->pollAvailFor(this->_client_id, POLLIN))
 		return (0);
-	bytes_read = recv(this->_client_fd, buffer, bytes_read, 0); //MSG_DONTWAIT
+	bytes_read = recv(this->_client_fd, buffer, bytes_read, MSG_DONTWAIT);
 	if (bytes_read == SERV_ERROR)
 	{
 		std::cerr << "Receive failed\n";
@@ -104,7 +107,7 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 {
 	if (!this->_server->pollAvailFor(this->_client_id, POLLOUT))
 		return (0);
-	if (send(this->_client_fd, buffer, bytes_write, 0) == SERV_ERROR) //MSG_DONTWAIT
+	if (send(this->_client_fd, buffer, bytes_write, MSG_DONTWAIT) == SERV_ERROR)
 	{
 		std::cerr << "Send failed\n";
 		return (SERV_ERROR);
@@ -114,11 +117,10 @@ int		Client::socketWrite(const char *buffer, int bytes_write) //TODO
 
 int		Client::handleEvent()
 {
-	int			bytes_read;
-	std::string	request_str;
-	std::string	response_str;
-	std::vector<char> buffer(_config->buffer_size);
-
+	int					bytes_read;
+	std::string			request_str;
+	std::string			response_str;
+	std::vector<char>	buffer(_config->buffer_size);
 
 	//TODO NOW ALSO NEEDS TO PREFORM INITIAL CONNEXTION WITH ACCEPT TO BE FULLY NON BLOCKING
 	// SEE LOGIC IN NOW DEPRECATED newClient IN WEBSERV
@@ -172,7 +174,7 @@ int 	Client::tryAccepting()
 	}
 	else
 		this->_state = DONE;
-	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id); //TODO Set non blocking;
+	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id);
 	std::cout << "Accepted client " << this->_client_id << std::endl;
 	return (0);
 }

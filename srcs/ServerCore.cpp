@@ -6,20 +6,11 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 16:59:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 18:14:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerCore.hpp"
-
-ServerCore::ServerCore(void)
-{
-	_config = NULL;
-	_server_fd = SERV_ERROR;
-	std::memset(&_server_addr, 0, sizeof(_server_addr));
-	_poll_fds.resize(0);
-	return ;
-}
 
 ServerCore::ServerCore(Config *config)
 {

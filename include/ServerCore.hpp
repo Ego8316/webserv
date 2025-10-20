@@ -25,7 +25,6 @@ class	Config;
 class	ServerCore
 {
 	public:
-		ServerCore(void);
 		ServerCore(Config	*config);
 		ServerCore(const ServerCore &other);
 		ServerCore	&operator=(const ServerCore &other);

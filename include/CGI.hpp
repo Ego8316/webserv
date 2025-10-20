@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 17:19:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 19:17:55 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,31 @@ class CGI
 	//SETTERS
 	//MEMBER FUNCTIONS
 		void		Run(Client &client, Request &request, Config &config, Cookie *cookies);
-		void		Communication(Client &client, Request &request, Config &config, int *pipeToCGI, int *pipeFromCGI);
-		void		Execute(Request &request, char **env, int *pipeToCGI, int *pipeFromCGI);
+		
+		void		Communicate(Client &client, Request &request, Config &config);
+		void		writeToCGI(Request &request, Config &config);
+		void		readFromCGI(Config &config);
+		void		sendOutput(Client &client, Config &config);
+		
+		void		parseHeader();
+		void		getFullHeader();
+
+		void		Execute(Request &request, char **env);
+		
 		void		RestoreFds(int *original_standard_fds);
 		char		**GenEnvVar(Request &request, Cookie *cookies);
 	private :
 		HttpStatus	_status;
+		std::string	_cgi_output;
+		int			_pid;
+		int			_process_status[2];
+		int			_pipe_to_CGI[2];
+		int			_pipe_from_CGI[2];
+		ssize_t		_total_bytes_sent;
+		size_t		_bytes_to_send;
+		ssize_t		_total_bytes_read;
+		size_t		_total_bytes_to_read;
+		bool		_header_sent;
+		bool		_header_parsed;
+		bool		_chunked;
 };

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:46:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 15:59:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ class Client
 		struct sockaddr_in	&getClientAddr();
 		socklen_t			&getClientLen();
 		RequestStage		getState();
+		long				getTimeLimit();
 	//SETTERS
 		void				setFd(int fd);
 		void				setClientId(int id);
@@ -52,9 +53,9 @@ class Client
 		int								_client_id;
 		
 		RequestStage					_state;
-		std::string						_preprend_response;
-		int								_response_fd;
-		int								_cgi_pid;
+		std::string						_preprend_response; //either just header or full HTTP error response default
+		int								_response_fd; //can be 0 if no file has to be sent
+		
 		long							_time_limit;
 		
 		Config							*_config;

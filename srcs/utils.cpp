@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:11:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 19:09:31 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,35 @@ std::string			utils::stringTrim(std::string str, std::string set)
 			str.erase(str.size() - 1, 1);
 	}
 	return (str);
+}
+
+std::string	utils::toLower(const std::string &str)
+{
+	std::string	lower = str;
+
+	for (size_t i = 0; i < lower.size(); ++i)
+		lower[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(lower[i])));
+	return (lower);
+}
+
+std::string	utils::capitalize(const std::string &str)
+{
+	std::string	result = str;
+	bool		new_word = true;
+
+	for (size_t i = 0; i < result.size(); ++i)
+	{
+		if (new_word && std::isalpha(static_cast<unsigned char>(result[i])))
+		{
+			result[i] = static_cast<char>(std::toupper(static_cast<unsigned char>(result[i])));
+			new_word = false;
+		}
+		else
+			result[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(result[i])));
+		if (result[i] == '-')
+			new_word = true;
+	}
+	return (result);
 }
 
 size_t	utils::getFileSize(const std::string &path)
