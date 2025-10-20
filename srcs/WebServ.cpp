@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 14:59:16 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/20 19:44:50 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int	WebServ::UpdateQueue()
 				if (this->_clients[event->client_id]->getState() == DONE)
 				{
 					std::cout << "Client " << event->client_id << " added to processing queue" << std::endl;
-					this->_clients[event->client_id]->setState(INPUT_READING);
+					this->_clients[event->client_id]->setState(TRY_ACCEPTING);
 					this->_processing_queue.push_back(this->_clients[event->client_id]);
 				}
 			}

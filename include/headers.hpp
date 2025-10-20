@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 18:00:04 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/20 18:55:42 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,9 @@
 	#define OS_NAME "Unknown"
 #endif
 
-#define SERV_ERROR -1
-#define NEW_CLIENT 1
+#define SERV_ERROR	-1
+#define	WBLOCK		-2
+#define NEW_CLIENT	1
 
 #define NO_TIMEOUT -1
 #define CLIENT_LIMIT 1000
@@ -85,6 +86,13 @@
 #define ERROR_PAGE_505	"<html><head><title>505 HTTP Version Not Supported</title></head>" \
 						"<body><h1>505 HTTP Version Not Supported</h1>" \
 						"<p>The server does not support the HTTP protocol version used in the request.</p></body></html>"
+
+#define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
+#define LISTDIR_PREFIX "  "
+#define LISTDIR_SUFFIX "<br>\n"
+#define LISTDIR_ENDING "</body>\n</html>"
+
+#define NULL_CHUNK "0\r\n\r\n"
 
 enum	Method
 {
@@ -146,10 +154,12 @@ enum	HttpStatus
 enum	RequestStage //should be set to DONE whenever not in the queue
 {
 	TRY_ACCEPTING,
-	INPUT_READING,
+	HEADER_READING,
+	BODY_READING,
 	PROCESSING_REQUEST,
-	OUTPUT_SENDING,
+	CGI_INIT,
 	CGI_WAITING,
+	OUTPUT_SENDING,
 	ABORTING,
 	DONE
 };
@@ -167,8 +177,3 @@ typedef struct s_Redirection
 	std::string		dest;
 	HttpStatus		error_code;
 }	Redirection;
-
-#define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
-#define LISTDIR_PREFIX "  "
-#define LISTDIR_SUFFIX "<br>\n"
-#define LISTDIR_ENDING "</body>\n</html>"

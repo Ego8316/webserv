@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 17:41:58 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/20 17:55:56 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,33 @@ int	ServerCore::socketAcceptClient(Client *new_client)
 	else if (std::string(OS_NAME) == "macOs")
 		_setNonBlocking(new_client->getFd());
 	return (new_client->getFd());
+}
+
+int	ServerCore::socketRead(char *buffer, int bytes_read, Client *client)
+{
+	if (!pollAvailFor(client->getId(), POLLIN))
+		return (WBLOCK);
+	int	bytes_received = recv(client->getFd(), buffer, bytes_read, MSG_DONTWAIT);
+	if (bytes_received == SERV_ERROR)
+	{
+		std::cerr << RED << "Receive failed: " << strerror(errno) << RESET << std::endl;
+		return (SERV_ERROR);
+	}
+	std::memset(buffer + bytes_received, 0, this->_config->buffer_size - bytes_received);
+	return (bytes_received);
+}
+
+int	ServerCore::socketWrite(const char *buffer, int bytes_write, Client *client)
+{
+	if (!pollAvailFor(client->getId(), POLLOUT))
+		return (WBLOCK);
+	int	bytes_sent = send(client->getFd(), buffer, bytes_write, MSG_DONTWAIT);
+	if (bytes_sent == SERV_ERROR)
+	{
+		std::cerr << RED << "Send failed: " << strerror(errno) << RESET << std::endl;
+		return (SERV_ERROR);
+	}
+	return (bytes_sent);
 }
 
 void	ServerCore::pollAdd(int fd, nfds_t event, int idx)

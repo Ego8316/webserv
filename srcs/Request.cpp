@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/19 17:35:21 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/20 19:53:26 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,14 @@
 
 Request::Request()
 {
+	this->_raw_header = "";
+	this->_raw_body = "";
 	this->_method = UNKNOWN;
-	this->_requestTarget = "";
+	this->_request_target = "";
 	this->_query_string = "";
 	this->_version = "";
-	this->_rawBody = "";
+	this->_content_length = 0;
+	this->_chunked = false;
 	this->_headers = std::map<std::string, std::string>();
 	this->_error = false;
 	this->_accept = FTYPE_NONE;
@@ -36,176 +39,96 @@ Request &Request::operator=(const Request &other)
 {
 	if (this != &other)
 	{
-		_method = other._method;
-		_requestTarget = other._requestTarget;
-		_query_string = other._query_string;
-		_version = other._version;
-		_rawBody = other._rawBody;
-		_headers = other._headers;
-		_error = other._error;
-		_accept = other._accept;
-		_query_cookies = other._query_cookies;
+		this->_raw_header = other._raw_header;
+		this->_raw_body = other._raw_body;
+		this->_method = other._method;
+		this->_request_target = other._request_target;
+		this->_query_string = other._query_string;
+		this->_version = other._version;
+		this->_content_length = other._content_length;
+		this->_chunked = other._chunked;
+		this->_headers = other._headers;
+		this->_error = other._error;
+		this->_accept = other._accept;
+		this->_query_cookies = other._query_cookies;
 	}
 	return (*this);
 }
 
-Request::~Request(void) {}
-
-int		Request::parseRequest(std::string request, const Config &config)
+Request::~Request()
 {
-	std::istringstream			stream(request);
-	std::string					line;
-	std::vector<std::string>	line_split;
+	delete this->_query_cookies;
+	return ;
+}
 
-	_error = false;
+int	Request::parseHeader(const Config &config)
+{
+	std::istringstream	stream(this->_raw_header);
+	std::string			line;
+	std::string			method_str;
+
 	if (!std::getline(stream, line))
-	{
-		std::cerr << "Empty request" << std::endl;
-		_error = true;
-		return (SERV_ERROR);
-	}
-	line_split = utils::stringSplit(line, "\\r\\n");
-	if (line_split.size() == 0)
-	{
-		std::cerr << "Empty request" << std::endl;
-		_error = true;
-		return (SERV_ERROR);
-	}
-	std::istringstream	firstLine(line_split[0]);
-	std::string			methodStr;
-
-	if (!(firstLine >> methodStr >> _requestTarget >> _version))
-	{
-		_error = true;
-		return (SERV_ERROR);
-	}
-	parseRequestTarget();
-	_method = utils::strToMethod(methodStr);
+		return (_error = true, SERV_ERROR);
+	std::istringstream	first_line(line);
+	if (!(first_line >> method_str >> _request_target >> _version))
+		return (_error = true, SERV_ERROR);
+	_method = utils::strToMethod(method_str);
+	_parseRequestTarget();
 	if (!config.isAcceptedMethod(_method))
+		return (_error = true, SERV_ERROR);
+	while (std::getline(stream, line))
 	{
-		_error = true;
+		line = utils::stringTrim(line, "\r\n \t");
+		if (line.empty())
+			return (_error = true, SERV_ERROR);
+		if (_parseHeaderLine(line, config) == SERV_ERROR)
+			return (SERV_ERROR);
 	}
-	for (unsigned int i = 1; i < line_split.size(); ++i)
-	{
-		if (utils::stringTrim(line, "\r\n \t").length() == 0)
-			continue;
-		parseHeaderLine(line_split[i]);
-	}
-	while (std::getline(stream, line) && line != "\r")
-	{
-		line_split = utils::stringSplit(line, "\\r\\n");
-		for (unsigned int i = 1; i < line_split.size(); ++i)
-		{
-			if (utils::stringTrim(line, "\r\n \t").length() == 0)
-				continue;
-			parseHeaderLine(line_split[i]);
-		}
-	}
-	if (_accept == FTYPE_NONE)
-		_accept = FTYPE_ANY;
+	if (this->_accept == FTYPE_NONE)
+		this->_accept = FTYPE_ANY;
 	if (this->_query_cookies == NULL)
 		this->_query_cookies = new Cookie();
-	size_t			expected_size = 0;
-	size_t			bytes_read = 0;
-	std::string		body_str = "";
-
-	if (_headers.count("Content-Length"))
-	{
-		expected_size = std::atoi(_headers["Content-Length"].c_str());
-		if (expected_size > config.max_body_size)
-		{
-			std::cerr << "Bad content length" << std::endl;
-			_error = true;
-			return (SERV_ERROR);
-		}
-	}
-	else
-		expected_size = config.max_body_size;
-	std::vector<char> buffer(config.buffer_size);
-	stream.read(&buffer[0], buffer.size());
-	bytes_read = stream.gcount();
-	while (stream && bytes_read && body_str.size() < expected_size)
-	{
-		body_str += std::string(buffer.begin(), buffer.end()).substr(0, bytes_read);
-		stream.read(&buffer[0], buffer.size());
-       	bytes_read = stream.gcount();
-	}
-	if (_rawBody.size() >= expected_size)
-	{
-		std::cerr << "Bad content length" << std::endl;
-		_error = true;
-		return (SERV_ERROR);
-	}
 	return (0);
 }
 
-int		Request::parseRequestTarget()
+std::string	&Request::getRawHeader()
 {
-	if (_requestTarget.find("?") != std::string::npos)
-	{
-		_query_string = _requestTarget.substr(_requestTarget.find("?") + 1, _requestTarget.length());
-		_requestTarget.erase(_requestTarget.find("?"), _requestTarget.length());
-	}
-	if (utils::startsWith(_requestTarget, "http://"))
-		_requestTarget.erase(0, 8);
-	if (utils::startsWith(_requestTarget, "www"))
-		_requestTarget.erase(0, _requestTarget.find("/"));
-	return (0);
+	return (_raw_header);
 }
 
-int		Request::parseHeaderLine(std::string line)
+std::string &Request::getRawBody()
 {
-	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
-	Cookie						*cookie;
-	
-	if (field_split.size() == 2)
-	{
-		std::string	key = field_split[0];
-		std::string	value = field_split[1];
-		while (!value.empty() && value[0] == ' ')
-			value.erase(0, 1);
-		if (!value.empty() && value[value.size() - 1] == '\r')
-			value.erase(value.size() - 1);
-		if (key == "Cookie")
-		{
-			cookie = new Cookie(value);
-			if (cookie && cookie->applyToPath(_requestTarget))
-				this->_query_cookies = cookie;
-		}
-		else if (key == "Accept")
-			this->_accept = static_cast<ContentTypes>(this->_accept | utils::strToContentType(value));
-		else if (headerHasField(key))
-			this->_headers[key] = _headers[key] + "; " + value;
-		else
-			this->_headers[key] = value;
-	}
-	else
-	{
-		std::cerr << "Invalid Header in Request" << std::endl;
-		_error = true;
-		return (SERV_ERROR);
-	}
-	return (0);
+	return (_raw_body);
 }
 
-Method	Request::getMethod(void) const
+const std::string &Request::getRawBody() const
+{
+	return (_raw_body);
+}
+
+Method	Request::getMethod() const
 {
 	return (_method);
 }
 
-std::string	Request::getRequestTarget(void) const
+std::string	Request::getRequestTarget() const
 {
-	return (_requestTarget);
+	return (_request_target);
 }
 
-std::string Request::getVersion(void) const
+std::string Request::getVersion() const
 {
 	return (_version);
 }
 
-const std::string &Request::getRawBody(void) const
+size_t	Request::getContentLength() const
 {
-	return (_rawBody);
+	return (_content_length);
+}
+
+bool	Request::isChunked() const
+{
+	return (_chunked);
 }
 
 std::map<std::string, std::string>	Request::getHeaders(void) const
@@ -213,32 +136,9 @@ std::map<std::string, std::string>	Request::getHeaders(void) const
 	return (_headers);
 }
 
-bool	Request::getError(void) const
+bool	Request::getError() const
 {
 	return (_error);
-}
-		
-
-ContentTypes	Request::getAccept(void) const
-{
-	return (this->_accept);
-}
-
-void			Request::setMethod(Method method)
-{
-	this->_method = method;
-}
-
-bool			Request::headerHasField(const std::string field)
-{
-	return (_headers.find(field) != _headers.end());
-}
-
-std::string		Request::headerGetField(const std::string field)
-{
-	if (this->_headers.find(field) != this->_headers.end())
-		return (this->_headers[field]);
-	return ("");
 }
 
 const Cookie	&Request::getQueryCookies()
@@ -248,9 +148,88 @@ const Cookie	&Request::getQueryCookies()
 	return (*this->_query_cookies);
 }
 
-std::string			Request::getQueryString() const
+ContentTypes	Request::getAccept() const
+{
+	return (this->_accept);
+}
+
+std::string	Request::getQueryString() const
 {
 	return (this->_query_string);
+}
+
+void	Request::setMethod(Method method)
+{
+	this->_method = method;
+}
+
+bool	Request::headerHasField(const std::string field)
+{
+	return (_headers.find(field) != _headers.end());
+}
+
+std::string	Request::headerGetField(const std::string field)
+{
+	if (this->_headers.find(field) != this->_headers.end())
+		return (this->_headers[field]);
+	return ("");
+}
+
+int		Request::_parseRequestTarget()
+{
+	if (_request_target.find("?") != std::string::npos)
+	{
+		_query_string = _request_target.substr(_request_target.find("?") + 1, _request_target.length());
+		_request_target.erase(_request_target.find("?"), _request_target.length());
+	}
+	if (utils::startsWith(_request_target, "http://"))
+		_request_target.erase(0, 8);
+	if (utils::startsWith(_request_target, "www"))
+		_request_target.erase(0, _request_target.find("/"));
+	return (0);
+}
+
+int		Request::_parseHeaderLine(std::string line, const Config &config)
+{
+	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
+	Cookie						*cookie;
+	
+	if (field_split.size() == 2)
+	{
+		std::string	key = utils::capitalize(field_split[0]);
+		std::string	value = field_split[1];
+		while (!value.empty() && value[0] == ' ')
+			value.erase(0, 1);
+		if (!value.empty() && value[value.size() - 1] == '\r')
+			value.erase(value.size() - 1);
+		if (key == "Cookie")
+		{
+			cookie = new Cookie(value);
+			if (cookie && cookie->applyToPath(_request_target))
+			{
+				if (this->_query_cookies)
+					delete this->_query_cookies;
+				this->_query_cookies = cookie;
+			}
+		}
+		else if (key == "Accept")
+			this->_accept = static_cast<ContentTypes>(this->_accept | utils::strToContentType(value));
+		else if (headerHasField(key))
+			this->_headers[key] = _headers[key] + "; " + value;
+		else
+			this->_headers[key] = value;
+		if (key == "Transfer-Encoding" && utils::toLower(value).find("chunked") != std::string::npos)
+			_chunked = true;
+		else if (key == "Content-Length")
+		{
+			_content_length = std::atol(value.c_str());
+			if (_content_length < 0 || _content_length > config.max_body_size)
+				return (_error = true, SERV_ERROR);
+		}
+	}
+	else
+		return (_error = true, SERV_ERROR);
+	return (0);
 }
 
 std::ostream	&operator<<(std::ostream &os, const Request &src)
