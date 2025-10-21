@@ -6,20 +6,21 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 19:50:32 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/21 15:53:18 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
-#include "Config.hpp"
 #include "utils.hpp"
+#include "Config.hpp"
 #include "Cookie.hpp"
 
-class Cookie;
+class	Config;	
+class	Cookie;
 
-class Request
+class	Request
 {
 	public:
 		Request();

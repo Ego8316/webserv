@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/21 12:53:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/21 15:53:41 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@
 #include "ServerCore.hpp"
 #include "RequestHandler.hpp"
 
+class	Response;
 class	Query;
 class	Config;
 class	Cookie;
 class	ServerCore;
 class	Request;
-class	Response;
 
 class Client
 {

@@ -3,19 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Cookie.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 13:45:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/21 15:48:56 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "headers.hpp"
-#include "Client.hpp"
 #include "utils.hpp"
-#include "Config.hpp"
 
 class Client;
 

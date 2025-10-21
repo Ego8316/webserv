@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 19:53:26 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/21 15:44:44 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,7 +223,7 @@ int		Request::_parseHeaderLine(std::string line, const Config &config)
 		else if (key == "Content-Length")
 		{
 			_content_length = std::atol(value.c_str());
-			if (_content_length < 0 || _content_length > config.max_body_size)
+			if (_content_length > config.max_body_size)
 				return (_error = true, SERV_ERROR);
 		}
 	}

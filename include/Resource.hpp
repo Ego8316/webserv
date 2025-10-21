@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 19:44:08 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/21 15:51:18 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "Config.hpp"
 #include "Request.hpp"
 
+class	Config;
 class	Request;
 
 /**
