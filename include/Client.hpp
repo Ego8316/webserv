@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/21 01:20:06 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/21 12:53:58 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class	Config;
 class	Cookie;
 class	ServerCore;
 class	Request;
+class	Response;
 
 class Client
 {
