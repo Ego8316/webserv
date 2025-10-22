@@ -6,15 +6,13 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 17:50:19 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 17:50:57 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
 Client::Client(Config *config, ServerCore *server)
-	:	_config(config),
-		_server(server)
 {
 	this->_config = config;
 	this->_server = server;
