@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 17:40:15 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 17:50:19 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,20 @@ Client::Client(Config *config, ServerCore *server)
 	:	_config(config),
 		_server(server)
 {
-	this->_client_len = sizeof(this->_client_addr);
+	this->_config = config;
+	this->_server = server;
+	this->_client_fd = -1;
+	std::memset(&this->_client_addr, 0, sizeof(struct sockaddr_in));
+	this->_client_len = sizeof(struct sockaddr_in);
+	this->_client_id = 0;
 	this->_state = TRY_ACCEPTING;
 	this->_leftover = "";
+	this->_time_limit = 0;
 	this->_request = new Request();
 	this->_response = new Response();
 }
 
 Client::Client(const Client &other)
-	:	_config(other._config),
-		_server(other._server),
-		_response(other._response)
 {
 	*this = other;
 }
@@ -35,11 +38,15 @@ Client &Client::operator=(const Client &other)
 {
 	if (this != &other)
 	{
+		this->_config = other._config;
+		this->_server = other._server;
+		this->_client_fd = other._client_fd;
 		this->_client_addr = other._client_addr;
 		this->_client_len = other._client_len;
-		this->_config = other._config;
+		this->_client_id = other._client_id;
 		this->_state = other._state;
 		this->_leftover = other._leftover;
+		this->_time_limit = other._time_limit;
 		if (this->_request)
 			delete this->_request;
 		this->_request = new Request(*other._request);
