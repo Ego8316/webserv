@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 12:12:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 16:44:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ class CGI
 		bool		_is_complete;
 		HttpStatus	_status;
 		std::string	_output;
-		std::string	_header;
 		size_t		_header_len;
 		size_t		_content_len;
 		int			_pid;

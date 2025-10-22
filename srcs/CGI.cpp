@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 13:36:41 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 16:44:47 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,7 +173,6 @@ void	CGI::genFullOutput(Response &response)
 	if (!this->_content_len && !this->_chunked)
 		//this->_header += "Content-Length: " + utils::toString(this->_output.length() - this->_header_len) + "\r\n";
 		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n"));
-	this->_output = this->_header + this->_output;
 	response.buildHeader();
 	std::cout << "HEADER ====== \n" << response.getHeader() << std::endl;
 	std::cout << "END HEADER ====== \n" << std::endl;
