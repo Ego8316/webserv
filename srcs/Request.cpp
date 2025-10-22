@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 20:09:18 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 00:37:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,9 @@ Request &Request::operator=(const Request &other)
 		this->_headers = other._headers;
 		this->_error = other._error;
 		this->_accept = other._accept;
-		this->_query_cookies = other._query_cookies;
+		if (this->_query_cookies)
+			delete this->_query_cookies;
+		this->_query_cookies = new Cookie(*other._query_cookies);
 	}
 	return (*this);
 }
@@ -69,8 +71,10 @@ int	Request::parseHeader(const Config &config)
 
 	if (!std::getline(stream, line))
 		return (_error = true, SERV_ERROR);
-	std::istringstream	first_line(line);
+	std::istringstream	first_line(utils::stringTrim(line, "\r\n \t"));
 	if (!(first_line >> method_str >> _request_target >> _version))
+		return (_error = true, SERV_ERROR);
+	if (!first_line.eof())
 		return (_error = true, SERV_ERROR);
 	_method = utils::strToMethod(method_str);
 	_parseRequestTarget();

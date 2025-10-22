@@ -6,13 +6,13 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 18:11:02 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 00:35:01 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
 
-bool utils::endsWith(const std::string& str, const std::string& suffix)
+bool	utils::endsWith(const std::string& str, const std::string& suffix)
 {
 	if (str.length() < suffix.length())
 	{
@@ -21,7 +21,7 @@ bool utils::endsWith(const std::string& str, const std::string& suffix)
 	return (str.substr(str.length() - suffix.length(), suffix.length()) == suffix);
 }
 
-bool utils::startsWith(const std::string& str, const std::string& prefix)
+bool	utils::startsWith(const std::string& str, const std::string& prefix)
 {
 	if (str.length() < prefix.length())
 	{
@@ -48,7 +48,7 @@ std::vector<std::string>	utils::stringSplit(std::string str, std::string del)
 	return (split_str);
 }
 
-std::string			utils::stringTrim(std::string str, std::string set)
+std::string	utils::stringTrim(std::string &str, const std::string &set)
 {
 	unsigned int	last_size = str.size() + 1;
 
@@ -92,12 +92,12 @@ std::string	utils::capitalize(const std::string &str)
 	return (result);
 }
 
-static bool CICharComp(char a, char b)
+static bool	CICharComp(char a, char b)
 {
 	return (std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)));
 }
 
-std::string::iterator		utils::caseInsensitiveFind(std::string haystack, std::string needle)
+std::string::iterator	utils::caseInsensitiveFind(std::string haystack, std::string needle)
 {
 	std::string::iterator it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
 	return (it);
@@ -111,7 +111,7 @@ size_t	utils::getFileSize(const std::string &path)
 	return (0);
 }
 
-ContentTypes		utils::strToContentType(std::string input)
+ContentTypes	utils::strToContentType(std::string input)
 {
 	if (input == "*/*")
 		return (FTYPE_ANY);
@@ -152,7 +152,7 @@ std::string	utils::contentTypeToStr(ContentTypes type)
  * 
  * Updates _status to include IS_CGI for Python and PHP scripts.
  */
-ContentTypes		utils::extensionToContentTypes(std::string fname)
+ContentTypes	utils::extensionToContentTypes(std::string fname)
 {
 	if (utils::endsWith(fname, ".py"))
 		return (FTYPE_CGI_PY);
@@ -187,18 +187,18 @@ std::string	utils::contentTypeToExtensions(ContentTypes type)
 }
 
 
-std::string		utils::methodToStr(Method method)
+std::string	utils::methodToStr(Method method)
 {
-	if (method == GET)
-		return ("GET");
-	else if (method == POST)
-		return ("POST");
-	else
-		return ("DELETE");
-	return ("");
+	switch(method)
+	{
+		case GET:		return ("GET");
+		case POST:		return ("POST");
+		case DELETE:	return ("DELETE");
+		default:		return ("UNKNOWN");
+	}
 }
 
-Method			utils::strToMethod(std::string method_str)
+Method	utils::strToMethod(const std::string &method_str)
 {
 	if (method_str == "GET")
 		return (GET);
@@ -287,9 +287,9 @@ std::string	utils::stateToStr(RequestStage state)
 	}
 }
 
-long		utils::getTime()
+long	utils::getTime()
 {
-	time_t		t;
+	time_t	t;
 	
 	t = time(NULL);
 	if (t == -1)

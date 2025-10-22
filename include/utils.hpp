@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 18:09:38 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 00:32:36 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ namespace	utils
 bool						endsWith(const std::string& str, const std::string& suffix);
 bool 						startsWith(const std::string& str, const std::string& prefix);
 std::vector<std::string>	stringSplit(std::string str, std::string del);
-std::string					stringTrim(std::string str, std::string set);
+std::string					stringTrim(std::string &str, const std::string &set);
 std::string					toLower(const std::string &str);
 std::string					capitalize(const std::string &str);
 std::string::iterator		caseInsensitiveFind(std::string haystack, std::string needle);
@@ -30,7 +30,7 @@ std::string					contentTypeToStr(ContentTypes type);
 ContentTypes				extensionToContentTypes(std::string fname);
 std::string					contentTypeToExtensions(ContentTypes type);
 std::string					methodToStr(Method method);
-Method						strToMethod(std::string method);
+Method						strToMethod(const std::string &method);
 std::string					httpStatusToStr(HttpStatus code);
 HttpStatus					strToHttpStatus(std::string status);
 std::string					stateToStr(RequestStage state);

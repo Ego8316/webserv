@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 20:11:22 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 00:36:47 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,6 +195,7 @@ int	Client::_readHeader()
 	std::cout << CYAN << "[_readHeader] Header fully received (" << header_str.size() << " bytes)" << RESET << std::endl;
 	this->printHeader();
 	this->_request->parseHeader(*this->_config);
+	std::cout << "parse error: " << this->_request->getError() << std::endl;
 	if (!_request->isChunked() && _request->getContentLength() == 0)
 	{
 		this->_state = PROCESSING_REQUEST;
@@ -318,7 +319,7 @@ void	Client::printHeader() const
 void	Client::printRequest() const
 {
 	std::cout << BOLD_GRAY << "[Client " << this->_client_id << "]" << RESET
-		<< "]\n\t[REQUEST START]\n"
+		<< GRAY << "\n\t[REQUEST START]\n"
 		<< *this->_request
 		<< "\t[REQUEST END]" << RESET << std::endl;
 	return ;
