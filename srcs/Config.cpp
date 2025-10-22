@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:45:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 16:41:09 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ Config::Config(std::string config)
 			this->protocol = atoi(value.c_str());
 		else if (field == "METHODS")
 			this->parseMethod(conf_stream);
+		else if (field == "MAX_HEADER_SIZE")
+			this->max_header_size = atoi(value.c_str());
 		else if (field == "MAX_BODY_SIZE")
 			this->max_body_size = atoi(value.c_str());
 		else if (field == "CLIENT_LIMIT")
@@ -91,6 +93,8 @@ Config &Config::operator=(const Config &other)
 		//this->host_name = other.host_name;
 		this->type = other.type;
 		this->protocol = other.protocol;
+		this->max_header_size = other.max_header_size;
+		this->max_body_size = other.max_body_size;
 		this->client_limit = other.client_limit;
 		this->processing_time_limit = other.processing_time_limit;
 		this->incoming_queue_backlog = other.incoming_queue_backlog;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 18:13:20 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 16:36:48 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class Config {
 		int										domain;
 		int										type;
 		int										protocol;
+		size_t									max_header_size;
 		size_t									max_body_size;
 		int										client_limit;
 		int										processing_time_limit;

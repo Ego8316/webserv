@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 16:35:25 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 17:40:15 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,10 @@ Client &Client::operator=(const Client &other)
 		this->_leftover = other._leftover;
 		if (this->_request)
 			delete this->_request;
-		this->_request = other._request;
-		this->_response = other._response;
+		this->_request = new Request(*other._request);
+		if (this->_response)
+			delete this->_response;
+		this->_response = new Response(*other._response);
 	}
 	return (*this);
 }
@@ -111,31 +113,23 @@ void	Client::setState(RequestStage state)
 int		Client::handleEvent()
 {
 	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
-	while (utils::getTime() < this->_time_limit)
-	{
-		if (this->_state == TRY_ACCEPTING)
-			this->_tryAccepting();
-		if (this->_state == DONE)
-			return (0);
-		if (this->_state == ABORTING)
-			return (SERV_ERROR);
-		if (this->_state == HEADER_READING && this->_readHeader() == SERV_ERROR)
-			return (SERV_ERROR);
-		if (this->_state == PROCESSING_REQUEST)
-			this->_processRequest();
-		if (this->_state == CGI_RUNNING)
-			this->_monitorCGI();
-		if (this->_state == OUTPUT_SENDING && this->_sendOutput() == SERV_ERROR)
-			return (SERV_ERROR);
-	}
-	/*if (this->_request_str.length() == 0)
-	{
-		std::cerr << "Empty request. Ignoring..." << std::endl;
+	// while (utils::getTime() < this->_time_limit)
+	// {
+	if (this->_state == TRY_ACCEPTING)
+		this->_tryAccepting();
+	if (this->_state == DONE)
+		return (0);
+	if (this->_state == ABORTING)
 		return (SERV_ERROR);
-	}*/
-	//this->_state = DONE;
-	//if (_server->socketWrite(this->_response_str.c_str(), this->_response_str.length(), this) == SERV_ERROR)
-	//	return (SERV_ERROR);
+	if (this->_state == HEADER_READING && this->_readHeader() == SERV_ERROR)
+		return (SERV_ERROR);
+	if (this->_state == PROCESSING_REQUEST)
+		this->_processRequest();
+	if (this->_state == CGI_RUNNING)
+		this->_monitorCGI();
+	if (this->_state == OUTPUT_SENDING && this->_sendOutput() == SERV_ERROR)
+		return (SERV_ERROR);
+	// }
 	return (0); //TODO return err code
 }
 
@@ -160,8 +154,9 @@ int	Client::_tryAccepting()
 
 int	Client::_readHeader()
 {
-	std::vector<char>	buffer(_config->buffer_size);
+	std::vector<char>	buffer(this->_config->buffer_size);
 	std::string			&header_str = this->_request->getRawHeader();
+	size_t				pos;
 
 	if (!this->_leftover.empty())
 	{
@@ -171,14 +166,18 @@ int	Client::_readHeader()
 	ssize_t	bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
 	if (bytes_read == SERV_ERROR)
 		return (SERV_ERROR);
-	if (bytes_read == 0)
+	if (bytes_read == WBLOCK)
 		return (0);
+	if (bytes_read == 0)
+		return (this->_state = ABORTING, 0);
 	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
-	size_t	pos = header_str.find("\r\n\r\n");
-	if (pos == std::string::npos)
+	if (header_str.size() > this->_config->max_header_size)
+		return (this->_state = ABORTING, SERV_ERROR);
+	if ((pos = header_str.find("\r\n\r\n")) == std::string::npos)
 		return (0);
 	this->_leftover = header_str.substr(pos + 4);
 	header_str.erase(pos + 4);
+	std::cout << "DEBUG\n\n" << header_str << std::endl;
 	this->_request->parseHeader(*this->_config);
 	if (!_request->isChunked() && _request->getContentLength() == 0)
 	{
@@ -192,9 +191,12 @@ int	Client::_readHeader()
 int	Client::_readBody()
 {
 
-	std::vector<char>	buffer(_config->buffer_size);
+	std::vector<char>	buffer(this->_config->buffer_size);
 	std::string			&body_str = this->_request->getRawBody();
+	size_t				pos;
 
+	if (body_str.empty() && !this->_request->isChunked())
+		body_str.reserve(_request->getContentLength());
 	if (!this->_leftover.empty())
 	{
 		body_str.append(this->_leftover);
@@ -203,26 +205,36 @@ int	Client::_readBody()
 	ssize_t	bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
 	if (bytes_read == SERV_ERROR)
 		return (SERV_ERROR);
-	if (bytes_read == 0)
+	if (bytes_read == WBLOCK)
 		return (0);
-
+	if (bytes_read == 0)
+		return (this->_state = ABORTING, 0);
 	body_str.append(buffer.begin(), buffer.begin() + bytes_read);
 	if (body_str.size() >= this->_request->getContentLength())
 	{
 		_leftover = body_str.substr(this->_request->getContentLength());
 		body_str.erase(this->_request->getContentLength());
 		this->_state = PROCESSING_REQUEST;
+		return (0);
+	}
+	if (this->_request->isChunked() && (pos = body_str.find(NULL_CHUNK)) != std::string::npos)
+	{
+		_leftover = body_str.substr(pos);
+		body_str.erase(pos);
+		this->_state = PROCESSING_REQUEST;
+		return (0);
 	}
 	return (0);
 }
 
 void	Client::_processRequest()
 {
-	const Cookie		cookies = _request->getQueryCookies();
-	*_response = RequestHandler::handle(*_request, *_config, cookies);
+	const Cookie		cookies = this->_request->getQueryCookies();
+	*this->_response = RequestHandler::handle(*_request, *_config, cookies);
 	if (_response->isCGI())
-		_state = CGI_RUNNING;
-	_state = OUTPUT_SENDING;
+		this->_state = CGI_RUNNING;
+	else
+		this->_state = OUTPUT_SENDING;
 	return ;
 }
 
@@ -242,5 +254,9 @@ int		Client::_monitorCGI()
 int	Client::_sendOutput()
 {
 	this->_state = DONE;
+	delete this->_request;
+	delete this->_response;
+	this->_request = new Request();
+	this->_response = new Response();
 	return (0);
 }
