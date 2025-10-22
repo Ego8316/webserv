@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 20:43:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 18:09:38 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ std::string					methodToStr(Method method);
 Method						strToMethod(std::string method);
 std::string					httpStatusToStr(HttpStatus code);
 HttpStatus					strToHttpStatus(std::string status);
+std::string					stateToStr(RequestStage state);
 long						getTime();
 
 template <typename T>

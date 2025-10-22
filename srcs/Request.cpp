@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 16:34:57 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 20:09:18 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,10 +246,9 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 	std::string									methodStr;
 
 	if (src.getError())
-	{
-		os << "Parse error detected: " << src.getError() << std::endl;
-		return (os);
-	}
+		os << "BAD REQUEST" << std::endl;
+	else
+		os << "GOOD REQUEST" << std::endl;
 	methodStr = utils::methodToStr(method);
 	os << "Method:\t\t" << methodStr << std::endl
 		<< "Target:\t\t" << src.getRequestTarget() << std::endl
@@ -258,6 +257,5 @@ std::ostream	&operator<<(std::ostream &os, const Request &src)
 	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
 		os << "\t\t" << it->first << ": " << it->second << std::endl;
 	os << "Body:\n" << src.getRawBody() << std::endl;
-	os << "DONE" << std::endl;
 	return (os);
 }

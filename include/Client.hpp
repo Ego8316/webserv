@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 16:34:33 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 20:11:33 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,11 @@ class Client
 		void					setFd(int fd);
 		void					setClientId(int id);
 		void    				setState(RequestStage state);
+
+		void	printState() const;
+		void	printHeader() const;
+		void	printRequest() const;
+
 	private :
 		Config							*_config;
 		ServerCore						*_server;

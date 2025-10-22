@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 13:58:05 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 18:22:43 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,13 +83,13 @@ int	WebServ::UpdateQueue()
 		{
 			if (event->server == true)
 			{
-				std::cerr << "Server Error closed connection" << std::endl;
+				 std::cerr << RED << "[UpdateQueue] Server error: closing connection!" << RESET << std::endl;
 				// TODO do a clean exit, probably will see that at the end when we know what need to be closed/cleaned
 				return (SERV_ERROR);
 			}
 			else
 			{
-				std::cout << "removing client " << event->client_id << std::endl;
+				std::cout << RED << "[UpdateQueue] Removing client " << event->client_id << " due to error" << RESET << std::endl;
 				removeClient(event->client_id);
 			}
 		}
@@ -97,17 +97,18 @@ int	WebServ::UpdateQueue()
 		{
 			if (event->server == true)
 			{
+				std::cout << GREEN << "[UpdateQueue] New connection detected. Creating client..." << RESET << std::endl;
 				Client	*new_client = newClient();
 				if (new_client)
 					this->_processing_queue.push_back(new_client);
 				else
-					std::cerr << "Error while creating Client instance" << std::endl;
+					std::cerr << RED << "[UpdateQueue] Error creating Client instance" << RESET << std::endl;
 			}
 			else
 			{
 				if (this->_clients[event->client_id]->getState() == DONE)
 				{
-					std::cout << "Client " << event->client_id << " added to processing queue" << std::endl;
+					std::cout << MAGENTA << "[UpdateQueue] Client " << event->client_id << " added to processing queue" << RESET << std::endl;
 					this->_clients[event->client_id]->setState(HEADER_READING);
 					this->_processing_queue.push_back(this->_clients[event->client_id]);
 				}
@@ -129,7 +130,7 @@ int	WebServ::ProcessQueue()
 	if (next_client->getState() != DONE)
 		this->_processing_queue.push_back(next_client);
 	else
-		std::cout << RED << "Client " << next_client->getId() << " finished it's event" << RESET << std::endl;
+		std::cout << GREEN << "[ProcessQueue] Client " << next_client->getId() << " finished processing." << RESET << std::endl;
 	return (0);
 }
 
@@ -144,11 +145,12 @@ Client	*WebServ::newClient()
 	}
 	if (indx == this->_config->client_limit)
 	{
-		std::cerr << "Cannot accept new clients" << std::endl;
+		std::cerr << RED << "[newClient] Cannot accept new clients, limit reached!" << RESET << std::endl;
 		return (NULL);
 	}
 	this->_clients[indx] = new Client(this->_config, this->_core);
 	this->_clients[indx]->setClientId(indx);
+	std::cout << GREEN << "[newClient] Client " << indx << " created." << RESET << std::endl;
 	return (this->_clients[indx]);
 }
 
@@ -157,6 +159,7 @@ int	WebServ::removeClient(int indx)
 	this->_core->pollRemove(indx);
 	if (this->_clients[indx] != NULL)
 	{
+		 std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;
 		if (this->_clients[indx]->getState() != DONE)
 		{
 			std::deque<Client *>::iterator it = this->_processing_queue.begin();

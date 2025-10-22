@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 17:50:57 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 20:11:22 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,8 @@ int		Client::handleEvent()
 		return (SERV_ERROR);
 	if (this->_state == HEADER_READING && this->_readHeader() == SERV_ERROR)
 		return (SERV_ERROR);
+	if (this->_state == BODY_READING && this->_readBody() == SERV_ERROR)
+		return (SERV_ERROR);
 	if (this->_state == PROCESSING_REQUEST)
 		this->_processRequest();
 	if (this->_state == CGI_RUNNING)
@@ -153,7 +155,7 @@ int	Client::_tryAccepting()
 		this->_state = DONE;
 	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id);
 	std::cout << BLUE << "Accepted client " << this->_client_id << RESET << std::endl;
-	std::cout << BLUE << "State is now " << this->_state << RESET << std::endl;
+	this->printState();
 	return (0);
 }
 
@@ -165,6 +167,7 @@ int	Client::_readHeader()
 
 	if (!this->_leftover.empty())
 	{
+		std::cout << YELLOW << "[_readHeader] Applying leftover (" << _leftover.size() << " bytes)" << RESET << std::endl;
 		header_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
@@ -174,22 +177,32 @@ int	Client::_readHeader()
 	if (bytes_read == WBLOCK)
 		return (0);
 	if (bytes_read == 0)
+	{
+		std::cout << CYAN << "[_readHeader] Client closed the connection" << RESET << std::endl;
 		return (this->_state = ABORTING, 0);
+	}
+	std::cout << GREEN << "[_readHeader] Read " << bytes_read << " bytes" << RESET << std::endl;
 	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
 	if (header_str.size() > this->_config->max_header_size)
 		return (this->_state = ABORTING, SERV_ERROR);
 	if ((pos = header_str.find("\r\n\r\n")) == std::string::npos)
+	{
+		std::cout << CYAN << "[_readHeader] Incomplete header — waiting for more" << RESET << std::endl;
 		return (0);
+	}
 	this->_leftover = header_str.substr(pos + 4);
 	header_str.erase(pos + 4);
-	std::cout << "DEBUG\n\n" << header_str << std::endl;
+	std::cout << CYAN << "[_readHeader] Header fully received (" << header_str.size() << " bytes)" << RESET << std::endl;
+	this->printHeader();
 	this->_request->parseHeader(*this->_config);
 	if (!_request->isChunked() && _request->getContentLength() == 0)
 	{
 		this->_state = PROCESSING_REQUEST;
+		printState();
 		return (0);
 	}
 	this->_state = BODY_READING;
+	printState();
 	return (0);
 }
 
@@ -204,6 +217,7 @@ int	Client::_readBody()
 		body_str.reserve(_request->getContentLength());
 	if (!this->_leftover.empty())
 	{
+		std::cout << YELLOW << "[_readBody] Applying leftover (" << _leftover.size() << " bytes)" << RESET << std::endl;
 		body_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
@@ -213,22 +227,31 @@ int	Client::_readBody()
 	if (bytes_read == WBLOCK)
 		return (0);
 	if (bytes_read == 0)
+	{
+		std::cout << CYAN << "[_readHeader] Client closed the connection" << RESET << std::endl;
 		return (this->_state = ABORTING, 0);
+	}
 	body_str.append(buffer.begin(), buffer.begin() + bytes_read);
+	std::cout << GREEN << "[_readBody] Read " << bytes_read << " bytes (total: " << body_str.size() << ")" << RESET << std::endl;
 	if (body_str.size() >= this->_request->getContentLength())
 	{
 		_leftover = body_str.substr(this->_request->getContentLength());
 		body_str.erase(this->_request->getContentLength());
+		std::cout << CYAN << "[_readBody] Body complete (" << body_str.size() << " bytes)" << RESET << std::endl;
 		this->_state = PROCESSING_REQUEST;
+		printState();
 		return (0);
 	}
 	if (this->_request->isChunked() && (pos = body_str.find(NULL_CHUNK)) != std::string::npos)
 	{
 		_leftover = body_str.substr(pos);
 		body_str.erase(pos);
+		std::cout << CYAN << "[_readBody] Chunked body complete" << RESET << std::endl;
 		this->_state = PROCESSING_REQUEST;
+		printState();
 		return (0);
 	}
+	std::cout << CYAN << "[_readBody] Partial body received — waiting for more" << RESET << std::endl;
 	return (0);
 }
 
@@ -236,10 +259,19 @@ void	Client::_processRequest()
 {
 	const Cookie		cookies = this->_request->getQueryCookies();
 	*this->_response = RequestHandler::handle(*_request, *_config, cookies);
+	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
+		<< BLUE << " Processing request" << RESET << std::endl;
+	this->printRequest();
 	if (_response->isCGI())
+	{
 		this->_state = CGI_RUNNING;
+		printState();
+	}
 	else
+	{
 		this->_state = OUTPUT_SENDING;
+		printState();
+	}
 	return ;
 }
 
@@ -259,9 +291,35 @@ int		Client::_monitorCGI()
 int	Client::_sendOutput()
 {
 	this->_state = DONE;
+	printState();
 	delete this->_request;
 	delete this->_response;
 	this->_request = new Request();
 	this->_response = new Response();
 	return (0);
+}
+
+void	Client::printState() const
+{
+	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
+		<< BLUE << " State is now " << utils::stateToStr(this->_state) << RESET << std::endl;
+	return ;
+}
+
+void	Client::printHeader() const
+{
+	std::cout << BOLD_GRAY << "[Client " << this->_client_id << "]" << RESET
+		<< GRAY << "\n\t[HEADER START]\n"
+		<< this->_request->getRawHeader()
+		<< "\t[HEADER END]" << RESET << std::endl;
+	return ;
+}
+
+void	Client::printRequest() const
+{
+	std::cout << BOLD_GRAY << "[Client " << this->_client_id << "]" << RESET
+		<< "]\n\t[REQUEST START]\n"
+		<< *this->_request
+		<< "\t[REQUEST END]" << RESET << std::endl;
+	return ;
 }

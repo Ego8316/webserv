@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Utils.cpp                                          :+:      :+:    :+:   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 20:45:52 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 18:11:02 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,6 +269,22 @@ HttpStatus	utils::strToHttpStatus(std::string status)
 	if (utils::startsWith(status, "505"))
 		return (HTTP_VERSION_NOT_SUPPORTED);
 	return (HTTP_UNKNOWN_STATUS);
+}
+
+std::string	utils::stateToStr(RequestStage state)
+{
+	switch (state)
+	{
+		case TRY_ACCEPTING:			return "TRY_ACCEPTING";
+		case HEADER_READING:		return "HEADER_READING";
+		case BODY_READING:			return "BODY_READING";
+		case PROCESSING_REQUEST:	return "PROCESSING_REQUEST";
+		case CGI_RUNNING:			return "CGI_RUNNING";
+		case OUTPUT_SENDING:		return "OUTPUT_SENDING";
+		case ABORTING:				return "ABORTING";
+		case DONE:					return "DONE";
+		default:					return "UNKNOWN_STATE";
+	}
 }
 
 long		utils::getTime()
