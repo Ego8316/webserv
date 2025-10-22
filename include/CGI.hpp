@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/21 01:12:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 12:12:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,12 @@
 #include "Request.hpp"
 #include "Cookie.hpp"
 #include "utils.hpp"
+#include "Response.hpp"
 
 class	Cookie;
 class	Client;
 class	Request;
+class	Response;
 
 class CGI
 {
@@ -34,34 +36,40 @@ class CGI
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-		void		Run(Client &client, Request &request, Config &config, Cookie *cookies);
+		void		Run(Client &client, Request &request, Config &config, Response &response);
 		
-		void		Communicate(Client &client, Request &request, Config &config);
-		void		writeToCGI(Request &request, Config &config);
-		void		readFromCGI(Config &config);
-		std::string	&getOutput();
+		void		Nanny(Client &client, Request &request, Config &config, Response &response);
+		ssize_t		writeToCGI(Request &request, Config &config);
+		ssize_t		readFromCGI(Config &config);
 		
 		void		parseHeader();
-		void		genFullOutput();
+		void		genFullOutput(Response &response);
 
 		void		Execute(Request &request);
 		
-		void		RestoreFds(int *original_standard_fds);
-		void		GenEnvVar(Request &request, Cookie *cookies);
+		std::string	&getOutput();
+		HttpStatus	getStatus();
+		bool		isComplete();
+		
+		bool		checkOutputTermination(int bytes_read);
+		void		GenEnvVar(Request &request);
+		void		deleteEnvVar();
 	private :
+		bool		_is_init;
+		bool		_is_complete;
 		HttpStatus	_status;
 		std::string	_output;
 		std::string	_header;
-		int			_header_len;
-		int			_content_len;
+		size_t		_header_len;
+		size_t		_content_len;
 		int			_pid;
 		int			_process_status[2];
 		int			_pipe_to_CGI[2];
 		int			_pipe_from_CGI[2];
 		ssize_t		_total_bytes_sent;
-		size_t		_bytes_to_send;
+		ssize_t		_bytes_to_send;
 		ssize_t		_total_bytes_read;
-		size_t		_total_bytes_to_read;
+		ssize_t		_total_bytes_to_read;
 		bool		_chunked;
 		char		**_args;
 		char		**_env;

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 20:44:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 11:22:04 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,8 +165,7 @@ enum	RequestStage //should be set to DONE whenever not in the queue
 	HEADER_READING,
 	BODY_READING,
 	PROCESSING_REQUEST,
-	CGI_INIT,
-	CGI_WAITING,
+	CGI_RUNNING,
 	OUTPUT_SENDING,
 	ABORTING,
 	DONE

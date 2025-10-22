@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 19:44:50 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 13:58:05 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int	WebServ::UpdateQueue()
 				if (this->_clients[event->client_id]->getState() == DONE)
 				{
 					std::cout << "Client " << event->client_id << " added to processing queue" << std::endl;
-					this->_clients[event->client_id]->setState(TRY_ACCEPTING);
+					this->_clients[event->client_id]->setState(HEADER_READING);
 					this->_processing_queue.push_back(this->_clients[event->client_id]);
 				}
 			}
@@ -128,6 +128,8 @@ int	WebServ::ProcessQueue()
 	next_client->handleEvent();
 	if (next_client->getState() != DONE)
 		this->_processing_queue.push_back(next_client);
+	else
+		std::cout << RED << "Client " << next_client->getId() << " finished it's event" << RESET << std::endl;
 	return (0);
 }
 

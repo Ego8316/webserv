@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/21 15:56:32 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 12:00:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "headers.hpp"
 #include "utils.hpp"
+#include "CGI.hpp"
 
 class	CGI;
 
@@ -32,6 +33,7 @@ class	Response
 		std::string							_body;
 		std::map<std::string, std::string>	_headers;
 		CGI									*_cgi;
+		bool								_is_cgi;
 		
 	public:
 		Response(void);
@@ -51,6 +53,9 @@ class	Response
 
 		const std::string	&getHeader(void) const;
 		const std::string	&getBody(void) const;
+		CGI					*getCGI();
+		void				setCGI(CGI *cgi);
+		bool				isCGI();
 		std::string			toString(void) const;
 
 		static std::string	getDefaultErrorPage(HttpStatus code);

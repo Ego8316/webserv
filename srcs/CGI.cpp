@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/21 01:01:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 13:36:41 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ CGI::CGI()
 	this->_process_status[0] = 0;
 	this->_process_status[1] = 0;
 	this->_header_len = 0;
+	this->_is_complete = false;
 }
 
 CGI::CGI(const CGI &other)
@@ -54,8 +55,10 @@ CGI &CGI::operator=(const CGI &other)
 CGI::~CGI() {}
 
 
-void		CGI::Run(Client &client, Request &request, Config &config, Cookie *cookies)
+void		CGI::Run(Client &client, Request &request, Config &config, Response &response)
 {
+	if (this->_is_init)
+		return (this->Nanny(client, request, config, response));
 	if (pipe(this->_pipe_to_CGI) == -1)
 	{
 		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
@@ -69,38 +72,42 @@ void		CGI::Run(Client &client, Request &request, Config &config, Cookie *cookies
 	this->_pid = fork();
 	if (this->_pid == 0)
 	{
-		GenEnvVar(request, cookies);
+		GenEnvVar(request);
 		this->Execute(request);
 	}
 	else
 	{
-		this->Communicate(client, request, config);
+		this->Nanny(client, request, config, response);
 	}
-	//waitpid();
+	this->_is_init = true;
 }
 
-void	CGI::Communicate(Client &client, Request &request, Config &config)
+void	CGI::Nanny(Client &client, Request &request, Config &config, Response &response)
 {
-	int					original_standard_fds[2];
-
+	ssize_t				bytes_read = 1;
+	ssize_t				bytes_sent = 1;
+	
 	close(this->_pipe_to_CGI[PIPE_READ_END]);
 	close(this->_pipe_from_CGI[PIPE_WRITE_END]);
 	if (this->_bytes_to_send == 0)
 		this->_bytes_to_send = request.getRawBody().size();
 	while (utils::getTime() < client.getTimeLimit())
 	{
-		if (this->_total_bytes_sent < this->_bytes_to_send)
-			this->writeToCGI(request, config);
-		if (!this->_header_len || this->_total_bytes_read < this->_total_bytes_to_read)
-			readFromCGI(config);
+		if (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0)
+			bytes_sent = this->writeToCGI(request, config);
+		if (!checkOutputTermination(bytes_read))
+			bytes_read = this->readFromCGI(config);
 		else if (this->_process_status[0] == 0)
 			this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
-		if (this->_process_status[0] != 0)
-			genFullOutput();
+		if (this->_process_status[0] != 0) // only set process status if done reading so we are sure the program is both finished and we are done reading
+		{
+			genFullOutput(response);
+			this->_is_complete = true;
+		}
 	}
 }
 
-void	CGI::writeToCGI(Request &request, Config &config)
+ssize_t		CGI::writeToCGI(Request &request, Config &config)
 {
 	ssize_t				bytes_sent = 0;
 	const std::string	&request_str = request.getRawBody();
@@ -108,31 +115,21 @@ void	CGI::writeToCGI(Request &request, Config &config)
 
 	bytes_sent = send(this->_pipe_to_CGI[PIPE_WRITE_END],
 			request_str.c_str() + this->_total_bytes_sent, config.buffer_size, MSG_DONTWAIT);
-	if (bytes_sent == -1)
-	{
-		std::cerr << "Failed to send body to CGI" << std::endl;
-		_status = HTTP_INTERNAL_SERVER_ERROR;
-		return ;
-	}
 	this->_total_bytes_sent += bytes_sent;
+	return (bytes_sent);
 }
 
-void	CGI::readFromCGI(Config &config)
+ssize_t		CGI::readFromCGI(Config &config)
 {
 	ssize_t				bytes_read = 0;
 	std::vector<char>	buffer(config.buffer_size);
 
 	bytes_read = recv(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0] , buffer.size(), MSG_DONTWAIT);
-	if (bytes_read == -1)
-	{
-		std::cerr << "Failed to send body to CGI" << std::endl;
-		_status = HTTP_INTERNAL_SERVER_ERROR;
-		return ;
-	}
 	this->_output += std::string(buffer.begin(), buffer.end() + bytes_read);
 	this->_total_bytes_read += bytes_read;
 	if (!this->_header_len)
 		this->parseHeader();
+	return (bytes_read);
 }
 
 void	CGI::parseHeader()
@@ -150,12 +147,15 @@ void	CGI::parseHeader()
 		this->_header_len = this->_output.find("\r\n\r\n") + 4;
 }
 
-void	CGI::genFullOutput()
+void	CGI::genFullOutput(Response &response)
 {
 	if (!WIFEXITED(this->_process_status[1]))
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 	else if (utils::startsWith(this->_output, "HTTP/"))
+	{
+		deleteEnvVar();
 		return ;
+	}
 	else if (utils::caseInsensitiveFind(this->_output, "status: ") != this->_output.end())
 	{
 		this->_status = utils::strToHttpStatus(&*utils::caseInsensitiveFind(this->_output, "status: ")
@@ -166,12 +166,18 @@ void	CGI::genFullOutput()
 	}
 	else
 		this->_status = HTTP_OK;
-	this->_header = "HTTP/1.0 " + utils::toString(this->_status)
-		+ " " + utils::httpStatusToStr(this->_status) + "\r\n";
-	this->_header += "Server: Webserv/1.0 (Unix)\r\n";
+	response.setStatus(this->_status);
+	//this->_header = "HTTP/1.0 " + utils::toString(this->_status)
+	//	+ " " + utils::httpStatusToStr(this->_status) + "\r\n";
+	//this->_header += "Server: Webserv/1.0 (Unix)\r\n";
 	if (!this->_content_len && !this->_chunked)
-		this->_header += "Content-Length: " + utils::toString(this->_output.length() - this->_header_len) + "\r\n";
+		//this->_header += "Content-Length: " + utils::toString(this->_output.length() - this->_header_len) + "\r\n";
+		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n"));
 	this->_output = this->_header + this->_output;
+	response.buildHeader();
+	std::cout << "HEADER ====== \n" << response.getHeader() << std::endl;
+	std::cout << "END HEADER ====== \n" << std::endl;
+	deleteEnvVar();
 	return ;
 }
 
@@ -180,10 +186,18 @@ std::string	&CGI::getOutput()
 	return (this->_output);
 }
 
+HttpStatus	CGI::getStatus()
+{
+	return (this->_status);
+}
+
+bool		CGI::isComplete()
+{
+	return (this->_is_complete);
+}
+
 void		CGI::Execute(Request &request)
 {
-	int		original_standard_fds[2];
-
 	close(this->_pipe_to_CGI[PIPE_WRITE_END]);
 	close(this->_pipe_from_CGI[PIPE_READ_END]);
 	if (dup2(this->_pipe_to_CGI[PIPE_READ_END], STDIN_FILENO) == -1
@@ -191,35 +205,27 @@ void		CGI::Execute(Request &request)
 	{
 		std::cerr << "dup2 initialisation failed" << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+		exit(1);
 	}
 	if (execve(request.getRequestTarget().c_str(), this->_args, this->_env) == -1)
 	{
 		std::cerr << "CGI execution failed" << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+		exit(1);
 	}
 }
 
-void		CGI::RestoreFds(int *original_standard_fds)
-{
-	if (dup2(original_standard_fds[STDOUT_FILENO], STDOUT_FILENO) == -1
-		|| dup2(original_standard_fds[STDIN_FILENO], STDIN_FILENO) == -1)
-		this->_status = HTTP_INTERNAL_SERVER_ERROR;
-}
-
-void		CGI::GenEnvVar(Request &request, Cookie *cookies)
+void		CGI::GenEnvVar(Request &request)
 {
 	std::vector<std::string>	env;
 	std::string					varvalue;
-	char						**ret;
+	Cookie						cookies = request.getQueryCookies();
 	
 	env.push_back("METHOD=" + utils::methodToStr(request.getMethod()));
 	env.push_back("QUERY_STRING=" + request.getQueryString());
-	if (cookies != NULL)
-	{
-		std::map<std::string, std::string>	attr = cookies->getAllAttributes();
-		for (std::map<std::string, std::string>::iterator it = attr.begin(); it != attr.end(); ++it)
-			env.push_back("HTTP_COOKIE_" + it->first + "=" + it->second);
-	}
+	std::map<std::string, std::string>	attr = cookies.getAllAttributes();
+	for (std::map<std::string, std::string>::iterator it = attr.begin(); it != attr.end(); ++it)
+		env.push_back("HTTP_COOKIE_" + it->first + "=" + it->second);
 	this->_env = new char *[env.size() + 1];
 	for (unsigned int i = 0; i < env.size(); ++i)
 	{
@@ -237,4 +243,26 @@ void		CGI::GenEnvVar(Request &request, Cookie *cookies)
 	this->_args[0] = &request.getRequestTarget()[0];
 	this->_args[1] = NULL;
 	return ;
+}
+
+void	CGI::deleteEnvVar()
+{
+	int i = 0;
+
+	while (this->_args[i])
+		delete this->_args[i];
+	delete[] this->_args;
+	while (this->_env[i])
+		delete this->_env[i];
+	delete[] this->_env;
+}
+
+bool	CGI::checkOutputTermination(int bytes_read)
+{
+	if (this->_chunked)
+		return (utils::endsWith(this->_output, NULL_CHUNK));
+	else if (this->_content_len && this->_header_len)
+		return (this->_output.size() >= this->_header_len + this->_content_len);
+	else
+		return (bytes_read == 0);
 }

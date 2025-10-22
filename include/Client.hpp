@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/21 15:53:41 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 12:05:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,10 +57,11 @@ class Client
 		std::string						_response_str;
 		long							_time_limit;
 		Request							*_request;
-		Response						_response;
+		Response						*_response;
 		
 		int					_tryAccepting();
 		int					_readInput();
 		void				_processRequest();
 		int					_sendOutput();
+		int					_monitorCGI();
 };

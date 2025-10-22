@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/20 22:51:02 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 14:01:08 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,12 +105,8 @@ int	ServerCore::socketRead(char *buffer, int bytes_read, Client *client)
 	if (!pollAvailFor(client->getId(), POLLIN))
 		return (WBLOCK);
 	int	bytes_received = recv(client->getFd(), buffer, bytes_read, MSG_DONTWAIT);
-	if (bytes_received == SERV_ERROR)
-	{
-		std::cerr << RED << "Receive failed: " << strerror(errno) << RESET << std::endl;
-		return (SERV_ERROR);
-	}
-	std::memset(buffer + bytes_received, 0, this->_config->buffer_size - bytes_received);
+	if (bytes_received >= 0)
+		std::memset(buffer + bytes_received, 0, this->_config->buffer_size - bytes_received);
 	return (bytes_received);
 }
 
@@ -119,11 +115,6 @@ int	ServerCore::socketWrite(const char *buffer, int bytes_write, Client *client)
 	if (!pollAvailFor(client->getId(), POLLOUT))
 		return (WBLOCK);
 	int	bytes_sent = send(client->getFd(), buffer, bytes_write, MSG_DONTWAIT);
-	if (bytes_sent == SERV_ERROR)
-	{
-		std::cerr << RED << "Send failed: " << strerror(errno) << RESET << std::endl;
-		return (SERV_ERROR);
-	}
 	return (bytes_sent);
 }
 

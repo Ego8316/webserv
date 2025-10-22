@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/21 00:49:08 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 11:57:29 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ Response	RequestHandler::handle(const Request &request, const Config &config, co
 	if (resource.getStatus() & ACCEPT_ERROR)
 		return (_handleError(HTTP_BAD_REQUEST, config));
 	if (resource.isCGI())
-		return (_handleCGI(request, config, resource, cookies));
+		return (_handleCGI());
 	switch (request.getMethod())
 	{
 		case GET:		return _handleGet(request, config, resource);
@@ -147,14 +147,13 @@ Response	RequestHandler::_handleDelete(const Request &request, const Config &con
 	return (response);
 }
 
-Response	RequestHandler::_handleCGI(const Request &request, const Config &config, const Resource &resource, const Cookie &cookies)
+Response	RequestHandler::_handleCGI()
 {
 	Response	response;
 
-	(void)request;
-	(void)config;
-	(void)resource;
-	(void)cookies;
+	//TODO check for errors on Ressource
+	if (response.getCGI() == NULL)
+		response.setCGI(new CGI);
 	return (response);
 }
 

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/21 01:22:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 13:02:34 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,11 @@ Response	&Response::operator=(const Response &other)
  */
 Response::~Response(void)
 {
+	if (this->_cgi != NULL)
+	{
+		delete this->_cgi;
+		this->_cgi = NULL;
+	}
 	return ;
 }
 
@@ -135,7 +140,8 @@ void	Response::buildHeader(void)
 		+ " " + utils::httpStatusToStr(_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
 		_header += it->first + ": " + it->second + "\r\n";
-	_header += "\r\n";
+	if (!this->_is_cgi)
+		_header += "\r\n";
 	return ;
 }
 
@@ -157,6 +163,22 @@ const std::string	&Response::getBody(void) const
 	return (_body);
 }
 
+CGI			*Response::getCGI()
+{
+	return (this->_cgi);
+}
+
+void		Response::setCGI(CGI *cgi)
+{
+	this->_cgi = cgi;
+	this->_is_cgi = true;
+}
+
+bool		Response::isCGI()
+{
+	return (this->_is_cgi);
+}
+		
 /**
  * @brief Returns the full HTTP response (header + body) as a string.
  * @return Full HTTP response string.
