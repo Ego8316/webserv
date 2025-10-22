@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 14:19:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 16:35:25 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ Client::Client(Config *config, ServerCore *server)
 {
 	this->_client_len = sizeof(this->_client_addr);
 	this->_state = TRY_ACCEPTING;
+	this->_leftover = "";
 	this->_request = new Request();
 	this->_response = new Response();
 }
@@ -38,6 +39,7 @@ Client &Client::operator=(const Client &other)
 		this->_client_len = other._client_len;
 		this->_config = other._config;
 		this->_state = other._state;
+		this->_leftover = other._leftover;
 		if (this->_request)
 			delete this->_request;
 		this->_request = other._request;
@@ -111,19 +113,19 @@ int		Client::handleEvent()
 	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
 	while (utils::getTime() < this->_time_limit)
 	{
-		if (_state == TRY_ACCEPTING)
-			_tryAccepting();
-		if (_state == DONE)
+		if (this->_state == TRY_ACCEPTING)
+			this->_tryAccepting();
+		if (this->_state == DONE)
 			return (0);
-		if (_state == ABORTING)
+		if (this->_state == ABORTING)
 			return (SERV_ERROR);
-		if (_state == HEADER_READING && _readInput() == SERV_ERROR)
+		if (this->_state == HEADER_READING && this->_readHeader() == SERV_ERROR)
 			return (SERV_ERROR);
-		if (_state == PROCESSING_REQUEST)
-			_processRequest();
-		if (_state == CGI_RUNNING)
-			_monitorCGI();
-		if (_state == OUTPUT_SENDING && _sendOutput() == SERV_ERROR)
+		if (this->_state == PROCESSING_REQUEST)
+			this->_processRequest();
+		if (this->_state == CGI_RUNNING)
+			this->_monitorCGI();
+		if (this->_state == OUTPUT_SENDING && this->_sendOutput() == SERV_ERROR)
 			return (SERV_ERROR);
 	}
 	/*if (this->_request_str.length() == 0)
@@ -156,57 +158,34 @@ int	Client::_tryAccepting()
 	return (0);
 }
 
-int	Client::_readInput()
-{
-	ssize_t		bytes_read = _config->buffer_size;
-	std::vector<char>	buffer(_config->buffer_size);
-	
-	std::cout <<  "Reading input" << std::endl;
-	//while (bytes_read && this->_request_str.size() < this->_config->max_body_size)
-	//{
-	bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
-	if (bytes_read == SERV_ERROR)
-		return (SERV_ERROR);
-	else if (bytes_read == 0)
-		this->_state = PROCESSING_REQUEST;
-	else
-		std::cout << RED << "Read " << bytes_read << " bytes" << std::endl;
-	this->_request_str += std::string(buffer.begin(), buffer.end()).substr(0, bytes_read);
-	//}
-	std::cout << "State = " << _state << std::endl;
-	return (0);
-}
-
 int	Client::_readHeader()
 {
 	std::vector<char>	buffer(_config->buffer_size);
 	std::string			&header_str = this->_request->getRawHeader();
-	std::string			&body_str = this->_request->getRawBody();
 
+	if (!this->_leftover.empty())
+	{
+		header_str.append(this->_leftover);
+		this->_leftover.clear();
+	}
 	ssize_t	bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
 	if (bytes_read == SERV_ERROR)
 		return (SERV_ERROR);
 	if (bytes_read == 0)
 		return (0);
-
 	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
 	size_t	pos = header_str.find("\r\n\r\n");
 	if (pos == std::string::npos)
 		return (0);
-	this->_state = BODY_READING;
-	body_str = header_str.substr(pos + 4);
-	header_str.erase(pos);
-	body_str.append(buffer.begin() + pos + 4, buffer.begin() + bytes_read);
-	this->_request->getRawBodySize() = body_str.size();
-	// TODO si parseHeader ne fonctionne pas, directement envoyer Bad Request avec handleError? sinon juste go with the flow ~~~
-	if (this->_request->parseHeader(*this->_config) == SERV_ERROR || (!_request->isChunked() && _request->getContentLength() == 0))
+	this->_leftover = header_str.substr(pos + 4);
+	header_str.erase(pos + 4);
+	this->_request->parseHeader(*this->_config);
+	if (!_request->isChunked() && _request->getContentLength() == 0)
 	{
-		header_str.clear();
-		_state = PROCESSING_REQUEST;
+		this->_state = PROCESSING_REQUEST;
 		return (0);
 	}
-	header_str.clear();
-	_state = BODY_READING;
+	this->_state = BODY_READING;
 	return (0);
 }
 
@@ -216,6 +195,11 @@ int	Client::_readBody()
 	std::vector<char>	buffer(_config->buffer_size);
 	std::string			&body_str = this->_request->getRawBody();
 
+	if (!this->_leftover.empty())
+	{
+		body_str.append(this->_leftover);
+		this->_leftover.clear();
+	}
 	ssize_t	bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
 	if (bytes_read == SERV_ERROR)
 		return (SERV_ERROR);
@@ -223,6 +207,12 @@ int	Client::_readBody()
 		return (0);
 
 	body_str.append(buffer.begin(), buffer.begin() + bytes_read);
+	if (body_str.size() >= this->_request->getContentLength())
+	{
+		_leftover = body_str.substr(this->_request->getContentLength());
+		body_str.erase(this->_request->getContentLength());
+		this->_state = PROCESSING_REQUEST;
+	}
 	return (0);
 }
 

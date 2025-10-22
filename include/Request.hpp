@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 14:02:49 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 16:35:03 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ class	Request
 		std::string							&getRawHeader();
 		std::string							&getRawBody();
 		const std::string					&getRawBody() const;
-		size_t								&getRawBodySize();
 		Method								getMethod() const;
 		std::string							getRequestTarget() const;
 		std::string							getVersion() const;
@@ -53,7 +52,6 @@ class	Request
 	private:
 		std::string							_raw_header;
 		std::string							_raw_body;
-		size_t								_raw_body_size;
 		Method								_method;
 		std::string							_request_target;
 		std::string							_query_string;

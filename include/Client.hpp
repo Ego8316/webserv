@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 14:20:41 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 16:34:33 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,14 +53,12 @@ class Client
 		socklen_t						_client_len;
 		int								_client_id;
 		RequestStage					_state;
-		std::string						_request_str;
-		std::string						_response_str;
+		std::string						_leftover;
 		long							_time_limit;
 		Request							*_request;
 		Response						*_response;
 		
 		int					_tryAccepting();
-		int					_readInput();
 		int					_readHeader();
 		int					_readBody();
 		void				_processRequest();

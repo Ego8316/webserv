@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 11:57:29 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 15:32:34 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,11 @@ Response	RequestHandler::handle(const Request &request, const Config &config, co
 {
 	(void)cookies;
 	if (request.getError())
-		return _handleError(HTTP_BAD_REQUEST, config);
+	{
+		// if (request.getContentLength() > config.max_body_size)
+			// return (_handleError(HTTP_CONTENT_TOO_LARGE, config));
+		return (_handleError(HTTP_BAD_REQUEST, config));
+	}
 	if (request.getMethod() == UNKNOWN)
 		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
 	// TODO : BIEN PENSER A CHANGER AVANT DE RENDRE
