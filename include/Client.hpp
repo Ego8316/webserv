@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/21 15:53:41 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/21 16:58:46 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ class Client
 		
 		int					_tryAccepting();
 		int					_readInput();
+		int					_readHeader();
+		int					_readBody();
 		void				_processRequest();
 		int					_sendOutput();
 };

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/21 01:03:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/22 14:09:03 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,6 +156,55 @@ int	Client::_readInput()
 			return (SERV_ERROR);
 		this->_request_str += std::string(buffer.begin(), buffer.end()).substr(0, bytes_read);
 	}
+	return (0);
+}
+
+int	Client::_readHeader()
+{
+	std::vector<char>	buffer(_config->buffer_size);
+	std::string			&header_str = this->_request->getRawHeader();
+	std::string			&body_str = this->_request->getRawBody();
+
+	ssize_t	bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
+	if (bytes_read == SERV_ERROR)
+		return (SERV_ERROR);
+	if (bytes_read == 0)
+		return (0);
+
+	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
+	size_t	pos = header_str.find("\r\n\r\n");
+	if (pos == std::string::npos)
+		return (0);
+	this->_state = BODY_READING;
+	body_str = header_str.substr(pos + 4);
+	header_str.erase(pos);
+	body_str.append(buffer.begin() + pos + 4, buffer.begin() + bytes_read);
+	this->_request->getRawBodySize() = body_str.size();
+	// TODO si parseHeader ne fonctionne pas, directement envoyer Bad Request avec handleError? sinon juste go with the flow ~~~
+	if (this->_request->parseHeader(*this->_config) == SERV_ERROR || (!_request->isChunked() && _request->getContentLength() == 0))
+	{
+		header_str.clear();
+		_state = PROCESSING_REQUEST;
+		return (0);
+	}
+	header_str.clear();
+	_state = BODY_READING;
+	return (0);
+}
+
+int	Client::_readBody()
+{
+
+	std::vector<char>	buffer(_config->buffer_size);
+	std::string			&body_str = this->_request->getRawBody();
+
+	ssize_t	bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
+	if (bytes_read == SERV_ERROR)
+		return (SERV_ERROR);
+	if (bytes_read == 0)
+		return (0);
+
+	body_str.append(buffer.begin(), buffer.begin() + bytes_read);
 	return (0);
 }
 
