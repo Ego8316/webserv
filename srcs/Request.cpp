@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/21 15:44:44 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 14:05:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ Request::Request()
 {
 	this->_raw_header = "";
 	this->_raw_body = "";
+	this->_raw_body_size = 0;
 	this->_method = UNKNOWN;
 	this->_request_target = "";
 	this->_query_string = "";
@@ -41,6 +42,7 @@ Request &Request::operator=(const Request &other)
 	{
 		this->_raw_header = other._raw_header;
 		this->_raw_body = other._raw_body;
+		this->_raw_body_size = other._raw_body_size;
 		this->_method = other._method;
 		this->_request_target = other._request_target;
 		this->_query_string = other._query_string;
@@ -106,6 +108,11 @@ const std::string &Request::getRawBody() const
 	return (_raw_body);
 }
 
+size_t	&Request::getRawBodySize()
+{
+	return (_raw_body_size);
+}
+
 Method	Request::getMethod() const
 {
 	return (_method);
@@ -161,6 +168,11 @@ std::string	Request::getQueryString() const
 void	Request::setMethod(Method method)
 {
 	this->_method = method;
+}
+
+void	Request::setError(bool error)
+{
+	this->_error = error;
 }
 
 bool	Request::headerHasField(const std::string field)
