@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 16:42:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 00:30:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 CGI::CGI()
 {
+	this->_cgi_script = "";
 	this->_is_init = false;
 	this->_is_complete = false;
 	this->_status = HTTP_OK;
@@ -92,10 +93,19 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 	if (this->_pid == 0)
 	{
 		GenEnvVar(request);
-		this->Execute(request);
+		if (chdir(config.server_home.c_str()) == -1)
+			exit (0);
+		std::cout << "Moved to " << config.server_home << std::endl;
+		this->_cgi_script = config.server_home + request.getRequestTarget();
+		this->Execute();
 	}
 	else
 	{
+		std::cout << "PID = " << this->_pid << std::endl;
+		close(this->_pipe_to_CGI[PIPE_READ_END]);
+		close(this->_pipe_from_CGI[PIPE_WRITE_END]);
+		ServerCore::setNonBlocking(this->_pipe_to_CGI[PIPE_WRITE_END]);
+		ServerCore::setNonBlocking(this->_pipe_from_CGI[PIPE_READ_END]);
 		this->Nanny(client, request, config, response);
 	}
 	this->_is_init = true;
@@ -106,12 +116,14 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 	ssize_t				bytes_read = 1;
 	ssize_t				bytes_sent = 1;
 	
-	close(this->_pipe_to_CGI[PIPE_READ_END]);
-	close(this->_pipe_from_CGI[PIPE_WRITE_END]);
 	if (this->_bytes_to_send == 0)
 		this->_bytes_to_send = request.getRawBody().size();
+	std::cout << "bytes to send = " << this->_bytes_to_send << std::endl;
+	std::cout << "body = >" << request.getRawBody() << "<" << std::endl;
+	
 	while (utils::getTime() < client.getTimeLimit())
 	{
+		//std::cout << "total_bytes_sent = " << _total_bytes_sent << " _bytes_to_send = " << _bytes_to_send << " _total_bytes_read = " << _total_bytes_read << " _bytes to read = " << _total_bytes_to_read << std::endl;
 		if (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0)
 			bytes_sent = this->writeToCGI(request, config);
 		if (!checkOutputTermination(bytes_read))
@@ -132,9 +144,11 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 	const std::string	&request_str = request.getRawBody();
 	std::vector<char>	buffer(config.buffer_size);
 
-	bytes_sent = send(this->_pipe_to_CGI[PIPE_WRITE_END],
-			request_str.c_str() + this->_total_bytes_sent, config.buffer_size, MSG_DONTWAIT);
-	this->_total_bytes_sent += bytes_sent;
+	int bts = std::min(config.buffer_size, static_cast<const int>(this->_bytes_to_send - this->_total_bytes_sent));
+	//std::cout << "trying to send " << bts << " bytes" << std::endl;
+	bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent, bts);
+	if (bytes_sent != -1)
+		this->_total_bytes_sent += bytes_sent;
 	return (bytes_sent);
 }
 
@@ -143,9 +157,14 @@ ssize_t		CGI::readFromCGI(const Config &config)
 	ssize_t				bytes_read = 0;
 	std::vector<char>	buffer(config.buffer_size);
 
-	bytes_read = recv(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0] , buffer.size(), MSG_DONTWAIT);
-	this->_output += std::string(buffer.begin(), buffer.end() + bytes_read);
-	this->_total_bytes_read += bytes_read;
+	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0] , buffer.size());
+	
+	if (bytes_read != -1)
+	{
+		buffer[bytes_read + 1] = '\0';
+		this->_output += std::string(buffer.begin(), buffer.begin() + bytes_read);
+		this->_total_bytes_read += bytes_read;
+	}
 	if (!this->_header_len)
 		this->parseHeader();
 	return (bytes_read);
@@ -174,14 +193,19 @@ void	CGI::parseHeader()
 
 void	CGI::genFullOutput(Response &response)
 {
-	if (!WIFEXITED(this->_process_status[1]))
+	std::cout << "CGI OUTPUT = " << this->_output << std::endl;
+	std::cout << "DONE WITH CGI OUTPUT" << std::endl;
+	if (!WIFEXITED(this->_process_status[1]) || WEXITSTATUS(this->_process_status[1]) != 0)
+	{	
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+		std::cout << "Error in child process" << std::endl;
+	}
 	else if (utils::startsWith(this->_output, "HTTP/"))
 	{
 		deleteEnvVar();
 		return ;
 	}
-	else if (utils::caseInsensitiveFind(this->_output, "status: ") != this->_output.end())
+	else if (utils::caseInsensitiveFind(this->_output, "\r\nstatus: ") != this->_output.end())
 	{
 		this->_status = utils::strToHttpStatus(&*utils::caseInsensitiveFind(this->_output, "status: ")
 			+ std::string("status: ").length());
@@ -216,7 +240,7 @@ bool		CGI::isComplete()
 	return (this->_is_complete);
 }
 
-void		CGI::Execute(Request &request)
+void		CGI::Execute()
 {
 	close(this->_pipe_to_CGI[PIPE_WRITE_END]);
 	close(this->_pipe_from_CGI[PIPE_READ_END]);
@@ -227,9 +251,9 @@ void		CGI::Execute(Request &request)
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
 	}
-	if (execve(request.getRequestTarget().c_str(), this->_args, this->_env) == -1)
+	if (execve(this->_cgi_script.c_str(), this->_args, this->_env) == -1)
 	{
-		std::cerr << "CGI execution failed" << std::endl;
+		std::cerr << RED << "CGI execution failed" << RESET << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
 	}

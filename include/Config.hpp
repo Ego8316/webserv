@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 21:13:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 23:54:00 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,18 @@
 class Config {
 	public :
 	// CONSTRUCTORS
-		Config(std::string filename);
+		Config(std::string config_string);
 		Config(const Config &other);
 		Config &operator=(const Config &other);
 	//DESTUCTORS
 		~Config();
 	//GETTERS
 		std::map<std::string, Redirection>		getRedirections() const;
-		void			setIP(std::string ip_str);
-		void			parseDefaultErrorPages(std::istringstream &conf_stream);
-		void			parseMethod(std::istringstream &conf_stream);
-		void			parseHttpRedir(std::istringstream &conf_stream);
-		bool			isAcceptedMethod(Method method) const;
+		void									setIP(std::string ip_str);
+		void									parseDefaultErrorPages(std::istringstream &conf_stream);
+		void									parseMethod(std::istringstream &conf_stream);
+		void									parseHttpRedir(std::istringstream &conf_stream);
+		bool									isAcceptedMethod(Method method) const;
 	//SETTERS
 	//MEMBER FUNCTIONS
 		unsigned int 							ip;

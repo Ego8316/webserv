@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 00:28:36 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,11 @@ std::vector<std::string>	stringSplit(std::string str, std::string del);
 std::string					stringTrim(std::string &str, const std::string &set);
 std::string					toLower(const std::string &str);
 std::string					capitalize(const std::string &str);
-std::string::iterator		caseInsensitiveFind(std::string haystack, std::string needle);
+std::string::iterator		caseInsensitiveFind(std::string &haystack, std::string needle);
 ssize_t						getFileSize(const std::string &path);
-ContentType				strToContentType(std::string input);
+ContentType					strToContentType(std::string input);
 std::string					contentTypeToStr(ContentType type);
-ContentType				extensionToContentTypes(std::string fname);
+ContentType					extensionToContentTypes(std::string fname);
 std::string					contentTypeToExtensions(ContentType type);
 std::string					methodToStr(Method method);
 Method						strToMethod(const std::string &method);

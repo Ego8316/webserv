@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 21:22:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 00:28:19 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ static bool	CICharComp(char a, char b)
 	return (std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)));
 }
 
-std::string::iterator	utils::caseInsensitiveFind(std::string haystack, std::string needle)
+std::string::iterator	utils::caseInsensitiveFind(std::string &haystack, std::string needle)
 {
 	std::string::iterator it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
 	return (it);

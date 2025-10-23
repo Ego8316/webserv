@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 16:23:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 23:24:25 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ int	ServerCore::socketAcceptClient(Client *new_client)
 	if (new_client->getFd() == SERV_ERROR)
 		std::cerr << RED << "Accept failed: " << strerror(errno) << RESET << std::endl;
 	else if (std::string(OS_NAME) == "macOs")
-		_setNonBlocking(new_client->getFd());
+		setNonBlocking(new_client->getFd());
 	return (new_client->getFd());
 }
 
@@ -243,7 +243,7 @@ bool		ServerCore::_socketListen()
 	return (true);
 }
 
-void	ServerCore::_setNonBlocking(int fd)
+void	ServerCore::setNonBlocking(int fd)
 {
 	int	flags = fcntl(fd, F_GETFL, 0);
 
