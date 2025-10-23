@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 14:01:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:16:53 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ int	Client::handleEvent()
 	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
 	if (this->_state != TRY_ACCEPTING)
 		this->_time_limit = std::min(this->_time_limit, this->_request_time_limit);
-	while (utils::getTime() < this->_time_limit && _state != DONE && _state != ACCEPT_OK && _state != ABORTING)
+	while (utils::getTime() < this->_time_limit && _state != DONE && _state != ACCEPT_OK && _state != ABORTING && _error != WOULD_BLOCK)
 	{
 		if (_state == TRY_ACCEPTING)
 			_tryAccepting();
@@ -222,10 +222,11 @@ int	Client::_readHeader()
 		this->_leftover.clear();
 	}
 	ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
+	std::cout << "bytes_read = " << bytes_read << std::endl;
 	if (bytes_read == SERV_ERROR)
 		return (SERV_ERROR);
 	if (bytes_read == WBLOCK)
-		return (0);
+		return (_error = WOULD_BLOCK, WOULD_BLOCK);
 	if (bytes_read == 0)
 	{
 		std::cout << CYAN << "[_readHeader] Client closed the connection" << RESET << std::endl;
