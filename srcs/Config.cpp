@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 16:41:09 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 00:47:19 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,7 +236,7 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
 	}
 }
 
-bool	Config::isAcceptedMethod( Method element) const
+bool	Config::isAcceptedMethod(Method element) const
 {
 	for (unsigned int i = 0; i < this->accepted_methods.size(); ++i)
 	{

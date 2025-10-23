@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 13:02:34 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 02:24:22 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,13 @@
  * @brief Default constructor. Initializes status code to 200 OK.
  */
 Response::Response()
-	:	_status_code(HTTP_OK)
 {
+	this->_status_code = HTTP_OK;
+	this->_header = "";
+	this->_body = "";
 	this->_cgi = NULL;
+	this->_is_cgi = false;
+	this->_body_fd = -1;
 	return ;
 }
 
@@ -41,10 +45,15 @@ Response	&Response::operator=(const Response &other)
 {
 	if (this != &other)
 	{
-		_status_code = other._status_code;
-		_header = other._header;
-		_body = other._body;
-		_headers = other._headers;
+		this->_status_code = other._status_code;
+		this->_header = other._header;
+		this->_body = other._body;
+		this->_headers = other._headers;
+		if (this->_cgi)
+			delete this->_cgi;
+		this->_cgi = new CGI(*other._cgi);
+		this->_is_cgi = other._is_cgi;
+		this->_body_fd = other._body_fd;
 	}
 	return (*this);
 }
@@ -54,11 +63,13 @@ Response	&Response::operator=(const Response &other)
  */
 Response::~Response(void)
 {
-	if (this->_cgi != NULL)
+	if (this->_cgi)
 	{
 		delete this->_cgi;
 		this->_cgi = NULL;
 	}
+	if (this->_body_fd > -1)
+		close(this->_body_fd);
 	return ;
 }
 
@@ -68,7 +79,7 @@ Response::~Response(void)
  */
 void	Response::setStatus(HttpStatus code)
 {
-	_status_code = code;
+	this->_status_code = code;
 	return ;
 }
 
@@ -78,7 +89,7 @@ void	Response::setStatus(HttpStatus code)
  */
 void	Response::setBody(const std::string &body)
 {
-	_body = body;
+	this->_body = body;
 	return ;
 }
 
@@ -89,7 +100,7 @@ void	Response::setBody(const std::string &body)
  */
 void	Response::setHeaders(const std::string &key, const std::string &value)
 {
-	_headers[key] = value;
+	this->_headers[key] = value;
 	return ;
 }
 
@@ -99,7 +110,7 @@ void	Response::setHeaders(const std::string &key, const std::string &value)
  */
 void	Response::setContentType(const std::string &type)
 {
-	_headers["Content-Type"] = type;
+	this->_headers["Content-Type"] = type;
 	return ;
 }
 
@@ -109,7 +120,7 @@ void	Response::setContentType(const std::string &type)
  */
 void	Response::setContentLength(size_t len)
 {
-	_headers["Content-Length"] = utils::toString(len);
+	this->_headers["Content-Length"] = utils::toString(len);
 	return ;
 }
 
@@ -119,7 +130,7 @@ void	Response::setContentLength(size_t len)
  */
 void	Response::setCookie(const std::string &cookie)
 {
-	_headers["Set-Cookie"] = cookie;
+	this->_headers["Set-Cookie"] = cookie;
 	return ;
 }
 
@@ -132,16 +143,16 @@ void	Response::setCookie(const std::string &cookie)
  */
 void	Response::buildHeader(void)
 {
-	if (!utils::mapHasEntry(_headers, std::string("Server")))
-		_headers["Server"] = "Webserv/1.0 (Unix)";
+	if (!utils::mapHasEntry(this->_headers, std::string("Server")))
+		this->_headers["Server"] = "Webserv/1.0 (Unix)";
 	if (!utils::mapHasEntry(_headers, std::string("Connection")))
-		_headers["Connection"] = "close";
-	_header = "HTTP/1.0 " + utils::toString(_status_code)
-		+ " " + utils::httpStatusToStr(_status_code) + "\r\n";
-	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
-		_header += it->first + ": " + it->second + "\r\n";
+		this->_headers["Connection"] = "close";
+	this->_header = "HTTP/1.0 " + utils::toString(this->_status_code)
+		+ " " + utils::httpStatusToStr(this->_status_code) + "\r\n";
+	for (std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); ++it)
+		this->_header += it->first + ": " + it->second + "\r\n";
 	if (!this->_is_cgi)
-		_header += "\r\n";
+		this->_header += "\r\n";
 	return ;
 }
 
@@ -151,7 +162,7 @@ void	Response::buildHeader(void)
  */
 const std::string	&Response::getHeader(void) const
 {
-	return (_header);
+	return (this->_header);
 }
 
 /**
@@ -160,23 +171,29 @@ const std::string	&Response::getHeader(void) const
  */
 const std::string	&Response::getBody(void) const
 {
-	return (_body);
+	return (this->_body);
 }
 
-CGI			*Response::getCGI()
+CGI	*Response::getCGI()
 {
 	return (this->_cgi);
 }
 
-void		Response::setCGI(CGI *cgi)
+void	Response::setCGI(CGI *cgi)
 {
 	this->_cgi = cgi;
 	this->_is_cgi = true;
 }
 
-bool		Response::isCGI()
+bool	Response::isCGI()
 {
 	return (this->_is_cgi);
+}
+
+
+int	Response::getFd() const
+{
+	return (this->_body_fd);
 }
 		
 /**
@@ -185,7 +202,7 @@ bool		Response::isCGI()
  */
 std::string	Response::toString(void) const
 {
-	return (_header + _body);
+	return (this->_header + this->_body);
 }
 
 /**

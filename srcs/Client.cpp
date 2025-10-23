@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 00:36:47 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 01:39:08 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Client::Client(const Client &other)
 	*this = other;
 }
 
-Client &Client::operator=(const Client &other)
+Client	&Client::operator=(const Client &other)
 {
 	if (this != &other)
 	{
@@ -95,7 +95,7 @@ ServerCore	&Client::getServer()
 	return (*this->_server);
 }
 
-long			Client::getTimeLimit()
+long	Client::getTimeLimit()
 {
 	return (this->_time_limit);
 }
@@ -115,7 +115,7 @@ void	Client::setState(RequestStage state)
 	this->_state = state;
 }
 
-int		Client::handleEvent()
+int	Client::handleEvent()
 {
 	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
 	// while (utils::getTime() < this->_time_limit)
@@ -191,11 +191,10 @@ int	Client::_readHeader()
 		return (0);
 	}
 	this->_leftover = header_str.substr(pos + 4);
-	header_str.erase(pos + 4);
+	header_str.erase(pos);
 	std::cout << CYAN << "[_readHeader] Header fully received (" << header_str.size() << " bytes)" << RESET << std::endl;
 	this->printHeader();
 	this->_request->parseHeader(*this->_config);
-	std::cout << "parse error: " << this->_request->getError() << std::endl;
 	if (!_request->isChunked() && _request->getContentLength() == 0)
 	{
 		this->_state = PROCESSING_REQUEST;
@@ -276,7 +275,7 @@ void	Client::_processRequest()
 	return ;
 }
 
-int		Client::_monitorCGI()
+int	Client::_monitorCGI()
 {
 	if (!_response->getCGI() || _response->getCGI()->isComplete())
 	{
@@ -293,6 +292,7 @@ int	Client::_sendOutput()
 {
 	this->_state = DONE;
 	printState();
+	
 	delete this->_request;
 	delete this->_response;
 	this->_request = new Request();

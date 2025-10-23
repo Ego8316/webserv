@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 00:37:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 02:22:57 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,21 +70,22 @@ int	Request::parseHeader(const Config &config)
 	std::string			method_str;
 
 	if (!std::getline(stream, line))
-		return (_error = true, SERV_ERROR);
+		return (this->_error = true, SERV_ERROR);
 	std::istringstream	first_line(utils::stringTrim(line, "\r\n \t"));
-	if (!(first_line >> method_str >> _request_target >> _version))
-		return (_error = true, SERV_ERROR);
+	if (!(first_line >> method_str >> this->_request_target >> this->_version))
+		return (this->_error = true, SERV_ERROR);
+	// TODO verifier parce qu'avec le bail de query str jsp si cest bien judicieux
 	if (!first_line.eof())
-		return (_error = true, SERV_ERROR);
-	_method = utils::strToMethod(method_str);
-	_parseRequestTarget();
-	if (!config.isAcceptedMethod(_method))
-		return (_error = true, SERV_ERROR);
+		return (this->_error = true, SERV_ERROR);
+	this->_method = utils::strToMethod(method_str);
+	this->_parseRequestTarget();
+	if (!config.isAcceptedMethod(this->_method))
+		return (this->_error = true, SERV_ERROR);
 	while (std::getline(stream, line))
 	{
 		line = utils::stringTrim(line, "\r\n \t");
 		if (line.empty())
-			return (_error = true, SERV_ERROR);
+			return (this->_error = true, SERV_ERROR);
 		if (_parseHeaderLine(line, config) == SERV_ERROR)
 			return (SERV_ERROR);
 	}
@@ -99,52 +100,52 @@ int	Request::parseHeader(const Config &config)
 
 std::string	&Request::getRawHeader()
 {
-	return (_raw_header);
+	return (this->_raw_header);
 }
 
 std::string &Request::getRawBody()
 {
-	return (_raw_body);
+	return (this->_raw_body);
 }
 
 const std::string &Request::getRawBody() const
 {
-	return (_raw_body);
+	return (this->_raw_body);
 }
 
 Method	Request::getMethod() const
 {
-	return (_method);
+	return (this->_method);
 }
 
 std::string	Request::getRequestTarget() const
 {
-	return (_request_target);
+	return (this->_request_target);
 }
 
 std::string Request::getVersion() const
 {
-	return (_version);
+	return (this->_version);
 }
 
 size_t	Request::getContentLength() const
 {
-	return (_content_length);
+	return (this->_content_length);
 }
 
 bool	Request::isChunked() const
 {
-	return (_chunked);
+	return (this->_chunked);
 }
 
 std::map<std::string, std::string>	Request::getHeaders(void) const
 {
-	return (_headers);
+	return (this->_headers);
 }
 
 bool	Request::getError() const
 {
-	return (_error);
+	return (this->_error);
 }
 
 const Cookie	&Request::getQueryCookies()
@@ -176,7 +177,7 @@ void	Request::setError(bool error)
 
 bool	Request::headerHasField(const std::string field)
 {
-	return (_headers.find(field) != _headers.end());
+	return (this->_headers.find(field) != this->_headers.end());
 }
 
 std::string	Request::headerGetField(const std::string field)
@@ -188,15 +189,15 @@ std::string	Request::headerGetField(const std::string field)
 
 int		Request::_parseRequestTarget()
 {
-	if (_request_target.find("?") != std::string::npos)
+	if (this->_request_target.find("?") != std::string::npos)
 	{
-		_query_string = _request_target.substr(_request_target.find("?") + 1, _request_target.length());
-		_request_target.erase(_request_target.find("?"), _request_target.length());
+		this->_query_string = this->_request_target.substr(this->_request_target.find("?") + 1, this->_request_target.length());
+		this->_request_target.erase(this->_request_target.find("?"), this->_request_target.length());
 	}
-	if (utils::startsWith(_request_target, "http://"))
-		_request_target.erase(0, 8);
-	if (utils::startsWith(_request_target, "www"))
-		_request_target.erase(0, _request_target.find("/"));
+	if (utils::startsWith(this->_request_target, "http://"))
+		this->_request_target.erase(0, 8);
+	if (utils::startsWith(this->_request_target, "www"))
+		this->_request_target.erase(0, this->_request_target.find("/"));
 	return (0);
 }
 
@@ -230,16 +231,16 @@ int		Request::_parseHeaderLine(std::string line, const Config &config)
 		else
 			this->_headers[key] = value;
 		if (key == "Transfer-Encoding" && utils::toLower(value).find("chunked") != std::string::npos)
-			_chunked = true;
+			this->_chunked = true;
 		else if (key == "Content-Length")
 		{
-			_content_length = std::atol(value.c_str());
-			if (_content_length > config.max_body_size)
-				return (_error = true, SERV_ERROR);
+			this->_content_length = std::atol(value.c_str());
+			if (this->_content_length > config.max_body_size)
+				return (this->_error = true, SERV_ERROR);
 		}
 	}
 	else
-		return (_error = true, SERV_ERROR);
+		return (this->_error = true, SERV_ERROR);
 	return (0);
 }
 
