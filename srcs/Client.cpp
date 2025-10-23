@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 13:04:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 13:21:25 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,8 +129,10 @@ int	Client::handleEvent()
 	}
 	_error = ERR_NONE;
 	this->_time_limit = std::min(utils::getTime() + this->_config->processing_time_limit, this->_request_time_limit);
+	std::cout << "Coucou 1" << std::endl;
 	while (utils::getTime() < this->_time_limit && _state != DONE)
 	{
+		std::cout << "state = " << _state << std::endl;
 		if (_state == TRY_ACCEPTING)
 			_tryAccepting();
 		if (_state == ABORTING)
