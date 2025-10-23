@@ -25,7 +25,7 @@ class	Config;
 class	ServerCore
 {
 	public:
-		ServerCore(Config	*config);
+		ServerCore(const Config *config);
 		ServerCore(const ServerCore &other);
 		ServerCore	&operator=(const ServerCore &other);
 		~ServerCore(void);
@@ -43,7 +43,7 @@ class	ServerCore
 		bool					pollAvailFor(int indx, nfds_t operation);
 
 	private:
-		Config						*_config;
+		const Config				*_config;
 		int							_server_fd;
 		struct sockaddr_in			_server_addr;
 		std::vector<struct pollfd>	_poll_fds;

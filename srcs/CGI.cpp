@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:31:30 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:51:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ CGI::~CGI()
 }
 
 
-void		CGI::Run(Client &client, Request &request, Config &config, Response &response)
+void		CGI::Run(Client &client, Request &request, const Config &config, Response &response)
 {
 	if (this->_is_init)
 		return (this->Nanny(client, request, config, response));
@@ -86,7 +86,7 @@ void		CGI::Run(Client &client, Request &request, Config &config, Response &respo
 	this->_is_init = true;
 }
 
-void	CGI::Nanny(Client &client, Request &request, Config &config, Response &response)
+void	CGI::Nanny(Client &client, Request &request, const Config &config, Response &response)
 {
 	ssize_t				bytes_read = 1;
 	ssize_t				bytes_sent = 1;
@@ -111,7 +111,7 @@ void	CGI::Nanny(Client &client, Request &request, Config &config, Response &resp
 	}
 }
 
-ssize_t		CGI::writeToCGI(Request &request, Config &config)
+ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 {
 	ssize_t				bytes_sent = 0;
 	const std::string	&request_str = request.getRawBody();
@@ -123,7 +123,7 @@ ssize_t		CGI::writeToCGI(Request &request, Config &config)
 	return (bytes_sent);
 }
 
-ssize_t		CGI::readFromCGI(Config &config)
+ssize_t		CGI::readFromCGI(const Config &config)
 {
 	ssize_t				bytes_read = 0;
 	std::vector<char>	buffer(config.buffer_size);

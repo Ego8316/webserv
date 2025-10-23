@@ -6,13 +6,13 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:35:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:51:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(Config *config, ServerCore *server)
+Client::Client(const Config *config, ServerCore *server)
 {
 	this->_config = config;
 	this->_server = server;

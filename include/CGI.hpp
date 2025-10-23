@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 16:44:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:49:09 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,11 @@ class CGI
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-		void		Run(Client &client, Request &request, Config &config, Response &response);
+		void		Run(Client &client, Request &request, const Config &config, Response &response);
 		
-		void		Nanny(Client &client, Request &request, Config &config, Response &response);
-		ssize_t		writeToCGI(Request &request, Config &config);
-		ssize_t		readFromCGI(Config &config);
+		void		Nanny(Client &client, Request &request, const Config &config, Response &response);
+		ssize_t		writeToCGI(Request &request, const Config &config);
+		ssize_t		readFromCGI(const Config &config);
 		
 		void		parseHeader();
 		void		genFullOutput(Response &response);

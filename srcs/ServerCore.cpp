@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCore.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 04:08:14 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 12:53:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerCore.hpp"
 
-ServerCore::ServerCore(Config *config)
+ServerCore::ServerCore(const Config *config)
 {
 	_config = config;
 	_server_fd = SERV_ERROR;

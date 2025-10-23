@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:31:04 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:49:30 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class	Request;
 class Client
 {
 	public:
-		Client(Config *config, ServerCore *server);
+		Client(const Config *config, ServerCore *server);
 		Client(const Client &other);
 		Client	&operator=(const Client &other);
 		~Client(void);
@@ -51,7 +51,7 @@ class Client
 		void	printRequest() const;
 
 	private :
-		Config							*_config;
+		const Config					*_config;
 		ServerCore						*_server;
 		int								_client_fd;
 		struct sockaddr_in				_client_addr;

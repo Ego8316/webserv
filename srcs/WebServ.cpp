@@ -6,13 +6,13 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:42:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:48:47 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServ.hpp"
 
-WebServ::WebServ(Config *config)
+WebServ::WebServ(const Config *config)
 {
 	this->_config = config;
 	std::cout << *this->_config << std::endl;
@@ -67,7 +67,8 @@ int	WebServ::Init()
 
 int	WebServ::Run()
 {
-	this->UpdateQueue();
+	if (this->UpdateQueue() == SERV_ERROR)
+		return (SERV_ERROR);
 	this->ProcessQueue();
 	return (0);
 }
