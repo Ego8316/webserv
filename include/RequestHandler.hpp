@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:12:35 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:13:26 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include "headers.hpp"
 #include "utils.hpp"
 #include "Response.hpp"
-#include "Cookie.hpp"
 #include "Resource.hpp"
 #include "Request.hpp"
 #include "CGI.hpp"
@@ -23,7 +22,6 @@
 class	Response;
 class	Config;
 class	Client;
-class	Cookie;
 class	Request;
 class	Resource;
 
