@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 02:10:38 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 02:26:17 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@ class	Response
 		void	setStatus(HttpStatus code);
 		void	setBody(const std::string &body);
 		void	setHeaders(const std::string &key, const std::string &value);
+		void	setCGI(CGI *cgi);
+		void	setFd(int fd);
 
 		void	setContentType(const std::string &type);
 		void	setContentLength(size_t len);
@@ -46,7 +48,6 @@ class	Response
 		const std::string	&getHeader(void) const;
 		const std::string	&getBody(void) const;
 		CGI					*getCGI();
-		void				setCGI(CGI *cgi);
 		bool				isCGI();
 		int					getFd() const;
 		std::string			toString(void) const;

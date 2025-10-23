@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 16:30:23 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 02:41:23 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,9 @@
 # define PIPE_READ_END 0
 # define PIPE_WRITE_END 1
 
-// Default error pages
+// Default pages
+#define POST_PAGE		"<html><body><h1>Upload successful</h1></body></html>"
+
 #define ERROR_PAGE_400	"<html><head><title>400 Bad Request</title></head>" \
 						"<body><h1>400 Bad Request</h1>" \
 						"<p>Your browser sent a request that this server could not understand.</p></body></html>"

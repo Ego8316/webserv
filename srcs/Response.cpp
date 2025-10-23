@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 02:24:22 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 02:27:11 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,19 @@ void	Response::setHeaders(const std::string &key, const std::string &value)
 	return ;
 }
 
+void	Response::setCGI(CGI *cgi)
+{
+	this->_cgi = cgi;
+	this->_is_cgi = true;
+	return ;
+}
+
+void	Response::setFd(int fd)
+{
+	this->_body_fd = fd;
+	return ;
+}
+
 /**
  * @brief Sets or updates the content type header field.
  * @param type Content type.
@@ -177,12 +190,6 @@ const std::string	&Response::getBody(void) const
 CGI	*Response::getCGI()
 {
 	return (this->_cgi);
-}
-
-void	Response::setCGI(CGI *cgi)
-{
-	this->_cgi = cgi;
-	this->_is_cgi = true;
 }
 
 bool	Response::isCGI()

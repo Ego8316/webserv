@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 00:35:01 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 03:00:34 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,12 +103,13 @@ std::string::iterator	utils::caseInsensitiveFind(std::string haystack, std::stri
 	return (it);
 }
 
-size_t	utils::getFileSize(const std::string &path)
+ssize_t	utils::getFileSize(const std::string &path)
 {
 	struct stat	st;
+
 	if (stat(path.c_str(), &st) == 0)
 		return (st.st_size);
-	return (0);
+	return (-1);
 }
 
 ContentTypes	utils::strToContentType(std::string input)
