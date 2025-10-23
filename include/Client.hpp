@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 13:29:31 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:02:00 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class Client
 		Client(const Config *config, ServerCore *server);
 		Client(const Client &other);
 		Client	&operator=(const Client &other);
-		~Client(void);
+		~Client();
 
 		int						handleEvent();
 		int						getFd();

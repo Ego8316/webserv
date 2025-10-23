@@ -28,18 +28,18 @@ class	ServerCore
 		ServerCore(const Config *config);
 		ServerCore(const ServerCore &other);
 		ServerCore	&operator=(const ServerCore &other);
-		~ServerCore(void);
+		~ServerCore();
 
-		int							getFd(void) const;
-		std::vector<struct pollfd>	&getPollFds(void);
+		int							getFd() const;
+		std::vector<struct pollfd>	&getPollFds();
 
-		int						init(void);
+		int						init();
 		int						socketAcceptClient(Client *new_client);
 		int						socketRead(char *buffer, int bytes_read, Client *client);
 		int						socketWrite(const char *buffer, int bytes_write, Client *client);
 		void					pollAdd(int fd, nfds_t event, int idx);
 		void					pollRemove(int idx);
-		std::vector<pollRevent>	pollWatchRevent(void);
+		std::vector<pollRevent>	pollWatchRevent();
 		bool					pollAvailFor(int indx, nfds_t operation);
 
 	private:
@@ -48,10 +48,10 @@ class	ServerCore
 		struct sockaddr_in			_server_addr;
 		std::vector<struct pollfd>	_poll_fds;
 
-		bool	_socketCreate(void);
-		bool	_socketSetOptions(void);
-		bool	_socketBind(void);
-		bool	_socketListen(void);
+		bool	_socketCreate();
+		bool	_socketSetOptions();
+		bool	_socketBind();
+		bool	_socketListen();
 		void	_setNonBlocking(int fd);
-		int		_pollWait(void);
+		int		_pollWait();
 };

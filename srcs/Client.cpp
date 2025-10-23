@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 14:56:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:06:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -310,8 +310,7 @@ int	Client::_readBody()
 
 void	Client::_processRequest()
 {
-	const Cookie		cookies = this->_request->getQueryCookies();
-	*this->_response = RequestHandler::handle(*_request, *_config, cookies);
+	*this->_response = RequestHandler::handle(*_request, *_config);
 	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
 		<< BLUE << " Processing request" << RESET << std::endl;
 	this->printRequest();

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 14:36:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:05:58 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ ServerCore	&ServerCore::operator=(const ServerCore &other)
 	return (*this);
 }
 
-ServerCore::~ServerCore(void)
+ServerCore::~ServerCore()
 {
 	if (_server_fd > 0)
 	{
@@ -138,7 +138,7 @@ void	ServerCore::pollRemove(int idx)
 	std::memset(&_poll_fds[idx], 0, sizeof(pollfd));
 }
 
-std::vector<pollRevent>	ServerCore::pollWatchRevent(void)
+std::vector<pollRevent>	ServerCore::pollWatchRevent()
 {
 	std::vector<pollRevent>	ret;
 	pollRevent				revent;
@@ -206,7 +206,7 @@ bool	ServerCore::pollAvailFor(int idx, nfds_t operation)
 	return (_poll_fds[idx].revents & operation);
 }
 
-bool	ServerCore::_socketCreate(void)
+bool	ServerCore::_socketCreate()
 {
 	_server_fd = socket(_config->domain, _config->type, _config->protocol);
 	if (_server_fd == SERV_ERROR)
@@ -214,7 +214,7 @@ bool	ServerCore::_socketCreate(void)
 	return (true);
 }
 
-bool	ServerCore::_socketSetOptions(void)
+bool	ServerCore::_socketSetOptions()
 {
 	int	opt = 1;
 
@@ -223,7 +223,7 @@ bool	ServerCore::_socketSetOptions(void)
 	return (true);
 }
 
-bool	ServerCore::_socketBind(void)
+bool	ServerCore::_socketBind()
 {
 	int	success;
 
@@ -237,7 +237,7 @@ bool	ServerCore::_socketBind(void)
 	return (true);
 }
 
-bool		ServerCore::_socketListen(void)
+bool		ServerCore::_socketListen()
 {
 	if (listen(_server_fd, _config->incoming_queue_backlog) == SERV_ERROR)
 		return (false);
@@ -253,7 +253,7 @@ void	ServerCore::_setNonBlocking(int fd)
 	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-int	ServerCore::_pollWait(void)
+int	ServerCore::_pollWait()
 {
 	int	poll_count;
 

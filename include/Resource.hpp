@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 13:01:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:02:19 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,26 +29,26 @@ class	Request;
 class	Resource
 {
 	public:
-		Resource(void);
+		Resource();
 		Resource(const Resource &other);
 		Resource	&operator=(const Resource &other);
-		~Resource(void);
+		~Resource();
 
 		void				build(const Request &request, const Config &config);
 
-		const std::string	&getPath(void) const;
-		ResourceStatus		getStatus(void) const;
-		size_t				getSize(void) const;
-		ContentTypes		getType(void) const;
+		const std::string	&getPath() const;
+		ResourceStatus		getStatus() const;
+		size_t				getSize() const;
+		ContentTypes		getType() const;
 
-		bool	exists(void) const;
-		bool	isCGI(void) const;
-		bool	isRedirect(void) const;
-		bool	isDirectory(void) const;
-		bool	isReadable(void) const;
-		bool	isWritable(void) const;
-		bool	isExecutable(void) const;
-		bool	isForbidden(void) const;
+		bool	exists() const;
+		bool	isCGI() const;
+		bool	isRedirect() const;
+		bool	isDirectory() const;
+		bool	isReadable() const;
+		bool	isWritable() const;
+		bool	isExecutable() const;
+		bool	isForbidden() const;
 
 	private:
 		std::string		_path;
@@ -60,6 +60,6 @@ class	Resource
 		bool	_checkRedirect(const std::string &requestTarget, const Config &config);
 		bool	_checkAccept(const Request &request);
 		int		_resolvePath(const std::string &requestTarget, const Config &config);
-		void	_evaluatePermissions(void);
-		void	_detectType(void);
+		void	_evaluatePermissions();
+		void	_detectType();
 };

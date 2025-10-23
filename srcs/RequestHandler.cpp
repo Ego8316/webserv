@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 14:56:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:04:04 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,8 @@ RequestHandler::~RequestHandler(void)
 	return ;
 }
 
-Response	RequestHandler::handle(const Request &request, const Config &config, const Cookie &cookies)
+Response	RequestHandler::handle(const Request &request, const Config &config)
 {
-	(void)cookies;
 	if (request.getError())
 	{
 		// if (request.getContentLength() > config.max_body_size)

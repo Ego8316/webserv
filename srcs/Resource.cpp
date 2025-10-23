@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/13 20:34:38 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:06:08 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
  * @brief Default constructor. Initializes status code to 404 NOT FOUND and
  * and type to PLAIN.
  */
-Resource::Resource(void)
+Resource::Resource()
 	:	_path(""),
 		_status(EXISTS),
 		_size(0),
@@ -55,7 +55,7 @@ Resource	&Resource::operator=(const Resource &other)
 /**
  * @brief Destructor.
  */
-Resource::~Resource(void)
+Resource::~Resource()
 {
 	return ;
 }
@@ -148,7 +148,7 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
  *
  * @note Does nothing if the resource path cannot be accessed.
  */
-void	Resource::_evaluatePermissions(void)
+void	Resource::_evaluatePermissions()
 {
 	struct stat	file_stat;
 
@@ -168,7 +168,7 @@ void	Resource::_evaluatePermissions(void)
  * 
  * Updates _status to include IS_CGI for Python and PHP scripts.
  */
-void	Resource::_detectType(void)
+void	Resource::_detectType()
 {
 	_type = utils::extensionToContentTypes(_path);
 	_status = static_cast<ResourceStatus>(_status & ~IS_CGI);
@@ -180,7 +180,7 @@ void	Resource::_detectType(void)
  * @brief Returns the path.
  * @return Reference to the path.
  */
-const std::string	&Resource::getPath(void) const
+const std::string	&Resource::getPath() const
 {
 	return (_path);
 }
@@ -189,7 +189,7 @@ const std::string	&Resource::getPath(void) const
  * @brief Returns the status.
  * @return Status.
  */
-ResourceStatus	Resource::getStatus(void) const
+ResourceStatus	Resource::getStatus() const
 {
 	return (_status);
 }
@@ -198,7 +198,7 @@ ResourceStatus	Resource::getStatus(void) const
  * @brief Returns the size.
  * @return Size.
  */
-size_t	Resource::getSize(void) const
+size_t	Resource::getSize() const
 {
 	return (_size);
 }
@@ -207,7 +207,7 @@ size_t	Resource::getSize(void) const
  * @brief Returns the type.
  * @return Type.
  */
-ContentTypes	Resource::getType(void) const
+ContentTypes	Resource::getType() const
 {
 	return (_type);
 }
@@ -216,7 +216,7 @@ ContentTypes	Resource::getType(void) const
  * @brief Checks if the resource exists.
  * @return True if it is, false otherwise.
  */
-bool	Resource::exists(void) const
+bool	Resource::exists() const
 {
 	return (_status & EXISTS);
 }
@@ -225,12 +225,12 @@ bool	Resource::exists(void) const
  * @brief Checks if the resource is a CGI.
  * @return True if it is, false otherwise.
  */
-bool	Resource::isCGI(void) const
+bool	Resource::isCGI() const
 {
 	return (_status & IS_CGI);
 }
 
-bool	Resource::isRedirect(void) const
+bool	Resource::isRedirect() const
 {
 	return (_status & IS_REDIRECT);
 }
@@ -239,7 +239,7 @@ bool	Resource::isRedirect(void) const
  * @brief Checks if the resource is a directory.
  * @return True if it is, false otherwise.
  */
-bool	Resource::isDirectory(void) const
+bool	Resource::isDirectory() const
 {
 	return (_status & IS_DIR);
 }
@@ -248,7 +248,7 @@ bool	Resource::isDirectory(void) const
  * @brief Checks if the resource is readable.
  * @return True if it is, false otherwise.
  */
-bool	Resource::isReadable(void) const
+bool	Resource::isReadable() const
 {
 	return (_status & PERM_ROK);
 }
@@ -257,7 +257,7 @@ bool	Resource::isReadable(void) const
  * @brief Checks if the resource is writable.
  * @return True if it is, false otherwise.
  */
-bool	Resource::isWritable(void) const
+bool	Resource::isWritable() const
 {
 	return (_status & PERM_WOK);
 }
@@ -266,7 +266,7 @@ bool	Resource::isWritable(void) const
  * @brief Checks if the resource is executable.
  * @return True if it is, false otherwise.
  */
-bool	Resource::isExecutable(void) const
+bool	Resource::isExecutable() const
 {
 	return (_status & PERM_XOK);
 }
@@ -275,7 +275,7 @@ bool	Resource::isExecutable(void) const
  * @brief Checks if an existing resource is forbidden.
  * @return True if it is, false otherwise.
  */
-bool	Resource::isForbidden(void) const
+bool	Resource::isForbidden() const
 {
 	return (_status & EXISTS && !(_status & (PERM_ROK | PERM_WOK | PERM_XOK)));
 }

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 12:02:02 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:04:36 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class	Resource;
 class	RequestHandler
 {
 	public:
-		static Response	handle(const Request &request, const Config &config, const Cookie &cookies);
+		static Response	handle(const Request &request, const Config &config);
 
 	private:
 		RequestHandler();
