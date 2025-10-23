@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 01:39:08 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 03:35:46 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ Client::Client(Config *config, ServerCore *server)
 	this->_client_id = 0;
 	this->_state = TRY_ACCEPTING;
 	this->_leftover = "";
+	this->_bytes_sent = 0;
 	this->_time_limit = 0;
 	this->_request = new Request();
 	this->_response = new Response();
@@ -44,6 +45,7 @@ Client	&Client::operator=(const Client &other)
 		this->_client_id = other._client_id;
 		this->_state = other._state;
 		this->_leftover = other._leftover;
+		this->_bytes_sent = other._bytes_sent;
 		this->_time_limit = other._time_limit;
 		if (this->_request)
 			delete this->_request;
@@ -134,7 +136,9 @@ int	Client::handleEvent()
 		this->_processRequest();
 	if (this->_state == CGI_RUNNING)
 		this->_monitorCGI();
-	if (this->_state == OUTPUT_SENDING && this->_sendOutput() == SERV_ERROR)
+	if (this->_state == SENDING_STRING && this->_sendString() == SERV_ERROR)
+		return (SERV_ERROR);
+	if (this->_state == SENDING_FILE && this->_sendFile() == SERV_ERROR)
 		return (SERV_ERROR);
 	// }
 	return (0); //TODO return err code
@@ -269,7 +273,7 @@ void	Client::_processRequest()
 	}
 	else
 	{
-		this->_state = OUTPUT_SENDING;
+		this->_state = SENDING_STRING;
 		printState();
 	}
 	return ;
@@ -279,25 +283,54 @@ int	Client::_monitorCGI()
 {
 	if (!_response->getCGI() || _response->getCGI()->isComplete())
 	{
-		_state = OUTPUT_SENDING;
+		_state = SENDING_STRING;
 		return (0);
 	}
 	_response->getCGI()->Run(*this, *_request, *_config, *_response);
 	if (_response->getCGI()->isComplete())
-		_state = OUTPUT_SENDING;
+		_state = SENDING_STRING;
 	return (0);
 }
 
-int	Client::_sendOutput()
+int	Client::_sendString()
 {
-	this->_state = DONE;
-	printState();
-	
+	const std::string	&response_str = this->_response->getString();
+	int					bytes_to_send = response_str.size() - this->_bytes_sent;
+
+	if (bytes_to_send > 0)
+	{
+		int	sent = _server->socketWrite(response_str.c_str() + this->_bytes_sent, bytes_to_send, this);
+		if (sent == SERV_ERROR)
+			return (SERV_ERROR);
+		if (sent == WBLOCK)
+			return (0);
+		if (sent == 0)
+		{
+			std::cout << CYAN << "[_sendString] Client closed the connection" << RESET << std::endl;
+			return (this->_state = ABORTING, 0);
+		}
+		this->_bytes_sent += sent;
+		return (0);
+	}
+	if (this->_response->getFd() > -1)
+		this->_state = SENDING_FILE;
+	else
+		this->_state = DONE;
+	this->printState();
+	return (0);
+}
+
+int	Client::_sendFile()
+{
+	return (0);
+}
+
+void	Client::_prepareNew()
+{
 	delete this->_request;
 	delete this->_response;
 	this->_request = new Request();
 	this->_response = new Response();
-	return (0);
 }
 
 void	Client::printState() const

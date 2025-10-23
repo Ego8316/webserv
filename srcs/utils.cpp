@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 03:00:34 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 03:48:06 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,9 +55,9 @@ std::string	utils::stringTrim(std::string &str, const std::string &set)
 	while (last_size != str.size())
 	{
 		last_size = str.size();
-		if (set.find(str[0]) != std::string::npos)
+		if (!str.empty() && set.find(str[0]) != std::string::npos)
 			str.erase(0, 1);
-		if (set.find(str[str.size() - 1]) != std::string::npos)
+		if (!str.empty() && set.find(str[str.size() - 1]) != std::string::npos)
 			str.erase(str.size() - 1, 1);
 	}
 	return (str);
@@ -281,7 +281,8 @@ std::string	utils::stateToStr(RequestStage state)
 		case BODY_READING:			return "BODY_READING";
 		case PROCESSING_REQUEST:	return "PROCESSING_REQUEST";
 		case CGI_RUNNING:			return "CGI_RUNNING";
-		case OUTPUT_SENDING:		return "OUTPUT_SENDING";
+		case SENDING_STRING:		return "SENDING_STRING";
+		case SENDING_FILE:			return "SENDING_FILE";
 		case ABORTING:				return "ABORTING";
 		case DONE:					return "DONE";
 		default:					return "UNKNOWN_STATE";

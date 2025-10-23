@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 02:41:23 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 03:08:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,8 @@ enum	RequestStage //should be set to DONE whenever not in the queue
 	BODY_READING,
 	PROCESSING_REQUEST,
 	CGI_RUNNING,
-	OUTPUT_SENDING,
+	SENDING_STRING,
+	SENDING_FILE,
 	ABORTING,
 	DONE
 };

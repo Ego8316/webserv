@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 03:01:04 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 03:26:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ Response	RequestHandler::_handleGet(const Request &request, const Config &config
 	response.setFd(fd);
 	response.setContentLength(size);
 	response.setContentType(utils::contentTypeToStr(resource.getType()));
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
@@ -134,7 +134,7 @@ Response	RequestHandler::_handlePost(const Request &request, const Config &confi
 	response.setBody(POST_PAGE);
 	response.setContentType("text/html");
 	response.setContentLength(response.getBody().size());
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
@@ -156,7 +156,7 @@ Response	RequestHandler::_handleDelete(const Request &request, const Config &con
 	response.setStatus(HTTP_NO_CONTENT);
 	response.setBody("");
 	response.setContentLength(0);
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
@@ -181,7 +181,7 @@ Response	RequestHandler::_handleRedirect(const Request &request, const Config &c
 	response.setHeaders("Location", resource.getPath());
 	response.setContentType("text/html");
 	response.setContentLength(0);
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
@@ -212,7 +212,7 @@ Response	RequestHandler::_handleListDir(const Request &request, const Config &co
 	response.setBody(response_body);
 	response.setContentLength(response_body.length());
 	response.setContentType("text/html");
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
@@ -235,7 +235,7 @@ Response	RequestHandler::_handleError(HttpStatus code, const Config &config)
 			{
 				response.setFd(fd);
 				response.setContentLength(size);
-				response.buildHeader();
+				response.build();
 				return (response);
 			}
 			close(fd);
@@ -244,6 +244,6 @@ Response	RequestHandler::_handleError(HttpStatus code, const Config &config)
 
 	response.setBody(Response::getDefaultErrorPage(code));
 	response.setContentLength(response.getBody().size());
-	response.buildHeader();
+	response.build();
 	return (response);
 }

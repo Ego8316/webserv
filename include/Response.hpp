@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 02:26:17 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 03:25:42 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,14 +43,15 @@ class	Response
 		void	setContentLength(size_t len);
 		void	setCookie(const std::string &cookie);
 
-		void		buildHeader(void);
+		void	buildHeader();
+		void	build();
 
-		const std::string	&getHeader(void) const;
-		const std::string	&getBody(void) const;
+		const std::string	&getHeader() const;
+		const std::string	&getBody() const;
+		const std::string	&getString() const;
 		CGI					*getCGI();
 		bool				isCGI();
 		int					getFd() const;
-		std::string			toString(void) const;
 
 		static std::string	getDefaultErrorPage(HttpStatus code);
 
@@ -58,6 +59,7 @@ class	Response
 		HttpStatus							_status_code;
 		std::string							_header;
 		std::string							_body;
+		std::string							_string;
 		std::map<std::string, std::string>	_headers;
 		CGI									*_cgi;
 		bool								_is_cgi;

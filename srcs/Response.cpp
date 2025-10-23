@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 02:27:11 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 03:44:51 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ Response::Response()
 	this->_status_code = HTTP_OK;
 	this->_header = "";
 	this->_body = "";
+	this->_string = "";
 	this->_cgi = NULL;
 	this->_is_cgi = false;
 	this->_body_fd = -1;
@@ -48,10 +49,15 @@ Response	&Response::operator=(const Response &other)
 		this->_status_code = other._status_code;
 		this->_header = other._header;
 		this->_body = other._body;
+		this->_string = other._string;
 		this->_headers = other._headers;
 		if (this->_cgi)
+		{
 			delete this->_cgi;
-		this->_cgi = new CGI(*other._cgi);
+			this->_cgi = NULL;
+		}
+		if (other._cgi)
+			this->_cgi = new CGI(*other._cgi);
 		this->_is_cgi = other._is_cgi;
 		this->_body_fd = other._body_fd;
 	}
@@ -61,7 +67,7 @@ Response	&Response::operator=(const Response &other)
 /**
  * @brief Destructor.
  */
-Response::~Response(void)
+Response::~Response()
 {
 	if (this->_cgi)
 	{
@@ -154,7 +160,7 @@ void	Response::setCookie(const std::string &cookie)
  * Automatically adds default headers ("Server" and "Connection") if they are
  * not already set. The resulting string is stored in the _header member.
  */
-void	Response::buildHeader(void)
+void	Response::buildHeader()
 {
 	if (!utils::mapHasEntry(this->_headers, std::string("Server")))
 		this->_headers["Server"] = "Webserv/1.0 (Unix)";
@@ -169,11 +175,18 @@ void	Response::buildHeader(void)
 	return ;
 }
 
+void	Response::build()
+{
+	this->buildHeader();
+	this->_string = this->_header + this->_body;
+	return ;
+}
+
 /**
  * @brief Returns the built HTTP header string.
  * @return Reference to the header string.
  */
-const std::string	&Response::getHeader(void) const
+const std::string	&Response::getHeader() const
 {
 	return (this->_header);
 }
@@ -182,9 +195,14 @@ const std::string	&Response::getHeader(void) const
  * @brief Returns the body string.
  * @return Reference to the body string.
  */
-const std::string	&Response::getBody(void) const
+const std::string	&Response::getBody() const
 {
 	return (this->_body);
+}
+
+const std::string	&Response::getString() const
+{
+	return (this->_string);
 }
 
 CGI	*Response::getCGI()
@@ -201,15 +219,6 @@ bool	Response::isCGI()
 int	Response::getFd() const
 {
 	return (this->_body_fd);
-}
-		
-/**
- * @brief Returns the full HTTP response (header + body) as a string.
- * @return Full HTTP response string.
- */
-std::string	Response::toString(void) const
-{
-	return (this->_header + this->_body);
 }
 
 /**
