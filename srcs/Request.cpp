@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 14:05:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 11:44:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,40 @@ ContentTypes	Request::getAccept() const
 std::string	Request::getQueryString() const
 {
 	return (this->_query_string);
+}
+
+void	Request::unchunkBody()
+{
+	size_t				pos;
+	size_t				next_nl;
+	const char			*hexalen;
+	long				len = 1;
+	std::string			chunk;
+	std::string			unchunked;
+	char				*endPtr;
+	
+	pos = 0;
+	while (len)
+	{
+		next_nl = this->_raw_body.find("\r\n", pos);
+		hexalen = this->_raw_body.substr(pos, next_nl).c_str();
+		pos = next_nl + 2;
+		len = strtol(hexalen, &endPtr, 16);
+		if (*endPtr != '\0' || len < 0)
+		{
+			std::cerr << "Cannot recogonize chunk size" << std::endl;
+			return ;
+		}
+		pos = next_nl + 2;
+		next_nl = this->_raw_body.find("\r\n", pos);
+		if (pos + len != next_nl)
+		{
+			std::cerr << "Wrong chunk size" << std::endl;
+			return ;
+		}
+		unchunked += this->_raw_body.substr(pos, next_nl);
+	}
+	return ;
 }
 
 void	Request::setMethod(Method method)

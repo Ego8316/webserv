@@ -6,12 +6,13 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 11:22:04 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 10:41:04 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include <signal.h>
 #include <arpa/inet.h>
 #include <cerrno>
 #include <cstdio>

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 16:44:47 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 11:42:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,11 @@ CGI &CGI::operator=(const CGI &other)
 	return (*this);
 }
 
-CGI::~CGI() {}
+CGI::~CGI()
+{
+	if (this->_process_status[0] == 0 && this->_pid != 0)
+		kill(this->_pid, SIGKILL);
+}
 
 
 void		CGI::Run(Client &client, Request &request, Config &config, Response &response)
@@ -141,8 +145,14 @@ void	CGI::parseHeader()
 		this->_content_len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ")
 			+ std::string("Content-Length: ").length());
 	}
-	else if (utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: chunked") != this->_output.end())
-		this->_chunked = true;
+	else if (utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: ") != this->_output.end())
+	{
+		size_t	line_start = utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: ") - this->_output.begin();
+		size_t	line_end = this->_output.find("\r\n", line_start);
+		std::string		line = this->_output.substr(line_start, line_end);
+		if (utils::caseInsensitiveFind(line, "chunked") != line.end())
+			this->_chunked = true;
+	}
 	if (this->_output.find("\r\n\r\n") != std::string::npos)
 		this->_header_len = this->_output.find("\r\n\r\n") + 4;
 }

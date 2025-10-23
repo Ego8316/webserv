@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 14:02:49 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 16:58:23 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class	Request
 		Request	&operator=(const Request &other);
 		~Request();
 
-		int	parseHeader(const Config &config);
+		int		parseHeader(const Config &config);
 
 		std::string							&getRawHeader();
 		std::string							&getRawBody();
@@ -44,11 +44,12 @@ class	Request
 		const Cookie						&getQueryCookies();
 		ContentTypes						getAccept() const;
 		std::string							getQueryString() const;
+		void								unchunkBody();
 
-		void		setMethod(Method method);
-		void		setError(bool error);
-		bool		headerHasField(const std::string field);
-		std::string	headerGetField(const std::string field);
+		void								setMethod(Method method);
+		void								setError(bool error);
+		bool								headerHasField(const std::string field);
+		std::string							headerGetField(const std::string field);
 
 	private:
 		std::string							_raw_header;
@@ -65,8 +66,8 @@ class	Request
 		ContentTypes						_accept;
 		Cookie 								*_query_cookies;
 
-		int	_parseRequestTarget();
-		int	_parseHeaderLine(std::string line, const Config &config);
+		int		_parseRequestTarget();
+		int		_parseHeaderLine(std::string line, const Config &config);
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);
