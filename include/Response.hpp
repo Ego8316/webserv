@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 03:25:42 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 13:03:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ class	Response
 		CGI					*getCGI();
 		bool				isCGI();
 		int					getFd() const;
+		HttpStatus			getHttpStatus() const;
 
 		static std::string	getDefaultErrorPage(HttpStatus code);
 

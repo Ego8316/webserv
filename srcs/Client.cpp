@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:51:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 13:04:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,6 +150,8 @@ int	Client::handleEvent()
 	}
 	if (this->_request_time_limit <= utils::getTime())
 		_error = KILL_REQUEST;
+	if (this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
+		_error = KILL_CLIENT;
 	if (_state == DONE || _error > WOULD_BLOCK)
 	{
 		delete this->_request;

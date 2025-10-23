@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/21 15:51:18 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 13:01:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ class	Resource
 		const std::string	&getPath(void) const;
 		ResourceStatus		getStatus(void) const;
 		size_t				getSize(void) const;
-		HttpStatus			getHttpStatus(void)	const;
 		ContentTypes		getType(void) const;
 
 		bool	exists(void) const;

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:48:47 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:58:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,8 @@ int	WebServ::Run()
 {
 	if (this->UpdateQueue() == SERV_ERROR)
 		return (SERV_ERROR);
-	this->ProcessQueue();
+	if (this->ProcessQueue() == SERV_ERROR)
+		return (SERV_ERROR);
 	return (0);
 }
 
@@ -131,6 +132,8 @@ int	WebServ::ProcessQueue()
 	next_client = this->_processing_queue.front();
 	this->_processing_queue.pop_front();
 	error = next_client->handleEvent();
+	if (error == KILL_SERVER)
+		return (SERV_ERROR);
 	if (error == KILL_CLIENT)
 		removeClient(next_client->getId());
 	else if (next_client->getState() != DONE && error <= WOULD_BLOCK)
