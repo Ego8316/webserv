@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 13:22:23 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:09:21 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ Config::Config(std::string config)
 
 		this->max_request_time = 1000;
 		this->processing_time_limit = 1000000;
+		max_header_size = 10000;
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 13:40:30 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:01:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,30 +126,42 @@ int	Client::handleEvent()
 	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
 	if (this->_state != TRY_ACCEPTING)
 		this->_time_limit = std::min(this->_time_limit, this->_request_time_limit);
-	std::cout << "Coucou 1" << std::endl;
-	std::cout << "_request_time_limit " << this->_request_time_limit << std::endl;
-	std::cout << "_time_limit " << this->_time_limit << std::endl;
-	while (utils::getTime() < this->_time_limit && _state != DONE && _state != ACCEPT_OK)
+	while (utils::getTime() < this->_time_limit && _state != DONE && _state != ACCEPT_OK && _state != ABORTING)
 	{
-		std::cout << "state = " << _state << std::endl;
 		if (_state == TRY_ACCEPTING)
 			_tryAccepting();
 		if (_state == INIT)
 			_requestInit();
 		if (_state == ABORTING)
+		{
+			std::cout << "Aborting" << std::endl;
 			return (SERV_ERROR);
+		}
 		if (this->_state == HEADER_READING && this->_readHeader() == SERV_ERROR)
+		{
+			std::cout << "HEADER_READING" << std::endl;
 			return (SERV_ERROR);
+		}
 		if (this->_state == BODY_READING && this->_readBody() == SERV_ERROR)
+		{
+			std::cout << "BODY_READING" << std::endl;
 			return (SERV_ERROR);
+		}
 		if (_state == PROCESSING_REQUEST)
 			_processRequest();
 		if (_state == CGI_RUNNING)
 			_monitorCGI();
 		if (this->_state == SENDING_STRING && this->_sendString() == SERV_ERROR)
+		{
+			std::cout << "SENDING_STRING" << std::endl;
 			return (SERV_ERROR);
+		}
 		if (this->_state == SENDING_FILE && this->_sendFile() == SERV_ERROR)
+		{
+			std::cout << "SENDING_FILE" << std::endl;
 			return (SERV_ERROR);
+		}
+		std::cout << "1" << std::endl;
 	}
 	if (this->_request_time_limit <= utils::getTime() && _state != DONE && _state != ACCEPT_OK)
 		_error = KILL_REQUEST;
@@ -162,6 +174,9 @@ int	Client::handleEvent()
 		delete this->_response;
 		this->_response = NULL;
 	}
+	if (_state == ACCEPT_OK)
+		_state = DONE;
+	
 	return (_error);
 }
 

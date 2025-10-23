@@ -54,5 +54,4 @@ class	ServerCore
 		bool	_socketListen(void);
 		void	_setNonBlocking(int fd);
 		int		_pollWait(void);
-
 };

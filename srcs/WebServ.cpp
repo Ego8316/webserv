@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:58:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:02:21 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,9 +68,15 @@ int	WebServ::Init()
 int	WebServ::Run()
 {
 	if (this->UpdateQueue() == SERV_ERROR)
+	{
+		std::cout << RED << "[UpdateQueue] UpdateQueue returned an error" << RESET << std::endl;
 		return (SERV_ERROR);
+	}
 	if (this->ProcessQueue() == SERV_ERROR)
+	{
+		std::cout << RED << "[UpdateQueue] ProcessQueue returned an error" << RESET << std::endl;
 		return (SERV_ERROR);
+	}
 	return (0);
 }
 

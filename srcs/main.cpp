@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:47:04 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 13:52:43 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 				delete configs[i];
 				it_conf = configs.begin() + i;
 				configs.erase(it_conf);
-				std::cerr << "Server " << i << ": fatal error occured" << std::endl;
+				std::cerr << RED << "Server " << i << ": fatal error occured" << RESET << std::endl;
 			}
 		}
 	}
