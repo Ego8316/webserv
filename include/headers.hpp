@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 13:40:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:16:12 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,7 @@ enum	ResourceStatus
 	ACCEPT_ERROR		= 1 << 7
 };
 
-enum ContentTypes
+enum ContentType
 {
 		FTYPE_NONE		= 0,	// 0 0 0 0 0 0 0 0
 		FTYPE_HTML		= 1,	// 0 0 0 0 0 0 0 1
@@ -157,6 +157,7 @@ enum	HttpStatus
 	HTTP_FORBIDDEN = 403,
 	HTTP_NOT_FOUND = 404,
 	HTTP_CONFLICT = 409,
+	HTTP_CONTENT_TOO_LARGE = 413,
 	HTTP_INTERNAL_SERVER_ERROR = 500,
 	HTTP_NOT_IMPLEMENTED = 501,
 	HTTP_BAD_GATEWAY = 502,
@@ -168,8 +169,8 @@ enum	RequestStage //should be set to DONE whenever not in the queue
 	TRY_ACCEPTING,
 	ACCEPT_OK,
 	INIT,
-	HEADER_READING,
-	BODY_READING,
+	READING_HEADER,
+	READING_BODY,
 	PROCESSING_REQUEST,
 	CGI_RUNNING,
 	SENDING_STRING,
@@ -187,13 +188,13 @@ enum	ProcessError
 	KILL_SERVER
 };
 
-typedef struct s_pollRevent
+typedef struct s_PollRevent
 {
 	bool	error;
 	bool	server;
 	short	revent;
 	int		client_id;
-}	pollRevent;
+}	PollRevent;
 
 typedef struct s_Redirection
 {

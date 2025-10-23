@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:02:19 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class	Resource
 		const std::string	&getPath() const;
 		ResourceStatus		getStatus() const;
 		size_t				getSize() const;
-		ContentTypes		getType() const;
+		ContentType		getType() const;
 
 		bool	exists() const;
 		bool	isCGI() const;
@@ -54,7 +54,7 @@ class	Resource
 		std::string		_path;
 		ResourceStatus	_status;
 		size_t			_size;
-		ContentTypes	_type;
+		ContentType	_type;
 		HttpStatus		_redir_code;
 		
 		bool	_checkRedirect(const std::string &requestTarget, const Config &config);

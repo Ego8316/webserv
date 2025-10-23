@@ -39,7 +39,7 @@ class	ServerCore
 		int						socketWrite(const char *buffer, int bytes_write, Client *client);
 		void					pollAdd(int fd, nfds_t event, int idx);
 		void					pollRemove(int idx);
-		std::vector<pollRevent>	pollWatchRevent();
+		std::vector<PollRevent>	pollWatchRevent();
 		bool					pollAvailFor(int indx, nfds_t operation);
 
 	private:

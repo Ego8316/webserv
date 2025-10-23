@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 14:02:21 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:15:27 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,12 +82,12 @@ int	WebServ::Run()
 
 int	WebServ::UpdateQueue()
 {
-	std::vector<pollRevent>	events;
+	std::vector<PollRevent>	events;
 
 	events = this->_core->pollWatchRevent();
 	if (events.size() == 0)
 		return (0);
-	for (std::vector<pollRevent>::iterator event = events.begin(); event != events.end(); ++event)
+	for (std::vector<PollRevent>::iterator event = events.begin(); event != events.end(); ++event)
 	{
 		if (event->error)
 		{

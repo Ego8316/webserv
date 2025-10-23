@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:06:08 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,7 +207,7 @@ size_t	Resource::getSize() const
  * @brief Returns the type.
  * @return Type.
  */
-ContentTypes	Resource::getType() const
+ContentType	Resource::getType() const
 {
 	return (_type);
 }

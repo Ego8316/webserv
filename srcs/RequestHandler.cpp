@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:12:30 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:17:04 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ void	RequestHandler::handle(Response *response, const Request &request, const Co
 {
 	if (request.getError())
 	{
-		// if (request.getContentLength() > config.max_body_size)
-		// 	return (_handleError(HTTP_CONTENT_TOO_LARGE, config));
+		if (request.getContentLength() > config.max_body_size)
+			return (_handleError(response, HTTP_CONTENT_TOO_LARGE, config));
 		return (_handleError(response, HTTP_BAD_REQUEST, config));
 	}
 	if (request.getMethod() == UNKNOWN)

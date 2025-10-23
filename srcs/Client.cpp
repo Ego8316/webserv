@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:12:18 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:14:54 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,14 +142,14 @@ int	Client::handleEvent()
 			std::cout << "Aborting" << std::endl;
 			return (SERV_ERROR);
 		}
-		if (this->_state == HEADER_READING && this->_readHeader() == SERV_ERROR)
+		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
 		{
-			std::cout << "HEADER_READING" << std::endl;
+			std::cout << "READING_HEADER" << std::endl;
 			return (SERV_ERROR);
 		}
-		if (this->_state == BODY_READING && this->_readBody() == SERV_ERROR)
+		if (this->_state == READING_BODY && this->_readBody() == SERV_ERROR)
 		{
-			std::cout << "BODY_READING" << std::endl;
+			std::cout << "READING_BODY" << std::endl;
 			return (SERV_ERROR);
 		}
 		if (_state == PROCESSING_REQUEST)
@@ -208,7 +208,7 @@ int	Client::_requestInit()
 	this->_request = new Request();
 	this->_response = new Response();
 	this->_request_time_limit = utils::getTime() + this->_config->max_request_time;
-	_state = HEADER_READING;
+	_state = READING_HEADER;
 	return (0);
 }
 
@@ -255,7 +255,7 @@ int	Client::_readHeader()
 		printState();
 		return (0);
 	}
-	this->_state = BODY_READING;
+	this->_state = READING_BODY;
 	printState();
 	return (0);
 }

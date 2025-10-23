@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCore.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:05:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:15:27 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,10 +138,10 @@ void	ServerCore::pollRemove(int idx)
 	std::memset(&_poll_fds[idx], 0, sizeof(pollfd));
 }
 
-std::vector<pollRevent>	ServerCore::pollWatchRevent()
+std::vector<PollRevent>	ServerCore::pollWatchRevent()
 {
-	std::vector<pollRevent>	ret;
-	pollRevent				revent;
+	std::vector<PollRevent>	ret;
+	PollRevent				revent;
 	int						num_event;
 
 	ret.resize(0);

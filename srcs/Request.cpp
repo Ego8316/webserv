@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 12:34:24 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,7 @@ const Cookie	&Request::getQueryCookies()
 	return (*this->_query_cookies);
 }
 
-ContentTypes	Request::getAccept() const
+ContentType	Request::getAccept() const
 {
 	return (this->_accept);
 }
@@ -259,7 +259,7 @@ int		Request::_parseHeaderLine(std::string line, const Config &config)
 			}
 		}
 		else if (key == "Accept")
-			this->_accept = static_cast<ContentTypes>(this->_accept | utils::strToContentType(value));
+			this->_accept = static_cast<ContentType>(this->_accept | utils::strToContentType(value));
 		else if (headerHasField(key))
 			this->_headers[key] = _headers[key] + "; " + value;
 		else

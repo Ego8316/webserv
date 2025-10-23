@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 12:31:24 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class	Request
 		std::map<std::string, std::string>	getHeaders() const;
 		bool								getError() const;
 		const Cookie						&getQueryCookies();
-		ContentTypes						getAccept() const;
+		ContentType						getAccept() const;
 		std::string							getQueryString() const;
 		void								unchunkBody();
 
@@ -61,7 +61,7 @@ class	Request
 		bool								_chunked;
 		std::map<std::string, std::string>	_headers;
 		bool								_error;
-		ContentTypes						_accept;
+		ContentType						_accept;
 		Cookie 								*_query_cookies;
 
 		int		_parseRequestTarget();

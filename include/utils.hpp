@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 03:00:26 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,10 @@ std::string					toLower(const std::string &str);
 std::string					capitalize(const std::string &str);
 std::string::iterator		caseInsensitiveFind(std::string haystack, std::string needle);
 ssize_t						getFileSize(const std::string &path);
-ContentTypes				strToContentType(std::string input);
-std::string					contentTypeToStr(ContentTypes type);
-ContentTypes				extensionToContentTypes(std::string fname);
-std::string					contentTypeToExtensions(ContentTypes type);
+ContentType				strToContentType(std::string input);
+std::string					contentTypeToStr(ContentType type);
+ContentType				extensionToContentTypes(std::string fname);
+std::string					contentTypeToExtensions(ContentType type);
 std::string					methodToStr(Method method);
 Method						strToMethod(const std::string &method);
 std::string					httpStatusToStr(HttpStatus code);

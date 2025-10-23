@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Utils.cpp                                          :+:      :+:    :+:   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 13:33:34 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:14:54 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ ssize_t	utils::getFileSize(const std::string &path)
 	return (-1);
 }
 
-ContentTypes	utils::strToContentType(std::string input)
+ContentType	utils::strToContentType(std::string input)
 {
 	if (input == "*/*")
 		return (FTYPE_ANY);
@@ -136,7 +136,7 @@ ContentTypes	utils::strToContentType(std::string input)
  * 
  * @return The MIME type (e.g., "text/html", "image/png").
  */
-std::string	utils::contentTypeToStr(ContentTypes type)
+std::string	utils::contentTypeToStr(ContentType type)
 {
 	switch(type)
 	{
@@ -153,7 +153,7 @@ std::string	utils::contentTypeToStr(ContentTypes type)
  * 
  * Updates _status to include IS_CGI for Python and PHP scripts.
  */
-ContentTypes	utils::extensionToContentTypes(std::string fname)
+ContentType	utils::extensionToContentTypes(std::string fname)
 {
 	if (utils::endsWith(fname, ".py"))
 		return (FTYPE_CGI_PY);
@@ -174,7 +174,7 @@ ContentTypes	utils::extensionToContentTypes(std::string fname)
  * 
  * @return File extension (e.g., ".html", ".png", ".php").
  */
-std::string	utils::contentTypeToExtensions(ContentTypes type)
+std::string	utils::contentTypeToExtensions(ContentType type)
 {
 	switch(type)
 	{
@@ -278,8 +278,8 @@ std::string	utils::stateToStr(RequestStage state)
 	{
 		case TRY_ACCEPTING:			return "TRY_ACCEPTING";
 		case ACCEPT_OK:				return "ACCEPT_OK";
-		case HEADER_READING:		return "HEADER_READING";
-		case BODY_READING:			return "BODY_READING";
+		case READING_HEADER:		return "READING_HEADER";
+		case READING_BODY:			return "READING_BODY";
 		case PROCESSING_REQUEST:	return "PROCESSING_REQUEST";
 		case CGI_RUNNING:			return "CGI_RUNNING";
 		case SENDING_STRING:		return "SENDING_STRING";
