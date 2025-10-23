@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 14:20:41 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 11:58:25 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,11 @@ class Client
 		socklen_t						_client_len;
 		int								_client_id;
 		RequestStage					_state;
+		ProcessError					_error;
 		std::string						_request_str;
 		std::string						_response_str;
 		long							_time_limit;
+		long							_request_time_limit;
 		Request							*_request;
 		Response						*_response;
 		

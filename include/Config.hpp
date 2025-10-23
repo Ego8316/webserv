@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 18:13:20 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 11:50:30 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,14 @@ class Config {
 	//MEMBER FUNCTIONS
 		unsigned int 							ip;
 		int										port_number;
-		//std::string								host_name; //TODO ?
+		//std::string							host_name; //TODO ?
 		int										domain;
 		int										type;
 		int										protocol;
 		size_t									max_body_size;
 		int										client_limit;
-		int										processing_time_limit;
+		long									processing_time_limit;
+		long									max_request_time;
 		int										incoming_queue_backlog;
 		int										buffer_size;
 		int										cookie_sessions_max;

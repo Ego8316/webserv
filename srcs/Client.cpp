@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 14:21:23 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:11:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@ Client::Client(Config *config, ServerCore *server)
 {
 	this->_client_len = sizeof(this->_client_addr);
 	this->_state = TRY_ACCEPTING;
-	this->_request = new Request();
-	this->_response = new Response();
+	this->_error = ERR_NONE;
 }
 
 Client::Client(const Client &other)
@@ -108,13 +107,18 @@ void	Client::setState(RequestStage state)
 
 int		Client::handleEvent()
 {
+	if (_state == INIT)
+	{
+		this->_request = new Request();
+		this->_response = new Response();
+		_state = HEADER_READING;
+	}
+	_error = ERR_NONE;
 	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
-	while (utils::getTime() < this->_time_limit)
+	while (utils::getTime() < this->_time_limit && _state != DONE)
 	{
 		if (_state == TRY_ACCEPTING)
 			_tryAccepting();
-		if (_state == DONE)
-			return (0);
 		if (_state == ABORTING)
 			return (SERV_ERROR);
 		if (_state == HEADER_READING && _readInput() == SERV_ERROR)
@@ -126,15 +130,16 @@ int		Client::handleEvent()
 		if (_state == OUTPUT_SENDING && _sendOutput() == SERV_ERROR)
 			return (SERV_ERROR);
 	}
-	/*if (this->_request_str.length() == 0)
+	if (_state == DONE || _error > WOULD_BLOCK)
 	{
-		std::cerr << "Empty request. Ignoring..." << std::endl;
-		return (SERV_ERROR);
-	}*/
-	//this->_state = DONE;
-	//if (_server->socketWrite(this->_response_str.c_str(), this->_response_str.length(), this) == SERV_ERROR)
-	//	return (SERV_ERROR);
-	return (0); //TODO return err code
+		delete this->_request;
+		this->_request = NULL;
+		delete this->_response;
+		this->_response = NULL;
+		this->_request_str.clear();
+		this->_response_str.clear();
+	}
+	return (_error);
 }
 
 int	Client::_tryAccepting()

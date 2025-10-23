@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 16:45:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 11:49:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,7 +246,6 @@ std::ostream	&operator<<(std::ostream &os, const Config &item)
 {
 	os << "IP :" << item.ip << std::endl;
 	os << "port_number :" << item.port_number << std::endl;
-	//os << "host_name :" << item.host_name << std::endl;
 	os << "domain :" << item.domain << std::endl;
 	os << "type :" << item.type << std::endl;
 	os << "protocol :" << item.protocol << std::endl;

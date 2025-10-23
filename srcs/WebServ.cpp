@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 13:58:05 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:07:12 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int	WebServ::UpdateQueue()
 				if (this->_clients[event->client_id]->getState() == DONE)
 				{
 					std::cout << "Client " << event->client_id << " added to processing queue" << std::endl;
-					this->_clients[event->client_id]->setState(HEADER_READING);
+					this->_clients[event->client_id]->setState(INIT);
 					this->_processing_queue.push_back(this->_clients[event->client_id]);
 				}
 			}
@@ -120,13 +120,16 @@ int	WebServ::UpdateQueue()
 int	WebServ::ProcessQueue()
 {
 	Client	*next_client;
+	int		error;
 
 	if (this->_processing_queue.empty())
 		return (0);
 	next_client = this->_processing_queue.front();
 	this->_processing_queue.pop_front();
-	next_client->handleEvent();
-	if (next_client->getState() != DONE)
+	error = next_client->handleEvent();
+	if (error == CONNECTION_SEVERED)
+		removeClient(next_client->getId());
+	else if (next_client->getState() != DONE)
 		this->_processing_queue.push_back(next_client);
 	else
 		std::cout << RED << "Client " << next_client->getId() << " finished it's event" << RESET << std::endl;
@@ -174,11 +177,4 @@ int	WebServ::removeClient(int indx)
 	}
 	this->_clients[indx] = NULL;
 	return (0);
-}
-
-int	WebServ::Reboot()
-{
-	//TODO
-	std::cerr << "Gné gné gné ca marche pas" << std::endl;
-	return (SERV_ERROR);
 }

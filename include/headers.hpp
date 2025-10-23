@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 10:41:04 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:13:51 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,7 @@ enum	HttpStatus
 enum	RequestStage //should be set to DONE whenever not in the queue
 {
 	TRY_ACCEPTING,
+	INIT,
 	HEADER_READING,
 	BODY_READING,
 	PROCESSING_REQUEST,
@@ -170,6 +171,14 @@ enum	RequestStage //should be set to DONE whenever not in the queue
 	OUTPUT_SENDING,
 	ABORTING,
 	DONE
+};
+
+enum	ProcessError
+{
+	ERR_NONE,
+	WOULD_BLOCK,
+	CONNECTION_SEVERED,
+	INTERNAL_ERROR,
 };
 
 typedef struct s_pollRevent

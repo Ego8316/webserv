@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 17:19:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 11:59:30 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ class WebServ
 		int 				ProcessQueue();
 		Client				*newClient();
 		int					removeClient(int indx);
-		int					Reboot();
 	private :
 		Config								*_config;
 		ServerCore							*_core;
