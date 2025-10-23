@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:51:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:52:40 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,25 @@
 
 CGI::CGI()
 {
-	this->_total_bytes_sent = 0;
-	this->_bytes_to_send = 0;
-	this->_total_bytes_to_read = 0;
+	this->_is_init = false;
+	this->_is_complete = false;
+	this->_status = HTTP_OK;
 	this->_output = "";
+	this->_header_len = 0;
+	this->_content_len = 0;
+	this->_pid = 0;
 	this->_process_status[0] = 0;
 	this->_process_status[1] = 0;
-	this->_header_len = 0;
-	this->_is_complete = false;
+	this->_pipe_to_CGI[0] = 0;
+	this->_pipe_to_CGI[1] = 0;
+	this->_pipe_from_CGI[0] = 0;
+	this->_pipe_from_CGI[1] = 0;
+ 	this->_total_bytes_sent = 0;
+	this->_bytes_to_send = 0;
+	this->_total_bytes_to_read = 0;
+	this->_chunked = false;
+	this->_args = NULL;
+	this->_env = NULL;
 }
 
 CGI::CGI(const CGI &other)
@@ -33,8 +44,12 @@ CGI &CGI::operator=(const CGI &other)
 {
 	if (this != &other)
 	{
+		this->_is_init = other._is_complete;
+		this->_is_complete = other._is_complete;
 		this->_status = other._status;
 		this->_output = other._output;
+		this->_header_len = other._header_len;
+		this->_content_len = other._content_len;
 		this->_pid = other._pid;
 		this->_process_status[0] = other._process_status[0];
 		this->_process_status[1] = other._process_status[1];
@@ -44,10 +59,10 @@ CGI &CGI::operator=(const CGI &other)
 		this->_pipe_from_CGI[1] = other._pipe_from_CGI[1];
 		this->_total_bytes_sent = other._total_bytes_sent;
 		this->_bytes_to_send = other._bytes_to_send;
-		this->_total_bytes_read = other._total_bytes_read;
 		this->_total_bytes_to_read = other._total_bytes_to_read;
-		this->_header_len = other._header_len;
 		this->_chunked = other._chunked;
+		this->_args = NULL;
+		this->_env = NULL;
 	}
 	return (*this);
 }

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 13:03:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:37:23 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,10 @@ class	CGI;
 class	Response
 {
 	public:
-		Response(void);
+		Response();
 		Response(const Response &other);
 		Response	&operator=(const Response &other);
-		~Response(void);
+		~Response();
 
 		void	setStatus(HttpStatus code);
 		void	setBody(const std::string &body);

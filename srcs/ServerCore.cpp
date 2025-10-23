@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 14:03:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:36:53 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,21 +45,24 @@ ServerCore	&ServerCore::operator=(const ServerCore &other)
 ServerCore::~ServerCore(void)
 {
 	if (_server_fd > 0)
-		close(_server_fd);
+	{
+		close(this->_server_fd);
+		this->_server_fd = -1;
+	}
 	return ;
 }
 
-int	ServerCore::getFd(void) const
+int	ServerCore::getFd() const
 {
-	return (_server_fd);
+	return (this->_server_fd);
 }
 
-std::vector<struct pollfd>	&ServerCore::getPollFds(void)
+std::vector<struct pollfd>	&ServerCore::getPollFds()
 {
-	return (_poll_fds);
+	return (this->_poll_fds);
 }
 
-int	ServerCore::init(void)
+int	ServerCore::init()
 {
 	if (!_socketCreate())
 	{

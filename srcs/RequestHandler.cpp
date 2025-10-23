@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 04:18:15 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 14:38:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,6 @@ Response	RequestHandler::_handlePost(const Request &request, const Config &confi
 		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
 	outfile << request.getRawBody();
 	outfile.close();
-
 	if (existed)
 		response.setStatus(HTTP_NO_CONTENT);
 	else
@@ -166,7 +165,7 @@ Response	RequestHandler::_handleCGI()
 
 	//TODO check for errors on Ressource
 	if (response.getCGI() == NULL)
-		response.setCGI(new CGI);
+		response.setCGI(new CGI());
 	return (response);
 }
 

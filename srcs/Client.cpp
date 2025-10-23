@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 14:16:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:31:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ Client::Client(const Config *config, ServerCore *server)
 	this->_bytes_sent = 0;
 	this->_bytes_in_buffer = 0;
 	this->_time_limit = 0;
+	this->_request = NULL;
+	this->_response = NULL;
 }
 
 Client::Client(const Client &other)
@@ -60,8 +62,11 @@ Client	&Client::operator=(const Client &other)
 
 Client::~Client()
 {
-	if (this->_client_fd)
+	if (this->_client_fd > 0)
+	{
 		close(this->_client_fd);
+		this->_client_fd = -1;
+	}
 	if (this->_request)
 		delete _request;
 	if (this->_response)
@@ -161,7 +166,6 @@ int	Client::handleEvent()
 			std::cout << "SENDING_FILE" << std::endl;
 			return (SERV_ERROR);
 		}
-		std::cout << "1" << std::endl;
 	}
 	if (this->_request_time_limit <= utils::getTime() && _state != DONE && _state != ACCEPT_OK)
 		_error = KILL_REQUEST;
@@ -222,7 +226,6 @@ int	Client::_readHeader()
 		this->_leftover.clear();
 	}
 	ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
-	std::cout << "bytes_read = " << bytes_read << std::endl;
 	if (bytes_read == SERV_ERROR)
 		return (SERV_ERROR);
 	if (bytes_read == WBLOCK)
