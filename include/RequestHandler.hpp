@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:04:36 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 15:10:48 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class	Resource;
 class	RequestHandler
 {
 	public:
-		static Response	handle(const Request &request, const Config &config);
+		static void	handle(Response *response, const Request &request, const Config &config, const Cookie &cookies);
 
 	private:
 		RequestHandler();
@@ -38,11 +38,11 @@ class	RequestHandler
 		RequestHandler &operator=(const RequestHandler &other);
 		~RequestHandler();
 
-		static Response	_handleGet(const Request &request, const Config &config, const Resource &resource);
-		static Response	_handlePost(const Request &request, const Config &config, const Resource &resource);
-		static Response	_handleDelete(const Request &request, const Config &config, const Resource &resource);
-		static Response	_handleRedirect(const Request &request, const Config &config, const Resource &resource);
-		static Response	_handleListDir(const Request &request, const Config &config, const Resource &resource);
-		static Response	_handleError(HttpStatus code, const Config &config);
-		static Response	_handleCGI();
+		static void	_handleGet(Response *response, const Config &config, const Resource &resource);
+		static void	_handlePost(Response *response, const Request &request, const Config &config, const Resource &resource);
+		static void	_handleDelete(Response *response, const Config &config, const Resource &resource);
+		static void	_handleRedirect(Response *response, const Resource &resource);
+		static void	_handleListDir(Response *response, const Config &config, const Resource &resource);
+		static void	_handleError(Response *response, HttpStatus code, const Config &config);
+		static void	_handleCGI(Response *response);
 };
