@@ -19,7 +19,7 @@ MyServer1 I can write whatever here {
 	BUFFER_SIZE = 1024
 	COOKIE_SESSIONS_MAX = 10000
 	COOKIE_LIFE_TIME = 2
-	SERVER_HOME = ./WebSite3/
+	SERVER_HOME = ./WebSite3
 	ENABLE_LISTDIR = true
 	DEFAULT_PAGE = /index.html
 

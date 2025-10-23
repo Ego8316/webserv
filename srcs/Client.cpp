@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:14:54 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:39:17 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ Client::Client(const Config *config, ServerCore *server)
 	this->_bytes_sent = 0;
 	this->_bytes_in_buffer = 0;
 	this->_time_limit = 0;
+	this->_request_time_limit = 0;
 	this->_request = NULL;
 	this->_response = NULL;
 }
@@ -46,10 +47,12 @@ Client	&Client::operator=(const Client &other)
 		this->_client_len = other._client_len;
 		this->_client_id = other._client_id;
 		this->_state = other._state;
+		this->_error = other._error;
 		this->_leftover = other._leftover;
 		this->_bytes_sent = other._bytes_sent;
 		this->_bytes_in_buffer = other._bytes_in_buffer;
 		this->_time_limit = other._time_limit;
+		this->_request_time_limit = other._request_time_limit;
 		if (this->_request)
 			delete this->_request;
 		this->_request = other._request ? new Request(*other._request) : NULL;
@@ -125,51 +128,38 @@ void	Client::setState(RequestStage state)
 
 int	Client::handleEvent()
 {
-	if (_state == INIT)
-		_requestInit();
-	_error = ERR_NONE;
+	if (this->_state == TRY_ACCEPTING)
+		this->_tryAccepting();
+	if (this->_state == ABORTING)
+		return (SERV_ERROR);
+	else if (this->_error == WOULD_BLOCK)
+		return (ERR_NONE);
+	else if (this->_state == DONE)
+		return (ERR_NONE);
+	if (this->_state == INIT)
+		this->_requestInit();
+	this->_error = ERR_NONE;
 	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
 	if (this->_state != TRY_ACCEPTING)
 		this->_time_limit = std::min(this->_time_limit, this->_request_time_limit);
-	while (utils::getTime() < this->_time_limit && _state != DONE && _state != ACCEPT_OK && _state != ABORTING && _error != WOULD_BLOCK)
+	while (utils::getTime() < this->_time_limit && _state != DONE && _error != WOULD_BLOCK)
 	{
-		if (_state == TRY_ACCEPTING)
-			_tryAccepting();
-		if (_state == INIT)
-			_requestInit();
-		if (_state == ABORTING)
-		{
-			std::cout << "Aborting" << std::endl;
-			return (SERV_ERROR);
-		}
 		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
-		{
-			std::cout << "READING_HEADER" << std::endl;
 			return (SERV_ERROR);
-		}
 		if (this->_state == READING_BODY && this->_readBody() == SERV_ERROR)
-		{
-			std::cout << "READING_BODY" << std::endl;
 			return (SERV_ERROR);
-		}
 		if (_state == PROCESSING_REQUEST)
 			_processRequest();
 		if (_state == CGI_RUNNING)
 			_monitorCGI();
 		if (this->_state == SENDING_STRING && this->_sendString() == SERV_ERROR)
-		{
-			std::cout << "SENDING_STRING" << std::endl;
 			return (SERV_ERROR);
-		}
 		if (this->_state == SENDING_FILE && this->_sendFile() == SERV_ERROR)
-		{
-			std::cout << "SENDING_FILE" << std::endl;
 			return (SERV_ERROR);
-		}
 	}
 	if (this->_request_time_limit <= utils::getTime() && _state != DONE && _state != ACCEPT_OK)
 		_error = KILL_REQUEST;
-	if (this->_state > ACCEPT_OK && this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
+	if (this->_state != TRY_ACCEPTING && this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
 		_error = KILL_CLIENT;
 	if (_state == DONE || _error > WOULD_BLOCK)
 	{
@@ -178,9 +168,7 @@ int	Client::handleEvent()
 		delete this->_response;
 		this->_response = NULL;
 	}
-	if (_state == ACCEPT_OK)
-		_state = DONE;
-	
+	printState();
 	return (_error);
 }
 
@@ -189,14 +177,14 @@ int	Client::_tryAccepting()
 	if (this->_server->socketAcceptClient(this) == SERV_ERROR)
 	{
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
-			return (0);
+			return (this->_error = WOULD_BLOCK, WBLOCK);
 		this->_state = ABORTING;
 		return (SERV_ERROR);
 	}
 	if (this->_server->pollAvailFor(this->_client_id, POLLIN))
 		this->_state = INIT;
 	else
-		this->_state = ACCEPT_OK;
+		this->_state = DONE;
 	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id);
 	std::cout << BLUE << "Accepted client " << this->_client_id << RESET << std::endl;
 	this->printState();
