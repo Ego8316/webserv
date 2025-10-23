@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 03:35:46 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 04:43:19 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ Client::Client(Config *config, ServerCore *server)
 	this->_state = TRY_ACCEPTING;
 	this->_leftover = "";
 	this->_bytes_sent = 0;
+	this->_bytes_in_buffer = 0;
 	this->_time_limit = 0;
 	this->_request = new Request();
 	this->_response = new Response();
@@ -46,13 +47,14 @@ Client	&Client::operator=(const Client &other)
 		this->_state = other._state;
 		this->_leftover = other._leftover;
 		this->_bytes_sent = other._bytes_sent;
+		this->_bytes_in_buffer = other._bytes_in_buffer;
 		this->_time_limit = other._time_limit;
 		if (this->_request)
 			delete this->_request;
-		this->_request = new Request(*other._request);
+		this->_request = other._request ? new Request(*other._request) : NULL;
 		if (this->_response)
 			delete this->_response;
-		this->_response = new Response(*other._response);
+		this->_response = other._response ? new Response(*other._response) : NULL;
 	}
 	return (*this);
 }
@@ -175,7 +177,7 @@ int	Client::_readHeader()
 		header_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
-	ssize_t	bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
+	ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
 	if (bytes_read == SERV_ERROR)
 		return (SERV_ERROR);
 	if (bytes_read == WBLOCK)
@@ -199,7 +201,7 @@ int	Client::_readHeader()
 	std::cout << CYAN << "[_readHeader] Header fully received (" << header_str.size() << " bytes)" << RESET << std::endl;
 	this->printHeader();
 	this->_request->parseHeader(*this->_config);
-	if (!_request->isChunked() && _request->getContentLength() == 0)
+	if (!this->_request->isChunked() && this->_request->getContentLength() == 0)
 	{
 		this->_state = PROCESSING_REQUEST;
 		printState();
@@ -212,20 +214,19 @@ int	Client::_readHeader()
 
 int	Client::_readBody()
 {
-
 	std::vector<char>	buffer(this->_config->buffer_size);
 	std::string			&body_str = this->_request->getRawBody();
 	size_t				pos;
 
 	if (body_str.empty() && !this->_request->isChunked())
-		body_str.reserve(_request->getContentLength());
+		body_str.reserve(this->_request->getContentLength());
 	if (!this->_leftover.empty())
 	{
 		std::cout << YELLOW << "[_readBody] Applying leftover (" << _leftover.size() << " bytes)" << RESET << std::endl;
 		body_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
-	ssize_t	bytes_read = _server->socketRead(&buffer[0], buffer.size(), this);
+	ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
 	if (bytes_read == SERV_ERROR)
 		return (SERV_ERROR);
 	if (bytes_read == WBLOCK)
@@ -299,7 +300,7 @@ int	Client::_sendString()
 
 	if (bytes_to_send > 0)
 	{
-		int	sent = _server->socketWrite(response_str.c_str() + this->_bytes_sent, bytes_to_send, this);
+		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, bytes_to_send, this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);
 		if (sent == WBLOCK)
@@ -322,6 +323,30 @@ int	Client::_sendString()
 
 int	Client::_sendFile()
 {
+	std::vector<char>	buffer(this->_config->buffer_size);
+
+	ssize_t	bytes_read = read(this->_response->getFd(), &buffer[0], this->_config->buffer_size);
+	if (bytes_read < 0)
+		return (SERV_ERROR);
+	else if (bytes_read == 0)
+	{
+		close(this->_response->getFd());
+		this->_response->setFd(-1);
+		this->_state = DONE;
+		this->printState();
+		return (0);
+	}
+
+	ssize_t	bytes_sent = this->_server->socketWrite(&buffer[0], bytes_read, this);
+	if (bytes_sent == SERV_ERROR)
+		return (SERV_ERROR);
+	if (bytes_sent == WBLOCK)
+		return (0);
+	if (bytes_sent == 0)
+	{
+		std::cout << CYAN << "[_sendString] Client closed the connection" << RESET << std::endl;
+		return (this->_state = ABORTING, 0);
+	}
 	return (0);
 }
 

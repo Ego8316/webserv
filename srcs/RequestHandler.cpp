@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 03:26:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 04:18:15 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ Response	RequestHandler::_handleGet(const Request &request, const Config &config
 
 Response	RequestHandler::_handlePost(const Request &request, const Config &config, const Resource &resource)
 {
-	Response		response;
+	Response		response = Response();
 	std::ofstream	outfile;
 	bool			existed;
 

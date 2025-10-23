@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 03:30:05 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 04:42:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ class Client
 		RequestStage		_state;
 		std::string			_leftover;
 		int					_bytes_sent;
+		int					_bytes_in_buffer;
 		long				_time_limit;
 		Request				*_request;
 		Response			*_response;

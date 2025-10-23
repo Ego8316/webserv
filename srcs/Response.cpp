@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 03:44:51 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 04:15:24 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,12 +52,8 @@ Response	&Response::operator=(const Response &other)
 		this->_string = other._string;
 		this->_headers = other._headers;
 		if (this->_cgi)
-		{
 			delete this->_cgi;
-			this->_cgi = NULL;
-		}
-		if (other._cgi)
-			this->_cgi = new CGI(*other._cgi);
+		this->_cgi = other._cgi ? new CGI(*other._cgi) : NULL;
 		this->_is_cgi = other._is_cgi;
 		this->_body_fd = other._body_fd;
 	}

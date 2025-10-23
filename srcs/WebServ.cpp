@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 04:01:23 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 04:05:17 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int	WebServ::UpdateQueue()
 			}
 			else
 			{
-				if (this->_clients[event->client_id]->getState() == DONE)
+				if (this->_clients[event->client_id] && this->_clients[event->client_id]->getState() == DONE)
 				{
 					std::cout << MAGENTA << "[UpdateQueue] Client " << event->client_id << " added to processing queue" << RESET << std::endl;
 					this->_clients[event->client_id]->setState(HEADER_READING);
