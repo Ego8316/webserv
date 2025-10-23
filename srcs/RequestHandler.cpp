@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:11:44 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:12:30 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ RequestHandler::~RequestHandler(void)
 	return ;
 }
 
-void	RequestHandler::handle(Response *response, const Request &request, const Config &config, const Cookie &cookies)
+void	RequestHandler::handle(Response *response, const Request &request, const Config &config)
 {
 	if (request.getError())
 	{

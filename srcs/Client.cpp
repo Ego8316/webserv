@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:11:53 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:12:18 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -310,7 +310,7 @@ int	Client::_readBody()
 
 void	Client::_processRequest()
 {
-	RequestHandler::handle(this->_response, *_request, *_config, cookies);
+	RequestHandler::handle(this->_response, *_request, *_config);
 	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
 		<< BLUE << " Processing request" << RESET << std::endl;
 	this->printRequest();

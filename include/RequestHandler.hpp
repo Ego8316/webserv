@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:10:48 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:12:35 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class	Resource;
 class	RequestHandler
 {
 	public:
-		static void	handle(Response *response, const Request &request, const Config &config, const Cookie &cookies);
+		static void	handle(Response *response, const Request &request, const Config &config);
 
 	private:
 		RequestHandler();
