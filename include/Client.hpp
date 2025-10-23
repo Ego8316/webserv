@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:49:30 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 13:29:31 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ class Client
 		Response						*_response;
 		
 		int		_tryAccepting();
+		int		_requestInit();
 		int		_readHeader();
 		int		_readBody();
 		void	_processRequest();

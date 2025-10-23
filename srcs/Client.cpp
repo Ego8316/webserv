@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 13:21:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 13:40:30 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,20 +121,21 @@ void	Client::setState(RequestStage state)
 int	Client::handleEvent()
 {
 	if (_state == INIT)
-	{
-		this->_request = new Request();
-		this->_response = new Response();
-		this->_request_time_limit = utils::getTime() + this->_config->max_request_time;
-		_state = HEADER_READING;
-	}
+		_requestInit();
 	_error = ERR_NONE;
-	this->_time_limit = std::min(utils::getTime() + this->_config->processing_time_limit, this->_request_time_limit);
+	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
+	if (this->_state != TRY_ACCEPTING)
+		this->_time_limit = std::min(this->_time_limit, this->_request_time_limit);
 	std::cout << "Coucou 1" << std::endl;
-	while (utils::getTime() < this->_time_limit && _state != DONE)
+	std::cout << "_request_time_limit " << this->_request_time_limit << std::endl;
+	std::cout << "_time_limit " << this->_time_limit << std::endl;
+	while (utils::getTime() < this->_time_limit && _state != DONE && _state != ACCEPT_OK)
 	{
 		std::cout << "state = " << _state << std::endl;
 		if (_state == TRY_ACCEPTING)
 			_tryAccepting();
+		if (_state == INIT)
+			_requestInit();
 		if (_state == ABORTING)
 			return (SERV_ERROR);
 		if (this->_state == HEADER_READING && this->_readHeader() == SERV_ERROR)
@@ -150,9 +151,9 @@ int	Client::handleEvent()
 		if (this->_state == SENDING_FILE && this->_sendFile() == SERV_ERROR)
 			return (SERV_ERROR);
 	}
-	if (this->_request_time_limit <= utils::getTime())
+	if (this->_request_time_limit <= utils::getTime() && _state != DONE && _state != ACCEPT_OK)
 		_error = KILL_REQUEST;
-	if (this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
+	if (this->_state > ACCEPT_OK && this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
 		_error = KILL_CLIENT;
 	if (_state == DONE || _error > WOULD_BLOCK)
 	{
@@ -174,14 +175,24 @@ int	Client::_tryAccepting()
 		return (SERV_ERROR);
 	}
 	if (this->_server->pollAvailFor(this->_client_id, POLLIN))
-		this->_state = HEADER_READING;
+		this->_state = INIT;
 	else
-		this->_state = DONE;
+		this->_state = ACCEPT_OK;
 	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id);
 	std::cout << BLUE << "Accepted client " << this->_client_id << RESET << std::endl;
 	this->printState();
 	return (0);
 }
+
+int	Client::_requestInit()
+{
+	this->_request = new Request();
+	this->_response = new Response();
+	this->_request_time_limit = utils::getTime() + this->_config->max_request_time;
+	_state = HEADER_READING;
+	return (0);
+}
+
 
 int	Client::_readHeader()
 {

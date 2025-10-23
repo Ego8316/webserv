@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 12:31:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 13:40:12 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,6 +166,7 @@ enum	HttpStatus
 enum	RequestStage //should be set to DONE whenever not in the queue
 {
 	TRY_ACCEPTING,
+	ACCEPT_OK,
 	INIT,
 	HEADER_READING,
 	BODY_READING,

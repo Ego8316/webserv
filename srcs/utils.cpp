@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.cpp                                          :+:      :+:    :+:   */
+/*   Utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 03:48:06 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 13:33:34 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -277,6 +277,7 @@ std::string	utils::stateToStr(RequestStage state)
 	switch (state)
 	{
 		case TRY_ACCEPTING:			return "TRY_ACCEPTING";
+		case ACCEPT_OK:				return "ACCEPT_OK";
 		case HEADER_READING:		return "HEADER_READING";
 		case BODY_READING:			return "BODY_READING";
 		case PROCESSING_REQUEST:	return "PROCESSING_REQUEST";
