@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:50:58 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:59:38 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,9 +128,7 @@ void	Client::setState(RequestStage state)
 
 int	Client::handleEvent()
 {
-	printState();
 	this->_error = ERR_NONE;
-	std::cout << "error: " << _error << std::endl;
 	if (this->_state == TRY_ACCEPTING)
 		this->_tryAccepting();
 	if (this->_state == ABORTING)
@@ -159,7 +157,7 @@ int	Client::handleEvent()
 		if (this->_state == SENDING_FILE && this->_sendFile() == SERV_ERROR)
 			return (SERV_ERROR);
 	}
-	if (this->_request_time_limit <= utils::getTime() && _state != DONE && _state != ACCEPT_OK)
+	if (this->_request_time_limit <= utils::getTime() && _state != DONE)
 		_error = KILL_REQUEST;
 	if (this->_state != TRY_ACCEPTING && this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
 		_error = KILL_CLIENT;

@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:16:12 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:57:49 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,6 @@ enum	HttpStatus
 enum	RequestStage //should be set to DONE whenever not in the queue
 {
 	TRY_ACCEPTING,
-	ACCEPT_OK,
 	INIT,
 	READING_HEADER,
 	READING_BODY,

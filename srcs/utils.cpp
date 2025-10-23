@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:14:54 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:58:55 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -277,7 +277,7 @@ std::string	utils::stateToStr(RequestStage state)
 	switch (state)
 	{
 		case TRY_ACCEPTING:			return "TRY_ACCEPTING";
-		case ACCEPT_OK:				return "ACCEPT_OK";
+		case INIT:					return "INIT";
 		case READING_HEADER:		return "READING_HEADER";
 		case READING_BODY:			return "READING_BODY";
 		case PROCESSING_REQUEST:	return "PROCESSING_REQUEST";
