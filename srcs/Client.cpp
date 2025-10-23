@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:39:17 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 15:50:58 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,9 @@ void	Client::setState(RequestStage state)
 
 int	Client::handleEvent()
 {
+	printState();
+	this->_error = ERR_NONE;
+	std::cout << "error: " << _error << std::endl;
 	if (this->_state == TRY_ACCEPTING)
 		this->_tryAccepting();
 	if (this->_state == ABORTING)
@@ -138,7 +141,6 @@ int	Client::handleEvent()
 		return (ERR_NONE);
 	if (this->_state == INIT)
 		this->_requestInit();
-	this->_error = ERR_NONE;
 	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
 	if (this->_state != TRY_ACCEPTING)
 		this->_time_limit = std::min(this->_time_limit, this->_request_time_limit);
@@ -215,7 +217,10 @@ int	Client::_readHeader()
 	}
 	ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
 	if (bytes_read == SERV_ERROR)
+	{
+		std::cout << "caca" << std::endl;
 		return (SERV_ERROR);
+	}
 	if (bytes_read == WBLOCK)
 		return (_error = WOULD_BLOCK, WOULD_BLOCK);
 	if (bytes_read == 0)
