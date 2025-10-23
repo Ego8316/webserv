@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:02:00 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 16:46:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Client
 		RequestStage			getState();
 		ServerCore				&getServer();
 		long					getTimeLimit();
+		long					getRequestTimeLimit();
 		void					setFd(int fd);
 		void					setClientId(int id);
 		void    				setState(RequestStage state);

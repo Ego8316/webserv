@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 14:09:21 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 16:44:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,6 @@ Config::Config(std::string config)
 			this->setIP(value);
 		if (field == "PORT")
 			this->port_number = atoi(value.c_str());
-		//if (field == "HOST_NAME")
-		//	this->host_name = value;
 		else if (field == "DOMAIN")
 		{
 			if (value == "AF_INET")
@@ -57,6 +55,8 @@ Config::Config(std::string config)
 			this->client_limit = atoi(value.c_str());
 		else if (field == "PROCESSING_TIME_LIMIT")
 			this->processing_time_limit = atoi(value.c_str());
+		else if (field == "MAX_REQUEST_TIME")
+			this->max_request_time = atoi(value.c_str());
 		else if (field == "INCOMMING_QUEUE_BACKLOG")
 			this->incoming_queue_backlog = atoi(value.c_str());
 		else if (field == "COOKIE_SESSIONS_MAX")
@@ -75,12 +75,6 @@ Config::Config(std::string config)
 			this->parseDefaultErrorPages(conf_stream);
 		else if (field == "HTTP_REDIR")
 			this->parseHttpRedir(conf_stream);
-
-
-
-		this->max_request_time = 1000;
-		this->processing_time_limit = 1000000;
-		max_header_size = 10000;
 	}
 }
 
@@ -96,7 +90,6 @@ Config &Config::operator=(const Config &other)
 		this->ip = other.ip;
 		this->port_number = other.port_number;
 		this->domain = other.domain;
-		//this->host_name = other.host_name;
 		this->type = other.type;
 		this->protocol = other.protocol;
 		this->max_header_size = other.max_header_size;

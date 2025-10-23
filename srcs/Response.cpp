@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:56:14 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 16:42:55 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,8 +164,6 @@ void	Response::buildHeader()
 {
 	if (!utils::mapHasEntry(this->_headers, std::string("Server")))
 		this->_headers["Server"] = "Webserv/1.0 (Unix)";
-	// if (!utils::mapHasEntry(_headers, std::string("Connection")))
-	// 	this->_headers["Connection"] = "close";
 	this->_header = "HTTP/1.0 " + utils::toString(this->_status_code)
 		+ " " + utils::httpStatusToStr(this->_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); ++it)

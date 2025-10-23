@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 14:52:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 16:42:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,11 +192,7 @@ void	CGI::genFullOutput(Response &response)
 	else
 		this->_status = HTTP_OK;
 	response.setStatus(this->_status);
-	//this->_header = "HTTP/1.0 " + utils::toString(this->_status)
-	//	+ " " + utils::httpStatusToStr(this->_status) + "\r\n";
-	//this->_header += "Server: Webserv/1.0 (Unix)\r\n";
 	if (!this->_content_len && !this->_chunked)
-		//this->_header += "Content-Length: " + utils::toString(this->_output.length() - this->_header_len) + "\r\n";
 		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n"));
 	response.buildHeader();
 	std::cout << "HEADER ====== \n" << response.getHeader() << std::endl;

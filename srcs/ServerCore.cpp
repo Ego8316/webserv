@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCore.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:15:27 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 16:23:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,6 @@ int	ServerCore::socketAcceptClient(Client *new_client)
 
 int	ServerCore::socketRead(char *buffer, int bytes_read, Client *client)
 {
-	std::cout << "TRYING TO READ !" << std::endl;
 	if (!pollAvailFor(client->getId(), POLLIN))
 		return (WBLOCK);
 	int	bytes_received = recv(client->getFd(), buffer, bytes_read, MSG_DONTWAIT);

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 16:12:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 17:01:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,11 @@ long	Client::getTimeLimit()
 	return (this->_time_limit);
 }
 
+long	Client::getRequestTimeLimit()
+{
+	return (this->_request_time_limit);
+}
+
 void	Client::setClientId(int id)
 {
 	this->_client_id = id;
@@ -129,6 +134,8 @@ void	Client::setState(RequestStage state)
 int	Client::handleEvent()
 {
 	this->_error = ERR_NONE;
+	if (this->_request_time_limit == 0)
+		this->_request_time_limit = utils::getTime() + _config->max_request_time;
 	if (this->_state == TRY_ACCEPTING)
 		this->_tryAccepting();
 	if (this->_state == ABORTING)
@@ -136,12 +143,13 @@ int	Client::handleEvent()
 	else if (this->_error == WOULD_BLOCK)
 		return (ERR_NONE);
 	else if (this->_state == DONE)
+	{
+		this->_request_time_limit = 0;
 		return (ERR_NONE);
+	}
 	if (this->_state == INIT)
 		this->_requestInit();
-	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
-	if (this->_state != TRY_ACCEPTING)
-		this->_time_limit = std::min(this->_time_limit, this->_request_time_limit);
+	this->_time_limit = std::min(utils::getTime() + this->_config->processing_time_limit, this->_request_time_limit);
 	while (utils::getTime() < this->_time_limit && _state != DONE && _error != WOULD_BLOCK)
 	{
 		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
@@ -167,6 +175,7 @@ int	Client::handleEvent()
 		this->_request = NULL;
 		delete this->_response;
 		this->_response = NULL;
+		this->_request_time_limit = 0;
 	}
 	printState();
 	return (_error);
@@ -215,12 +224,12 @@ int	Client::_readHeader()
 	}
 	ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
 	if (bytes_read == SERV_ERROR)
-	{
-		std::cout << "caca" << std::endl;
 		return (SERV_ERROR);
-	}
 	if (bytes_read == WBLOCK)
-		return (_error = WOULD_BLOCK, WOULD_BLOCK);
+	{
+		this->_error = WOULD_BLOCK;
+		return (WOULD_BLOCK);
+	}
 	if (bytes_read == 0)
 	{
 		std::cout << CYAN << "[_readHeader] Client closed the connection" << RESET << std::endl;
@@ -306,15 +315,10 @@ void	Client::_processRequest()
 		<< BLUE << " Processing request" << RESET << std::endl;
 	this->printRequest();
 	if (_response->isCGI())
-	{
 		this->_state = CGI_RUNNING;
-		printState();
-	}
 	else
-	{
 		this->_state = SENDING_STRING;
-		printState();
-	}
+	printState();
 	return ;
 }
 
