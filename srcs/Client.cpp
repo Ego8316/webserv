@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:11:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:29:21 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,10 +111,11 @@ int		Client::handleEvent()
 	{
 		this->_request = new Request();
 		this->_response = new Response();
+		this->_request_time_limit = utils::getTime() + this->_config->max_request_time;
 		_state = HEADER_READING;
 	}
 	_error = ERR_NONE;
-	this->_time_limit = utils::getTime() + this->_config->processing_time_limit;
+	this->_time_limit = std::min(utils::getTime() + this->_config->processing_time_limit, this->_request_time_limit);
 	while (utils::getTime() < this->_time_limit && _state != DONE)
 	{
 		if (_state == TRY_ACCEPTING)
@@ -130,6 +131,8 @@ int		Client::handleEvent()
 		if (_state == OUTPUT_SENDING && _sendOutput() == SERV_ERROR)
 			return (SERV_ERROR);
 	}
+	if (this->_request_time_limit <= utils::getTime())
+		_error = KILL_REQUEST;
 	if (_state == DONE || _error > WOULD_BLOCK)
 	{
 		delete this->_request;

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 12:13:51 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:18:07 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,8 +177,9 @@ enum	ProcessError
 {
 	ERR_NONE,
 	WOULD_BLOCK,
-	CONNECTION_SEVERED,
-	INTERNAL_ERROR,
+	KILL_REQUEST,
+	KILL_CLIENT,
+	KILL_SERVER
 };
 
 typedef struct s_pollRevent
