@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/19 17:20:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:35:13 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,16 +109,13 @@ int main(int argc, char *argv[])
 		{
 			if (web_servers[i]->Run() == SERV_ERROR)
 			{
-				if (web_servers[i]->Reboot() == SERV_ERROR)
-				{
-					delete web_servers[i];
-					it_web = web_servers.begin() + i;
-					web_servers.erase(it_web);
-					delete configs[i];
-					it_conf = configs.begin() + i;
-					configs.erase(it_conf);
-					std::cerr << "Server " << i << ": fatal error occured" << std::endl;
-				}
+				delete web_servers[i];
+				it_web = web_servers.begin() + i;
+				web_servers.erase(it_web);
+				delete configs[i];
+				it_conf = configs.begin() + i;
+				configs.erase(it_conf);
+				std::cerr << "Server " << i << ": fatal error occured" << std::endl;
 			}
 		}
 	}

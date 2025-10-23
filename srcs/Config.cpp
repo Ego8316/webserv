@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 11:49:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:34:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ Config::Config(std::string config)
 			this->protocol = atoi(value.c_str());
 		else if (field == "METHODS")
 			this->parseMethod(conf_stream);
+		else if (field == "MAX_HEADER_SIZE")
+			this->max_header_size = atoi(value.c_str());
 		else if (field == "MAX_BODY_SIZE")
 			this->max_body_size = atoi(value.c_str());
 		else if (field == "CLIENT_LIMIT")
@@ -91,6 +93,8 @@ Config &Config::operator=(const Config &other)
 		//this->host_name = other.host_name;
 		this->type = other.type;
 		this->protocol = other.protocol;
+		this->max_header_size = other.max_header_size;
+		this->max_body_size = other.max_body_size;
 		this->client_limit = other.client_limit;
 		this->processing_time_limit = other.processing_time_limit;
 		this->incoming_queue_backlog = other.incoming_queue_backlog;
@@ -232,7 +236,7 @@ void		Config::parseHttpRedir(std::istringstream &conf_stream)
 	}
 }
 
-bool	Config::isAcceptedMethod( Method element) const
+bool	Config::isAcceptedMethod(Method element) const
 {
 	for (unsigned int i = 0; i < this->accepted_methods.size(); ++i)
 	{

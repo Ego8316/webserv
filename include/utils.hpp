@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 20:43:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 03:00:26 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,20 @@ namespace	utils
 bool						endsWith(const std::string& str, const std::string& suffix);
 bool 						startsWith(const std::string& str, const std::string& prefix);
 std::vector<std::string>	stringSplit(std::string str, std::string del);
-std::string					stringTrim(std::string str, std::string set);
+std::string					stringTrim(std::string &str, const std::string &set);
 std::string					toLower(const std::string &str);
 std::string					capitalize(const std::string &str);
 std::string::iterator		caseInsensitiveFind(std::string haystack, std::string needle);
-size_t						getFileSize(const std::string &path);
+ssize_t						getFileSize(const std::string &path);
 ContentTypes				strToContentType(std::string input);
 std::string					contentTypeToStr(ContentTypes type);
 ContentTypes				extensionToContentTypes(std::string fname);
 std::string					contentTypeToExtensions(ContentTypes type);
 std::string					methodToStr(Method method);
-Method						strToMethod(std::string method);
+Method						strToMethod(const std::string &method);
 std::string					httpStatusToStr(HttpStatus code);
 HttpStatus					strToHttpStatus(std::string status);
+std::string					stateToStr(RequestStage state);
 long						getTime();
 
 template <typename T>

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 11:57:29 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 04:18:15 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,11 @@ Response	RequestHandler::handle(const Request &request, const Config &config, co
 {
 	(void)cookies;
 	if (request.getError())
-		return _handleError(HTTP_BAD_REQUEST, config);
+	{
+		// if (request.getContentLength() > config.max_body_size)
+			// return (_handleError(HTTP_CONTENT_TOO_LARGE, config));
+		return (_handleError(HTTP_BAD_REQUEST, config));
+	}
 	if (request.getMethod() == UNKNOWN)
 		return (_handleError(HTTP_NOT_IMPLEMENTED, config));
 	// TODO : BIEN PENSER A CHANGER AVANT DE RENDRE
@@ -72,9 +76,9 @@ Response	RequestHandler::handle(const Request &request, const Config &config, co
 
 Response	RequestHandler::_handleGet(const Request &request, const Config &config, const Resource &resource)
 {
-	Response			response;
-	std::ifstream		file;
-	std::ostringstream	buffer;
+	Response	response;
+	int			fd;
+	ssize_t		size;
 
 	if (!resource.isReadable())
 		return (_handleError(HTTP_FORBIDDEN, config));
@@ -88,28 +92,31 @@ Response	RequestHandler::_handleGet(const Request &request, const Config &config
 		return (_handleError(HTTP_FORBIDDEN, config));
 	}
 	
-	file.open(resource.getPath().c_str(), std::ios::in | std::ios::binary);
-	if (!file.is_open())
+	if ((fd = open(resource.getPath().c_str(), O_RDONLY)) == -1)
 		return (_handleError(HTTP_INTERNAL_SERVER_ERROR, config));
-	buffer << file.rdbuf();
-	file.close();
+	if ((size = utils::getFileSize(resource.getPath())) == -1)
+		return (close(fd), _handleError(HTTP_INTERNAL_SERVER_ERROR, config));
 	
 	response.setStatus(HTTP_OK);
-	response.setBody(buffer.str());
-	response.setContentLength(buffer.str().size());
+	response.setFd(fd);
+	response.setContentLength(size);
 	response.setContentType(utils::contentTypeToStr(resource.getType()));
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
 Response	RequestHandler::_handlePost(const Request &request, const Config &config, const Resource &resource)
 {
-	Response		response;
+	Response		response = Response();
 	std::ofstream	outfile;
+	bool			existed;
 
 	(void)request;
 	if (request.getRawBody().empty() || resource.isDirectory())
 		return (_handleError(HTTP_BAD_REQUEST, config));
+
+	std::ifstream	check(resource.getPath().c_str());
+	existed = check.good();
 
 	outfile.open(resource.getPath().c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
 	if (!outfile.is_open())
@@ -117,11 +124,17 @@ Response	RequestHandler::_handlePost(const Request &request, const Config &confi
 	outfile << request.getRawBody();
 	outfile.close();
 
-	response.setStatus(HTTP_CREATED);
-	response.setBody("Sahtek frerot");
+	if (existed)
+		response.setStatus(HTTP_NO_CONTENT);
+	else
+	{
+		response.setStatus(HTTP_CREATED);
+		response.setHeaders("Location", resource.getPath());
+	}
+	response.setBody(POST_PAGE);
 	response.setContentType("text/html");
 	response.setContentLength(response.getBody().size());
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
@@ -143,7 +156,7 @@ Response	RequestHandler::_handleDelete(const Request &request, const Config &con
 	response.setStatus(HTTP_NO_CONTENT);
 	response.setBody("");
 	response.setContentLength(0);
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
@@ -168,7 +181,7 @@ Response	RequestHandler::_handleRedirect(const Request &request, const Config &c
 	response.setHeaders("Location", resource.getPath());
 	response.setContentType("text/html");
 	response.setContentLength(0);
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
@@ -199,27 +212,38 @@ Response	RequestHandler::_handleListDir(const Request &request, const Config &co
 	response.setBody(response_body);
 	response.setContentLength(response_body.length());
 	response.setContentType("text/html");
-	response.buildHeader();
+	response.build();
 	return (response);
 }
 
 Response	RequestHandler::_handleError(HttpStatus code, const Config &config)
 {
 	Response	response;
-	std::string	content;
+	std::string	error_page_path;
+	int			fd;
+	ssize_t		size;
+
+	response.setStatus(code);
+	response.setContentType("text/html");
 
 	if (utils::mapHasEntry(config.default_error_pages, (int)code))
 	{
-		std::ifstream	file(config.default_error_pages.at((int)code).c_str());
-		if (file)
-			content.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		error_page_path = config.default_error_pages.at(code);
+		if ((fd = open(error_page_path.c_str(), O_RDONLY)) >= 0)
+		{
+			if ((size = utils::getFileSize(error_page_path)) != -1)
+			{
+				response.setFd(fd);
+				response.setContentLength(size);
+				response.build();
+				return (response);
+			}
+			close(fd);
+		}
 	}
-	else
-		content = Response::getDefaultErrorPage(code);
-	response.setStatus(code);
-	response.setBody(content);
-	response.setContentLength(content.size());
-	response.setContentType("text/html");
-	response.buildHeader();
+
+	response.setBody(Response::getDefaultErrorPage(code));
+	response.setContentLength(response.getBody().size());
+	response.build();
 	return (response);
 }

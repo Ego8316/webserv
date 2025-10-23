@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 12:00:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 03:25:42 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,14 +27,6 @@ class	CGI;
  */
 class	Response
 {
-	private:
-		HttpStatus							_status_code;
-		std::string							_header;
-		std::string							_body;
-		std::map<std::string, std::string>	_headers;
-		CGI									*_cgi;
-		bool								_is_cgi;
-		
 	public:
 		Response(void);
 		Response(const Response &other);
@@ -44,19 +36,32 @@ class	Response
 		void	setStatus(HttpStatus code);
 		void	setBody(const std::string &body);
 		void	setHeaders(const std::string &key, const std::string &value);
+		void	setCGI(CGI *cgi);
+		void	setFd(int fd);
 
 		void	setContentType(const std::string &type);
 		void	setContentLength(size_t len);
 		void	setCookie(const std::string &cookie);
 
-		void		buildHeader(void);
+		void	buildHeader();
+		void	build();
 
-		const std::string	&getHeader(void) const;
-		const std::string	&getBody(void) const;
+		const std::string	&getHeader() const;
+		const std::string	&getBody() const;
+		const std::string	&getString() const;
 		CGI					*getCGI();
-		void				setCGI(CGI *cgi);
 		bool				isCGI();
-		std::string			toString(void) const;
+		int					getFd() const;
 
 		static std::string	getDefaultErrorPage(HttpStatus code);
+
+	private:
+		HttpStatus							_status_code;
+		std::string							_header;
+		std::string							_body;
+		std::string							_string;
+		std::map<std::string, std::string>	_headers;
+		CGI									*_cgi;
+		bool								_is_cgi;
+		int									_body_fd;
 };

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 11:50:30 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:31:10 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class Config {
 		int										domain;
 		int										type;
 		int										protocol;
+		size_t									max_header_size;
 		size_t									max_body_size;
 		int										client_limit;
 		long									processing_time_limit;

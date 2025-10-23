@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCore.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 14:01:08 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 04:08:14 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,10 @@ std::vector<pollRevent>	ServerCore::pollWatchRevent(void)
 		return (ret);
 	for (unsigned int i = 0; i < _poll_fds.size(); ++i)
 	{
+		revent.error = false;
+		revent.server = false;
+		revent.client_id = -1;
+		revent.revent = 0;
 		if (_poll_fds[i].fd == 0)
 			continue ;
 		if (_poll_fds[i].revents & POLLHUP || _poll_fds[i].revents & POLLERR)

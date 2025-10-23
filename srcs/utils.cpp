@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Utils.cpp                                          :+:      :+:    :+:   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/20 20:45:52 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 03:48:06 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
 
-bool utils::endsWith(const std::string& str, const std::string& suffix)
+bool	utils::endsWith(const std::string& str, const std::string& suffix)
 {
 	if (str.length() < suffix.length())
 	{
@@ -21,7 +21,7 @@ bool utils::endsWith(const std::string& str, const std::string& suffix)
 	return (str.substr(str.length() - suffix.length(), suffix.length()) == suffix);
 }
 
-bool utils::startsWith(const std::string& str, const std::string& prefix)
+bool	utils::startsWith(const std::string& str, const std::string& prefix)
 {
 	if (str.length() < prefix.length())
 	{
@@ -48,16 +48,16 @@ std::vector<std::string>	utils::stringSplit(std::string str, std::string del)
 	return (split_str);
 }
 
-std::string			utils::stringTrim(std::string str, std::string set)
+std::string	utils::stringTrim(std::string &str, const std::string &set)
 {
 	unsigned int	last_size = str.size() + 1;
 
 	while (last_size != str.size())
 	{
 		last_size = str.size();
-		if (set.find(str[0]) != std::string::npos)
+		if (!str.empty() && set.find(str[0]) != std::string::npos)
 			str.erase(0, 1);
-		if (set.find(str[str.size() - 1]) != std::string::npos)
+		if (!str.empty() && set.find(str[str.size() - 1]) != std::string::npos)
 			str.erase(str.size() - 1, 1);
 	}
 	return (str);
@@ -92,26 +92,27 @@ std::string	utils::capitalize(const std::string &str)
 	return (result);
 }
 
-static bool CICharComp(char a, char b)
+static bool	CICharComp(char a, char b)
 {
 	return (std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)));
 }
 
-std::string::iterator		utils::caseInsensitiveFind(std::string haystack, std::string needle)
+std::string::iterator	utils::caseInsensitiveFind(std::string haystack, std::string needle)
 {
 	std::string::iterator it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
 	return (it);
 }
 
-size_t	utils::getFileSize(const std::string &path)
+ssize_t	utils::getFileSize(const std::string &path)
 {
 	struct stat	st;
+
 	if (stat(path.c_str(), &st) == 0)
 		return (st.st_size);
-	return (0);
+	return (-1);
 }
 
-ContentTypes		utils::strToContentType(std::string input)
+ContentTypes	utils::strToContentType(std::string input)
 {
 	if (input == "*/*")
 		return (FTYPE_ANY);
@@ -152,7 +153,7 @@ std::string	utils::contentTypeToStr(ContentTypes type)
  * 
  * Updates _status to include IS_CGI for Python and PHP scripts.
  */
-ContentTypes		utils::extensionToContentTypes(std::string fname)
+ContentTypes	utils::extensionToContentTypes(std::string fname)
 {
 	if (utils::endsWith(fname, ".py"))
 		return (FTYPE_CGI_PY);
@@ -187,18 +188,18 @@ std::string	utils::contentTypeToExtensions(ContentTypes type)
 }
 
 
-std::string		utils::methodToStr(Method method)
+std::string	utils::methodToStr(Method method)
 {
-	if (method == GET)
-		return ("GET");
-	else if (method == POST)
-		return ("POST");
-	else
-		return ("DELETE");
-	return ("");
+	switch(method)
+	{
+		case GET:		return ("GET");
+		case POST:		return ("POST");
+		case DELETE:	return ("DELETE");
+		default:		return ("UNKNOWN");
+	}
 }
 
-Method			utils::strToMethod(std::string method_str)
+Method	utils::strToMethod(const std::string &method_str)
 {
 	if (method_str == "GET")
 		return (GET);
@@ -271,9 +272,26 @@ HttpStatus	utils::strToHttpStatus(std::string status)
 	return (HTTP_UNKNOWN_STATUS);
 }
 
-long		utils::getTime()
+std::string	utils::stateToStr(RequestStage state)
 {
-	time_t		t;
+	switch (state)
+	{
+		case TRY_ACCEPTING:			return "TRY_ACCEPTING";
+		case HEADER_READING:		return "HEADER_READING";
+		case BODY_READING:			return "BODY_READING";
+		case PROCESSING_REQUEST:	return "PROCESSING_REQUEST";
+		case CGI_RUNNING:			return "CGI_RUNNING";
+		case SENDING_STRING:		return "SENDING_STRING";
+		case SENDING_FILE:			return "SENDING_FILE";
+		case ABORTING:				return "ABORTING";
+		case DONE:					return "DONE";
+		default:					return "UNKNOWN_STATE";
+	}
+}
+
+long	utils::getTime()
+{
+	time_t	t;
 	
 	t = time(NULL);
 	if (t == -1)

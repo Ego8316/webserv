@@ -11,13 +11,15 @@ MyServer1 I can write whatever here {
 		DELETE
 	end
 
+	MAX_HEADER_SIZE = 500
 	MAX_BODY_SIZE = 4048000
 	CLIENT_LIMIT = 1000
+	PROCESSING_TIME_LIMIT = 10000
 	INCOMMING_QUEUE_BACKLOG = 100
 	BUFFER_SIZE = 1024
 	COOKIE_SESSIONS_MAX = 10000
-	COOKIE_LIFE_TIME = 1000
-	SERVER_HOME = ./WebSite
+	COOKIE_LIFE_TIME = 2
+	SERVER_HOME = ./WebSite3/
 	ENABLE_LISTDIR = true
 	DEFAULT_PAGE = /index.html
 
@@ -27,6 +29,6 @@ MyServer1 I can write whatever here {
 	end
 
 	HTTP_REDIR = dict
-		/redirect_test/redi_test.txt = /some_page/page.html 301
+		/redirect_test/redi_test.txt : /some_page/page.html 301
 	end
 }

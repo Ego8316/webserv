@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 16:58:23 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:31:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ class	Request
 		std::string							&getRawHeader();
 		std::string							&getRawBody();
 		const std::string					&getRawBody() const;
-		size_t								&getRawBodySize();
 		Method								getMethod() const;
 		std::string							getRequestTarget() const;
 		std::string							getVersion() const;
@@ -54,7 +53,6 @@ class	Request
 	private:
 		std::string							_raw_header;
 		std::string							_raw_body;
-		size_t								_raw_body_size;
 		Method								_method;
 		std::string							_request_target;
 		std::string							_query_string;

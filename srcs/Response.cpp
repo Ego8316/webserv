@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 13:02:34 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 04:15:24 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,14 @@
  * @brief Default constructor. Initializes status code to 200 OK.
  */
 Response::Response()
-	:	_status_code(HTTP_OK)
 {
+	this->_status_code = HTTP_OK;
+	this->_header = "";
+	this->_body = "";
+	this->_string = "";
 	this->_cgi = NULL;
+	this->_is_cgi = false;
+	this->_body_fd = -1;
 	return ;
 }
 
@@ -41,10 +46,16 @@ Response	&Response::operator=(const Response &other)
 {
 	if (this != &other)
 	{
-		_status_code = other._status_code;
-		_header = other._header;
-		_body = other._body;
-		_headers = other._headers;
+		this->_status_code = other._status_code;
+		this->_header = other._header;
+		this->_body = other._body;
+		this->_string = other._string;
+		this->_headers = other._headers;
+		if (this->_cgi)
+			delete this->_cgi;
+		this->_cgi = other._cgi ? new CGI(*other._cgi) : NULL;
+		this->_is_cgi = other._is_cgi;
+		this->_body_fd = other._body_fd;
 	}
 	return (*this);
 }
@@ -52,13 +63,15 @@ Response	&Response::operator=(const Response &other)
 /**
  * @brief Destructor.
  */
-Response::~Response(void)
+Response::~Response()
 {
-	if (this->_cgi != NULL)
+	if (this->_cgi)
 	{
 		delete this->_cgi;
 		this->_cgi = NULL;
 	}
+	if (this->_body_fd > -1)
+		close(this->_body_fd);
 	return ;
 }
 
@@ -68,7 +81,7 @@ Response::~Response(void)
  */
 void	Response::setStatus(HttpStatus code)
 {
-	_status_code = code;
+	this->_status_code = code;
 	return ;
 }
 
@@ -78,7 +91,7 @@ void	Response::setStatus(HttpStatus code)
  */
 void	Response::setBody(const std::string &body)
 {
-	_body = body;
+	this->_body = body;
 	return ;
 }
 
@@ -89,7 +102,20 @@ void	Response::setBody(const std::string &body)
  */
 void	Response::setHeaders(const std::string &key, const std::string &value)
 {
-	_headers[key] = value;
+	this->_headers[key] = value;
+	return ;
+}
+
+void	Response::setCGI(CGI *cgi)
+{
+	this->_cgi = cgi;
+	this->_is_cgi = true;
+	return ;
+}
+
+void	Response::setFd(int fd)
+{
+	this->_body_fd = fd;
 	return ;
 }
 
@@ -99,7 +125,7 @@ void	Response::setHeaders(const std::string &key, const std::string &value)
  */
 void	Response::setContentType(const std::string &type)
 {
-	_headers["Content-Type"] = type;
+	this->_headers["Content-Type"] = type;
 	return ;
 }
 
@@ -109,7 +135,7 @@ void	Response::setContentType(const std::string &type)
  */
 void	Response::setContentLength(size_t len)
 {
-	_headers["Content-Length"] = utils::toString(len);
+	this->_headers["Content-Length"] = utils::toString(len);
 	return ;
 }
 
@@ -119,7 +145,7 @@ void	Response::setContentLength(size_t len)
  */
 void	Response::setCookie(const std::string &cookie)
 {
-	_headers["Set-Cookie"] = cookie;
+	this->_headers["Set-Cookie"] = cookie;
 	return ;
 }
 
@@ -130,18 +156,25 @@ void	Response::setCookie(const std::string &cookie)
  * Automatically adds default headers ("Server" and "Connection") if they are
  * not already set. The resulting string is stored in the _header member.
  */
-void	Response::buildHeader(void)
+void	Response::buildHeader()
 {
-	if (!utils::mapHasEntry(_headers, std::string("Server")))
-		_headers["Server"] = "Webserv/1.0 (Unix)";
+	if (!utils::mapHasEntry(this->_headers, std::string("Server")))
+		this->_headers["Server"] = "Webserv/1.0 (Unix)";
 	if (!utils::mapHasEntry(_headers, std::string("Connection")))
-		_headers["Connection"] = "close";
-	_header = "HTTP/1.0 " + utils::toString(_status_code)
-		+ " " + utils::httpStatusToStr(_status_code) + "\r\n";
-	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
-		_header += it->first + ": " + it->second + "\r\n";
+		this->_headers["Connection"] = "close";
+	this->_header = "HTTP/1.0 " + utils::toString(this->_status_code)
+		+ " " + utils::httpStatusToStr(this->_status_code) + "\r\n";
+	for (std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); ++it)
+		this->_header += it->first + ": " + it->second + "\r\n";
 	if (!this->_is_cgi)
-		_header += "\r\n";
+		this->_header += "\r\n";
+	return ;
+}
+
+void	Response::build()
+{
+	this->buildHeader();
+	this->_string = this->_header + this->_body;
 	return ;
 }
 
@@ -149,43 +182,39 @@ void	Response::buildHeader(void)
  * @brief Returns the built HTTP header string.
  * @return Reference to the header string.
  */
-const std::string	&Response::getHeader(void) const
+const std::string	&Response::getHeader() const
 {
-	return (_header);
+	return (this->_header);
 }
 
 /**
  * @brief Returns the body string.
  * @return Reference to the body string.
  */
-const std::string	&Response::getBody(void) const
+const std::string	&Response::getBody() const
 {
-	return (_body);
+	return (this->_body);
 }
 
-CGI			*Response::getCGI()
+const std::string	&Response::getString() const
+{
+	return (this->_string);
+}
+
+CGI	*Response::getCGI()
 {
 	return (this->_cgi);
 }
 
-void		Response::setCGI(CGI *cgi)
-{
-	this->_cgi = cgi;
-	this->_is_cgi = true;
-}
-
-bool		Response::isCGI()
+bool	Response::isCGI()
 {
 	return (this->_is_cgi);
 }
-		
-/**
- * @brief Returns the full HTTP response (header + body) as a string.
- * @return Full HTTP response string.
- */
-std::string	Response::toString(void) const
+
+
+int	Response::getFd() const
 {
-	return (_header + _body);
+	return (this->_body_fd);
 }
 
 /**

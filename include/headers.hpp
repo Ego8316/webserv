@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 12:18:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:31:16 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -63,7 +64,9 @@
 # define PIPE_READ_END 0
 # define PIPE_WRITE_END 1
 
-// Default error pages
+// Default pages
+#define POST_PAGE		"<html><body><h1>Upload successful</h1></body></html>"
+
 #define ERROR_PAGE_400	"<html><head><title>400 Bad Request</title></head>" \
 						"<body><h1>400 Bad Request</h1>" \
 						"<p>Your browser sent a request that this server could not understand.</p></body></html>"
@@ -168,7 +171,8 @@ enum	RequestStage //should be set to DONE whenever not in the queue
 	BODY_READING,
 	PROCESSING_REQUEST,
 	CGI_RUNNING,
-	OUTPUT_SENDING,
+	SENDING_STRING,
+	SENDING_FILE,
 	ABORTING,
 	DONE
 };

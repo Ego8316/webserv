@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 11:58:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 12:31:04 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,11 @@ class Client
 		void					setFd(int fd);
 		void					setClientId(int id);
 		void    				setState(RequestStage state);
+
+		void	printState() const;
+		void	printHeader() const;
+		void	printRequest() const;
+
 	private :
 		Config							*_config;
 		ServerCore						*_server;
@@ -54,18 +59,20 @@ class Client
 		int								_client_id;
 		RequestStage					_state;
 		ProcessError					_error;
-		std::string						_request_str;
-		std::string						_response_str;
+		std::string						_leftover;
+		int								_bytes_sent;
+		int								_bytes_in_buffer;
 		long							_time_limit;
 		long							_request_time_limit;
 		Request							*_request;
 		Response						*_response;
 		
-		int					_tryAccepting();
-		int					_readInput();
-		int					_readHeader();
-		int					_readBody();
-		void				_processRequest();
-		int					_sendOutput();
-		int					_monitorCGI();
+		int		_tryAccepting();
+		int		_readHeader();
+		int		_readBody();
+		void	_processRequest();
+		int		_sendString();
+		int		_sendFile();
+		void	_prepareNew();
+		int		_monitorCGI();
 };

@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 16:08:18 by ego               #+#    #+#             */
-/*   Updated: 2025/10/17 17:01:10 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/22 18:33:47 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 // Standard colors
 #define BLACK				"\033[0;30m"
+#define GRAY				"\033[90m"
 #define RED					"\033[0;31m"
 #define GREEN				"\033[0;32m"
 #define YELLOW				"\033[0;33m"
@@ -29,6 +30,7 @@
 
 // Bold
 #define BOLD_BLACK			"\033[1;30m"
+#define BOLD_GRAY			"\033[1;90m"
 #define BOLD_RED			"\033[1;31m"
 #define BOLD_GREEN			"\033[1;32m"
 #define BOLD_YELLOW			"\033[1;33m"
