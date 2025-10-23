@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 14:31:16 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:56:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -418,7 +418,7 @@ void	Client::printHeader() const
 	std::cout << BOLD_GRAY << "[Client " << this->_client_id << "]" << RESET
 		<< GRAY << "\n\t[HEADER START]\n"
 		<< this->_request->getRawHeader()
-		<< "\t[HEADER END]" << RESET << std::endl;
+		<< "\n\t[HEADER END]" << RESET << std::endl;
 	return ;
 }
 

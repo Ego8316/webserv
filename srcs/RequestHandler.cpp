@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 14:38:57 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:56:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ Response	RequestHandler::handle(const Request &request, const Config &config, co
 	if (request.getError())
 	{
 		// if (request.getContentLength() > config.max_body_size)
-			// return (_handleError(HTTP_CONTENT_TOO_LARGE, config));
+		// 	return (_handleError(HTTP_CONTENT_TOO_LARGE, config));
 		return (_handleError(HTTP_BAD_REQUEST, config));
 	}
 	if (request.getMethod() == UNKNOWN)
@@ -76,7 +76,9 @@ Response	RequestHandler::handle(const Request &request, const Config &config, co
 
 Response	RequestHandler::_handleGet(const Request &request, const Config &config, const Resource &resource)
 {
+	std::cout << "before" << std::endl;
 	Response	response;
+	std::cout << "after" << std::endl;
 	int			fd;
 	ssize_t		size;
 
@@ -107,7 +109,7 @@ Response	RequestHandler::_handleGet(const Request &request, const Config &config
 
 Response	RequestHandler::_handlePost(const Request &request, const Config &config, const Resource &resource)
 {
-	Response		response = Response();
+	Response		response;
 	std::ofstream	outfile;
 	bool			existed;
 
@@ -161,7 +163,7 @@ Response	RequestHandler::_handleDelete(const Request &request, const Config &con
 
 Response	RequestHandler::_handleCGI()
 {
-	Response	response;
+	Response	response = Response();
 
 	//TODO check for errors on Ressource
 	if (response.getCGI() == NULL)
@@ -171,7 +173,7 @@ Response	RequestHandler::_handleCGI()
 
 Response	RequestHandler::_handleRedirect(const Request &request, const Config &config, const Resource &resource)
 {
-	Response		response;
+	Response		response = Response();
 	std::string		response_body;
 
 	(void)request;

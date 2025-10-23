@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 14:35:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:57:01 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,12 @@
  */
 Response::Response()
 {
+	std::cout << "Default constructor called" << std::endl;
 	this->_status_code = HTTP_OK;
 	this->_header = "";
 	this->_body = "";
 	this->_string = "";
+	this->_headers.clear();
 	this->_cgi = NULL;
 	this->_is_cgi = false;
 	this->_body_fd = -1;
