@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/22 18:22:43 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 04:01:23 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ WebServ::WebServ(Config *config)
 	std::cout << *this->_config << std::endl;
 	this->_core = new ServerCore(config);
 	this->_clients.resize(this->_config->client_limit);
+	this->_processing_queue.clear();
 }
 
 WebServ::WebServ(std::string config_file)
@@ -25,6 +26,7 @@ WebServ::WebServ(std::string config_file)
 	this->_config = new Config(config_file);
 	this->_core = new ServerCore(this->_config);
 	this->_clients.resize(this->_config->client_limit);
+	this->_processing_queue.clear();
 }
 
 WebServ::WebServ(const WebServ &other) : _config(other._config), _core(other._core), _clients(other._clients) {}
