@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 14:16:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:31:01 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ Client::Client(const Config *config, ServerCore *server)
 	this->_bytes_sent = 0;
 	this->_bytes_in_buffer = 0;
 	this->_time_limit = 0;
+	this->_request = NULL;
+	this->_response = NULL;
 }
 
 Client::Client(const Client &other)
@@ -60,7 +62,7 @@ Client	&Client::operator=(const Client &other)
 
 Client::~Client()
 {
-	if (this->_client_fd)
+	if (this->_client_fd > 0)
 		close(this->_client_fd);
 	if (this->_request)
 		delete _request;
@@ -415,7 +417,7 @@ void	Client::printHeader() const
 	std::cout << BOLD_GRAY << "[Client " << this->_client_id << "]" << RESET
 		<< GRAY << "\n\t[HEADER START]\n"
 		<< this->_request->getRawHeader()
-		<< "\t[HEADER END]" << RESET << std::endl;
+		<< "\n\t[HEADER END]" << RESET << std::endl;
 	return ;
 }
 

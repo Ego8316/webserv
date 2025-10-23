@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 13:49:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 14:53:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,12 @@
  */
 Response::Response()
 {
+	std::cout << "Default constructor called" << std::endl;
 	this->_status_code = HTTP_OK;
 	this->_header = "";
 	this->_body = "";
 	this->_string = "";
+	this->_headers.clear();
 	this->_cgi = NULL;
 	this->_is_cgi = false;
 	this->_body_fd = -1;
