@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 21:13:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 23:05:11 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@
 #include <cmath>
 #include <dirent.h>
 #include "colors.hpp"
+#include "default.hpp"
+#include "utils.hpp"
 
 #if defined(__APPLE__)
 	#define OS_NAME "macOS"
