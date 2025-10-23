@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 12:31:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 21:13:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ class Config {
 	//MEMBER FUNCTIONS
 		unsigned int 							ip;
 		int										port_number;
-		//std::string							host_name; //TODO ?
 		int										domain;
 		int										type;
 		int										protocol;

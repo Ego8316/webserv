@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 21:48:19 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class	Request
 		Request	&operator=(const Request &other);
 		~Request();
 
-		int		parseHeader(const Config &config);
+		void					parseHeader(const Config &config);
 
 		std::string							&getRawHeader();
 		std::string							&getRawBody();
@@ -61,11 +61,11 @@ class	Request
 		bool								_chunked;
 		std::map<std::string, std::string>	_headers;
 		bool								_error;
-		ContentType						_accept;
+		ContentType							_accept;
 		Cookie 								*_query_cookies;
 
-		int		_parseRequestTarget();
-		int		_parseHeaderLine(std::string line, const Config &config);
+		void				_parseRequestTarget();
+		void				_parseHeaderLine(std::string line, const Config &config);
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);

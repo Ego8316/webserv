@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 16:46:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 21:32:57 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,12 @@
 #include "headers.hpp"
 #include "Response.hpp"
 #include "Config.hpp"
-#include "Cookie.hpp"
 #include "ServerCore.hpp"
 #include "RequestHandler.hpp"
 
 class	Response;
 class	Query;
 class	Config;
-class	Cookie;
 class	ServerCore;
 class	Request;
 
@@ -76,5 +74,5 @@ class Client
 		int		_sendString();
 		int		_sendFile();
 		void	_prepareNew();
-		int		_monitorCGI();
+		void	_monitorCGI();
 };

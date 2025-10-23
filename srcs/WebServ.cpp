@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:15:27 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 21:57:52 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,6 @@ int	WebServ::UpdateQueue()
 			if (event->server == true)
 			{
 				 std::cerr << RED << "[UpdateQueue] Server error: closing connection!" << RESET << std::endl;
-				// TODO do a clean exit, probably will see that at the end when we know what need to be closed/cleaned
 				return (SERV_ERROR);
 			}
 			else

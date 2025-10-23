@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/23 21:55:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,39 +63,120 @@ Request::~Request()
 	return ;
 }
 
-int	Request::parseHeader(const Config &config)
+void	Request::parseHeader(const Config &config)
 {
 	std::istringstream	stream(this->_raw_header);
 	std::string			line;
 	std::string			method_str;
 
 	if (!std::getline(stream, line))
-		return (this->_error = true, SERV_ERROR);
+	{
+		this->_error = true;
+		return ;
+	}
 	std::istringstream	first_line(utils::stringTrim(line, "\r\n \t"));
 	if (!(first_line >> method_str >> this->_request_target >> this->_version))
-		return (this->_error = true, SERV_ERROR);
+	{
+		this->_error = true;
+		return ;
+	}
 	// TODO verifier parce qu'avec le bail de query str jsp si cest bien judicieux
 	if (!first_line.eof())
-		return (this->_error = true, SERV_ERROR);
+	{
+		this->_error = true;
+		return ;
+	}
 	this->_method = utils::strToMethod(method_str);
 	this->_parseRequestTarget();
 	if (!config.isAcceptedMethod(this->_method))
-		return (this->_error = true, SERV_ERROR);
+	{
+		this->_error = true;
+		return ;
+	}
 	while (std::getline(stream, line))
 	{
 		line = utils::stringTrim(line, "\r\n \t");
 		if (line.empty())
-			return (this->_error = true, SERV_ERROR);
-		if (_parseHeaderLine(line, config) == SERV_ERROR)
-			return (SERV_ERROR);
+		{
+			this->_error = true;
+			return ;
+		}
+		_parseHeaderLine(line, config);
+		if (this->_error)
+			return ;
 	}
-	if (_chunked && _content_length)
-		return (_error = true, SERV_ERROR);
+	if (_chunked && _content_length) //TODO on est sur de ca ?
+	{
+		this->_error = true;
+		return ;
+	}
 	if (this->_accept == FTYPE_NONE)
 		this->_accept = FTYPE_ANY;
 	if (this->_query_cookies == NULL)
 		this->_query_cookies = new Cookie();
-	return (0);
+	return ;
+}
+
+void		Request::_parseRequestTarget()
+{
+	if (this->_request_target.find("?") != std::string::npos)
+	{
+		this->_query_string = this->_request_target.substr(this->_request_target.find("?") + 1, this->_request_target.length());
+		this->_request_target.erase(this->_request_target.find("?"), this->_request_target.length());
+	}
+	if (utils::startsWith(this->_request_target, "http://"))
+		this->_request_target.erase(0, 8);
+	if (utils::startsWith(this->_request_target, "www"))
+		this->_request_target.erase(0, this->_request_target.find("/"));
+	return ;
+}
+
+void		Request::_parseHeaderLine(std::string line, const Config &config)
+{
+	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
+	Cookie						*cookie;
+	
+	if (field_split.size() == 2)
+	{
+		std::string	key = utils::capitalize(field_split[0]);
+		std::string	value = field_split[1];
+		while (!value.empty() && value[0] == ' ')
+			value.erase(0, 1);
+		if (!value.empty() && value[value.size() - 1] == '\r')
+			value.erase(value.size() - 1);
+		if (key == "Cookie")
+		{
+			cookie = new Cookie(value);
+			if (cookie && cookie->applyToPath(_request_target))
+			{
+				if (this->_query_cookies)
+					delete this->_query_cookies;
+				this->_query_cookies = cookie;
+			}
+			else
+				delete cookie;
+		}
+		else if (key == "Accept")
+			this->_accept = static_cast<ContentType>(this->_accept | utils::strToContentType(value));
+		else if (headerHasField(key))
+			this->_headers[key] = _headers[key] + "; " + value;
+		else
+			this->_headers[key] = value;
+		if (key == "Transfer-Encoding" && utils::toLower(value).find("chunked") != std::string::npos)
+			this->_chunked = true;
+		else if (key == "Content-Length")
+		{
+			this->_content_length = std::atol(value.c_str());
+			if (this->_content_length > config.max_body_size)
+			{
+				this->_error = true;
+				return ;
+			}
+		}
+	}
+	else
+		this->_error = true;
+	return ;
 }
 
 std::string	&Request::getRawHeader()
@@ -196,6 +277,7 @@ void	Request::unchunkBody()
 		}
 		unchunked += this->_raw_body.substr(pos, next_nl);
 	}
+	this->_raw_body = unchunked;
 	return ;
 }
 
@@ -219,63 +301,6 @@ std::string	Request::headerGetField(const std::string field)
 	if (this->_headers.find(field) != this->_headers.end())
 		return (this->_headers[field]);
 	return ("");
-}
-
-int		Request::_parseRequestTarget()
-{
-	if (this->_request_target.find("?") != std::string::npos)
-	{
-		this->_query_string = this->_request_target.substr(this->_request_target.find("?") + 1, this->_request_target.length());
-		this->_request_target.erase(this->_request_target.find("?"), this->_request_target.length());
-	}
-	if (utils::startsWith(this->_request_target, "http://"))
-		this->_request_target.erase(0, 8);
-	if (utils::startsWith(this->_request_target, "www"))
-		this->_request_target.erase(0, this->_request_target.find("/"));
-	return (0);
-}
-
-int		Request::_parseHeaderLine(std::string line, const Config &config)
-{
-	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
-	Cookie						*cookie;
-	
-	if (field_split.size() == 2)
-	{
-		std::string	key = utils::capitalize(field_split[0]);
-		std::string	value = field_split[1];
-		while (!value.empty() && value[0] == ' ')
-			value.erase(0, 1);
-		if (!value.empty() && value[value.size() - 1] == '\r')
-			value.erase(value.size() - 1);
-		if (key == "Cookie")
-		{
-			cookie = new Cookie(value);
-			if (cookie && cookie->applyToPath(_request_target))
-			{
-				if (this->_query_cookies)
-					delete this->_query_cookies;
-				this->_query_cookies = cookie;
-			}
-		}
-		else if (key == "Accept")
-			this->_accept = static_cast<ContentType>(this->_accept | utils::strToContentType(value));
-		else if (headerHasField(key))
-			this->_headers[key] = _headers[key] + "; " + value;
-		else
-			this->_headers[key] = value;
-		if (key == "Transfer-Encoding" && utils::toLower(value).find("chunked") != std::string::npos)
-			this->_chunked = true;
-		else if (key == "Content-Length")
-		{
-			this->_content_length = std::atol(value.c_str());
-			if (this->_content_length > config.max_body_size)
-				return (this->_error = true, SERV_ERROR);
-		}
-	}
-	else
-		return (this->_error = true, SERV_ERROR);
-	return (0);
 }
 
 std::ostream	&operator<<(std::ostream &os, const Request &src)

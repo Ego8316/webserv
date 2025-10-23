@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 17:01:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 21:55:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,9 +157,9 @@ int	Client::handleEvent()
 		if (this->_state == READING_BODY && this->_readBody() == SERV_ERROR)
 			return (SERV_ERROR);
 		if (_state == PROCESSING_REQUEST)
-			_processRequest();
-		if (_state == CGI_RUNNING)
-			_monitorCGI();
+			this->_processRequest();
+		if (_state == CGI_RUNNING )
+			this->_monitorCGI();
 		if (this->_state == SENDING_STRING && this->_sendString() == SERV_ERROR)
 			return (SERV_ERROR);
 		if (this->_state == SENDING_FILE && this->_sendFile() == SERV_ERROR)
@@ -322,17 +322,17 @@ void	Client::_processRequest()
 	return ;
 }
 
-int	Client::_monitorCGI()
+void	Client::_monitorCGI()
 {
 	if (!_response->getCGI() || _response->getCGI()->isComplete())
 	{
 		_state = SENDING_STRING;
-		return (0);
+		return ;
 	}
 	_response->getCGI()->Run(*this, *_request, *_config, *_response);
 	if (_response->getCGI()->isComplete())
 		_state = SENDING_STRING;
-	return (0);
+	return ;
 }
 
 int	Client::_sendString()

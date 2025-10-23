@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 16:13:05 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/23 21:22:53 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,8 +297,8 @@ long	utils::getTime()
 	t = time(NULL);
 	if (t == -1)
 	{
-		std::cerr << "Clock error in Cookie. Considering Cookie as expired" << std::endl;
-		return (SERV_ERROR);
+		std::cerr << "Clock error. Seting time to 0" << std::endl;
+		return (0);
 	}
 	return (static_cast<long>(t));
 }
