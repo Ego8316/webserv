@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 21:13:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 16:20:17 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,10 @@ Config &Config::operator=(const Config &other)
 	return (*this);
 }
 
-Config::~Config() {}
+Config::~Config()
+{
+	std::cerr << RED << "Destroying config" << RESET << std::endl;
+}
 
 std::map<std::string, Redirection>		Config::getRedirections() const
 {

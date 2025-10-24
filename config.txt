@@ -1,6 +1,6 @@
 
 MyServer1 I can write whatever here {
-	IP : 192.168.1.6
+	IP : 0.0.0.0
 	PORT : 8080
 	DOMAIN = AF_INET
 	TYPE = SOCK_STREAM
@@ -15,13 +15,13 @@ MyServer1 I can write whatever here {
 	MAX_BODY_SIZE = 4048000
 	MAX_HEADER_SIZE = 100000
 	CLIENT_LIMIT = 1000
-	PROCESSING_TIME_LIMIT = 10000
-	MAX_REQUEST_TIME = 1000000
+	PROCESSING_TIME_LIMIT = 20
+	MAX_REQUEST_TIME = 200
 	INCOMMING_QUEUE_BACKLOG = 100
 	BUFFER_SIZE = 1024
 	COOKIE_SESSIONS_MAX = 10000
 	COOKIE_LIFE_TIME = 2
-	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite
+	SERVER_HOME = ./WebSite
 	ENABLE_LISTDIR = true
 	DEFAULT_PAGE = /index.html
 
@@ -36,7 +36,7 @@ MyServer1 I can write whatever here {
 }
 
 Website 2 {
-	IP : 192.168.1.6
+	IP : 0.0.0.0
 	PORT : 8081
 	DOMAIN = AF_INET
 	TYPE = SOCK_STREAM
@@ -58,7 +58,7 @@ Website 2 {
 	COOKIE_SESSIONS_MAX = 10000
 	COOKIE_LIFE_TIME = 2
 
-	SERVER_HOME = /Users/victorviterbo/Desktop/42/WebServ/WebSite2
+	SERVER_HOME = ./WebSite2
 	ENABLE_LISTDIR = true
 	DEFAULT_PAGE = /index.html
 	DEFAULT_ERROR_PAGES = dict

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 00:30:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 15:10:08 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,13 +95,13 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 		GenEnvVar(request);
 		if (chdir(config.server_home.c_str()) == -1)
 			exit (0);
-		std::cout << "Moved to " << config.server_home << std::endl;
-		this->_cgi_script = config.server_home + request.getRequestTarget();
+		this->_cgi_script = request.getRequestTarget(); //TODO quand config sera ok refaire les setup de path et les checks
+		if (!utils::startsWith(this->_cgi_script, "."))
+			this->_cgi_script = "." + this->_cgi_script;
 		this->Execute();
 	}
 	else
 	{
-		std::cout << "PID = " << this->_pid << std::endl;
 		close(this->_pipe_to_CGI[PIPE_READ_END]);
 		close(this->_pipe_from_CGI[PIPE_WRITE_END]);
 		ServerCore::setNonBlocking(this->_pipe_to_CGI[PIPE_WRITE_END]);
@@ -118,12 +118,9 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 	
 	if (this->_bytes_to_send == 0)
 		this->_bytes_to_send = request.getRawBody().size();
-	std::cout << "bytes to send = " << this->_bytes_to_send << std::endl;
-	std::cout << "body = >" << request.getRawBody() << "<" << std::endl;
 	
-	while (utils::getTime() < client.getTimeLimit())
+	while (utils::getTime() < client.getTimeLimit() && !this->_is_complete)
 	{
-		//std::cout << "total_bytes_sent = " << _total_bytes_sent << " _bytes_to_send = " << _bytes_to_send << " _total_bytes_read = " << _total_bytes_read << " _bytes to read = " << _total_bytes_to_read << std::endl;
 		if (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0)
 			bytes_sent = this->writeToCGI(request, config);
 		if (!checkOutputTermination(bytes_read))
@@ -144,8 +141,7 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 	const std::string	&request_str = request.getRawBody();
 	std::vector<char>	buffer(config.buffer_size);
 
-	int bts = std::min(config.buffer_size, static_cast<const int>(this->_bytes_to_send - this->_total_bytes_sent));
-	//std::cout << "trying to send " << bts << " bytes" << std::endl;
+	int bts = std::min(config.buffer_size, static_cast<int>(this->_bytes_to_send - this->_total_bytes_sent));
 	bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent, bts);
 	if (bytes_sent != -1)
 		this->_total_bytes_sent += bytes_sent;
@@ -193,10 +189,8 @@ void	CGI::parseHeader()
 
 void	CGI::genFullOutput(Response &response)
 {
-	std::cout << "CGI OUTPUT = " << this->_output << std::endl;
-	std::cout << "DONE WITH CGI OUTPUT" << std::endl;
 	if (!WIFEXITED(this->_process_status[1]) || WEXITSTATUS(this->_process_status[1]) != 0)
-	{	
+	{
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		std::cout << "Error in child process" << std::endl;
 	}
@@ -219,8 +213,8 @@ void	CGI::genFullOutput(Response &response)
 	if (!this->_content_len && !this->_chunked)
 		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n"));
 	response.buildHeader();
-	std::cout << "HEADER ====== \n" << response.getHeader() << std::endl;
-	std::cout << "END HEADER ====== \n" << std::endl;
+	response.setBody(this->_output);
+	response.build();
 	deleteEnvVar();
 	return ;
 }
@@ -251,6 +245,7 @@ void		CGI::Execute()
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
 	}
+	std::cerr << "executing : >" << this->_cgi_script.c_str() << "<" << std::endl;
 	if (execve(this->_cgi_script.c_str(), this->_args, this->_env) == -1)
 	{
 		std::cerr << RED << "CGI execution failed" << RESET << std::endl;
@@ -276,8 +271,7 @@ void		CGI::GenEnvVar(Request &request)
 		this->_env[i] = new char[env[i].length() + 1];
 		if (!this->_env[i])
 		{	//TODO test
-			delete[] this->_env;
-			delete this->_env;
+			deleteEnvVar();
 			return ;
 		}
 		strcpy(this->_env[i], env[i].c_str());
@@ -293,12 +287,29 @@ void	CGI::deleteEnvVar()
 {
 	int i = 0;
 
-	while (this->_args[i])
-		delete this->_args[i];
-	delete[] this->_args;
-	while (this->_env[i])
-		delete this->_env[i];
-	delete[] this->_env;
+	if (this->_args)
+	{
+		while (this->_args[i])
+		{	
+			delete[] this->_args[i];
+			this->_args[i] = NULL;
+			++i;
+		}
+		delete[] this->_args;
+		this->_args = NULL;
+	}
+	i = 0;
+	if (this->_env)
+	{
+		while (this->_env[i])
+		{	
+			delete[] this->_env[i];
+			this->_env[i] = NULL;
+			++i;
+		}
+		delete[] this->_env;
+		this->_env = NULL;
+	}
 }
 
 bool	CGI::checkOutputTermination(int bytes_read)
