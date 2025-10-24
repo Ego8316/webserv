@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Utils.cpp                                          :+:      :+:    :+:   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 21:22:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 16:26:32 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,11 @@ std::string	utils::stringTrim(std::string &str, const std::string &set)
 			str.erase(str.size() - 1, 1);
 	}
 	return (str);
+}
+
+std::string	utils::stringTrimSpaces(std::string &str)
+{
+	return (stringTrim(str, " \r\n\t"));
 }
 
 std::string	utils::toLower(const std::string &str)

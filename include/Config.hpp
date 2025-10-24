@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 02:33:17 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 13:13:40 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 class	Config
 {
 	public:
-		Config(const std::string &conf);
+		Config(const std::string &conf, const std::string &name);
 		~Config();
 
 		class	Error	:	public	std::exception
@@ -30,10 +30,21 @@ class	Config
 				const char* what() const throw() { return _msg.c_str(); }
 		};
 
+		typedef struct	s_Location
+		{
+			std::string							requested_path;
+			std::string							root;
+			std::string							default_page;
+			std::vector<Method>					accepted_methods;
+			bool								autoindex;
+			std::map<std::string, Redirection>	http_redir;
+		}	Location;
+
 		const std::map<std::string, Redirection>	&getRedirections() const;
 		bool										isAcceptedMethod(Method method) const;
 
 		static int								line_number;
+		std::string								server_name;
 		unsigned int							ip;
 		int										port_number;
 		int										domain;
@@ -51,6 +62,7 @@ class	Config
 		std::string								server_home;
 		bool									enable_listdir;
 		std::string								default_page;
+		std::vector<Location>					locations;
 		std::map<int, std::string>				default_error_pages;
 		std::vector<Method>						accepted_methods;
 		std::map<std::string, Redirection>		http_redir;
@@ -59,7 +71,7 @@ class	Config
 		Config(const Config &other);
 		Config	&operator=(const Config &other);
 
-		typedef struct s_FieldHandler
+		typedef struct	s_FieldHandler
 		{
 			std::string	name;
 			enum FieldType
@@ -97,6 +109,7 @@ class	Config
 			std::map<std::string, int>	Config::*enum_map;
 		}	FieldHandler;
 
+		static int					_nb;
 		static FieldHandler			_fields[];
 		std::map<std::string, int>	_enum_domain;
 		std::map<std::string, int>	_enum_type;

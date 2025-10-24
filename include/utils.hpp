@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 16:26:05 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ bool						endsWith(const std::string& str, const std::string& suffix);
 bool 						startsWith(const std::string& str, const std::string& prefix);
 std::vector<std::string>	stringSplit(std::string str, std::string del);
 std::string					stringTrim(std::string &str, const std::string &set);
+std::string					stringTrimSpaces(std::string &str);
 std::string					toLower(const std::string &str);
 std::string					capitalize(const std::string &str);
 std::string::iterator		caseInsensitiveFind(std::string haystack, std::string needle);
