@@ -6,54 +6,91 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 00:32:01 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 02:35:08 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 
-int	Config::_line_number = 0;
+int	Config::line_number = 0;
 
 Config::FieldHandler Config::_fields[] = {
-	{"ip", FieldHandler::INT, true, false, 0, 0,
-		{ .uintField = &Config::ip }, { .ulongValue = INADDR_ANY }},
+	{"ip", FieldHandler::UINT, true, false, 0, 0,
+		{ .uint_field = &Config::ip },
+		{ .int_value = INADDR_ANY },
+		NULL },
 	{"port", FieldHandler::INT, true, false, MIN_PORT, MAX_PORT,
-		{ .intField = &Config::port_number }, { .intValue = DEFAULT_PORT }},
-	{"domain", FieldHandler::INT, true, false, 0, 0,
-		{ .intField = &Config::domain }, { .intValue = AF_INET }},
-	{"type", FieldHandler::INT, true, false, 0, 0,
-		{ .intField = &Config::type }, { .intValue = SOCK_STREAM }},
-	{"protocol", FieldHandler::INT, true, false, 0, 0,
-		{ .intField = &Config::protocol }, { .intValue = 0 }},
-	{"max_header_size", FieldHandler::INT, false, false, MIN_MAX_HEADER_SIZE, MAX_MAX_HEADER_SIZE,
-		{ .ulongField = &Config::max_header_size }, { .ulongValue = DEFAULT_MAX_HEADER_SIZE }},
-	{"max_body_size", FieldHandler::INT, false, false, MIN_MAX_BODY_SIZE, MAX_MAX_BODY_SIZE,
-		{ .ulongField = &Config::max_body_size }, { .ulongValue = DEFAULT_MAX_BODY_SIZE }},
+		{ .int_field = &Config::port_number },
+		{ .int_value = DEFAULT_PORT },
+		NULL },
+	{"domain", FieldHandler::ENUM, true, false, 0, 0,
+		{ .int_field = &Config::domain },
+		{ .int_value = AF_INET },
+		&Config::_enum_domain },
+	{"type", FieldHandler::ENUM, true, false, 0, 0,
+		{ .int_field = &Config::type },
+		{ .int_value = SOCK_STREAM },
+		&Config::_enum_type },
+	{"protocol", FieldHandler::ENUM, true, false, 0, 0,
+		{ .int_field = &Config::protocol },
+		{ .int_value = 0 },
+		&Config::_enum_protocol },
+	{"max_header_size", FieldHandler::SIZE, false, false, MIN_MAX_HEADER_SIZE, MAX_MAX_HEADER_SIZE,
+		{ .size_field = &Config::max_header_size },
+		{ .size_value = DEFAULT_MAX_HEADER_SIZE },
+		NULL },
+	{"max_body_size", FieldHandler::SIZE, false, false, MIN_MAX_BODY_SIZE, MAX_MAX_BODY_SIZE,
+		{ .size_field = &Config::max_body_size },
+		{ .size_value = DEFAULT_MAX_BODY_SIZE },
+		NULL },
 	{"client_limit", FieldHandler::INT, false, false, MIN_CLIENT_LIMIT, MAX_CLIENT_LIMIT,
-		{ .intField = &Config::client_limit }, { .intValue = DEFAULT_CLIENT_LIMIT }},
+		{ .int_field = &Config::client_limit },
+		{ .int_value = DEFAULT_CLIENT_LIMIT },
+		NULL },
 	{"processing_time_limit", FieldHandler::LONG, false, false, MIN_PROCESSING_TIME_LIMIT, MAX_PROCESSING_TIME_LIMIT,
-		{ .longField = &Config::processing_time_limit }, { .longValue = DEFAULT_PROCESSING_TIME_LIMIT }},
+		{ .long_field = &Config::processing_time_limit },
+		{ .long_value = DEFAULT_PROCESSING_TIME_LIMIT },
+		NULL },
 	{"max_request_time", FieldHandler::LONG, false, false, MIN_MAX_REQUEST_TIME, MAX_MAX_REQUEST_TIME,
-		{ .longField = &Config::max_request_time }, { .longValue = DEFAULT_MAX_REQUEST_TIME }},
+		{ .long_field = &Config::max_request_time },
+		{ .long_value = DEFAULT_MAX_REQUEST_TIME },
+		NULL },
 	{"incoming_queue_backlog", FieldHandler::INT, false, false, MIN_INCOMING_QUEUE_BACKLOG, MAX_INCOMING_QUEUE_BACKLOG,
-		{ .intField = &Config::incoming_queue_backlog }, { .intValue = DEFAULT_INCOMING_QUEUE_BACKLOG }},
-	{"buffer_size", FieldHandler::INT, false, false, MIN_BUFFER_SIZE, MAX_BUFFER_SIZE,
-		{ .intField = &Config::buffer_size }, { .intValue = DEFAULT_BUFFER_SIZE }},
+		{ .int_field = &Config::incoming_queue_backlog },
+		{ .int_value = DEFAULT_INCOMING_QUEUE_BACKLOG },
+		NULL },
+	{"buffer_size", FieldHandler::SIZE, false, false, MIN_BUFFER_SIZE, MAX_BUFFER_SIZE,
+		{ .size_field = &Config::buffer_size },
+		{ .size_value = DEFAULT_BUFFER_SIZE },
+		NULL },
 	{"cookie_sessions_max", FieldHandler::INT, false, false, MIN_COOKIE_SESSIONS_MAX, MAX_COOKIE_SESSIONS_MAX,
-		{ .intField = &Config::cookie_sessions_max }, { .intValue = DEFAULT_COOKIE_SESSIONS_MAX }},
+		{ .int_field = &Config::cookie_sessions_max },
+		{ .int_value = DEFAULT_COOKIE_SESSIONS_MAX },
+		NULL },
 	{"cookie_life_time", FieldHandler::INT, false, false, MIN_COOKIE_LIFETIME, MAX_COOKIE_LIFETIME,
-		{ .intField = &Config::cookie_life_time }, { .intValue = DEFAULT_MAX_COOKIE_LIFETIME }},
+		{ .int_field = &Config::cookie_life_time },
+		{ .int_value = DEFAULT_MAX_COOKIE_LIFETIME },
+		NULL },
 	{"server_home", FieldHandler::STRING, true, false, 0, 0,
-		{ .stringField = &Config::server_home },{ .strValue = DEFAULT_SERVER_HOME }},
+		{ .string_field = &Config::server_home },
+		{ .string_value = DEFAULT_SERVER_HOME },
+		NULL },
 	{"enable_listdir", FieldHandler::BOOL, false, false, 0, 0,
-		{ .boolField = &Config::enable_listdir }, { .boolValue = DEFAULT_ENABLE_LISTDIR }},
+		{ .bool_field = &Config::enable_listdir },
+		{ .bool_value = DEFAULT_ENABLE_LISTDIR },
+		NULL },
 	{"default_page", FieldHandler::STRING, false, false, 0, 0,
-		{ .stringField = &Config::default_page }, { .strValue = DEFAULT_DEFAULT_PAGE }}
+		{ .string_field = &Config::default_page },
+		{ .string_value = DEFAULT_DEFAULT_PAGE },
+		NULL },
+	{"default_error_pages", FieldHandler::LIST, false, false, 0, 0,
+		{ 0 }, { 0 }, NULL },
+	{"methods", FieldHandler::LIST, true, false, 0, 0,
+		{ 0 }, { 0 }, NULL },
+	{"http_redir", FieldHandler::LIST, false, false, 0, 0,
+		{ 0 }, { 0 }, NULL },
 };
 
-		std::map<int, std::string>				default_error_pages;
-		std::vector<Method>						accepted_methods;
-		std::map<std::string, Redirection>		http_redir;
 
 Config::Config(const std::string &conf)
 {
@@ -61,9 +98,10 @@ Config::Config(const std::string &conf)
 	std::string			line;
 	std::string			field, equal, value;
 
+	this->_initEnumMaps();
 	while (std::getline(conf_stream, line))
 	{
-		++_line_number;
+		++line_number;
 		line = utils::stringTrim(line, " \t\n");
 		if (line.empty()) continue ;
 		std::istringstream	line_stream(line);
@@ -78,7 +116,7 @@ Config::Config(const std::string &conf)
 				if (fh.found == true)
 					throw Error("Duplicate");
 				fh.found = true;
-				this->_assignValue(fh, value);
+				this->_assignValue(fh, utils::toLower(value), conf_stream);
 				matched = true;
 				break ;
 			}
@@ -92,106 +130,8 @@ Config::Config(const std::string &conf)
 		if (!fh.found && fh.required)
 			throw Error("Missing config field: " + fh.name);
 		if (!fh.found)
-			this->assignDefault(fh);
+			this->_assignDefault(fh);
 	}
-}
-
-// Config::Config(std::string config)
-// {
-// 	std::istringstream	conf_stream(config);
-// 	std::string			newline;
-// 	std::string			field, equal, value;
-
-// 	while (std::getline(conf_stream, newline))
-// 	{
-// 		if (utils::stringTrim(newline, " \t\n").length() == 0)
-// 			continue ;
-// 		std::istringstream 			line(newline);
-	
-// 		if (!(line >> field >> equal >> value) || (equal != "=" && equal != ":"))
-// 		{
-// 			std::cerr << "Could not parse config line " << newline << " in global"   << std::endl;
-// 			continue;
-// 		}
-// 		if (field == "IP")
-// 			this->setIP(value);
-// 		if (field == "PORT")
-// 			this->port_number = atoi(value.c_str());
-// 		else if (field == "DOMAIN")
-// 		{
-// 			if (value == "AF_INET")
-// 				this->domain = AF_INET;
-// 		}
-// 		else if (field == "TYPE")
-// 		{
-// 			if (value == "SOCK_STREAM")
-// 				this->type = SOCK_STREAM;
-// 		}
-// 		else if (field == "PROTOCOL")
-// 			this->protocol = atoi(value.c_str());
-// 		else if (field == "METHODS")
-// 			this->parseMethod(conf_stream);
-// 		else if (field == "MAX_HEADER_SIZE")
-// 			this->max_header_size = atoi(value.c_str());
-// 		else if (field == "MAX_BODY_SIZE")
-// 			this->max_body_size = atoi(value.c_str());
-// 		else if (field == "CLIENT_LIMIT")
-// 			this->client_limit = atoi(value.c_str());
-// 		else if (field == "PROCESSING_TIME_LIMIT")
-// 			this->processing_time_limit = atoi(value.c_str());
-// 		else if (field == "MAX_REQUEST_TIME")
-// 			this->max_request_time = atoi(value.c_str());
-// 		else if (field == "INCOMMING_QUEUE_BACKLOG")
-// 			this->incoming_queue_backlog = atoi(value.c_str());
-// 		else if (field == "COOKIE_SESSIONS_MAX")
-// 			this->cookie_sessions_max = atoi(value.c_str());
-// 		else if (field == "COOKIE_LIFE_TIME")
-// 			this->cookie_life_time = atoi(value.c_str());
-// 		else if (field == "BUFFER_SIZE")
-// 			this->buffer_size = atoi(value.c_str());
-// 		else if (field == "SERVER_HOME")
-// 			this->server_home = value;
-// 		else if (field == "ENABLE_LISTDIR")
-// 			this->enable_listdir = ((value == "1") || (value == "true") || (value == "TRUE") || (value == "True"));
-// 		else if (field == "DEFAULT_PAGE")
-// 			this->default_page = value;
-// 		else if (field == "DEFAULT_ERROR_PAGES" && value == "list")
-// 			this->parseDefaultErrorPages(conf_stream);
-// 		else if (field == "HTTP_REDIR")
-// 			this->parseHttpRedir(conf_stream);
-// 	}
-// }
-
-Config::Config(const Config &other)
-{
-	*this = other;
-}
-
-Config	&Config::operator=(const Config &other)
-{
-	if (this != &other)
-	{
-		this->ip = other.ip;
-		this->port_number = other.port_number;
-		this->domain = other.domain;
-		this->type = other.type;
-		this->protocol = other.protocol;
-		this->max_header_size = other.max_header_size;
-		this->max_body_size = other.max_body_size;
-		this->client_limit = other.client_limit;
-		this->processing_time_limit = other.processing_time_limit;
-		this->incoming_queue_backlog = other.incoming_queue_backlog;
-		this->buffer_size = other.buffer_size;
-		this->cookie_sessions_max = other.cookie_sessions_max;
-		this->cookie_life_time = other.cookie_life_time;
-		this->server_home = other.server_home;
-		this->enable_listdir = other.enable_listdir;
-		this->default_page = other.default_page;
-		this->default_error_pages = other.default_error_pages;
-		this->http_redir = other.http_redir;
-		this->accepted_methods = other.accepted_methods;
-	}
-	return (*this);
 }
 
 Config::~Config() {}
@@ -201,39 +141,138 @@ const std::map<std::string, Redirection>	&Config::getRedirections() const
 	return (this->http_redir);
 }
 
-void	Config::_assignValue(FieldHandler &fh, const std::string &value)
+bool	Config::isAcceptedMethod(Method element) const
 {
+	for (unsigned int i = 0; i < this->accepted_methods.size(); ++i)
+		if (element == this->accepted_methods[i])
+			return (true);
+	return (false);
+}
+
+void	Config::_initEnumMaps()
+{
+	for (size_t i = 0; i < sizeof(_fields) / sizeof(_fields[0]); ++i)
+	{
+		if (_fields[i].enum_map == NULL)
+			continue;
+		std::map<std::string, int> &emap = this->*(_fields[i].enum_map);
+		if (_fields[i].name == "domain")
+		{
+			emap["af_inet"] = AF_INET;
+			emap["af_unix"] = AF_UNIX;
+			emap["inet"] = AF_INET;
+			emap["unix"] = AF_UNIX;
+		}
+		else if (_fields[i].name == "type")
+		{
+			emap["sock_stream"] = SOCK_STREAM;
+			emap["sock_dgram"] = SOCK_DGRAM;
+			emap["stream"] = SOCK_STREAM;
+			emap["dgram"] = SOCK_DGRAM;
+		}
+		else if (_fields[i].name == "protocol")
+		{
+			emap["ipproto_tcp"] = IPPROTO_TCP;
+			emap["ipproto_udp"] = IPPROTO_UDP;
+			emap["tcp"] = IPPROTO_TCP;
+			emap["udp"] = IPPROTO_UDP;
+		}
+	}
+}
+
+void	Config::_assignValue(FieldHandler &fh, const std::string &value, std::istringstream &conf_stream)
+{
+	switch (fh.type)
+	{
+		case FieldHandler::UINT:
+		{
+			_parseIP(value);
+			break ;
+		}
+		case FieldHandler::INT:
+		{
+			int	v = atoi(value.c_str());
+			if (v < static_cast<int>(fh.min) || v > static_cast<int>(fh.max))
+				throw Error("Value out of range for " + fh.name);
+			this->*(fh.target.int_field) = v;
+			break ;
+		}
+		case FieldHandler::LONG:
+		{
+			long v = strtol(value.c_str(), 0 ,0);
+			if (v < static_cast<long>(fh.min) || v > static_cast<long>(fh.max))
+				throw Error("Value out of range for " + fh.name);
+			this->*(fh.target.long_field) = v;
+			break ;
+		}
+		case FieldHandler::SIZE:
+		{
+			size_t v = strtoul(value.c_str(), 0 ,0);
+			if (v < fh.min || v > fh.max)
+				throw Error("Value out of range for " + fh.name);
+			this->*(fh.target.size_field) = v;
+			break ;
+		}
+		case FieldHandler::BOOL:
+		{
+			if (value != "true" && value != "false")
+				throw Error("Unknown keyword for " + fh.name);
+			this->*(fh.target.bool_field) = (value == "true");
+			break ;
+		}
+		case FieldHandler::STRING:
+		{
+			this->*(fh.target.string_field) = value;
+			break ;
+		}
+		case FieldHandler::ENUM:
+		{
+			std::map<std::string, int>				&emap = this->*(fh.enum_map);
+			std::map<std::string, int>::iterator	it = emap.find(value);
+			if (it == emap.end())
+				throw Error("Unknown keyword for " + fh.name);
+			this->*(fh.target.int_field) = it->second;
+			break ;
+		}
+		case FieldHandler::LIST:
+		{
+			if (fh.name == "default_error_pages")
+				_parseDefaultErrorPages(conf_stream);
+			else if (fh.name == "methods")
+				_parseMethods(conf_stream);
+			else
+				_parseHttpRedir(conf_stream);
+		}
+	}
 	return ;
 }
 
-void	Config::_setIP(std::string ip_str)
+void	Config::_parseIP(const std::string &ip_str)
 {
 	int					octets[4];
-	char				dot;
+	char				dot1, dot2, dot3;
 	std::istringstream	iss(ip_str);
-	unsigned int		ip_uint = 0;
-	
-	if (ip_str == "INADDR_ANY")
+
+	if (ip_str == "INADDR_ANY" || ip_str == "localhost")
 	{
-		this->ip = INADDR_ANY;
+		this->ip = htonl(INADDR_ANY);
 		return ;
 	}
 	else if (ip_str == "INADDR_NONE")
 	{
-		this->ip = INADDR_NONE;
+		this->ip = htonl(INADDR_NONE);
 		return ;
 	}
-	if ((iss >> octets[0] >> dot >> octets[1] >> dot >> octets[2] >> dot >> octets[3])
-		&& dot == '.' && iss.eof())
+	if (!(iss >> octets[0] >> dot1 >> octets[1] >> dot2 >> octets[2] >> dot3 >> octets[3]) ||
+		dot1 != '.' || dot2 != '.' || dot3 != '.' || !iss.eof())
+		throw Error("Invalid IP format: " + ip_str);
+	for (int i = 0; i < 4; ++i)
 	{
-		for (int i = 0; i < 4; ++i)
-		{
-			if (octets[i] < 0 || octets[i] > 255)
-				throw Error("Invalid IP address: " + ip_str);
-			ip_uint += octets[i] * pow(2, (3 - i) * 8);
-		}
+		if (octets[i] < 0 || octets[i] > 255)
+			throw Error("Invalid IP address (out of range): " + ip_str);
 	}
-	this->ip = htonl(ip_uint);
+	this->ip = (octets[0] << 24) | (octets[1] << 16) | (octets[2] << 8) | octets[3];
+	this->ip = htonl(this->ip);
 }
 
 void	Config::_parseDefaultErrorPages(std::istringstream &conf_stream)
@@ -244,7 +283,7 @@ void	Config::_parseDefaultErrorPages(std::istringstream &conf_stream)
 
 	while (std::getline(conf_stream, newline))
 	{
-		++_line_number;
+		++line_number;
 		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue;
 		else if (utils::stringTrim(newline, " \t\n") == "end")
@@ -261,14 +300,14 @@ void	Config::_parseDefaultErrorPages(std::istringstream &conf_stream)
 	}
 }
 
-void	Config::_parseMethod(std::istringstream &conf_stream)
+void	Config::_parseMethods(std::istringstream &conf_stream)
 {
 	std::string	newline;
 	std::string	field;
 
 	while (std::getline(conf_stream, newline))
 	{
-		++_line_number;
+		++line_number;
 		if (utils::stringTrim(newline, " \t\n").length() == 0)
 			continue;
 		else if (utils::stringTrim(newline, " \t\n") == "end")
@@ -283,7 +322,7 @@ void	Config::_parseMethod(std::istringstream &conf_stream)
 	}
 }
 
-void		Config::_parseHttpRedir(std::istringstream &conf_stream)
+void	Config::_parseHttpRedir(std::istringstream &conf_stream)
 {
 	std::string	newline;
 	std::string	path, equal, dest;
@@ -309,12 +348,19 @@ void		Config::_parseHttpRedir(std::istringstream &conf_stream)
 	}
 }
 
-bool	Config::isAcceptedMethod(Method element) const
+void	Config::_assignDefault(FieldHandler &fh)
 {
-	for (unsigned int i = 0; i < this->accepted_methods.size(); ++i)
-		if (element == this->accepted_methods[i])
-			return (true);
-	return (false);
+	if (fh.name == "default_error_pages" || fh.name == "http_redir")
+		return ;
+	switch (fh.type)
+	{
+		case FieldHandler::INT:		this->*(fh.target.int_field) = fh.default_value.int_value; break;
+		case FieldHandler::LONG:	this->*(fh.target.long_field) = fh.default_value.long_value; break;
+		case FieldHandler::SIZE:	this->*(fh.target.size_field) = fh.default_value.size_value; break;
+		case FieldHandler::BOOL:	this->*(fh.target.bool_field) = fh.default_value.bool_value; break;
+		case FieldHandler::STRING:	this->*(fh.target.string_field) = fh.default_value.string_value; break;
+		default:					break;
+	}
 }
 
 std::ostream	&operator<<(std::ostream &os, const Config &item)

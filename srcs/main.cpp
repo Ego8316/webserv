@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 13:52:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 01:35:02 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	deleteAllConfigs(std::vector<Config *> &configs)
 	configs.resize(0);
 }
 
-std::vector<Config *> parseMultipleConfigs(std::string filename)
+std::vector<Config *> parseMultipleConfigs(const std::string &filename)
 {
 	std::ifstream 			conf_file;
 	std::string				newline;
@@ -35,7 +35,7 @@ std::vector<Config *> parseMultipleConfigs(std::string filename)
 	configs.resize(0);
 	if (!conf_file.is_open())
 	{
-		std::cerr << "Could not open config file" << std::endl;
+		std::cerr << RED << "Cannot open configuration file " << BOLD_RED << filename << RESET << std::endl;
 		return (configs);
 	}
 	while (std::getline(conf_file, newline))
@@ -44,13 +44,13 @@ std::vector<Config *> parseMultipleConfigs(std::string filename)
 		{
 			if (config_section.length() != 0)
 			{
-				std::cerr << "Nested configs not supported" << std::endl;
+				std::cerr << RED << "Nested configurations not supported" << RESET << std::endl;
 				deleteAllConfigs(configs);
 				return (configs);
 			}
 			else if (newline.find("}") != std::string::npos)
 			{
-				std::cerr << "Format not recognized" << std::endl;
+				std::cerr << RED << "Invalid format" << RESET << std::endl;
 				deleteAllConfigs(configs);
 				return (configs);
 			}
@@ -60,7 +60,18 @@ std::vector<Config *> parseMultipleConfigs(std::string filename)
 		else if (newline.find("}") != std::string::npos)
 		{
 			config_section += newline.substr(0, newline.find("}")) + "\n";
-			configs.push_back(new Config(config_section));
+			try
+			{
+				Config	*cfg = new Config(config_section);
+				configs.push_back(cfg);
+			}
+			catch (const Config::Error &e)
+			{
+				std::cerr << BOLD_RED << "Configuration error: "
+					<< RED << e.what() << " at line " << Config::line_number << RESET << std::endl;
+				deleteAllConfigs(configs);
+				return (configs);
+			}
 			config_section = "";
 		}
 		else if (newline.length())

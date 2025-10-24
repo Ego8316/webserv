@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 00:13:05 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 02:33:17 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,14 @@ class	Config
 			std::string	_msg;
 			public:
 				Error(const std::string &msg) { _msg = msg; }
+				virtual ~Error() throw() {};
 				const char* what() const throw() { return _msg.c_str(); }
 		};
 
 		const std::map<std::string, Redirection>	&getRedirections() const;
 		bool										isAcceptedMethod(Method method) const;
 
+		static int								line_number;
 		unsigned int							ip;
 		int										port_number;
 		int										domain;
@@ -43,7 +45,7 @@ class	Config
 		long									processing_time_limit;
 		long									max_request_time;
 		int										incoming_queue_backlog;
-		int										buffer_size;
+		size_t									buffer_size;
 		int										cookie_sessions_max;
 		int										cookie_life_time;
 		std::string								server_home;
@@ -62,11 +64,14 @@ class	Config
 			std::string	name;
 			enum FieldType
 			{
+				UINT,
 				INT,
 				LONG,
-				STRING,
+				SIZE,
 				BOOL,
-				ENUM
+				STRING,
+				ENUM,
+				LIST
 			}	type;
 			bool	required;
 			bool	found;
@@ -74,31 +79,36 @@ class	Config
 			size_t	max;
 			union
 			{
-				unsigned int	Config::*uintField;
-				int				Config::*intField;
-				long			Config::*longField;
-				size_t			Config::*sizeField;
-				bool			Config::*boolField;
-				std::string		Config::*stringField;
+				unsigned int	Config::*uint_field;
+				int				Config::*int_field;
+				long			Config::*long_field;
+				size_t			Config::*size_field;
+				bool			Config::*bool_field;
+				std::string		Config::*string_field;
 			}	target;
 			union
 			{
-				int			intDefault;
-				bool		boolDefault;
-				size_t		sizeDefault;
-				bool		boolDefault;
-				std::string	stringDefault;
+				int			int_value;
+				long		long_value;
+				size_t		size_value;
+				bool		bool_value;
+				const char 	*string_value;
 			}	default_value;
+			std::map<std::string, int>	Config::*enum_map;
 		}	FieldHandler;
 
-		static FieldHandler	_fields[];
-		static int			_line_number;
+		static FieldHandler			_fields[];
+		std::map<std::string, int>	_enum_domain;
+		std::map<std::string, int>	_enum_type;
+		std::map<std::string, int>	_enum_protocol;
 
-		void	_assignValue(FieldHandler &fh, const std::string &value);
-		void	_setIP(std::string ip_str);
+		void	_initEnumMaps();
+		void	_assignValue(FieldHandler &fh, const std::string &value, std::istringstream &conf_stream);
+		void	_parseIP(const std::string &ip_str);
 		void	_parseDefaultErrorPages(std::istringstream &conf_stream);
-		void	_parseMethod(std::istringstream &conf_stream);
+		void	_parseMethods(std::istringstream &conf_stream);
 		void	_parseHttpRedir(std::istringstream &conf_stream);
+		void	_assignDefault(FieldHandler &fh);
 };
 
 std::ostream	&operator<<(std::ostream &os, const Config &src);
