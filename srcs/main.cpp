@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 17:09:34 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 19:09:09 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,59 +58,73 @@ void	shutdown(std::vector<WebServ *> &web_servers, std::vector<Config *> &config
 	configs.clear();
 }
 
-std::vector<Config *> parseMultipleConfigs(std::string filename)
+std::vector<Config *> parseConfigFile(std::string filename)
 {
-	std::ifstream 			conf_file;
-	std::string				newline;
+	std::ifstream 			conf_file(filename.c_str());
 	std::vector<Config *>	configs;
-	std::string				config_section;
-	
-	conf_file.open(filename.c_str(), std::ios::in);
-	
-	configs.resize(0);
+	std::string				line, block_content, current_name;
+	bool					in_server_block = false;
+
+	current_name.clear();
+	block_content.clear();
 	if (!conf_file.is_open())
+		throw Config::Error("Could not open config file: " + filename);
+	try
 	{
-		std::cerr << RED << "Cannot open configuration file " << BOLD_RED << filename << RESET << std::endl;
-		return (configs);
-	}
-	while (std::getline(conf_file, newline))
-	{
-		if (newline.find("{") != std::string::npos)
+		while (std::getline(conf_file, line))
 		{
-			if (config_section.length() != 0)
+			line = utils::stringTrimSpaces(line);
+			if (!in_server_block && (line.empty() || line[0] == '#'))
 			{
-				std::cerr << RED << "Nested configurations not supported" << RESET << std::endl;
-				deleteAllConfigs(configs);
-				return (configs);
+				Config::line_number++;
+				continue ;
 			}
-			else if (newline.find("}") != std::string::npos)
+			if (!in_server_block)
 			{
-				std::cerr << RED << "Invalid format" << RESET << std::endl;
-				deleteAllConfigs(configs);
-				return (configs);
+				if (utils::caseInsensitiveFind(line, "server") != line.end())
+				{
+					size_t	name_start = std::string("server").length();
+					size_t	brace_pos = line.find("{", name_start);
+
+					if (name_start >= line.size() || !isspace(line[name_start]))
+						throw Config::Error("Unknown keyword: expected `server'");
+					if (brace_pos == std::string::npos)
+						throw Config::Error("Missing `{' after server declaration");
+					if (brace_pos != line.size() - 1)
+						throw Config::Error("Unexpected token after `{' in server declaration");
+					current_name = line.substr(name_start, brace_pos - name_start);
+					utils::stringTrimSpaces(current_name);
+					in_server_block = true;
+					block_content.clear();
+				}
+				else
+					throw Config::Error("Unexpected content outside server block");
 			}
 			else
-				config_section = newline.erase(0, newline.find("{") + 1) + "\n";
-		}
-		else if (newline.find("}") != std::string::npos)
-		{
-			config_section += newline.substr(0, newline.find("}")) + "\n";
-			try
 			{
-				Config	*cfg = new Config(config_section);
-				configs.push_back(cfg);
+				if (line.find("}") != std::string::npos)
+				{
+					in_server_block = false;
+					try
+					{
+						Config	*cfg = new Config(block_content, current_name);
+						configs.push_back(cfg);
+					}
+					catch (const Config::Error &e) { throw ; }
+					current_name.clear();
+					block_content.clear();
+				}
+				else
+					block_content += line + "\n";
 			}
-			catch (const Config::Error &e)
-			{
-				std::cerr << BOLD_RED << "Configuration error: "
-					<< RED << e.what() << " at line " << Config::line_number << RESET << std::endl;
-				deleteAllConfigs(configs);
-				return (configs);
-			}
-			config_section = "";
 		}
-		else if (newline.length())
-			config_section += newline + "\n";
+		if (in_server_block)
+			throw Config::Error("Unmatched `{' before end of file");
+	}
+	catch (const Config::Error &e)
+	{
+		deleteAllConfigs(configs);
+		std::cerr << BOLD_RED << "Configuration error: " << RED << e.what() << " at line " << Config::line_number << std::endl;
 	}
 	conf_file.close();
 	return (configs);
@@ -125,12 +139,12 @@ int main(int argc, char *argv[])
     signal(SIGTERM, signal_handler);  // kill command or system shutdown
     signal(SIGHUP, signal_handler);   // Terminal hangup
 	if (argc == 1)
-		configs = parseMultipleConfigs("default.config");
+		configs = parseConfigFile("default.config");
 	else if (argc == 2)
-		configs = parseMultipleConfigs(argv[1]);
+		configs = parseConfigFile(argv[1]);
 	else
 	{
-		std::cerr << "Please provide one config file" << std::endl;
+		std::cerr << RED << "Please provide only one config file" << RESET << std::endl;
 		return (1);
 	}
 	if (configs.size() == 0)

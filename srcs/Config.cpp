@@ -6,13 +6,15 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 17:09:07 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 19:07:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 
-int	Config::line_number = 0;
+int	Config::line_number = 1;
+
+int	Config::_nb = 1;
 
 Config::FieldHandler Config::_fields[] = {
 	{"ip", FieldHandler::UINT, true, false, 0, 0,
@@ -92,13 +94,18 @@ Config::FieldHandler Config::_fields[] = {
 };
 
 
-Config::Config(const std::string &conf)
+Config::Config(const std::string &conf, const std::string &name)
 {
 	std::istringstream	conf_stream(conf);
 	std::string			line;
 	std::string			field, equal, value;
 
 	this->_initEnumMaps();
+	if (name.empty())
+		this->server_name = utils::toString(_nb);
+	else
+		this->server_name = name;
+	_nb++;
 	while (std::getline(conf_stream, line))
 	{
 		++line_number;
@@ -157,7 +164,7 @@ void	Config::_initEnumMaps()
 	for (size_t i = 0; i < sizeof(_fields) / sizeof(_fields[0]); ++i)
 	{
 		if (_fields[i].enum_map == NULL)
-			continue;
+			continue ;
 		std::map<std::string, int> &emap = this->*(_fields[i].enum_map);
 		if (_fields[i].name == "domain")
 		{
@@ -179,6 +186,8 @@ void	Config::_initEnumMaps()
 			emap["ipproto_udp"] = IPPROTO_UDP;
 			emap["tcp"] = IPPROTO_TCP;
 			emap["udp"] = IPPROTO_UDP;
+			for (int j = 0; j < 10; ++j)
+				emap[utils::toString(j)] = j;
 		}
 	}
 }
@@ -368,8 +377,10 @@ void	Config::_assignDefault(FieldHandler &fh)
 
 std::ostream &operator<<(std::ostream &os, const Config &cfg)
 {
-	#define BORDER_COLOR	BOLD_PURPLE
-	#define SECTION_COLOR	BOLD_RED
+	#define BORDER_COLOR		BOLD_PURPLE
+	#define SECTION_COLOR		BOLD_RED
+	#define FIELD_NAME_COLOR	BOLD
+	#define	FIELD_VALUE_COLOR	RESET
 	#define WIDTH				70UL
 	#define SECTION(title) \
 		{ \
@@ -384,14 +395,14 @@ std::ostream &operator<<(std::ostream &os, const Config &cfg)
 			os << BORDER_COLOR << VERTICAL << RESET << "   "; \
 			if (strlen(name) < WIDTH / 2) \
 			{ \
-				os << BOLD << name << RESET;\
+				os << FIELD_NAME_COLOR << name << RESET;\
 				for (size_t i = 0; i < WIDTH / 2 - strlen(name); ++i) os << " "; \
 			} \
 			else \
 				for (size_t i = 0; i < WIDTH / 2; ++i) os << " "; \
 			if (strlen(value) < WIDTH / 2 - 3) \
 			{ \
-				os << BOLD << value << RESET; \
+				os << FIELD_VALUE_COLOR << value << RESET; \
 				for (size_t i = 0; i < WIDTH / 2 - 3 - strlen(value); ++i) os << " "; \
 			} \
 			else \
@@ -402,13 +413,14 @@ std::ostream &operator<<(std::ostream &os, const Config &cfg)
 	os << BORDER_COLOR << TOP_LEFT << "SERVER CONFIG";
 	for (size_t i = 0; i < WIDTH - 13; ++i) os << HORIZONTAL;
 	os << TOP_RIGHT << RESET << "\n";
-	SECTION("Network Settings");
+	SECTION("Server settings");
+	FIELD("Name:", cfg.server_name.c_str());
 	FIELD("IP:", utils::toString(cfg.ip).c_str());
 	FIELD("Port:", utils::toString(cfg.port_number).c_str());
 	FIELD("Domain:", utils::toString(cfg.domain).c_str());
 	FIELD("Type:", utils::toString(cfg.type).c_str());
 	FIELD("Protocol:", utils::toString(cfg.protocol).c_str());
-	SECTION("Limits");
+	SECTION("Server limits");
 	FIELD("Max header size:", utils::toString(cfg.max_header_size).c_str());
 	FIELD("Max body size:", utils::toString(cfg.max_body_size).c_str());
 	FIELD("Client limit:", utils::toString(cfg.client_limit).c_str());
@@ -437,6 +449,8 @@ std::ostream &operator<<(std::ostream &os, const Config &cfg)
 	#undef FIELD
 	#undef SECTION
 	#undef WIDTH
+	#undef FIELD_VALUE_COLOR
+	#undef FIELD_NAME_COLOR
 	#undef SECTION_COLOR
 	#undef BORDER_COLOR
 	return (os);
