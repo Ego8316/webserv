@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 17:13:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 19:45:15 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,16 @@ CGI::~CGI()
 {
 	if (this->_process_status[0] == 0 && this->_pid != 0)
 		kill(this->_pid, SIGKILL);
+	if (this->_pipe_to_CGI[PIPE_WRITE_END] != -1)
+	{
+		close(this->_pipe_to_CGI[PIPE_WRITE_END]);
+		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
+	}
+	if (this->_pipe_from_CGI[PIPE_READ_END] != -1)
+	{
+		close(this->_pipe_from_CGI[PIPE_READ_END]);
+		this->_pipe_from_CGI[PIPE_READ_END] = -1;
+	}
 }
 
 

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 21:56:09 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 20:05:04 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 
 	std::ifstream	check(resource.getPath().c_str());
 	existed = check.good();
+	check.close();
 
 	outfile.open(resource.getPath().c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
 	if (!outfile.is_open())
@@ -220,7 +221,6 @@ void	RequestHandler::_handleError(Response *response, HttpStatus code, const Con
 			close(fd);
 		}
 	}
-
 	response->setBody(Response::getDefaultErrorPage(code));
 	response->setContentLength(response->getBody().size());
 	response->build();

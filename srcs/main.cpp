@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 19:09:09 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 20:13:54 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,15 +132,14 @@ std::vector<Config *> parseConfigFile(std::string filename)
 
 int main(int argc, char *argv[])
 {
+	return (0);
 	std::vector<Config *>				configs;
 	std::vector<WebServ *>				web_servers;
 	
-	signal(SIGINT, signal_handler);   // Ctrl+C
-    signal(SIGTERM, signal_handler);  // kill command or system shutdown
-    signal(SIGHUP, signal_handler);   // Terminal hangup
-	if (argc == 1)
-		configs = parseConfigFile("default.config");
-	else if (argc == 2)
+	signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+    signal(SIGHUP, signal_handler);
+	if (argc == 2)
 		configs = parseConfigFile(argv[1]);
 	else
 	{
@@ -160,8 +159,7 @@ int main(int argc, char *argv[])
 			std::cerr << "Could not init server " << i << std::endl;
 		}
 	}
-	long start = utils::getTime();
-	while (!g_shutdown && utils::getTime() < start + 10)
+	while (!g_shutdown)
 	{
 		for (unsigned int i = 0; i < web_servers.size(); ++i)
 		{

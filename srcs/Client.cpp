@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 10:36:44 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 19:49:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -383,7 +383,6 @@ int	Client::_sendFile()
 		this->printState();
 		return (0);
 	}
-
 	ssize_t	bytes_sent = this->_server->socketWrite(&buffer[0], bytes_read, this);
 	if (bytes_sent == SERV_ERROR)
 		return (SERV_ERROR);
