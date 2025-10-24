@@ -2,7 +2,7 @@
 MyServer1 I can write whatever here {
 	IP : 0.0.0.0
 	PORT : 8080
-	DOMAIN = AF_INET
+	DOMAiN = AF_INet
 	TYPE = SOCK_STREAM
 	PROTOCOL = 0
 

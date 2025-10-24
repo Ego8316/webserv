@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 23:24:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 17:10:31 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,28 +66,28 @@ int	ServerCore::init()
 {
 	if (!_socketCreate())
 	{
-		std::cerr << RED << "[KO] Socket creation failed: " << strerror(errno) << RESET << std::endl;
+		std::cerr << BOLD_RED << "[KO] Socket creation failed: " << RED << strerror(errno) << RESET << std::endl;
 		return (SERV_ERROR);
 	}
-	std::cout << GREEN << "[OK] Socket successfully created" << RESET << std::endl;
+	std::cout << BOLD_GREEN << "[OK]" << GREEN << " Socket successfully created" << RESET << std::endl;
 	if (!_socketSetOptions())
 	{
-		std::cerr << RED << "[KO] Socket configuration failed: " << strerror(errno) << RESET << std::endl;
+		std::cerr << BOLD_RED << "[KO] Socket configuration failed: " << RED <<  strerror(errno) << RESET << std::endl;
 		return (SERV_ERROR);
 	}
-	std::cout << GREEN << "[OK] Socket successfully configured" << RESET << std::endl;
+	std::cout << BOLD_GREEN << "[OK]" << GREEN << " Socket successfully configured" << RESET << std::endl;
 	if (!_socketBind())
 	{
-		std::cerr << RED << "[KO] Socket bind failed: " << strerror(errno) << RESET << std::endl;
+		std::cerr << BOLD_RED << "[KO] Socket bind failed: " << RED << strerror(errno) << RESET << std::endl;
 		return (SERV_ERROR);
 	}
-	std::cout << GREEN << "[OK] Socket successfully binded" << RESET << std::endl;
+	std::cout << BOLD_GREEN << "[OK]" << GREEN << " Socket successfully binded" << RESET << std::endl;
 	if (!_socketListen())
 	{
-		std::cerr << RED << "[KO] Socket listen failed: " << strerror(errno) << RESET << std::endl;
+		std::cerr << BOLD_RED << "[KO] Socket listen failed: " << RED << strerror(errno) << RESET << std::endl;
 		return (false);
 	}
-	std::cout << GREEN << "[OK] Socket successfully listened" << RESET << std::endl;
+	std::cout << BOLD_GREEN << "[OK]" << GREEN << " Socket successfully listened" << RESET << std::endl;
 	return (0);
 }
 
@@ -97,7 +97,7 @@ int	ServerCore::socketAcceptClient(Client *new_client)
 		(struct sockaddr *)&new_client->getClientAddr(),
 		&new_client->getClientLen()));
 	if (new_client->getFd() == SERV_ERROR)
-		std::cerr << RED << "Accept failed: " << strerror(errno) << RESET << std::endl;
+		std::cerr << BOLD_RED << "Accept failed: " << RED << strerror(errno) << RESET << std::endl;
 	else if (std::string(OS_NAME) == "macOs")
 		setNonBlocking(new_client->getFd());
 	return (new_client->getFd());

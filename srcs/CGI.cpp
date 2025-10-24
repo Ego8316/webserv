@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 15:10:08 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 17:13:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 	const std::string	&request_str = request.getRawBody();
 	std::vector<char>	buffer(config.buffer_size);
 
-	int bts = std::min(config.buffer_size, static_cast<int>(this->_bytes_to_send - this->_total_bytes_sent));
+	int bts = std::min(config.buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
 	bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent, bts);
 	if (bytes_sent != -1)
 		this->_total_bytes_sent += bytes_sent;
