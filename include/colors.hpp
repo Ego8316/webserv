@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 16:08:18 by ego               #+#    #+#             */
-/*   Updated: 2025/10/22 18:33:47 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 03:15:38 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 #define PURPLE				"\033[38;5;129m"
 
 // Bold
+#define BOLD				"\033[1m"
 #define BOLD_BLACK			"\033[1;30m"
 #define BOLD_GRAY			"\033[1;90m"
 #define BOLD_RED			"\033[1;31m"
@@ -52,3 +53,12 @@
 #define UNDERLINE_WHITE		"\033[4;37m"
 #define UNDERLINE_ORANGE	"\033[4;38;5;208m"
 #define UNDERLINE_PURPLE	"\033[4;38;5;129m"
+
+// Borders
+
+#define TOP_LEFT			"╔"
+#define TOP_RIGHT			"╗"
+#define BOTTOM_LEFT			"╚"
+#define BOTTOM_RIGHT		"╝"
+#define VERTICAL			"║"
+#define HORIZONTAL			"═"

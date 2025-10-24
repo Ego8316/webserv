@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 02:35:08 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 04:28:28 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -363,36 +363,78 @@ void	Config::_assignDefault(FieldHandler &fh)
 	}
 }
 
-std::ostream	&operator<<(std::ostream &os, const Config &item)
+std::ostream &operator<<(std::ostream &os, const Config &cfg)
 {
-	os << "IP :" << item.ip << std::endl;
-	os << "port_number :" << item.port_number << std::endl;
-	os << "domain :" << item.domain << std::endl;
-	os << "type :" << item.type << std::endl;
-	os << "protocol :" << item.protocol << std::endl;
-	os << "client_limit :" << item.client_limit << std::endl;
-	os << "incoming_queue_backlog :" << item.incoming_queue_backlog << std::endl;
-	os << "buffer_size :" << item.buffer_size << std::endl;
-	os << "cookie_sessions_max :" << item.cookie_sessions_max << std::endl;
-	os << "cookie_life_time :" << item.cookie_life_time << std::endl;
-	os << "ServHome :" << item.server_home << std::endl;
-	os << "enable_listdir :" << item.enable_listdir << std::endl;
-	os << "default_page :" << item.default_page << std::endl;
-	os << "Default error pages:" << std::endl;
-	std::map<int, std::string>		dep = item.default_error_pages;
-	std::map<int, std::string>::iterator		dep_it;
-	for (dep_it = dep.begin(); dep_it != dep.end(); ++dep_it)
-		os << dep_it->first << ": " << dep_it->second << "\n";
-	os << std::endl;
-	os << "Accepted Methods:" << std::endl;
-	for (unsigned int i = 0; i < item.accepted_methods.size(); ++i)
-		os << item.accepted_methods[i] << "\n";
-	os << std::endl;
-	os << "Redirections:" << std::endl;
-	std::map<std::string, Redirection>		red = item.http_redir;
-	std::map<std::string, Redirection>::iterator	red_it;
-	for (red_it = red.begin(); red_it != red.end(); ++red_it)
-		os << red_it->first << " -> " << red_it->second.dest << " with errcode " << red_it->second.error_code << "\n";
-	os << std::endl;
+	#define BORDER_COLOR	BOLD_PURPLE
+	#define SECTION_COLOR	BOLD_RED
+	#define WIDTH				70UL
+	#define SECTION(title) \
+		{ \
+			os << BORDER_COLOR << VERTICAL << RESET << " "; \
+			os << SECTION_COLOR << title << RESET; \
+			int pad = WIDTH - strlen(title) - 2; \
+			for (int i = 0; i <= pad; ++i) os << " "; \
+			os << BORDER_COLOR <<  VERTICAL << RESET << "\n"; \
+		}
+	#define FIELD(name, value) \
+		{ \
+			os << BORDER_COLOR << VERTICAL << RESET << "   "; \
+			if (strlen(name) < WIDTH / 2) \
+			{ \
+				os << BOLD << name << RESET;\
+				for (size_t i = 0; i < WIDTH / 2 - strlen(name); ++i) os << " "; \
+			} \
+			else \
+				for (size_t i = 0; i < WIDTH / 2; ++i) os << " "; \
+			if (strlen(value) < WIDTH / 2 - 3) \
+			{ \
+				os << BOLD << value << RESET; \
+				for (size_t i = 0; i < WIDTH / 2 - 3 - strlen(value); ++i) os << " "; \
+			} \
+			else \
+				for (size_t i = 0; i < WIDTH / 2 - 3; ++i) os << " "; \
+			os << BOLD_PURPLE << VERTICAL << RESET << "\n"; \
+		}
+
+	os << BORDER_COLOR << TOP_LEFT << "SERVER CONFIG";
+	for (size_t i = 0; i < WIDTH - 13; ++i) os << HORIZONTAL;
+	os << TOP_RIGHT << RESET << "\n";
+	SECTION("Network Settings");
+	FIELD("IP:", utils::toString(cfg.ip).c_str());
+	FIELD("Port:", utils::toString(cfg.port_number).c_str());
+	FIELD("Domain:", utils::toString(cfg.domain).c_str());
+	FIELD("Type:", utils::toString(cfg.type).c_str());
+	FIELD("Protocol:", utils::toString(cfg.protocol).c_str());
+	SECTION("Limits");
+	FIELD("Max header size:", utils::toString(cfg.max_header_size).c_str());
+	FIELD("Max body size:", utils::toString(cfg.max_body_size).c_str());
+	FIELD("Client limit:", utils::toString(cfg.client_limit).c_str());
+	FIELD("Processing time:", utils::toString(cfg.processing_time_limit).c_str());
+	FIELD("Max request time:", utils::toString(cfg.max_request_time).c_str());
+	FIELD("Incoming queue:", utils::toString(cfg.incoming_queue_backlog).c_str());
+	FIELD("Buffer size:", utils::toString(cfg.buffer_size).c_str());
+	FIELD("Cookie session:", utils::toString(cfg.cookie_sessions_max).c_str());
+	FIELD("Cookie lifetime:", utils::toString(cfg.cookie_life_time).c_str());
+	SECTION("Files & Directories");
+	FIELD("Root:", utils::toString(cfg.server_home.c_str()).c_str());
+	FIELD("Listdir:", (const char *)(cfg.enable_listdir ? "ON" : "OFF"));
+	FIELD("Default page:", utils::toString(cfg.default_page.c_str()).c_str());
+	SECTION("Methods");
+	for (size_t j = 0; j < cfg.accepted_methods.size(); ++j)
+		FIELD(utils::methodToStr(cfg.accepted_methods[j]).c_str(), "");
+	SECTION("Default error pages");
+	for (std::map<int, std::string>::const_iterator it = cfg.default_error_pages.begin(); it != cfg.default_error_pages.end(); ++it)
+		FIELD(utils::toString(it->first).c_str(), (it->second).c_str());
+	SECTION("Redirections");
+	for (std::map<std::string, Redirection>::const_iterator it = cfg.http_redir.begin(); it != cfg.http_redir.end(); ++it)
+		FIELD(it->first.c_str(), (it->second.dest + " (" + utils::toString(it->second.error_code) + ")").c_str());
+	os << BOLD_PURPLE << BOTTOM_LEFT;
+	for (size_t i = 0; i < WIDTH; ++i) os << HORIZONTAL;
+	os << BOTTOM_RIGHT << RESET << "\n";
+	#undef FIELD
+	#undef SECTION
+	#undef WIDTH
+	#undef SECTION_COLOR
+	#undef BORDER_COLOR
 	return (os);
 }

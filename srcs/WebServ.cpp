@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 21:57:52 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 03:31:17 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ int	WebServ::Init()
 	if (_core->init() == SERV_ERROR)
 		return (SERV_ERROR);
 	this->_core->pollAdd(this->_core->getFd(), POLLIN, -1);
-	std::cout << BOLD_GREEN << "[OK] WebServ initialized!" << RESET << std::endl;
+	std::cout << BOLD_GREEN << "[OK]" << GREEN << " WebServ initialized!" << RESET << std::endl;
 	return (0);
 }
 

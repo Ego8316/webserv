@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/24 01:52:19 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 03:21:08 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,6 @@ std::vector<struct pollfd>	&ServerCore::getPollFds()
 
 int	ServerCore::init()
 {
-	std::cout << "IP (network order): " << this->_config->ip
-          << " | AF: " << this->_config->domain
-          << " | Type: " << this->_config->type
-          << " | Proto: " << this->_config->protocol << std::endl;
 	if (!_socketCreate())
 	{
 		std::cerr << BOLD_RED << "[KO] Socket creation failed: " << RED << strerror(errno) << RESET << std::endl;
