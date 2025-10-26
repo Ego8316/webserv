@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 21:55:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 19:49:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -326,12 +326,17 @@ void	Client::_monitorCGI()
 {
 	if (!_response->getCGI() || _response->getCGI()->isComplete())
 	{
-		_state = SENDING_STRING;
+		this->_state = SENDING_STRING;
+		this->printState();
 		return ;
 	}
 	_response->getCGI()->Run(*this, *_request, *_config, *_response);
 	if (_response->getCGI()->isComplete())
-		_state = SENDING_STRING;
+	{
+		
+		this->_state = SENDING_STRING;
+		this->printState();
+	}
 	return ;
 }
 
@@ -378,7 +383,6 @@ int	Client::_sendFile()
 		this->printState();
 		return (0);
 	}
-
 	ssize_t	bytes_sent = this->_server->socketWrite(&buffer[0], bytes_read, this);
 	if (bytes_sent == SERV_ERROR)
 		return (SERV_ERROR);

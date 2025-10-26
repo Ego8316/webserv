@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/23 14:32:38 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/25 14:42:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include "Cookie.hpp"
 #include "utils.hpp"
 #include "Response.hpp"
+#include "ServerCore.hpp"
 
 class	Cookie;
 class	Client;
@@ -45,7 +46,7 @@ class CGI
 		void		parseHeader();
 		void		genFullOutput(Response &response);
 
-		void		Execute(Request &request);
+		void		Execute();
 		
 		std::string	&getOutput();
 		HttpStatus	getStatus();
@@ -55,21 +56,23 @@ class CGI
 		void		GenEnvVar(Request &request);
 		void		deleteEnvVar();
 	private :
-		bool		_is_init;
-		bool		_is_complete;
-		HttpStatus	_status;
-		std::string	_output;
-		size_t		_header_len;
-		size_t		_content_len;
-		int			_pid;
-		int			_process_status[2];
-		int			_pipe_to_CGI[2];
-		int			_pipe_from_CGI[2];
-		ssize_t		_total_bytes_sent;
-		ssize_t		_bytes_to_send;
-		ssize_t		_total_bytes_read;
-		ssize_t		_total_bytes_to_read;
-		bool		_chunked;
-		char		**_args;
-		char		**_env;
+		std::string			_cgi_script;
+		bool				_is_init;
+		bool				_is_complete;
+		HttpStatus			_status;
+		std::string			_output;
+		size_t				_header_len;
+		size_t				_content_len;
+		int					_pid;
+		int					_process_status[2];
+		int					_pipe_to_CGI[2];
+		int					_pipe_from_CGI[2];
+		ssize_t				_total_bytes_sent;
+		ssize_t				_bytes_to_send;
+		ssize_t				_total_bytes_read;
+		ssize_t				_total_bytes_to_read;
+		bool				_chunked;
+		char				*_cgi_script_char;
+		char				**_args;
+		char				**_env;
 };

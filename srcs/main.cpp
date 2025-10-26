@@ -3,15 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 17:09:10 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/25 14:48:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 #include "WebServ.hpp"
+
+int g_shutdown = 0;
 
 void	deleteAllConfigs(std::vector<Config *> &configs)
 {
@@ -23,7 +25,40 @@ void	deleteAllConfigs(std::vector<Config *> &configs)
 	configs.resize(0);
 }
 
-std::vector<Config *>	parseConfigFile(const std::string &filename)
+void	signal_handler(int signal)
+{
+	(void)signal;
+	g_shutdown = 1;
+}
+
+void	deleteServer(std::vector<WebServ *> &web_servers, std::vector<Config *> &configs, int i)
+{
+	std::vector<WebServ *>::iterator	it_web;
+	std::vector<Config *>::iterator		it_conf;
+
+	delete web_servers[i];
+	it_web = web_servers.begin() + i;
+	web_servers.erase(it_web);
+	delete configs[i];
+	it_conf = configs.begin() + i;
+	configs.erase(it_conf);
+	return ;
+}
+
+void	shutdown(std::vector<WebServ *> &web_servers, std::vector<Config *> &configs)
+{
+	unsigned int len = web_servers.size();
+	for (unsigned int i = 0; i < len; ++i)
+	{
+		std::cerr << RED << "Destroying server and config " << i + 1 << "/" << web_servers.size() << RESET << std::endl;
+		delete web_servers[i];
+		delete configs[i];
+	}
+	web_servers.clear();
+	configs.clear();
+}
+
+std::vector<Config *> parseConfigFile(std::string filename)
 {
 	std::ifstream 			conf_file(filename.c_str());
 	std::vector<Config *>	configs;
@@ -99,12 +134,11 @@ int main(int argc, char *argv[])
 {
 	std::vector<Config *>				configs;
 	std::vector<WebServ *>				web_servers;
-	std::vector<WebServ *>::iterator	it_web;
-	std::vector<Config *>::iterator		it_conf;
 	
-	if (argc == 1)
-		configs = parseConfigFile("default.config");
-	else if (argc == 2)
+	signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+    signal(SIGHUP, signal_handler);
+	if (argc == 2)
 		configs = parseConfigFile(argv[1]);
 	else
 	{
@@ -113,36 +147,28 @@ int main(int argc, char *argv[])
 	}
 	if (configs.size() == 0)
 		return (1);
+	ServerCore::setNonBlocking(STDIN_FILENO);
 	for (unsigned int i = 0; i < configs.size(); ++i)
 		web_servers.push_back(new WebServ(configs[i]));
 	for (unsigned int i = 0; i < web_servers.size(); ++i)
 	{
 		if (web_servers[i]->Init() == SERV_ERROR)
 		{
-			delete web_servers[i];
-			it_web = web_servers.begin() + i;
-			web_servers.erase(it_web);
-			delete configs[i];
-			it_conf = configs.begin() + i;
-			configs.erase(it_conf);
+			
 			std::cerr << "Could not init server " << i << std::endl;
 		}
 	}
-	while (true)
+	while (!g_shutdown)
 	{
 		for (unsigned int i = 0; i < web_servers.size(); ++i)
 		{
 			if (web_servers[i]->Run() == SERV_ERROR)
 			{
-				delete web_servers[i];
-				it_web = web_servers.begin() + i;
-				web_servers.erase(it_web);
-				delete configs[i];
-				it_conf = configs.begin() + i;
-				configs.erase(it_conf);
+				deleteServer(web_servers, configs, i);
 				std::cerr << RED << "Server " << i << ": fatal error occured" << RESET << std::endl;
 			}
 		}
 	}
+	shutdown(web_servers, configs);
 	return (0);
 }

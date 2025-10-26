@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 16:50:44 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 19:08:12 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,17 @@ WebServ::WebServ(const Config *config)
 
 WebServ::~WebServ()
 {
-	for (unsigned int i = 0; i < _clients.size(); ++i)
+	for (int i = 0; i < _config->client_limit; ++i)
 	{
 		if (this->_clients[i] != NULL)
+		{
 			delete this->_clients[i];
+			this->_clients[i] = NULL;
+		}
 	}
 	if (this->_core)
 		delete this->_core;
+	std::cerr << RED << "Destroying server" << RESET << std::endl;
 }
 
 int	WebServ::Init()

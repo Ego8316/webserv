@@ -42,6 +42,7 @@ class	ServerCore
 		std::vector<PollRevent>	pollWatchRevent();
 		bool					pollAvailFor(int indx, nfds_t operation);
 
+		static void				setNonBlocking(int fd);
 	private:
 		const Config				*_config;
 		int							_server_fd;
@@ -52,6 +53,5 @@ class	ServerCore
 		bool	_socketSetOptions();
 		bool	_socketBind();
 		bool	_socketListen();
-		void	_setNonBlocking(int fd);
 		int		_pollWait();
 };

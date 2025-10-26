@@ -1,3 +1,4 @@
 objs/*
 WebServ
 webserv
+valgrind_detailed.log

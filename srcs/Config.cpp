@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 17:11:21 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/24 19:07:26 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,10 @@ Config::Config(const std::string &conf, const std::string &name)
 	}
 }
 
-Config::~Config() {}
+Config::~Config()
+{
+	std::cerr << RED << "Destroying config" << RESET << std::endl;
+}
 
 const std::map<std::string, Redirection>	&Config::getRedirections() const
 {

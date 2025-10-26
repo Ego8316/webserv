@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 14:37:23 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/24 10:41:02 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,3 +66,5 @@ class	Response
 		bool								_is_cgi;
 		int									_body_fd;
 };
+
+std::ostream	&operator<<(std::ostream &os, const Response &src);
