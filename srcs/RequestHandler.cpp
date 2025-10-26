@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/24 20:05:04 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/25 20:04:25 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,7 @@ void	RequestHandler::_handleDelete(Response *response, const Config &config, con
 void	RequestHandler::_handleCGI(Response *response)
 {
 	//TODO check for errors on Ressource
+	if 
 	if (response->getCGI() == NULL)
 		response->setCGI(new CGI());
 }

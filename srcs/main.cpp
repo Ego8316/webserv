@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 20:13:54 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/25 14:48:32 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void	shutdown(std::vector<WebServ *> &web_servers, std::vector<Config *> &config
 	unsigned int len = web_servers.size();
 	for (unsigned int i = 0; i < len; ++i)
 	{
-		std::cerr << RED << "Destroying server and config " << i << "/" << web_servers.size() << RESET << std::endl;
+		std::cerr << RED << "Destroying server and config " << i + 1 << "/" << web_servers.size() << RESET << std::endl;
 		delete web_servers[i];
 		delete configs[i];
 	}
@@ -132,7 +132,6 @@ std::vector<Config *> parseConfigFile(std::string filename)
 
 int main(int argc, char *argv[])
 {
-	return (0);
 	std::vector<Config *>				configs;
 	std::vector<WebServ *>				web_servers;
 	
@@ -171,6 +170,5 @@ int main(int argc, char *argv[])
 		}
 	}
 	shutdown(web_servers, configs);
-	return (123);
+	return (0);
 }
-

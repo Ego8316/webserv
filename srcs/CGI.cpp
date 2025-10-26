@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 19:45:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/25 20:03:44 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ CGI::CGI()
 	this->_bytes_to_send = 0;
 	this->_total_bytes_to_read = 0;
 	this->_chunked = false;
+	this->_cgi_script_char = NULL;
 	this->_args = NULL;
 	this->_env = NULL;
 }
@@ -62,6 +63,7 @@ CGI &CGI::operator=(const CGI &other)
 		this->_bytes_to_send = other._bytes_to_send;
 		this->_total_bytes_to_read = other._total_bytes_to_read;
 		this->_chunked = other._chunked;
+		this->_cgi_script_char = NULL;
 		this->_args = NULL;
 		this->_env = NULL;
 	}
@@ -82,6 +84,7 @@ CGI::~CGI()
 		close(this->_pipe_from_CGI[PIPE_READ_END]);
 		this->_pipe_from_CGI[PIPE_READ_END] = -1;
 	}
+	deleteEnvVar();
 }
 
 
@@ -99,15 +102,17 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
 		return ;
 	}
+	if (chdir(config.server_home.c_str()) == -1)
+		exit (0);
+	this->_cgi_script = request.getRequestTarget(); //TODO quand config sera ok refaire les setup de path et les checks
+	if (!utils::startsWith(this->_cgi_script, "."))
+		this->_cgi_script = "." + this->_cgi_script;
+	this->_cgi_script_char = new char[this->_cgi_script.length() + 1];
+	strcpy(this->_cgi_script_char, this->_cgi_script.c_str());
+	GenEnvVar(request);
 	this->_pid = fork();
 	if (this->_pid == 0)
 	{
-		GenEnvVar(request);
-		if (chdir(config.server_home.c_str()) == -1)
-			exit (0);
-		this->_cgi_script = request.getRequestTarget(); //TODO quand config sera ok refaire les setup de path et les checks
-		if (!utils::startsWith(this->_cgi_script, "."))
-			this->_cgi_script = "." + this->_cgi_script;
 		this->Execute();
 	}
 	else
@@ -161,10 +166,10 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 ssize_t		CGI::readFromCGI(const Config &config)
 {
 	ssize_t				bytes_read = 0;
-	std::vector<char>	buffer(config.buffer_size);
+	std::vector<char>	buffer(config.buffer_size + 2);
 
-	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0] , buffer.size());
-	
+	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0], config.buffer_size);
+	std::cout << "read " << bytes_read << " bytes" << std::endl;
 	if (bytes_read != -1)
 	{
 		buffer[bytes_read + 1] = '\0';
@@ -199,16 +204,13 @@ void	CGI::parseHeader()
 
 void	CGI::genFullOutput(Response &response)
 {
-	if (!WIFEXITED(this->_process_status[1]) || WEXITSTATUS(this->_process_status[1]) != 0)
+	if (!WIFEXITED(this->_process_status[1]))
 	{
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
-		std::cout << "Error in child process" << std::endl;
+		std::cout << "Error : Child process returned " << this->_process_status[1] << std::endl;
 	}
 	else if (utils::startsWith(this->_output, "HTTP/"))
-	{
-		deleteEnvVar();
 		return ;
-	}
 	else if (utils::caseInsensitiveFind(this->_output, "\r\nstatus: ") != this->_output.end())
 	{
 		this->_status = utils::strToHttpStatus(&*utils::caseInsensitiveFind(this->_output, "status: ")
@@ -225,7 +227,6 @@ void	CGI::genFullOutput(Response &response)
 	response.buildHeader();
 	response.setBody(this->_output);
 	response.build();
-	deleteEnvVar();
 	return ;
 }
 
@@ -255,8 +256,7 @@ void		CGI::Execute()
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
 	}
-	std::cerr << "executing : >" << this->_cgi_script.c_str() << "<" << std::endl;
-	if (execve(this->_cgi_script.c_str(), this->_args, this->_env) == -1)
+	if (execve(this->_cgi_script_char, this->_args, this->_env) == -1)
 	{
 		std::cerr << RED << "CGI execution failed" << RESET << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
@@ -288,7 +288,8 @@ void		CGI::GenEnvVar(Request &request)
 	}
 	this->_env[env.size()] = NULL;
 	this->_args = new char *[2];
-	this->_args[0] = &request.getRequestTarget()[0];
+	this->_args[0] = new char[this->_cgi_script.size() + 1];
+	strcpy(this->_args[0], this->_cgi_script_char);
 	this->_args[1] = NULL;
 	return ;
 }
@@ -296,7 +297,9 @@ void		CGI::GenEnvVar(Request &request)
 void	CGI::deleteEnvVar()
 {
 	int i = 0;
-
+	
+	delete this->_cgi_script_char;
+	this->_cgi_script_char = NULL;
 	if (this->_args)
 	{
 		while (this->_args[i])
