@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 22:29:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/27 14:37:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,24 +72,28 @@ void	Resource::build(const Request &request, const Config &config)
 		return ;
 	if (_resolvePath(request.getRequestTarget(), config) == SERV_ERROR)
 		return ;
-	_evaluatePermissions();
-	_detectType();
-	_checkAccept(request);
+	this->_evaluatePermissions();
+	this->_detectType();
+	this->_checkAccept(request);
 	return ;
 }
 
 bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &config)
 {
 	std::string							raw_path_requested(requestTarget);
-	std::map<std::string, Redirection>	redirs = config.getRedirections();
+	// TODO
+	std::map<std::string, Redirection>	redirs;
 	
+	(void)config;
 	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
 	{
-		if ((raw_path_requested == it->first) || (raw_path_requested + config.default_page == it->first))
+		// TODO adapter avec location
+		// if ((raw_path_requested == it->first) || (raw_path_requested + config.default_page == it->first))
+		if ((raw_path_requested == it->first) || (raw_path_requested == it->first))
 		{
-			_path = it->second.dest;
-			_redir_code = it->second.error_code;
-			_status = IS_REDIRECT;
+			this->_path = it->second.dest;
+			this->_redir_code = it->second.error_code;
+			this->_status = IS_REDIRECT;
 			return (true);
 		}	
 	}
@@ -100,7 +104,7 @@ bool	Resource::_checkAccept(const Request &request)
 {
 
 	if (!(this->_type & request.getAccept()))
-		_status = static_cast<ResourceStatus>(_status | ACCEPT_ERROR);
+		this->_status |= ACCEPT_ERROR;
 	return (this->_type & request.getAccept());
 }
 
@@ -122,23 +126,25 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
 {
 	struct stat	file_stat;
 
-	_path = config.server_home + requestTarget;
-	_status = static_cast<ResourceStatus>(_status & ~(EXISTS | IS_DIR));
-	if (stat(_path.c_str(), &file_stat) == -1)
+	this->_path = config.server_home + requestTarget;
+	this->_status = static_cast<ResourceStatus>(this->_status & ~(EXISTS | IS_DIR));
+	if (stat(this->_path.c_str(), &file_stat) == -1)
 	{
 		if (errno == EACCES)
-			_status = static_cast<ResourceStatus>(_status | EXISTS);
-		std::cerr << "Cannot find ressource " << _path << std::endl;
+			this->_status |= EXISTS;
+		std::cerr << "Cannot find ressource " << this->_path << std::endl;
 		return (SERV_ERROR);
 	}
-	_status = static_cast<ResourceStatus>(_status | EXISTS);
+	this->_status |= EXISTS;
 	if (S_ISDIR(file_stat.st_mode))
 	{
-		std::string	index_path = _path + config.default_page;
+		// TODO adapter avec Location
+		// std::string	index_path = _path + config.default_page;
+		std::string	index_path = this->_path;
 		if (stat(index_path.c_str(), &file_stat) == 0)
-			_path = index_path;
+			this->_path = index_path;
 		else
-			_status = static_cast<ResourceStatus>(_status | IS_DIR);
+			this->_status |= IS_DIR;
 	}
 	return (0);
 }
@@ -152,15 +158,15 @@ void	Resource::_evaluatePermissions()
 {
 	struct stat	file_stat;
 
-	_status = static_cast<ResourceStatus>(_status & ~(PERM_ROK | PERM_WOK | PERM_XOK));
+	this->_status = static_cast<ResourceStatus>(this->_status & ~(PERM_ROK | PERM_WOK | PERM_XOK));
 	if (stat(_path.c_str(), &file_stat) == -1)
 		return ;
 	if (file_stat.st_mode & S_IRUSR)
-		_status = static_cast<ResourceStatus>(_status | PERM_ROK);
+		this->_status |= PERM_ROK;
 	if (file_stat.st_mode & S_IWUSR)
-		_status = static_cast<ResourceStatus>(_status | PERM_WOK);
+		this->_status |= PERM_WOK;
 	if (file_stat.st_mode & S_IXUSR)
-		_status = static_cast<ResourceStatus>(_status | PERM_XOK);
+		this->_status |= PERM_XOK;
 }
 
 /**
@@ -170,9 +176,9 @@ void	Resource::_evaluatePermissions()
  */
 void	Resource::_detectType()
 {
-	_type = utils::extensionToContentTypes(_path);
-	_status = static_cast<ResourceStatus>(_status & ~IS_CGI);
-	_status = static_cast<ResourceStatus>(_status | (IS_CGI * ((FTYPE_IS_CGI & _type) != 0)));
+	this->_type = utils::extensionToContentTypes(_path);
+	this->_status = static_cast<ResourceStatus>(_status & ~IS_CGI);
+	this->_status = static_cast<ResourceStatus>(_status | (IS_CGI * ((FTYPE_IS_CGI & _type) != 0)));
 	return ;
 }
 
@@ -182,7 +188,7 @@ void	Resource::_detectType()
  */
 const std::string	&Resource::getPath() const
 {
-	return (_path);
+	return (this->_path);
 }
 
 /**
@@ -191,7 +197,7 @@ const std::string	&Resource::getPath() const
  */
 ResourceStatus	Resource::getStatus() const
 {
-	return (_status);
+	return (this->_status);
 }
 
 /**
@@ -200,7 +206,7 @@ ResourceStatus	Resource::getStatus() const
  */
 size_t	Resource::getSize() const
 {
-	return (_size);
+	return (this->_size);
 }
 
 /**
@@ -209,7 +215,7 @@ size_t	Resource::getSize() const
  */
 ContentType	Resource::getType() const
 {
-	return (_type);
+	return (this->_type);
 }
 
 /**
@@ -218,7 +224,7 @@ ContentType	Resource::getType() const
  */
 bool	Resource::exists() const
 {
-	return (_status & EXISTS);
+	return (this->_status & EXISTS);
 }
 
 /**
@@ -227,12 +233,12 @@ bool	Resource::exists() const
  */
 bool	Resource::isCGI() const
 {
-	return (_status & IS_CGI);
+	return (this->_status & IS_CGI);
 }
 
 bool	Resource::isRedirect() const
 {
-	return (_status & IS_REDIRECT);
+	return (this->_status & IS_REDIRECT);
 }
 
 /**
@@ -241,7 +247,7 @@ bool	Resource::isRedirect() const
  */
 bool	Resource::isDirectory() const
 {
-	return (_status & IS_DIR);
+	return (this->_status & IS_DIR);
 }
 
 /**
@@ -250,7 +256,7 @@ bool	Resource::isDirectory() const
  */
 bool	Resource::isReadable() const
 {
-	return (_status & PERM_ROK);
+	return (this->_status & PERM_ROK);
 }
 
 /**
@@ -259,7 +265,7 @@ bool	Resource::isReadable() const
  */
 bool	Resource::isWritable() const
 {
-	return (_status & PERM_WOK);
+	return (this->_status & PERM_WOK);
 }
 
 /**
@@ -268,7 +274,7 @@ bool	Resource::isWritable() const
  */
 bool	Resource::isExecutable() const
 {
-	return (_status & PERM_XOK);
+	return (this->_status & PERM_XOK);
 }
 
 /**
@@ -277,5 +283,5 @@ bool	Resource::isExecutable() const
  */
 bool	Resource::isForbidden() const
 {
-	return (_status & EXISTS && !(_status & (PERM_ROK | PERM_WOK | PERM_XOK)));
+	return (this->_status & EXISTS && !(this->_status & (PERM_ROK | PERM_WOK | PERM_XOK)));
 }

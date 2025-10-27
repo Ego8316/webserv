@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/25 20:04:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/27 13:53:59 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,8 +85,9 @@ void	RequestHandler::_handleGet(Response *response, const Config &config, const 
 	{
 		if (!utils::endsWith(resource.getPath(), "/"))
 			return (_handleError(response, HTTP_REDIRECT_PERM, config));
-		if (config.enable_listdir)
-			return (_handleListDir(response, config, resource));
+		// TODO Adapter avec Location
+		// if (config.enable_listdir)
+		// 	return (_handleListDir(response, config, resource));
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	}
 	
@@ -154,7 +155,6 @@ void	RequestHandler::_handleDelete(Response *response, const Config &config, con
 void	RequestHandler::_handleCGI(Response *response)
 {
 	//TODO check for errors on Ressource
-	if 
 	if (response->getCGI() == NULL)
 		response->setCGI(new CGI());
 }

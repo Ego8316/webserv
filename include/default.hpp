@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/23 22:53:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 23:31:28 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/27 14:06:59 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,5 +53,6 @@
 #define DEFAULT_MAX_COOKIE_LIFETIME		1000
 
 #define DEFAULT_SERVER_HOME				"/var/www"
-#define DEFAULT_ENABLE_LISTDIR			0
+#define DEFAULT_AUTOINDEX				0
+#define DEFAULT_ACCEPTED_METHODS		1
 #define DEFAULT_DEFAULT_PAGE			"index.html"

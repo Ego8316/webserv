@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/24 01:17:41 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/27 14:34:11 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,10 +108,10 @@
 
 enum	Method
 {
-	GET,
-	POST,
-	DELETE,
-	UNKNOWN
+	GET		= 1 << 0,
+	POST	= 1 << 1,
+	DELETE	= 1 << 2,
+	UNKNOWN	= 1 << 3
 };
 
 enum	ResourceStatus
@@ -201,3 +201,10 @@ typedef struct s_Redirection
 	std::string		dest;
 	HttpStatus		error_code;
 }	Redirection;
+
+inline Method			operator|(Method a, Method b) { return static_cast<Method>(static_cast<int>(a) | static_cast<int>(b)); }
+inline Method&			operator|=(Method& a, Method b) { a = a | b; return a; }
+inline ResourceStatus	operator|(ResourceStatus a, ResourceStatus b) { return static_cast<ResourceStatus>(static_cast<int>(a) | static_cast<int>(b)); }
+inline ResourceStatus&	operator|=(ResourceStatus& a, ResourceStatus b) { a = a | b; return a; }
+inline ResourceStatus	operator&(ResourceStatus a, ResourceStatus b) { return static_cast<ResourceStatus>(static_cast<int>(a) & static_cast<int>(b)); }
+inline ResourceStatus&	operator&=(ResourceStatus& a, ResourceStatus b) { a = a & b; return a; }

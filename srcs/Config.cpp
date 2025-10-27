@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 19:07:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/27 14:43:49 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,22 +77,21 @@ Config::FieldHandler Config::_fields[] = {
 		{ .string_field = &Config::server_home },
 		{ .string_value = DEFAULT_SERVER_HOME },
 		NULL },
-	{"enable_listdir", FieldHandler::BOOL, false, false, 0, 0,
-		{ .bool_field = &Config::enable_listdir },
-		{ .bool_value = DEFAULT_ENABLE_LISTDIR },
-		NULL },
+	{"autoindex", FieldHandler::BOOL, false, false, 0, 0,
+		{ .bool_field = &Config::default_autoindex },
+		{ .bool_value = DEFAULT_AUTOINDEX },
+	NULL },
 	{"default_page", FieldHandler::STRING, false, false, 0, 0,
 		{ .string_field = &Config::default_page },
 		{ .string_value = DEFAULT_DEFAULT_PAGE },
 		NULL },
+	{"methods", FieldHandler::LIST, false, false, 0, 0,
+		{ .method_field = &Config::default_accepted_methods },
+		{ .int_value = DEFAULT_ACCEPTED_METHODS },
+		NULL },
 	{"default_error_pages", FieldHandler::LIST, false, false, 0, 0,
 		{ 0 }, { 0 }, NULL },
-	{"methods", FieldHandler::LIST, true, false, 0, 0,
-		{ 0 }, { 0 }, NULL },
-	{"http_redir", FieldHandler::LIST, false, false, 0, 0,
-		{ 0 }, { 0 }, NULL },
 };
-
 
 Config::Config(const std::string &conf, const std::string &name)
 {
@@ -101,6 +100,7 @@ Config::Config(const std::string &conf, const std::string &name)
 	std::string			field, equal, value;
 
 	this->_initEnumMaps();
+	for (size_t i = 0; i < sizeof(_fields) / sizeof(_fields[0]); ++i) _fields[i].found = false;
 	if (name.empty())
 		this->server_name = utils::toString(_nb);
 	else
@@ -109,11 +109,17 @@ Config::Config(const std::string &conf, const std::string &name)
 	while (std::getline(conf_stream, line))
 	{
 		++line_number;
-		line = utils::stringTrim(line, " \t\n");
 		if (line.empty()) continue ;
 		std::istringstream	line_stream(line);
-		if (!(line_stream >> field >> equal >> value) || (equal != "=" && equal != ":"))
+		if (!(line_stream >> field >> equal >> value) || !line_stream.eof())
 			throw Error("Invalid line format");
+		if (field == "location")
+		{
+			_parseLocation(equal, value, conf_stream);
+			continue ;
+		}
+		if (equal != "=" && equal != ":")
+			throw Error("Unexpected token in second position: expected `=' or `:'");
 		bool	matched = false;
 		for (size_t i = 0; i < sizeof(_fields) / sizeof(_fields[0]); ++i)
 		{
@@ -146,17 +152,9 @@ Config::~Config()
 	std::cerr << RED << "Destroying config" << RESET << std::endl;
 }
 
-const std::map<std::string, Redirection>	&Config::getRedirections() const
+bool	Config::isAcceptedMethod(Method element, const Location &loc) const
 {
-	return (this->http_redir);
-}
-
-bool	Config::isAcceptedMethod(Method element) const
-{
-	for (unsigned int i = 0; i < this->accepted_methods.size(); ++i)
-		if (element == this->accepted_methods[i])
-			return (true);
-	return (false);
+	return (loc.accepted_methods & element);
 }
 
 void	Config::_initEnumMaps()
@@ -189,6 +187,98 @@ void	Config::_initEnumMaps()
 			for (int j = 0; j < 10; ++j)
 				emap[utils::toString(j)] = j;
 		}
+	}
+}
+
+void	Config::_parseLocation(const std::string &path, const std::string &bracket, std::istringstream &conf_stream)
+{
+	if (bracket != "{")
+		throw Error("Expected `{' after location path");
+	Location	loc;
+	loc.requested_path = path;
+	loc.autoindex = this->default_autoindex; 
+	loc.root = this->server_home;
+	loc.default_page = this->default_page;
+	loc.accepted_methods = this->default_accepted_methods;
+
+	std::string newline;
+	while (std::getline(conf_stream, newline))
+	{
+		++line_number;
+		newline = utils::stringTrimSpaces(newline);
+		if (newline.empty()) continue;
+		if (newline == "}") break;
+		std::istringstream line(newline);
+		std::string field, equal, value;
+		if (!(line >> field >> equal >> value))
+			throw Error("Invalid location line format");
+		if (equal != "=" && equal != ":")
+			throw Error("Unexpected token in location block (expected `=' or `:')");
+		if (field == "root")
+			loc.root = value;
+		else if (field == "enable_listdir")
+			loc.autoindex = (value == "true" || value == "on");
+		else if (field == "default_page")
+			loc.default_page = value;
+		else if (field == "methods")
+			_parseLocationMethods(loc, conf_stream);
+		else if (field == "http_redir")
+			_parseLocationRedirs(loc, conf_stream);
+		else
+			throw Error("Unknown directive in location block: " + field);
+	}
+	this->locations.push_back(loc);
+}
+
+void	Config::_parseLocationMethods(Location &loc, std::istringstream &conf_stream)
+{
+	std::string	newline;
+	std::string	field;
+	Method		method;
+
+	while (std::getline(conf_stream, newline))
+	{
+		++line_number;
+		newline = utils::toLower(utils::stringTrimSpaces(newline));
+		if (newline.length() == 0) continue ;
+		else if (newline == "end") break ;
+		std::istringstream 	line(newline);
+		
+		if (!(line >> field))
+			throw Error("Invalid line format");
+		method = utils::strToMethod(field);
+		if (method == UNKNOWN)
+			throw Error("Unknown method: " + field);
+		if (loc.accepted_methods & method) continue ;
+		loc.accepted_methods |= method;
+	}
+}
+
+
+void	Config::_parseLocationRedirs(Location &loc, std::istringstream &conf_stream)
+{
+	std::string	line;
+	while (std::getline(conf_stream, line))
+	{
+		++line_number;
+		line = utils::stringTrimSpaces(line);
+		if (line.empty()) continue;
+		if (line == "end") return;
+
+		std::istringstream iss(line);
+		std::string path, equal, dest;
+		int code;
+		if (!(iss >> path >> equal >> dest >> code))
+			throw Error("Invalid redirect format in location");
+
+		if (equal != "=" && equal != ":")
+			throw Error("Expected `=' or `:' in redirection line");
+
+		Redirection	r;
+		r.dest = dest;
+		// TODO meilleur check de la validite de l'error code?
+		r.error_code = (300 <= code && code <= 308) ? static_cast<HttpStatus>(code) : HTTP_REDIRECT;
+		loc.redirs[path] = r;
 	}
 }
 
@@ -250,10 +340,8 @@ void	Config::_assignValue(FieldHandler &fh, const std::string &value, std::istri
 		{
 			if (fh.name == "default_error_pages")
 				_parseDefaultErrorPages(conf_stream);
-			else if (fh.name == "methods")
-				_parseMethods(conf_stream);
 			else
-				_parseHttpRedir(conf_stream);
+				_parseDefaultMethods(conf_stream);
 		}
 	}
 	return ;
@@ -296,12 +384,10 @@ void	Config::_parseDefaultErrorPages(std::istringstream &conf_stream)
 	while (std::getline(conf_stream, newline))
 	{
 		++line_number;
-		if (utils::stringTrim(newline, " \t\n").length() == 0)
-			continue;
-		else if (utils::stringTrim(newline, " \t\n") == "end")
-			return ;
+		newline = utils::stringTrimSpaces(newline);
+		if (newline.length() == 0) continue;
+		else if (newline == "end") return ;
 		std::istringstream 	line(newline);
-		
 		if (!(line >> field >> equal >> value) || (equal != "=" && equal != ":"))
 			throw Error("Invalid line format");
 		// if (utils::httpStatusToStr(field) == "Unknown")
@@ -312,57 +398,33 @@ void	Config::_parseDefaultErrorPages(std::istringstream &conf_stream)
 	}
 }
 
-void	Config::_parseMethods(std::istringstream &conf_stream)
+void	Config::_parseDefaultMethods(std::istringstream &conf_stream)
 {
 	std::string	newline;
 	std::string	field;
+	Method		method;
 
 	while (std::getline(conf_stream, newline))
 	{
 		++line_number;
-		if (utils::stringTrim(newline, " \t\n").length() == 0)
-			continue;
-		else if (utils::stringTrim(newline, " \t\n") == "end")
-			return ;
+		newline = utils::toLower(utils::stringTrimSpaces(newline));
+		if (newline.length() == 0) continue ;
+		else if (newline == "end") break ;
 		std::istringstream 	line(newline);
 		
 		if (!(line >> field))
 			throw Error("Invalid line format");
-		if (utils::strToMethod(field) == UNKNOWN)
+		method = utils::strToMethod(field);
+		if (method == UNKNOWN)
 			throw Error("Unknown method: " + field);
-		this->accepted_methods.push_back(utils::strToMethod(field));
-	}
-}
-
-void	Config::_parseHttpRedir(std::istringstream &conf_stream)
-{
-	std::string	newline;
-	std::string	path, equal, dest;
-	int			error_code;
-
-	while (std::getline(conf_stream, newline))
-	{
-		if (utils::stringTrim(newline, " \t\n").length() == 0)
-			continue;
-		else if (utils::stringTrim(newline, " \t\n") == "end")
-			return ;
-		std::istringstream	line(newline);
-		
-		if (!(line >> path >> equal >> dest >> error_code) || (equal != "=" && equal != ":"))
-			throw Error("Invalid line format");
-		this->http_redir[path].dest = dest;
-		if ((300 <= error_code && error_code <= 302) || error_code == 308)
-			this->http_redir[path].error_code = static_cast<HttpStatus>(error_code);
-		else
-			this->http_redir[path].error_code = HTTP_REDIRECT;
-		if (newline.find("}") != std::string::npos)
-			return ;
+		if (this->default_accepted_methods & method) continue ;
+		this->default_accepted_methods = static_cast<Method>(this->default_accepted_methods | method);
 	}
 }
 
 void	Config::_assignDefault(FieldHandler &fh)
 {
-	if (fh.name == "default_error_pages" || fh.name == "http_redir")
+	if (fh.name == "default_error_pages")
 		return ;
 	switch (fh.type)
 	{
@@ -371,6 +433,7 @@ void	Config::_assignDefault(FieldHandler &fh)
 		case FieldHandler::SIZE:	this->*(fh.target.size_field) = fh.default_value.size_value; break;
 		case FieldHandler::BOOL:	this->*(fh.target.bool_field) = fh.default_value.bool_value; break;
 		case FieldHandler::STRING:	this->*(fh.target.string_field) = fh.default_value.string_value; break;
+		case FieldHandler::LIST:	this->*(fh.target.method_field) = static_cast<Method>(fh.default_value.int_value); break;
 		default:					break;
 	}
 }
@@ -430,19 +493,19 @@ std::ostream &operator<<(std::ostream &os, const Config &cfg)
 	FIELD("Buffer size:", utils::toString(cfg.buffer_size).c_str());
 	FIELD("Cookie session:", utils::toString(cfg.cookie_sessions_max).c_str());
 	FIELD("Cookie lifetime:", utils::toString(cfg.cookie_life_time).c_str());
-	SECTION("Files & Directories");
-	FIELD("Root:", utils::toString(cfg.server_home.c_str()).c_str());
-	FIELD("Listdir:", (const char *)(cfg.enable_listdir ? "ON" : "OFF"));
-	FIELD("Default page:", utils::toString(cfg.default_page.c_str()).c_str());
-	SECTION("Methods");
-	for (size_t j = 0; j < cfg.accepted_methods.size(); ++j)
-		FIELD(utils::methodToStr(cfg.accepted_methods[j]).c_str(), "");
-	SECTION("Default error pages");
-	for (std::map<int, std::string>::const_iterator it = cfg.default_error_pages.begin(); it != cfg.default_error_pages.end(); ++it)
-		FIELD(utils::toString(it->first).c_str(), (it->second).c_str());
-	SECTION("Redirections");
-	for (std::map<std::string, Redirection>::const_iterator it = cfg.http_redir.begin(); it != cfg.http_redir.end(); ++it)
-		FIELD(it->first.c_str(), (it->second.dest + " (" + utils::toString(it->second.error_code) + ")").c_str());
+	// SECTION("Files & Directories");
+	// FIELD("Root:", utils::toString(cfg.server_home.c_str()).c_str());
+	// FIELD("Default page:", utils::toString(cfg.default_page.c_str()).c_str());
+	// FIELD("Autoindex:", (const char *)(cfg.enable_listdir ? "ON" : "OFF"));
+	// SECTION("Methods");
+	// for (size_t j = 0; j < cfg.accepted_methods.size(); ++j)
+	// 	FIELD(utils::methodToStr(cfg.accepted_methods[j]).c_str(), "");
+	// SECTION("Default error pages");
+	// for (std::map<int, std::string>::const_iterator it = cfg.default_error_pages.begin(); it != cfg.default_error_pages.end(); ++it)
+	// 	FIELD(utils::toString(it->first).c_str(), (it->second).c_str());
+	// SECTION("Redirections");
+	// for (std::map<std::string, Redirection>::const_iterator it = cfg.http_redir.begin(); it != cfg.http_redir.end(); ++it)
+	// 	FIELD(it->first.c_str(), (it->second.dest + " (" + utils::toString(it->second.error_code) + ")").c_str());
 	os << BOLD_PURPLE << BOTTOM_LEFT;
 	for (size_t i = 0; i < WIDTH; ++i) os << HORIZONTAL;
 	os << BOTTOM_RIGHT << RESET << "\n";

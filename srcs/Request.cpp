@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/24 19:56:14 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/27 13:53:24 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,11 +88,12 @@ void	Request::parseHeader(const Config &config)
 	}
 	this->_method = utils::strToMethod(method_str);
 	this->_parseRequestTarget();
-	if (!config.isAcceptedMethod(this->_method))
-	{
-		this->_error = true;
-		return ;
-	}
+	// TODO adapter avec location
+	// if (!config.isAcceptedMethod(this->_method))
+	// {
+	// 	this->_error = true;
+	// 	return ;
+	// }
 	while (std::getline(stream, line))
 	{
 		line = utils::stringTrim(line, "\r\n \t");

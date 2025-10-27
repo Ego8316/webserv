@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 19:07:00 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/27 14:40:06 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,37 +35,35 @@ class	Config
 			std::string							requested_path;
 			std::string							root;
 			std::string							default_page;
-			std::vector<Method>					accepted_methods;
+			Method								accepted_methods;
 			bool								autoindex;
-			std::map<std::string, Redirection>	http_redir;
+			std::map<std::string, Redirection>	redirs;
 		}	Location;
 
-		const std::map<std::string, Redirection>	&getRedirections() const;
-		bool										isAcceptedMethod(Method method) const;
+		bool										isAcceptedMethod(Method method, const Location &loc) const;
 
-		static int								line_number;
-		std::string								server_name;
-		unsigned int							ip;
-		int										port_number;
-		int										domain;
-		int										type;
-		int										protocol;
-		size_t									max_header_size;
-		size_t									max_body_size;
-		int										client_limit;
-		long									processing_time_limit;
-		long									max_request_time;
-		int										incoming_queue_backlog;
-		size_t									buffer_size;
-		int										cookie_sessions_max;
-		int										cookie_life_time;
-		std::string								server_home;
-		bool									enable_listdir;
-		std::string								default_page;
-		std::vector<Location>					locations;
-		std::map<int, std::string>				default_error_pages;
-		std::vector<Method>						accepted_methods;
-		std::map<std::string, Redirection>		http_redir;
+		static int					line_number;
+		std::string					server_name;
+		unsigned int				ip;
+		int							port_number;
+		int							domain;
+		int							type;
+		int							protocol;
+		size_t						max_header_size;
+		size_t						max_body_size;
+		int							client_limit;
+		long						processing_time_limit;
+		long						max_request_time;
+		int							incoming_queue_backlog;
+		size_t						buffer_size;
+		int							cookie_sessions_max;
+		int							cookie_life_time;
+		std::string					server_home;
+		std::vector<Location>		locations;
+		std::string					default_page;
+		bool						default_autoindex;
+		Method						default_accepted_methods;
+		std::map<int, std::string>	default_error_pages;
 
 	private:
 		Config(const Config &other);
@@ -93,6 +91,7 @@ class	Config
 			{
 				unsigned int	Config::*uint_field;
 				int				Config::*int_field;
+				Method			Config::*method_field;
 				long			Config::*long_field;
 				size_t			Config::*size_field;
 				bool			Config::*bool_field;
@@ -104,7 +103,7 @@ class	Config
 				long		long_value;
 				size_t		size_value;
 				bool		bool_value;
-				const char 	*string_value;
+				const char	*string_value;
 			}	default_value;
 			std::map<std::string, int>	Config::*enum_map;
 		}	FieldHandler;
@@ -117,10 +116,12 @@ class	Config
 
 		void	_initEnumMaps();
 		void	_assignValue(FieldHandler &fh, const std::string &value, std::istringstream &conf_stream);
+		void	_parseLocation(const std::string &path, const std::string &bracket, std::istringstream &conf_stream);
+		void	_parseLocationMethods(Location &loc, std::istringstream &conf_stream);
+		void	_parseLocationRedirs(Location &loc, std::istringstream &conf_stream);
 		void	_parseIP(const std::string &ip_str);
 		void	_parseDefaultErrorPages(std::istringstream &conf_stream);
-		void	_parseMethods(std::istringstream &conf_stream);
-		void	_parseHttpRedir(std::istringstream &conf_stream);
+		void	_parseDefaultMethods(std::istringstream &conf_stream);
 		void	_assignDefault(FieldHandler &fh);
 };
 
