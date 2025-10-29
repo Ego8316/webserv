@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 21:56:13 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/26 14:01:39 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,5 +42,5 @@ class	RequestHandler
 		static void	_handleRedirect(Response *response, const Resource &resource);
 		static void	_handleListDir(Response *response, const Config &config, const Resource &resource);
 		static void	_handleError(Response *response, HttpStatus code, const Config &config);
-		static void	_handleCGI(Response *response);
+		static void	_handleCGI(Response *response, const Request &request, const Config &config, const Resource &resource);
 };

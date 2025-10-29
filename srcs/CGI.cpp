@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/25 20:03:44 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/27 20:39:12 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ CGI::CGI()
 	this->_pipe_from_CGI[1] = 0;
  	this->_total_bytes_sent = 0;
 	this->_bytes_to_send = 0;
-	this->_total_bytes_to_read = 0;
 	this->_chunked = false;
 	this->_cgi_script_char = NULL;
 	this->_args = NULL;
@@ -61,7 +60,6 @@ CGI &CGI::operator=(const CGI &other)
 		this->_pipe_from_CGI[1] = other._pipe_from_CGI[1];
 		this->_total_bytes_sent = other._total_bytes_sent;
 		this->_bytes_to_send = other._bytes_to_send;
-		this->_total_bytes_to_read = other._total_bytes_to_read;
 		this->_chunked = other._chunked;
 		this->_cgi_script_char = NULL;
 		this->_args = NULL;
@@ -102,8 +100,6 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
 		return ;
 	}
-	if (chdir(config.server_home.c_str()) == -1)
-		exit (0);
 	this->_cgi_script = request.getRequestTarget(); //TODO quand config sera ok refaire les setup de path et les checks
 	if (!utils::startsWith(this->_cgi_script, "."))
 		this->_cgi_script = "." + this->_cgi_script;
@@ -113,6 +109,8 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 	this->_pid = fork();
 	if (this->_pid == 0)
 	{
+		if (chdir(config.server_home.c_str()) == -1)
+			exit (1);
 		this->Execute();
 	}
 	else
@@ -132,20 +130,24 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 	ssize_t				bytes_sent = 1;
 	
 	if (this->_bytes_to_send == 0)
-		this->_bytes_to_send = request.getRawBody().size();
-	
+	{
+		this->_bytes_to_send = request.getRawBody().size() + request.getRawHeader().size();
+		std::cout << "Body = >" << request.getRawBody() << "<\nheader = >" << request.getRawHeader() << "<" << std::endl;
+	}
 	while (utils::getTime() < client.getTimeLimit() && !this->_is_complete)
 	{
 		if (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0)
 			bytes_sent = this->writeToCGI(request, config);
 		if (!checkOutputTermination(bytes_read))
 			bytes_read = this->readFromCGI(config);
-		else if (this->_process_status[0] == 0)
+		else if (this->_process_status[0] == 0) // TODO what if the prorgram crash ???
 			this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
 		if (this->_process_status[0] != 0) // only set process status if done reading so we are sure the program is both finished and we are done reading
 		{
 			genFullOutput(response);
 			this->_is_complete = true;
+			std::cout << "this->_chunked = " << this->_chunked << " this->_content_len = " << this->_content_len << " this->_header_len = " << this->_header_len << " bytes_read = " << bytes_read << std::endl;
+			std::cout << "this->_total_bytes_sent " << this->_total_bytes_sent << "this->_bytes_to_send " << this->_bytes_to_send << "bytes_sent " << bytes_sent << "checkOutputTermination(bytes_read) " << checkOutputTermination(bytes_read) << std::endl;
 		}
 	}
 }
@@ -153,11 +155,21 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 {
 	ssize_t				bytes_sent = 0;
-	const std::string	&request_str = request.getRawBody();
 	std::vector<char>	buffer(config.buffer_size);
-
-	int bts = std::min(config.buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
-	bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent, bts);
+	int 				bts;
+	
+	if (this->_total_bytes_sent < static_cast<ssize_t>(request.getRawHeader().size()))
+	{
+		const std::string	&header_str = request.getRawHeader();
+		bts = std::min(config.buffer_size, header_str.size() - this->_total_bytes_sent);
+		bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], header_str.c_str() + this->_total_bytes_sent, bts);
+	}
+	else
+	{
+		const std::string	&request_str = request.getRawBody();
+		bts = std::min(config.buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
+		bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent - request.getRawHeader().size(), bts);
+	}
 	if (bytes_sent != -1)
 		this->_total_bytes_sent += bytes_sent;
 	return (bytes_sent);
@@ -166,13 +178,13 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 ssize_t		CGI::readFromCGI(const Config &config)
 {
 	ssize_t				bytes_read = 0;
-	std::vector<char>	buffer(config.buffer_size + 2);
+	std::vector<char>	buffer(config.buffer_size + 1);
 
 	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0], config.buffer_size);
-	std::cout << "read " << bytes_read << " bytes" << std::endl;
 	if (bytes_read != -1)
 	{
-		buffer[bytes_read + 1] = '\0';
+		std::cout << "read " << bytes_read << " now at " << this->_total_bytes_read << "/" <<  this->_output.length() << std::endl;
+		buffer[bytes_read] = '\0';
 		this->_output += std::string(buffer.begin(), buffer.begin() + bytes_read);
 		this->_total_bytes_read += bytes_read;
 	}

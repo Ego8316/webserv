@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/25 20:04:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/26 14:21:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ void	RequestHandler::handle(Response *response, const Request &request, const Co
 	if (resource.getStatus() & ACCEPT_ERROR)
 		return (_handleError(response, HTTP_BAD_REQUEST, config));
 	if (resource.isCGI())
-		return (_handleCGI(response));
+		return (_handleCGI(response, request, config, resource));
 	switch (request.getMethod())
 	{
 		case GET:		return _handleGet(response, config, resource);
@@ -151,10 +151,12 @@ void	RequestHandler::_handleDelete(Response *response, const Config &config, con
 	response->build();
 }
 
-void	RequestHandler::_handleCGI(Response *response)
+void	RequestHandler::_handleCGI(Response *response, const Request &request, const Config &config, const Resource &resource)
 {
 	//TODO check for errors on Ressource
-	if 
+	if (!resource.isExecutable() || resource.isDirectory())
+		return (_handleError(response, HTTP_FORBIDDEN, config));
+	(void)request;
 	if (response->getCGI() == NULL)
 		response->setCGI(new CGI());
 }

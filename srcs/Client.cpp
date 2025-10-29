@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 19:49:26 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/26 13:54:55 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -346,7 +346,7 @@ int	Client::_sendString()
 	int					bytes_to_send = response_str.size() - this->_bytes_sent;
 
 	if (bytes_to_send > 0)
-	{
+	{//TODO on devrait pas send config->buffer_size plutot que tout le reste ?
 		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, bytes_to_send, this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);

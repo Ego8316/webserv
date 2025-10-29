@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/25 14:42:38 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/27 20:15:53 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,6 @@ class CGI
 		ssize_t				_total_bytes_sent;
 		ssize_t				_bytes_to_send;
 		ssize_t				_total_bytes_read;
-		ssize_t				_total_bytes_to_read;
 		bool				_chunked;
 		char				*_cgi_script_char;
 		char				**_args;

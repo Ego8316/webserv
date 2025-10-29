@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/24 19:56:14 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/26 13:51:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,6 @@ void	Request::parseHeader(const Config &config)
 		this->_error = true;
 		return ;
 	}
-	// TODO verifier parce qu'avec le bail de query str jsp si cest bien judicieux
 	if (!first_line.eof())
 	{
 		this->_error = true;
