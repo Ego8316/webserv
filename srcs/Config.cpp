@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/29 17:09:45 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/29 17:29:13 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,8 +212,8 @@ void	Config::_parseLocation(const std::string &path, const std::string &bracket,
 		if (newline.empty()) continue;
 		if (newline == "}") break;
 		std::istringstream line(newline);
-		std::string field, equal, value;
-		if (!(line >> field >> equal >> value))
+		std::string			field, equal, value;
+		if (!(line >> field >> equal >> value) )
 			throw Error("Invalid location line format");
 		if (equal != "=" && equal != ":")
 			throw Error("Unexpected token in location block (expected `=' or `:')");
