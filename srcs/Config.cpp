@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/29 17:08:34 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/29 17:09:45 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,6 +239,7 @@ void	Config::_parseLocationMethods(Location &loc, std::istringstream &conf_strea
 	std::string	field;
 	Method		method;
 
+	loc.accepted_methods = UNKNOWN;
 	while (std::getline(conf_stream, newline))
 	{
 		++line_number;
