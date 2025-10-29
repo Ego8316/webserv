@@ -22,15 +22,11 @@ server Servor {
 	COOKIE_SESSIONS_MAX = 10000
 	COOKIE_LIFE_TIME = 2
 	SERVER_HOME = ./WebSite
-	ENABLE_LISTDIR = true
+	autoindex = true
 	DEFAULT_PAGE = /index.html
 
 	DEFAULT_ERROR_PAGES = dict
 		404 : error/404.html
 		403 : error/403.html
-	end
-
-	HTTP_REDIR = dict
-		/redirect_test/redi_test.txt : /some_page/page.html 301
 	end
 }

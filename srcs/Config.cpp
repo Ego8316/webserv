@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/29 16:25:44 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/29 17:08:34 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,8 @@ Config::Config(const std::string &conf, const std::string &name)
 		this->server_name = utils::toString(_nb);
 	else
 		this->server_name = name;
-	_nb++;
+	this->_nb++;
+	this->default_accepted_methods = UNKNOWN;
 	while (std::getline(conf_stream, line))
 	{
 		++line_number;
@@ -251,7 +252,6 @@ void	Config::_parseLocationMethods(Location &loc, std::istringstream &conf_strea
 		method = utils::strToMethod(utils::toUpper(field));
 		if (method == UNKNOWN)
 			throw Error("Unknown method: " + field);
-		if (loc.accepted_methods & method) continue ;
 		loc.accepted_methods |= method;
 	}
 }
@@ -419,8 +419,7 @@ void	Config::_parseDefaultMethods(std::istringstream &conf_stream)
 		method = utils::strToMethod(utils::toUpper(field));
 		if (method == UNKNOWN)
 			throw Error("Unknown method: " + field);
-		if (this->default_accepted_methods & method) continue ;
-		this->default_accepted_methods = static_cast<Method>(this->default_accepted_methods | method);
+		this->default_accepted_methods |= method;
 	}
 }
 
