@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/26 13:51:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/29 16:34:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,11 +87,12 @@ void	Request::parseHeader(const Config &config)
 	}
 	this->_method = utils::strToMethod(method_str);
 	this->_parseRequestTarget();
-	if (!config.isAcceptedMethod(this->_method))
-	{
-		this->_error = true;
-		return ;
-	}
+	// TODO adapter avec location
+	// if (!config.isAcceptedMethod(this->_method))
+	// {
+	// 	this->_error = true;
+	// 	return ;
+	// }
 	while (std::getline(stream, line))
 	{
 		line = utils::stringTrim(line, "\r\n \t");

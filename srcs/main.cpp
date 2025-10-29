@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 20:24:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/29 16:33:56 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,8 @@ std::vector<Config *> parseConfigFile(std::string filename)
 	std::vector<Config *>	configs;
 	std::string				line, block_content, current_name;
 	bool					in_server_block = false;
+	int						brace_depth = 0;
 
-	current_name.clear();
-	block_content.clear();
 	if (!conf_file.is_open())
 		throw Config::Error("Could not open config file: " + filename);
 	try
@@ -79,30 +78,32 @@ std::vector<Config *> parseConfigFile(std::string filename)
 				Config::line_number++;
 				continue ;
 			}
-			if (!in_server_block)
+			if (!in_server_block && utils::caseInsensitiveFind(line, "server") != line.end())
 			{
-				if (utils::caseInsensitiveFind(line, "server") != line.end())
-				{
-					size_t	name_start = std::string("server").length();
-					size_t	brace_pos = line.find("{", name_start);
+				size_t	name_start = std::string("server").length();
+				size_t	brace_pos = line.find("{", name_start);
 
-					if (name_start >= line.size() || !isspace(line[name_start]))
-						throw Config::Error("Unknown keyword: expected `server'");
-					if (brace_pos == std::string::npos)
-						throw Config::Error("Missing `{' after server declaration");
-					if (brace_pos != line.size() - 1)
-						throw Config::Error("Unexpected token after `{' in server declaration");
-					current_name = line.substr(name_start, brace_pos - name_start);
-					utils::stringTrimSpaces(current_name);
-					in_server_block = true;
-					block_content.clear();
-				}
-				else
-					throw Config::Error("Unexpected content outside server block");
+				if (name_start >= line.size() || !isspace(line[name_start]))
+					throw Config::Error("Unknown keyword: expected `server'");
+				if (brace_pos == std::string::npos)
+					throw Config::Error("Missing `{' after server declaration");
+				if (brace_pos != line.size() - 1)
+					throw Config::Error("Unexpected token after `{' in server declaration");
+				current_name = line.substr(name_start, brace_pos - name_start);
+				utils::stringTrimSpaces(current_name);
+				in_server_block = true;
+				block_content.clear();
+				brace_depth = 1;
+				continue ;
 			}
-			else
+			if (in_server_block)
 			{
-				if (line.find("}") != std::string::npos)
+				for (size_t i = 0; i < line.size(); ++i)
+				{
+					if (line[i] == '{') brace_depth++;
+					else if (line[i] == '}') brace_depth--;
+				}
+				if (brace_depth == 0)
 				{
 					in_server_block = false;
 					try
@@ -110,13 +111,12 @@ std::vector<Config *> parseConfigFile(std::string filename)
 						Config	*cfg = new Config(block_content, current_name);
 						configs.push_back(cfg);
 					}
-					catch (const Config::Error &e) { throw ; }
-					current_name.clear();
-					block_content.clear();
+					catch (const Config::Error &e) { throw; }
 				}
-				else
-					block_content += line + "\n";
+				block_content += line + "\n";
 			}
+			else
+				throw Config::Error("Unexpected content oustside server block");
 		}
 		if (in_server_block)
 			throw Config::Error("Unmatched `{' before end of file");
@@ -124,7 +124,7 @@ std::vector<Config *> parseConfigFile(std::string filename)
 	catch (const Config::Error &e)
 	{
 		deleteAllConfigs(configs);
-		std::cerr << BOLD_RED << "Configuration error: " << RED << e.what() << " at line " << Config::line_number << std::endl;
+		std::cerr << BOLD_RED << "Configuration error: " << RED << e.what() << " at line " << Config::line_number << RESET << std::endl;
 	}
 	conf_file.close();
 	return (configs);

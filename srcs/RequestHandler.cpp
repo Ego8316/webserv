@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/26 14:21:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/29 16:34:42 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,8 +85,9 @@ void	RequestHandler::_handleGet(Response *response, const Config &config, const 
 	{
 		if (!utils::endsWith(resource.getPath(), "/"))
 			return (_handleError(response, HTTP_REDIRECT_PERM, config));
-		if (config.enable_listdir)
-			return (_handleListDir(response, config, resource));
+		// TODO Adapter avec Location
+		// if (config.enable_listdir)
+		// 	return (_handleListDir(response, config, resource));
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	}
 	
