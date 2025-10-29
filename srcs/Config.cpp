@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/29 14:25:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/29 16:25:44 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,7 +218,7 @@ void	Config::_parseLocation(const std::string &path, const std::string &bracket,
 			throw Error("Unexpected token in location block (expected `=' or `:')");
 		if (field == "root")
 			loc.root = value;
-		else if (field == "enable_listdir")
+		else if (field == "autoindex")
 			loc.autoindex = (value == "true" || value == "on");
 		else if (field == "default_page")
 			loc.default_page = value;
