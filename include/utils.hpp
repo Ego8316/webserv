@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 19:07:13 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/27 15:19:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ std::vector<std::string>	stringSplit(std::string str, std::string del);
 std::string					stringTrim(std::string &str, const std::string &set);
 std::string					stringTrimSpaces(std::string &str);
 std::string					toLower(const std::string &str);
+std::string					toUpper(const std::string &str);
 std::string					capitalize(const std::string &str);
 std::string::iterator		caseInsensitiveFind(std::string &haystack, std::string needle);
 ssize_t						getFileSize(const std::string &path);

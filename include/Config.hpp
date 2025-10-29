@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 14:40:06 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/29 14:23:52 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,38 +32,40 @@ class	Config
 
 		typedef struct	s_Location
 		{
-			std::string							requested_path;
 			std::string							root;
 			std::string							default_page;
 			Method								accepted_methods;
 			bool								autoindex;
 			std::map<std::string, Redirection>	redirs;
+			bool								has_default_page;
+			bool								has_methods;
+			bool								has_autoindex;
 		}	Location;
 
 		bool										isAcceptedMethod(Method method, const Location &loc) const;
 
-		static int					line_number;
-		std::string					server_name;
-		unsigned int				ip;
-		int							port_number;
-		int							domain;
-		int							type;
-		int							protocol;
-		size_t						max_header_size;
-		size_t						max_body_size;
-		int							client_limit;
-		long						processing_time_limit;
-		long						max_request_time;
-		int							incoming_queue_backlog;
-		size_t						buffer_size;
-		int							cookie_sessions_max;
-		int							cookie_life_time;
-		std::string					server_home;
-		std::vector<Location>		locations;
-		std::string					default_page;
-		bool						default_autoindex;
-		Method						default_accepted_methods;
-		std::map<int, std::string>	default_error_pages;
+		static int							line_number;
+		std::string							server_name;
+		unsigned int						ip;
+		int									port_number;
+		int									domain;
+		int									type;
+		int									protocol;
+		size_t								max_header_size;
+		size_t								max_body_size;
+		int									client_limit;
+		long								processing_time_limit;
+		long								max_request_time;
+		int									incoming_queue_backlog;
+		size_t								buffer_size;
+		int									cookie_sessions_max;
+		int									cookie_life_time;
+		std::string							server_home;
+		std::map<std::string, Location>		locations;
+		std::string							default_page;
+		bool								default_autoindex;
+		Method								default_accepted_methods;
+		std::map<int, std::string>			default_error_pages;
 
 	private:
 		Config(const Config &other);

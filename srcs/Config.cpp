@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 14:43:49 by ego              ###   ########.fr       */
+/*   Updated: 2025/10/29 14:25:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,8 +96,8 @@ Config::FieldHandler Config::_fields[] = {
 Config::Config(const std::string &conf, const std::string &name)
 {
 	std::istringstream	conf_stream(conf);
-	std::string			line;
-	std::string			field, equal, value;
+	std::string			line, field, equal, value;
+	bool				parsing_locations = false;
 
 	this->_initEnumMaps();
 	for (size_t i = 0; i < sizeof(_fields) / sizeof(_fields[0]); ++i) _fields[i].found = false;
@@ -109,15 +109,18 @@ Config::Config(const std::string &conf, const std::string &name)
 	while (std::getline(conf_stream, line))
 	{
 		++line_number;
-		if (line.empty()) continue ;
+		if (line.empty() || line[0] == '#') continue ;
 		std::istringstream	line_stream(line);
 		if (!(line_stream >> field >> equal >> value) || !line_stream.eof())
 			throw Error("Invalid line format");
 		if (field == "location")
 		{
+			parsing_locations = true;
 			_parseLocation(equal, value, conf_stream);
 			continue ;
 		}
+		if (parsing_locations)
+			throw Error("Unexpected content after a location block");
 		if (equal != "=" && equal != ":")
 			throw Error("Unexpected token in second position: expected `=' or `:'");
 		bool	matched = false;
@@ -195,7 +198,6 @@ void	Config::_parseLocation(const std::string &path, const std::string &bracket,
 	if (bracket != "{")
 		throw Error("Expected `{' after location path");
 	Location	loc;
-	loc.requested_path = path;
 	loc.autoindex = this->default_autoindex; 
 	loc.root = this->server_home;
 	loc.default_page = this->default_page;
@@ -227,7 +229,7 @@ void	Config::_parseLocation(const std::string &path, const std::string &bracket,
 		else
 			throw Error("Unknown directive in location block: " + field);
 	}
-	this->locations.push_back(loc);
+	this->locations[path] = loc;
 }
 
 void	Config::_parseLocationMethods(Location &loc, std::istringstream &conf_stream)
@@ -246,7 +248,7 @@ void	Config::_parseLocationMethods(Location &loc, std::istringstream &conf_strea
 		
 		if (!(line >> field))
 			throw Error("Invalid line format");
-		method = utils::strToMethod(field);
+		method = utils::strToMethod(utils::toUpper(field));
 		if (method == UNKNOWN)
 			throw Error("Unknown method: " + field);
 		if (loc.accepted_methods & method) continue ;
@@ -414,7 +416,7 @@ void	Config::_parseDefaultMethods(std::istringstream &conf_stream)
 		
 		if (!(line >> field))
 			throw Error("Invalid line format");
-		method = utils::strToMethod(field);
+		method = utils::strToMethod(utils::toUpper(field));
 		if (method == UNKNOWN)
 			throw Error("Unknown method: " + field);
 		if (this->default_accepted_methods & method) continue ;
@@ -438,83 +440,112 @@ void	Config::_assignDefault(FieldHandler &fh)
 	}
 }
 
-std::ostream &operator<<(std::ostream &os, const Config &cfg)
+namespace
 {
+	#define WIDTH				70UL
 	#define BORDER_COLOR		BOLD_PURPLE
 	#define SECTION_COLOR		BOLD_RED
+	#define SECTION_SUB_COLOR	BLUE
 	#define FIELD_NAME_COLOR	BOLD
 	#define	FIELD_VALUE_COLOR	RESET
-	#define WIDTH				70UL
-	#define SECTION(title) \
-		{ \
-			os << BORDER_COLOR << VERTICAL << RESET << " "; \
-			os << SECTION_COLOR << title << RESET; \
-			int pad = WIDTH - strlen(title) - 2; \
-			for (int i = 0; i <= pad; ++i) os << " "; \
-			os << BORDER_COLOR <<  VERTICAL << RESET << "\n"; \
-		}
-	#define FIELD(name, value) \
-		{ \
-			os << BORDER_COLOR << VERTICAL << RESET << "   "; \
-			if (strlen(name) < WIDTH / 2) \
-			{ \
-				os << FIELD_NAME_COLOR << name << RESET;\
-				for (size_t i = 0; i < WIDTH / 2 - strlen(name); ++i) os << " "; \
-			} \
-			else \
-				for (size_t i = 0; i < WIDTH / 2; ++i) os << " "; \
-			if (strlen(value) < WIDTH / 2 - 3) \
-			{ \
-				os << FIELD_VALUE_COLOR << value << RESET; \
-				for (size_t i = 0; i < WIDTH / 2 - 3 - strlen(value); ++i) os << " "; \
-			} \
-			else \
-				for (size_t i = 0; i < WIDTH / 2 - 3; ++i) os << " "; \
-			os << BOLD_PURPLE << VERTICAL << RESET << "\n"; \
-		}
 
-	os << BORDER_COLOR << TOP_LEFT << "SERVER CONFIG";
-	for (size_t i = 0; i < WIDTH - 13; ++i) os << HORIZONTAL;
-	os << TOP_RIGHT << RESET << "\n";
-	SECTION("Server settings");
-	FIELD("Name:", cfg.server_name.c_str());
-	FIELD("IP:", utils::toString(cfg.ip).c_str());
-	FIELD("Port:", utils::toString(cfg.port_number).c_str());
-	FIELD("Domain:", utils::toString(cfg.domain).c_str());
-	FIELD("Type:", utils::toString(cfg.type).c_str());
-	FIELD("Protocol:", utils::toString(cfg.protocol).c_str());
-	SECTION("Server limits");
-	FIELD("Max header size:", utils::toString(cfg.max_header_size).c_str());
-	FIELD("Max body size:", utils::toString(cfg.max_body_size).c_str());
-	FIELD("Client limit:", utils::toString(cfg.client_limit).c_str());
-	FIELD("Processing time:", utils::toString(cfg.processing_time_limit).c_str());
-	FIELD("Max request time:", utils::toString(cfg.max_request_time).c_str());
-	FIELD("Incoming queue:", utils::toString(cfg.incoming_queue_backlog).c_str());
-	FIELD("Buffer size:", utils::toString(cfg.buffer_size).c_str());
-	FIELD("Cookie session:", utils::toString(cfg.cookie_sessions_max).c_str());
-	FIELD("Cookie lifetime:", utils::toString(cfg.cookie_life_time).c_str());
-	// SECTION("Files & Directories");
-	// FIELD("Root:", utils::toString(cfg.server_home.c_str()).c_str());
-	// FIELD("Default page:", utils::toString(cfg.default_page.c_str()).c_str());
-	// FIELD("Autoindex:", (const char *)(cfg.enable_listdir ? "ON" : "OFF"));
-	// SECTION("Methods");
-	// for (size_t j = 0; j < cfg.accepted_methods.size(); ++j)
-	// 	FIELD(utils::methodToStr(cfg.accepted_methods[j]).c_str(), "");
-	// SECTION("Default error pages");
-	// for (std::map<int, std::string>::const_iterator it = cfg.default_error_pages.begin(); it != cfg.default_error_pages.end(); ++it)
-	// 	FIELD(utils::toString(it->first).c_str(), (it->second).c_str());
-	// SECTION("Redirections");
-	// for (std::map<std::string, Redirection>::const_iterator it = cfg.http_redir.begin(); it != cfg.http_redir.end(); ++it)
-	// 	FIELD(it->first.c_str(), (it->second.dest + " (" + utils::toString(it->second.error_code) + ")").c_str());
-	os << BOLD_PURPLE << BOTTOM_LEFT;
-	for (size_t i = 0; i < WIDTH; ++i) os << HORIZONTAL;
-	os << BOTTOM_RIGHT << RESET << "\n";
-	#undef FIELD
-	#undef SECTION
-	#undef WIDTH
-	#undef FIELD_VALUE_COLOR
-	#undef FIELD_NAME_COLOR
-	#undef SECTION_COLOR
-	#undef BORDER_COLOR
-	return (os);
+	void	printBorderTop(std::ostream &os, const std::string &title)
+	{
+		os << BORDER_COLOR << TOP_LEFT << title;
+		for (size_t i = 0; i < WIDTH - title.size(); ++i) { os << HORIZONTAL; }
+		os << TOP_RIGHT << RESET << "\n";
+	}
+
+	void	printBorderBottom(std::ostream &os)
+	{
+		os << BORDER_COLOR << BOTTOM_LEFT;
+		for (size_t i = 0; i < WIDTH; ++i) { os << HORIZONTAL; }
+		os << BOTTOM_RIGHT << RESET << "\n";
+	}
+
+	void	printSection(std::ostream &os, const std::string &title, const std::string &subtitle)
+	{
+		os << BORDER_COLOR << VERTICAL << RESET << " ";
+		os << SECTION_COLOR << title << RESET;
+		for (size_t i = 0; i <= WIDTH / 2 - static_cast<int>(title.length()); ++i) { os << " "; }
+		if (subtitle.length() < WIDTH / 2 - 3)
+		{
+			os << SECTION_SUB_COLOR << subtitle << RESET;
+			for (size_t i = 0; i < WIDTH / 2 - 2 - subtitle.length(); ++i) { os << " "; }
+		}
+		else
+			for (size_t i = 0; i < WIDTH / 2 - 2; ++i) { os << " "; }
+		os << BORDER_COLOR << VERTICAL << RESET << "\n";
+	}
+
+	void	printField(std::ostream &os, const std::string &name, const std::string &value)
+	{
+		os << BORDER_COLOR << VERTICAL << RESET << "   ";
+		if (name.length() < WIDTH / 2)
+		{
+			os << FIELD_NAME_COLOR << name << RESET;
+			for (size_t i = 0; i < WIDTH / 2 - name.length(); ++i) { os << " "; }
+		}
+		else
+			for (size_t i = 0; i < WIDTH / 2; ++i) { os << " " ; }
+		if (value.length() < WIDTH / 2 - 3)
+		{
+			os << FIELD_VALUE_COLOR << value << RESET;
+			for (size_t i = 0; i < WIDTH / 2 - 3 - value.length(); ++i) { os << " "; }
+		}
+		else
+			for (size_t i = 0; i < WIDTH / 2 - 3; ++i) { os << " "; }
+		os << BORDER_COLOR << VERTICAL << RESET << "\n";
+	}
+
+	void	printServerSettings(std::ostream &os, const Config &cfg)
+	{
+		printSection(os, "Server settings", "");
+		printField(os, "Name:", cfg.server_name);
+		printField(os, "IP:", utils::toString(cfg.ip));
+		printField(os, "Port:", utils::toString(cfg.port_number));
+		printField(os, "Domain:", utils::toString(cfg.domain));
+		printField(os, "Type:", utils::toString(cfg.type));
+		printField(os, "Protocol:", utils::toString(cfg.protocol));
+	}
+
+	void	printServerLimits(std::ostream &os, const Config &cfg)
+	{
+		printSection(os, "Server limits", "");
+		printField(os, "Max header size:", utils::toString(cfg.max_header_size));
+		printField(os, "Max body size:", utils::toString(cfg.max_body_size));
+		printField(os, "Client limit:", utils::toString(cfg.client_limit));
+		printField(os, "Processing time:", utils::toString(cfg.processing_time_limit));
+		printField(os, "Max request time:", utils::toString(cfg.max_request_time));
+		printField(os, "Incoming queue:", utils::toString(cfg.incoming_queue_backlog));
+		printField(os, "Buffer size:", utils::toString(cfg.buffer_size));
+		printField(os, "Cookie session:", utils::toString(cfg.cookie_sessions_max));
+		printField(os, "Cookie lifetime:", utils::toString(cfg.cookie_life_time));
+	}
+
+	void	printLocation(std::ostream &os, const Config::Location &loc, const std::string &route)
+	{
+		printSection(os, "Location", route);
+		printField(os, "Root:", loc.root);
+		printField(os, "Default page:", loc.default_page);
+		printField(os, "Autoindex:", loc.autoindex ? "ON" : "OFF");
+		printField(os, "Methods:", "");
+		for (int i = 0; i < 3; ++i)
+			if (loc.accepted_methods & (1 << i))
+				printField(os, "   " + utils::methodToStr(static_cast<Method>(1 << i)), "");
+		printField(os, "Redirections:", "");
+		for (std::map<std::string, Redirection>::const_iterator it = loc.redirs.begin(); it != loc.redirs.end(); ++it)
+			printField(os, it->first.c_str(), (it->second.dest + " (" + utils::toString(it->second.error_code) + ")").c_str());
+	}
+}
+
+std::ostream &operator<<(std::ostream &os, const Config &cfg)
+{
+	printBorderTop(os, "SERVER CONFIG");
+	printServerSettings(os, cfg);
+	printServerLimits(os, cfg);
+	for (std::map<std::string, Config::Location>::const_iterator it = cfg.locations.begin(); it != cfg.locations.end(); ++it)
+		printLocation(os, it->second, it->first);
+	printBorderBottom(os);
+	return os;
 }

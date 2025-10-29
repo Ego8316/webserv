@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 19:07:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/27 15:19:18 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,15 @@ std::string	utils::toLower(const std::string &str)
 	for (size_t i = 0; i < lower.size(); ++i)
 		lower[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(lower[i])));
 	return (lower);
+}
+
+std::string	utils::toUpper(const std::string &str)
+{
+	std::string	upper = str;
+
+	for (size_t i = 0; i < upper.size(); ++i)
+		upper[i] = static_cast<char>(std::toupper(static_cast<unsigned char>(upper[i])));
+	return (upper);
 }
 
 std::string	utils::capitalize(const std::string &str)
