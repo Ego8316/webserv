@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/29 16:33:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/30 11:24:58 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,9 +135,9 @@ int main(int argc, char *argv[])
 	std::vector<Config *>				configs;
 	std::vector<WebServ *>				web_servers;
 	
-	signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
-    signal(SIGHUP, signal_handler);
+	//signal(SIGINT, signal_handler);
+    //signal(SIGTERM, signal_handler);
+    //signal(SIGHUP, signal_handler);
 	if (argc == 2)
 		configs = parseConfigFile(argv[1]);
 	else

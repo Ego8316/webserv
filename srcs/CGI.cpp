@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 20:39:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/30 11:35:35 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,9 +146,9 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 		{
 			genFullOutput(response);
 			this->_is_complete = true;
-			std::cout << "this->_chunked = " << this->_chunked << " this->_content_len = " << this->_content_len << " this->_header_len = " << this->_header_len << " bytes_read = " << bytes_read << std::endl;
-			std::cout << "this->_total_bytes_sent " << this->_total_bytes_sent << "this->_bytes_to_send " << this->_bytes_to_send << "bytes_sent " << bytes_sent << "checkOutputTermination(bytes_read) " << checkOutputTermination(bytes_read) << std::endl;
 		}
+		std::cout << "this->_chunked = " << this->_chunked << " this->_content_len = " << this->_content_len << " this->_header_len = " << this->_header_len << " bytes_read = " << bytes_read << std::endl;
+		std::cout << " this->_total_bytes_sent " << this->_total_bytes_sent << " this->_bytes_to_send " << this->_bytes_to_send << " bytes_sent " << bytes_sent << " checkOutputTermination(bytes_read) " << checkOutputTermination(bytes_read) << std::endl;
 	}
 }
 
@@ -189,18 +189,25 @@ ssize_t		CGI::readFromCGI(const Config &config)
 		this->_total_bytes_read += bytes_read;
 	}
 	if (!this->_header_len)
-		this->parseHeader();
+		this->parseHeader(config);
 	return (bytes_read);
 }
 
-void	CGI::parseHeader()
+void	CGI::parseHeader(const Config &config)
 {
 	if (!this->_output.length() || utils::startsWith(this->_output, "HTTP/"))
 		return ;
 	if (utils::caseInsensitiveFind(this->_output, "Content-Length: ") != this->_output.end())
 	{
-		this->_content_len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ")
+		long len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ")
 			+ std::string("Content-Length: ").length());
+		if (len > config.max_body_size || len < 0)
+		{
+			this->_is_complete = true;
+			this->_status = HTTP_INTERNAL_SERVER_ERROR;
+			return ;
+		}
+		this->_content_len = len;
 	}
 	else if (utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: ") != this->_output.end())
 	{

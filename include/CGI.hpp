@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 20:15:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/10/30 11:34:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class CGI
 		ssize_t		writeToCGI(Request &request, const Config &config);
 		ssize_t		readFromCGI(const Config &config);
 		
-		void		parseHeader();
+		void		parseHeader(const Config &config);
 		void		genFullOutput(Response &response);
 
 		void		Execute();
