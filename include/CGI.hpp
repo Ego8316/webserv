@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 20:15:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/24 23:40:25 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,11 @@ class	Client;
 class	Request;
 class	Response;
 
+/**
+ * @class CGI
+ *
+ * @brief Manages execution of CGI scripts and marshals I/O to/from responses.
+ */
 class CGI
 {
 	public :

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/29 16:33:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/24 23:47:20 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,11 @@
 
 int g_shutdown = 0;
 
+/**
+ * @brief Frees all Config objects in the vector and clears it.
+ *
+ * @param configs Vector of config pointers to delete.
+ */
 void	deleteAllConfigs(std::vector<Config *> &configs)
 {
 	for (unsigned int i = 0; i < configs.size(); ++i)
@@ -25,12 +30,24 @@ void	deleteAllConfigs(std::vector<Config *> &configs)
 	configs.resize(0);
 }
 
+/**
+ * @brief Signal handler to request graceful shutdown.
+ *
+ * @param signal Caught signal.
+ */
 void	signal_handler(int signal)
 {
 	(void)signal;
 	g_shutdown = 1;
 }
 
+/**
+ * @brief Deletes a server/config pair at index i.
+ *
+ * @param web_servers Vector of servers.
+ * @param configs Vector of configs.
+ * @param i Index to delete.
+ */
 void	deleteServer(std::vector<WebServ *> &web_servers, std::vector<Config *> &configs, int i)
 {
 	std::vector<WebServ *>::iterator	it_web;
@@ -45,6 +62,12 @@ void	deleteServer(std::vector<WebServ *> &web_servers, std::vector<Config *> &co
 	return ;
 }
 
+/**
+ * @brief Tears down all servers/configs at program termination.
+ *
+ * @param web_servers Vector of servers.
+ * @param configs Vector of configs.
+ */
 void	shutdown(std::vector<WebServ *> &web_servers, std::vector<Config *> &configs)
 {
 	unsigned int len = web_servers.size();
@@ -58,6 +81,13 @@ void	shutdown(std::vector<WebServ *> &web_servers, std::vector<Config *> &config
 	configs.clear();
 }
 
+/**
+ * @brief Parses a config file into Config objects (one per server block).
+ *
+ * @param filename Path to configuration file.
+ *
+ * @return Vector of parsed Config pointers.
+ */
 std::vector<Config *> parseConfigFile(std::string filename)
 {
 	std::ifstream 			conf_file(filename.c_str());
@@ -130,6 +160,14 @@ std::vector<Config *> parseConfigFile(std::string filename)
 	return (configs);
 }
 
+/**
+ * @brief Program entry point: loads configs, starts servers, runs event loop.
+ *
+ * @param argc Argument count.
+ * @param argv Argument values.
+ *
+ * @return Exit status.
+ */
 int main(int argc, char *argv[])
 {
 	std::vector<Config *>				configs;

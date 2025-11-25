@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/24 10:41:02 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/24 23:41:02 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,9 @@ class	CGI;
 
 /**
  * @class Response
+ *
  * @brief Represents an HTTP response.
- * 
+ *
  * Stores the HTTP status code, headers and body. Provides utility functions to
  * build the full HTTP response string to be sent to a client.
  */

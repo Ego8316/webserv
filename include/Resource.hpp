@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/10/23 15:14:14 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/24 23:40:58 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ class	Request;
 
 /**
  * @class Resource
+ *
  * @brief Represents a filesystem resource for HTTP requests.
  *
  * Handles path resolution, permission evaluation, and type detection.

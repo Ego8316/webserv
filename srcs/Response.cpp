@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/25 18:26:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/25 00:29:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ Response::Response()
 
 /**
  * @brief Copy constructor.
+ *
  * @param other The Response object to copy.
  */
 Response::Response(const Response &other)
@@ -40,7 +41,9 @@ Response::Response(const Response &other)
 
 /**
  * @brief Assignment operator.
+ *
  * @param other The Response object to assign from.
+ *
  * @return Reference to this Response object.
  */
 Response	&Response::operator=(const Response &other)
@@ -82,6 +85,7 @@ Response::~Response()
 
 /**
  * @brief Sets the HTTP status code for the response.
+ *
  * @param code HTTP status code (e.g., OK, HTTP_NOT_FOUND).
  */
 void	Response::setStatus(HttpStatus code)
@@ -92,6 +96,7 @@ void	Response::setStatus(HttpStatus code)
 
 /**
  * @brief Sets the response body content.
+ *
  * @param body The body as a string.
  */
 void	Response::setBody(const std::string &body)
@@ -102,6 +107,7 @@ void	Response::setBody(const std::string &body)
 
 /**
  * @brief Sets or updates a header field.
+ *
  * @param key Header name.
  * @param value Header value.
  */
@@ -111,6 +117,11 @@ void	Response::setHeaders(const std::string &key, const std::string &value)
 	return ;
 }
 
+/**
+ * @brief Attaches a CGI handler and marks the response as CGI-generated.
+ *
+ * @param cgi CGI handler to attach.
+ */
 void	Response::setCGI(CGI *cgi)
 {
 	this->_cgi = cgi;
@@ -118,6 +129,11 @@ void	Response::setCGI(CGI *cgi)
 	return ;
 }
 
+/**
+ * @brief Stores a file descriptor to stream as the response body.
+ *
+ * @param fd Open file descriptor for response body.
+ */
 void	Response::setFd(int fd)
 {
 	this->_body_fd = fd;
@@ -126,6 +142,7 @@ void	Response::setFd(int fd)
 
 /**
  * @brief Sets or updates the content type header field.
+ *
  * @param type Content type.
  */
 void	Response::setContentType(const std::string &type)
@@ -136,7 +153,8 @@ void	Response::setContentType(const std::string &type)
 
 /**
  * @brief Sets or updates the content length header field.
- * @param type Content length.
+ *
+ * @param len Content length.
  */
 void	Response::setContentLength(size_t len)
 {
@@ -146,6 +164,7 @@ void	Response::setContentLength(size_t len)
 
 /**
  * @brief Sets or updates the cookie header field.
+ *
  * @param type Cookie.
  */
 void	Response::setCookie(const std::string &cookie)
@@ -157,7 +176,7 @@ void	Response::setCookie(const std::string &cookie)
 /**
  * @brief Builds the HTTP response header string from the status code and
  * currently set headers.
- * 
+ *
  * Automatically adds default headers ("Server" and "Connection") if they are
  * not already set. The resulting string is stored in the _header member.
  */
@@ -168,12 +187,15 @@ void	Response::buildHeader()
 	this->_header = "HTTP/1.0 " + utils::toString(this->_status_code)
 		+ " " + utils::httpStatusToStr(this->_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); ++it)
-		this->_header += it->first + ": " + it->second + "\r\n";
+	this->_header += it->first + ": " + it->second + "\r\n";
 	if (!this->_is_cgi)
 		this->_header += "\r\n";
 	return ;
 }
 
+/**
+ * @brief Builds the final response string (header + body).
+ */
 void	Response::build()
 {
 	this->buildHeader();
@@ -183,6 +205,7 @@ void	Response::build()
 
 /**
  * @brief Returns the built HTTP header string.
+ *
  * @return Reference to the header string.
  */
 const std::string	&Response::getHeader() const
@@ -192,6 +215,7 @@ const std::string	&Response::getHeader() const
 
 /**
  * @brief Returns the body string.
+ *
  * @return Reference to the body string.
  */
 const std::string	&Response::getBody() const
@@ -199,26 +223,51 @@ const std::string	&Response::getBody() const
 	return (this->_body);
 }
 
+/**
+ * @brief Returns the serialized HTTP response (header + body).
+ *
+ * @return Response string.
+ */
 const std::string	&Response::getString() const
 {
 	return (this->_string);
 }
 
+/**
+ * @brief Returns the CGI handler pointer (nullable).
+ *
+ * @return CGI handler or NULL.
+ */
 CGI	*Response::getCGI()
 {
 	return (this->_cgi);
 }
 
+/**
+ * @brief True if a CGI handler is attached.
+ *
+ * @return CGI flag.
+ */
 bool	Response::isCGI()
 {
 	return (this->_is_cgi);
 }
 
+/**
+ * @brief Returns the HTTP status code.
+ *
+ * @return HttpStatus code.
+ */
 HttpStatus	Response::getHttpStatus() const
 {
 	return (this->_status_code);
 }
 
+/**
+ * @brief Returns the file descriptor backing the body (-1 if none).
+ *
+ * @return Body file descriptor.
+ */
 int	Response::getFd() const
 {
 	return (this->_body_fd);
@@ -227,7 +276,9 @@ int	Response::getFd() const
 /**
  * @brief Returns a default error page in case the server configuration
  * does not give one.
+ *
  * @param code HTTP status code.
+ *
  * @return HTML code for the error page.
  */
 std::string	Response::getDefaultErrorPage(HttpStatus code)
@@ -246,11 +297,12 @@ std::string	Response::getDefaultErrorPage(HttpStatus code)
 
 /**
  * @brief Stream insertion operator for Response.
- *
+ * 
  * Writes the full HTTP response (header + body) to an output stream.
  *
  * @param os The output stream to write to.
  * @param src The Response object to output.
+ *
  * @return `std::ostream&` Reference to the output stream.
  */
 std::ostream	&operator<<(std::ostream &os, const Response &src)

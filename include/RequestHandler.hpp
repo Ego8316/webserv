@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/10/26 14:01:39 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/24 23:40:54 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,11 @@ class	Client;
 class	Request;
 class	Resource;
 
+/**
+ * @class RequestHandler
+ *
+ * @brief Static dispatcher that builds HTTP responses from parsed requests.
+ */
 class	RequestHandler
 {
 	public:

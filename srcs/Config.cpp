@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/29 17:29:13 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/24 23:46:11 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,12 @@ Config::FieldHandler Config::_fields[] = {
 		{ 0 }, { 0 }, NULL },
 };
 
+/**
+ * @brief Parses a server block string into a Config instance.
+ *
+ * @param conf Raw server block content.
+ * @param name Server name extracted from declaration.
+ */
 Config::Config(const std::string &conf, const std::string &name)
 {
 	std::istringstream	conf_stream(conf);
@@ -151,16 +157,30 @@ Config::Config(const std::string &conf, const std::string &name)
 	}
 }
 
+/**
+ * @brief Destructor logging config teardown.
+ */
 Config::~Config()
 {
 	std::cerr << RED << "Destroying config" << RESET << std::endl;
 }
 
+/**
+ * @brief Checks if a method is allowed for a given location.
+ *
+ * @param element Method to test.
+ * @param loc Target location.
+ *
+ * @return True when allowed.
+ */
 bool	Config::isAcceptedMethod(Method element, const Location &loc) const
 {
 	return (loc.accepted_methods & element);
 }
 
+/**
+ * @brief Fills enum maps for domain/type/protocol keywords.
+ */
 void	Config::_initEnumMaps()
 {
 	for (size_t i = 0; i < sizeof(_fields) / sizeof(_fields[0]); ++i)
@@ -194,6 +214,13 @@ void	Config::_initEnumMaps()
 	}
 }
 
+/**
+ * @brief Parses a location block and stores it in the map.
+ *
+ * @param path Location path.
+ * @param bracket Opening bracket token.
+ * @param conf_stream Stream positioned after declaration.
+ */
 void	Config::_parseLocation(const std::string &path, const std::string &bracket, std::istringstream &conf_stream)
 {
 	if (bracket != "{")
@@ -233,6 +260,12 @@ void	Config::_parseLocation(const std::string &path, const std::string &bracket,
 	this->locations[path] = loc;
 }
 
+/**
+ * @brief Parses the METHODS list inside a location block.
+ *
+ * @param loc Location to populate.
+ * @param conf_stream Stream positioned after METHODS keyword.
+ */
 void	Config::_parseLocationMethods(Location &loc, std::istringstream &conf_stream)
 {
 	std::string	newline;
@@ -258,6 +291,12 @@ void	Config::_parseLocationMethods(Location &loc, std::istringstream &conf_strea
 }
 
 
+/**
+ * @brief Parses HTTP redirection entries inside a location block.
+ *
+ * @param loc Location to populate.
+ * @param conf_stream Stream positioned after http_redir keyword.
+ */
 void	Config::_parseLocationRedirs(Location &loc, std::istringstream &conf_stream)
 {
 	std::string	line;
@@ -285,6 +324,13 @@ void	Config::_parseLocationRedirs(Location &loc, std::istringstream &conf_stream
 	}
 }
 
+/**
+ * @brief Assigns a directive value to the appropriate field.
+ *
+ * @param fh Field handler metadata.
+ * @param value Parsed value string.
+ * @param conf_stream Stream used for list directives.
+ */
 void	Config::_assignValue(FieldHandler &fh, const std::string &value, std::istringstream &conf_stream)
 {
 	switch (fh.type)
@@ -350,6 +396,11 @@ void	Config::_assignValue(FieldHandler &fh, const std::string &value, std::istri
 	return ;
 }
 
+/**
+ * @brief Parses dotted IPv4 strings or INADDR_* aliases.
+ *
+ * @param ip_str IP string.
+ */
 void	Config::_parseIP(const std::string &ip_str)
 {
 	int					octets[4];
@@ -378,6 +429,11 @@ void	Config::_parseIP(const std::string &ip_str)
 	this->ip = htonl(this->ip);
 }
 
+/**
+ * @brief Parses a DEFAULT_ERROR_PAGES dictionary block.
+ *
+ * @param conf_stream Stream positioned after directive.
+ */
 void	Config::_parseDefaultErrorPages(std::istringstream &conf_stream)
 {
 	std::string	newline;
@@ -401,6 +457,11 @@ void	Config::_parseDefaultErrorPages(std::istringstream &conf_stream)
 	}
 }
 
+/**
+ * @brief Parses a METHODS list block at server level.
+ *
+ * @param conf_stream Stream positioned after METHODS directive.
+ */
 void	Config::_parseDefaultMethods(std::istringstream &conf_stream)
 {
 	std::string	newline;
@@ -424,6 +485,11 @@ void	Config::_parseDefaultMethods(std::istringstream &conf_stream)
 	}
 }
 
+/**
+ * @brief Assigns default values when an optional directive is absent.
+ *
+ * @param fh Field handler metadata.
+ */
 void	Config::_assignDefault(FieldHandler &fh)
 {
 	if (fh.name == "default_error_pages")
@@ -449,6 +515,12 @@ namespace
 	#define FIELD_NAME_COLOR	BOLD
 	#define	FIELD_VALUE_COLOR	RESET
 
+	/**
+	 * @brief Prints the top border with a title.
+	 * 
+	 * @param os Output stream.
+	 * @param title Title to display.
+	 */
 	void	printBorderTop(std::ostream &os, const std::string &title)
 	{
 		os << BORDER_COLOR << TOP_LEFT << title;
@@ -456,6 +528,11 @@ namespace
 		os << TOP_RIGHT << RESET << "\n";
 	}
 
+	/**
+	 * @brief Prints the bottom border.
+	 * 
+	 * @param os Output stream.
+	 */
 	void	printBorderBottom(std::ostream &os)
 	{
 		os << BORDER_COLOR << BOTTOM_LEFT;
@@ -463,6 +540,13 @@ namespace
 		os << BOTTOM_RIGHT << RESET << "\n";
 	}
 
+	/**
+	 * @brief Prints a titled section with optional subtitle.
+	 *
+	 * @param os Output stream.
+	 * @param title Section title.
+	 * @param subtitle Section subtitle.
+	 */
 	void	printSection(std::ostream &os, const std::string &title, const std::string &subtitle)
 	{
 		os << BORDER_COLOR << VERTICAL << RESET << " ";
@@ -478,6 +562,13 @@ namespace
 		os << BORDER_COLOR << VERTICAL << RESET << "\n";
 	}
 
+	/**
+	 * @brief Prints a name/value row inside the bordered box.
+	 * 
+	 * @param os Output stream.
+	 * @param name Field name.
+	 * @param value Field value.
+	 */
 	void	printField(std::ostream &os, const std::string &name, const std::string &value)
 	{
 		os << BORDER_COLOR << VERTICAL << RESET << "   ";
@@ -498,6 +589,12 @@ namespace
 		os << BORDER_COLOR << VERTICAL << RESET << "\n";
 	}
 
+	/**
+	 * @brief Prints general server settings.
+	 * 
+	 * @param os Output stream.
+	 * @param cfg Configuration object.
+	 */
 	void	printServerSettings(std::ostream &os, const Config &cfg)
 	{
 		printSection(os, "Server settings", "");
@@ -509,6 +606,12 @@ namespace
 		printField(os, "Protocol:", utils::toString(cfg.protocol));
 	}
 
+	/**
+	 * @brief Prints server limit settings.
+	 * 
+	 * @param os Output stream.
+	 * @param cfg Configuration object.
+	 */
 	void	printServerLimits(std::ostream &os, const Config &cfg)
 	{
 		printSection(os, "Server limits", "");

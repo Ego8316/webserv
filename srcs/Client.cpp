@@ -3,15 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/26 13:54:55 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/24 23:44:34 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
+/**
+ * @brief Builds a client object attached to a server and config.
+ *
+ * @param config Server configuration.
+ * @param server Owning server core.
+ */
 Client::Client(const Config *config, ServerCore *server)
 {
 	this->_config = config;
@@ -31,11 +37,23 @@ Client::Client(const Config *config, ServerCore *server)
 	this->_response = NULL;
 }
 
+/**
+ * @brief Copy constructor.
+ *
+ * @param other Source client.
+ */
 Client::Client(const Client &other)
 {
 	*this = other;
 }
 
+/**
+ * @brief Assignment operator.
+ *
+ * @param other Source client.
+ *
+ * @return Reference to this client.
+ */
 Client	&Client::operator=(const Client &other)
 {
 	if (this != &other)
@@ -63,6 +81,9 @@ Client	&Client::operator=(const Client &other)
 	return (*this);
 }
 
+/**
+ * @brief Destructor closing socket and freeing request/response.
+ */
 Client::~Client()
 {
 	if (this->_client_fd > 0)
@@ -76,61 +97,121 @@ Client::~Client()
 		delete _response;
 }
 
+/**
+ * @brief Returns client sockaddr storage.
+ *
+ * @return Reference to sockaddr_in.
+ */
 struct sockaddr_in	&Client::getClientAddr()
 {
 	return (this->_client_addr);
 }
 
+/**
+ * @brief Returns stored sockaddr length reference.
+ *
+ * @return Reference to socklen_t.
+ */
 socklen_t	&Client::getClientLen()
 {
 	return (this->_client_len);
 }
 
+/**
+ * @brief Returns client identifier.
+ *
+ * @return Client id.
+ */
 int	Client::getId()
 {
 	return (this->_client_id);
 }
 
+/**
+ * @brief Returns client socket descriptor.
+ *
+ * @return Socket fd.
+ */
 int	Client::getFd()
 {
 	return (this->_client_fd);
 }
 
+/**
+ * @brief Returns current processing state.
+ *
+ * @return RequestStage value.
+ */
 RequestStage	Client::getState()
 {
 	return (this->_state);
 }
 
+/**
+ * @brief Returns reference to owning ServerCore.
+ *
+ * @return ServerCore reference.
+ */
 ServerCore	&Client::getServer()
 {
 	return (*this->_server);
 }
 
+/**
+ * @brief Returns per-iteration processing time limit.
+ *
+ * @return Time limit in seconds.
+ */
 long	Client::getTimeLimit()
 {
 	return (this->_time_limit);
 }
 
+/**
+ * @brief Returns absolute request timeout.
+ *
+ * @return Timeout in seconds.
+ */
 long	Client::getRequestTimeLimit()
 {
 	return (this->_request_time_limit);
 }
 
+/**
+ * @brief Sets client identifier.
+ *
+ * @param id New client id.
+ */
 void	Client::setClientId(int id)
 {
 	this->_client_id = id;
 }
 
+/**
+ * @brief Stores accepted socket descriptor.
+ *
+ * @param fd Socket descriptor.
+ */
 void	Client::setFd(int fd)
 {
 	this->_client_fd = fd;
 }
 
+/**
+ * @brief Updates state machine stage.
+ *
+ * @param state New state.
+ */
 void	Client::setState(RequestStage state)
 {
 	this->_state = state;
 }
 
+/**
+ * @brief Drives the client state machine for one poll cycle.
+ *
+ * @return ProcessError code (or SERV_ERROR).
+ */
 int	Client::handleEvent()
 {
 	this->_error = ERR_NONE;
@@ -181,6 +262,11 @@ int	Client::handleEvent()
 	return (_error);
 }
 
+/**
+ * @brief Accepts a pending connection and registers it with poll.
+ *
+ * @return 0 on success, SERV_ERROR or WBLOCK otherwise.
+ */
 int	Client::_tryAccepting()
 {
 	if (this->_server->socketAcceptClient(this) == SERV_ERROR)
@@ -200,6 +286,11 @@ int	Client::_tryAccepting()
 	return (0);
 }
 
+/**
+ * @brief Allocates Request/Response objects and primes header reading.
+ *
+ * @return 0 on success.
+ */
 int	Client::_requestInit()
 {
 	this->_request = new Request();
@@ -210,6 +301,11 @@ int	Client::_requestInit()
 }
 
 
+/**
+ * @brief Reads the HTTP header, advancing state when complete.
+ *
+ * @return 0, SERV_ERROR, or WOULD_BLOCK.
+ */
 int	Client::_readHeader()
 {
 	std::vector<char>	buffer(this->_config->buffer_size);
@@ -260,6 +356,11 @@ int	Client::_readHeader()
 	return (0);
 }
 
+/**
+ * @brief Reads the HTTP body, handling both content-length and chunked.
+ *
+ * @return 0, SERV_ERROR, or WOULD_BLOCK.
+ */
 int	Client::_readBody()
 {
 	std::vector<char>	buffer(this->_config->buffer_size);
@@ -308,6 +409,9 @@ int	Client::_readBody()
 	return (0);
 }
 
+/**
+ * @brief Builds the Response based on the parsed Request.
+ */
 void	Client::_processRequest()
 {
 	RequestHandler::handle(this->_response, *_request, *_config);
@@ -322,6 +426,9 @@ void	Client::_processRequest()
 	return ;
 }
 
+/**
+ * @brief Monitors CGI execution until completion.
+ */
 void	Client::_monitorCGI()
 {
 	if (!_response->getCGI() || _response->getCGI()->isComplete())
@@ -340,6 +447,11 @@ void	Client::_monitorCGI()
 	return ;
 }
 
+/**
+ * @brief Sends buffered response string over the socket.
+ *
+ * @return 0 on progress/completion, SERV_ERROR or WOULD_BLOCK otherwise.
+ */
 int	Client::_sendString()
 {
 	const std::string	&response_str = this->_response->getString();
@@ -368,6 +480,11 @@ int	Client::_sendString()
 	return (0);
 }
 
+/**
+ * @brief Streams response file descriptor contents to the client.
+ *
+ * @return 0 on progress/completion, SERV_ERROR or WOULD_BLOCK otherwise.
+ */
 int	Client::_sendFile()
 {
 	std::vector<char>	buffer(this->_config->buffer_size);
@@ -396,6 +513,9 @@ int	Client::_sendFile()
 	return (0);
 }
 
+/**
+ * @brief Resets request/response objects for a new exchange.
+ */
 void	Client::_prepareNew()
 {
 	delete this->_request;
@@ -404,6 +524,9 @@ void	Client::_prepareNew()
 	this->_response = new Response();
 }
 
+/**
+ * @brief Logs the current client state.
+ */
 void	Client::printState() const
 {
 	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
@@ -411,6 +534,9 @@ void	Client::printState() const
 	return ;
 }
 
+/**
+ * @brief Logs the raw HTTP header for debugging.
+ */
 void	Client::printHeader() const
 {
 	std::cout << BOLD_GRAY << "[Client " << this->_client_id << "]" << RESET
@@ -420,6 +546,9 @@ void	Client::printHeader() const
 	return ;
 }
 
+/**
+ * @brief Logs the parsed request for debugging.
+ */
 void	Client::printRequest() const
 {
 	std::cout << BOLD_GRAY << "[Client " << this->_client_id << "]" << RESET

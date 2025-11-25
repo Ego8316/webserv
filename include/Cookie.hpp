@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/21 15:48:56 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/24 23:40:41 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,11 @@
 
 class Client;
 
+/**
+ * @class Cookie
+ *
+ * @brief Parses and stores HTTP cookie attributes from request headers.
+ */
 class Cookie {
 	public :
 	// CONSTRUCTORS

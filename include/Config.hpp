@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/29 14:23:52 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/24 23:40:35 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,11 @@
 #include "headers.hpp"
 #include "utils.hpp"
 
+/**
+ * @class Config
+ *
+ * @brief Parses and stores server configuration including locations and limits.
+ */
 class	Config
 {
 	public:

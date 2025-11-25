@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/10/29 16:35:01 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/25 00:13:48 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ Resource::Resource()
 
 /**
  * @brief Copy constructor.
+ *
  * @param other The Resource object to copy.
  */
 Resource::Resource(const Resource &other)
@@ -37,7 +38,9 @@ Resource::Resource(const Resource &other)
 
 /**
  * @brief Assignment operator.
+ *
  * @param other The Resource object to assign from.
+ *
  * @return Reference to this Resource object.
  */
 Resource	&Resource::operator=(const Resource &other)
@@ -62,7 +65,7 @@ Resource::~Resource()
 
 /**
  * @brief Builds the resource object based on request target and server config.
- * 
+ *
  * @param requestTarget Requested path from the HTTP request.
  * @param config Server configuration.
  */
@@ -78,6 +81,14 @@ void	Resource::build(const Request &request, const Config &config)
 	return ;
 }
 
+/**
+ * @brief Detects configured redirects matching the requested target.
+ *
+ * @param requestTarget Requested path.
+ * @param config Server configuration.
+ *
+ * @return True when a redirect is found.
+ */
 bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &config)
 {
 	std::string							raw_path_requested(requestTarget);
@@ -100,6 +111,13 @@ bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &co
 	return (false);
 }
 
+/**
+ * @brief Validates the request Accept header against detected resource type.
+ *
+ * @param request Client request (provides Accept header).
+ *
+ * @return True when accepted, false otherwise.
+ */
 bool	Resource::_checkAccept(const Request &request)
 {
 
@@ -114,12 +132,12 @@ bool	Resource::_checkAccept(const Request &request)
  * Combines the server home directory with the requested target. If the path
  * is a directory, appends the server default page (e.g., index.html). Marks
  * the resource as existing even if permissions prevent accessing it (EACCES).
- * 
+ *
  * @note Marks as existing even if stat fails due to permission.
- * 
+ *
  * @param requestTarget Requested path from the HTTP request.
  * @param config Server configuration.
- * 
+ *
  * @return 0 if the path can be resolved, `SERV_ERROR` otherwise.
  */
 int	Resource::_resolvePath(const std::string &requestTarget, const Config &config)
@@ -171,7 +189,7 @@ void	Resource::_evaluatePermissions()
 
 /**
  * @brief Detects the type of the resource based on the file extension.
- * 
+ *
  * Updates _status to include IS_CGI for Python and PHP scripts.
  */
 void	Resource::_detectType()
@@ -184,6 +202,7 @@ void	Resource::_detectType()
 
 /**
  * @brief Returns the path.
+ *
  * @return Reference to the path.
  */
 const std::string	&Resource::getPath() const
@@ -193,6 +212,7 @@ const std::string	&Resource::getPath() const
 
 /**
  * @brief Returns the status.
+ *
  * @return Status.
  */
 ResourceStatus	Resource::getStatus() const
@@ -202,6 +222,7 @@ ResourceStatus	Resource::getStatus() const
 
 /**
  * @brief Returns the size.
+ *
  * @return Size.
  */
 size_t	Resource::getSize() const
@@ -211,6 +232,7 @@ size_t	Resource::getSize() const
 
 /**
  * @brief Returns the type.
+ *
  * @return Type.
  */
 ContentType	Resource::getType() const
@@ -220,6 +242,7 @@ ContentType	Resource::getType() const
 
 /**
  * @brief Checks if the resource exists.
+ *
  * @return True if it is, false otherwise.
  */
 bool	Resource::exists() const
@@ -229,6 +252,7 @@ bool	Resource::exists() const
 
 /**
  * @brief Checks if the resource is a CGI.
+ *
  * @return True if it is, false otherwise.
  */
 bool	Resource::isCGI() const
@@ -236,6 +260,11 @@ bool	Resource::isCGI() const
 	return (this->_status & IS_CGI);
 }
 
+/**
+ * @brief Returns true when the resource resolves to a redirect.
+ *
+ * @return True if redirect.
+ */
 bool	Resource::isRedirect() const
 {
 	return (this->_status & IS_REDIRECT);
@@ -243,6 +272,7 @@ bool	Resource::isRedirect() const
 
 /**
  * @brief Checks if the resource is a directory.
+ *
  * @return True if it is, false otherwise.
  */
 bool	Resource::isDirectory() const
@@ -252,6 +282,7 @@ bool	Resource::isDirectory() const
 
 /**
  * @brief Checks if the resource is readable.
+ *
  * @return True if it is, false otherwise.
  */
 bool	Resource::isReadable() const
@@ -261,6 +292,7 @@ bool	Resource::isReadable() const
 
 /**
  * @brief Checks if the resource is writable.
+ *
  * @return True if it is, false otherwise.
  */
 bool	Resource::isWritable() const
@@ -270,6 +302,7 @@ bool	Resource::isWritable() const
 
 /**
  * @brief Checks if the resource is executable.
+ *
  * @return True if it is, false otherwise.
  */
 bool	Resource::isExecutable() const
@@ -279,6 +312,7 @@ bool	Resource::isExecutable() const
 
 /**
  * @brief Checks if an existing resource is forbidden.
+ *
  * @return True if it is, false otherwise.
  */
 bool	Resource::isForbidden() const

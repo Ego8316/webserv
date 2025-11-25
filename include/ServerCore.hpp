@@ -20,7 +20,9 @@ class	Client;
 class	Config;
 
 /**
- * @class Handles socket setup and poll monitoring.
+ * @class ServerCore
+ *
+ * @brief Handles socket setup and poll monitoring.
  */
 class	ServerCore
 {

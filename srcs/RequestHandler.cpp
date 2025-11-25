@@ -3,37 +3,62 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/29 16:34:42 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/24 23:50:35 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "RequestHandler.hpp"
 
+/**
+ * @brief Default constructor (unused because all methods are static).
+ */
 RequestHandler::RequestHandler(void)
 {
 	return ;
 }
 
+/**
+ * @brief Copy constructor (unused).
+ *
+ * @param other Source handler.
+ */
 RequestHandler::RequestHandler(const RequestHandler &other)
 {
 	(void)other;
 	return ;
 }
 
+/**
+ * @brief Assignment operator (unused).
+ *
+ * @param other Source handler.
+ *
+ * @return Reference to this handler.
+ */
 RequestHandler	&RequestHandler::operator=(const RequestHandler &other)
 {
 	(void)other;
 	return (*this);
 }
 
+/**
+ * @brief Destructor.
+ */
 RequestHandler::~RequestHandler(void)
 {
 	return ;
 }
 
+/**
+ * @brief Entry point that routes a parsed request to the proper handler.
+ *
+ * @param response Response object to fill.
+ * @param request Parsed request.
+ * @param config Server configuration.
+ */
 void	RequestHandler::handle(Response *response, const Request &request, const Config &config)
 {
 	if (request.getError())
@@ -73,6 +98,13 @@ void	RequestHandler::handle(Response *response, const Request &request, const Co
 	}
 }
 
+/**
+ * @brief Handles GET requests by serving files or emitting directory errors.
+ *
+ * @param response Response to populate.
+ * @param config Server configuration.
+ * @param resource Resolved resource.
+ */
 void	RequestHandler::_handleGet(Response *response, const Config &config, const Resource &resource)
 {
 	int			fd;
@@ -103,6 +135,14 @@ void	RequestHandler::_handleGet(Response *response, const Config &config, const 
 	response->build();
 }
 
+/**
+ * @brief Handles POST uploads by writing the body to the resolved path.
+ *
+ * @param response Response to populate.
+ * @param request Client request.
+ * @param config Server configuration.
+ * @param resource Resolved resource.
+ */
 void	RequestHandler::_handlePost(Response *response, const Request &request, const Config &config, const Resource &resource)
 {
 	std::ofstream	outfile;
@@ -134,6 +174,13 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 	response->build();
 }
 
+/**
+ * @brief Handles DELETE requests, mapping errno to HTTP status codes.
+ *
+ * @param response Response to populate.
+ * @param config Server configuration.
+ * @param resource Resolved resource.
+ */
 void	RequestHandler::_handleDelete(Response *response, const Config &config, const Resource &resource)
 {
 	if (resource.isDirectory() && !utils::endsWith(resource.getPath(), "/"))
@@ -152,6 +199,14 @@ void	RequestHandler::_handleDelete(Response *response, const Config &config, con
 	response->build();
 }
 
+/**
+ * @brief Initializes CGI handling when the resource is executable.
+ *
+ * @param response Response to populate with CGI handler.
+ * @param request Parsed request.
+ * @param config Server configuration.
+ * @param resource Resolved resource.
+ */
 void	RequestHandler::_handleCGI(Response *response, const Request &request, const Config &config, const Resource &resource)
 {
 	//TODO check for errors on Ressource
@@ -162,6 +217,12 @@ void	RequestHandler::_handleCGI(Response *response, const Request &request, cons
 		response->setCGI(new CGI());
 }
 
+/**
+ * @brief Sends an HTTP redirect response using the resource redirection info.
+ *
+ * @param response Response to populate.
+ * @param resource Redirect resource.
+ */
 void	RequestHandler::_handleRedirect(Response *response, const Resource &resource)
 {
 	std::string		response_body;
@@ -173,6 +234,13 @@ void	RequestHandler::_handleRedirect(Response *response, const Resource &resourc
 	response->build();
 }
 
+/**
+ * @brief Builds a simple directory listing response body.
+ *
+ * @param response Response to populate.
+ * @param config Server configuration.
+ * @param resource Resolved directory resource.
+ */
 void	RequestHandler::_handleListDir(Response *response, const Config &config, const Resource &resource)
 {
 	std::string		response_body;
@@ -201,6 +269,13 @@ void	RequestHandler::_handleListDir(Response *response, const Config &config, co
 	response->build();
 }
 
+/**
+ * @brief Builds an error response, preferring configured custom pages.
+ *
+ * @param response Response to populate.
+ * @param code HTTP status code to send.
+ * @param config Server configuration for custom pages.
+ */
 void	RequestHandler::_handleError(Response *response, HttpStatus code, const Config &config)
 {
 	std::string	error_page_path;

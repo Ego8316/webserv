@@ -3,15 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 20:39:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/24 23:42:42 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGI.hpp"
 
+/**
+ * @brief Default constructor initializing CGI state.
+ */
 CGI::CGI()
 {
 	this->_cgi_script = "";
@@ -36,11 +39,23 @@ CGI::CGI()
 	this->_env = NULL;
 }
 
+/**
+ * @brief Copy constructor.
+ *
+ * @param other Source CGI.
+ */
 CGI::CGI(const CGI &other)
 {
 	*this = other;
 }
 
+/**
+ * @brief Assignment operator.
+ *
+ * @param other Source CGI.
+ *
+ * @return Reference to this CGI.
+ */
 CGI &CGI::operator=(const CGI &other)
 {
 	if (this != &other)
@@ -68,6 +83,9 @@ CGI &CGI::operator=(const CGI &other)
 	return (*this);
 }
 
+/**
+ * @brief Destructor terminating process and cleaning pipes/env.
+ */
 CGI::~CGI()
 {
 	if (this->_process_status[0] == 0 && this->_pid != 0)
@@ -86,6 +104,14 @@ CGI::~CGI()
 }
 
 
+/**
+ * @brief Runs the CGI lifecycle (init then nanny loop).
+ *
+ * @param client Client issuing the request.
+ * @param request Parsed HTTP request.
+ * @param config Server configuration.
+ * @param response Response to populate.
+ */
 void		CGI::Run(Client &client, Request &request, const Config &config, Response &response)
 {
 	if (this->_is_init)
@@ -124,6 +150,14 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 	this->_is_init = true;
 }
 
+/**
+ * @brief Supervises CGI I/O once initialized.
+ *
+ * @param client Client issuing the request.
+ * @param request Parsed request.
+ * @param config Server configuration.
+ * @param response Response to populate when CGI completes.
+ */
 void	CGI::Nanny(Client &client, Request &request, const Config &config, Response &response)
 {
 	ssize_t				bytes_read = 1;
@@ -152,6 +186,13 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 	}
 }
 
+/**
+ * @brief Writes request data to the CGI process.
+ *
+ * @param request Parsed request.
+ * @param config Server configuration (buffer size).
+ * @return Bytes written or -1 on error.
+ */
 ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 {
 	ssize_t				bytes_sent = 0;
@@ -175,6 +216,12 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 	return (bytes_sent);
 }
 
+/**
+ * @brief Reads output from the CGI process.
+ *
+ * @param config Server configuration (buffer size).
+ * @return Bytes read or -1 on error.
+ */
 ssize_t		CGI::readFromCGI(const Config &config)
 {
 	ssize_t				bytes_read = 0;
@@ -193,6 +240,9 @@ ssize_t		CGI::readFromCGI(const Config &config)
 	return (bytes_read);
 }
 
+/**
+ * @brief Parses CGI output header to fill metadata.
+ */
 void	CGI::parseHeader()
 {
 	if (!this->_output.length() || utils::startsWith(this->_output, "HTTP/"))
@@ -214,6 +264,11 @@ void	CGI::parseHeader()
 		this->_header_len = this->_output.find("\r\n\r\n") + 4;
 }
 
+/**
+ * @brief Builds the final HTTP response from CGI output.
+ *
+ * @param response Response to populate.
+ */
 void	CGI::genFullOutput(Response &response)
 {
 	if (!WIFEXITED(this->_process_status[1]))
@@ -242,21 +297,39 @@ void	CGI::genFullOutput(Response &response)
 	return ;
 }
 
+/**
+ * @brief Returns the raw CGI output buffer.
+ *
+ * @return Reference to output string.
+ */
 std::string	&CGI::getOutput()
 {
 	return (this->_output);
 }
 
+/**
+ * @brief Returns the CGI-generated status code.
+ *
+ * @return HttpStatus value.
+ */
 HttpStatus	CGI::getStatus()
 {
 	return (this->_status);
 }
 
+/**
+ * @brief Indicates whether CGI processing finished.
+ *
+ * @return True when complete.
+ */
 bool		CGI::isComplete()
 {
 	return (this->_is_complete);
 }
 
+/**
+ * @brief Forked child entry to exec the CGI script.
+ */
 void		CGI::Execute()
 {
 	close(this->_pipe_to_CGI[PIPE_WRITE_END]);
@@ -276,6 +349,11 @@ void		CGI::Execute()
 	}
 }
 
+/**
+ * @brief Builds the CGI environment variables and argv.
+ *
+ * @param request Parsed HTTP request.
+ */
 void		CGI::GenEnvVar(Request &request)
 {
 	std::vector<std::string>	env;
@@ -306,6 +384,9 @@ void		CGI::GenEnvVar(Request &request)
 	return ;
 }
 
+/**
+ * @brief Frees allocated argv/env structures and script path buffer.
+ */
 void	CGI::deleteEnvVar()
 {
 	int i = 0;
@@ -337,6 +418,13 @@ void	CGI::deleteEnvVar()
 	}
 }
 
+/**
+ * @brief Determines whether CGI output is complete based on headers/encoding.
+ *
+ * @param bytes_read Last read byte count.
+ *
+ * @return True when no more data is expected.
+ */
 bool	CGI::checkOutputTermination(int bytes_read)
 {
 	if (this->_chunked)

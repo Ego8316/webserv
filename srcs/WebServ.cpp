@@ -3,15 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 19:08:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/25 00:48:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServ.hpp"
 
+/**
+ * @brief Constructs a web server instance with its own ServerCore.
+ *
+ * @param config Server configuration.
+ */
 WebServ::WebServ(const Config *config)
 {
 	this->_config = config;
@@ -21,6 +26,9 @@ WebServ::WebServ(const Config *config)
 	this->_processing_queue.clear();
 }
 
+/**
+ * @brief Destructor freeing clients and core.
+ */
 WebServ::~WebServ()
 {
 	for (int i = 0; i < _config->client_limit; ++i)
@@ -36,6 +44,11 @@ WebServ::~WebServ()
 	std::cerr << RED << "Destroying server" << RESET << std::endl;
 }
 
+/**
+ * @brief Initializes sockets and poll entries.
+ *
+ * @return 0 on success, SERV_ERROR on failure.
+ */
 int	WebServ::Init()
 {
 	if (!this->_config || !this->_core)
@@ -47,6 +60,11 @@ int	WebServ::Init()
 	return (0);
 }
 
+/**
+ * @brief Performs one loop iteration: updates queue then processes it.
+ *
+ * @return 0 on success, SERV_ERROR on fatal errors.
+ */
 int	WebServ::Run()
 {
 	if (this->UpdateQueue() == SERV_ERROR)
@@ -62,6 +80,11 @@ int	WebServ::Run()
 	return (0);
 }
 
+/**
+ * @brief Moves ready clients into the processing queue based on poll events.
+ *
+ * @return 0 on success, SERV_ERROR on fatal server error.
+ */
 int	WebServ::UpdateQueue()
 {
 	std::vector<PollRevent>	events;
@@ -109,6 +132,11 @@ int	WebServ::UpdateQueue()
 	return (0);
 }
 
+/**
+ * @brief Handles one client from the processing queue.
+ *
+ * @return Error code from client handling.
+ */
 int	WebServ::ProcessQueue()
 {
 	Client	*next_client;
@@ -134,6 +162,11 @@ int	WebServ::ProcessQueue()
 	return (error);
 }
 
+/**
+ * @brief Creates a new Client or returns NULL if capacity reached.
+ *
+ * @return Pointer to new Client or NULL on failure/limit.
+ */
 Client	*WebServ::newClient()
 {
 	int indx;
@@ -154,6 +187,13 @@ Client	*WebServ::newClient()
 	return (this->_clients[indx]);
 }
 
+/**
+ * @brief Removes a client by index and cleans processing queue references.
+ *
+ * @param indx Client index.
+ *
+ * @return 0 on completion.
+ */
 int	WebServ::removeClient(int indx)
 {
 	this->_core->pollRemove(indx);

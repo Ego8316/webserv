@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 16:51:02 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/24 23:41:12 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,11 @@
 #include "Cookie.hpp"
 #include "Config.hpp"
 
+/**
+ * @class WebServ
+ *
+ * @brief High-level server wrapper coordinating clients and the event loop.
+ */
 class WebServ
 {
 	public:

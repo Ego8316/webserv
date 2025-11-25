@@ -6,12 +6,20 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 15:19:18 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/25 00:44:16 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
 
+/**
+ * @brief Returns true when `str` ends with the given suffix.
+ *
+ * @param str String to test.
+ * @param suffix Trailing substring to match.
+ *
+ * @return True when suffix matches.
+ */
 bool	utils::endsWith(const std::string& str, const std::string& suffix)
 {
 	if (str.length() < suffix.length())
@@ -21,6 +29,14 @@ bool	utils::endsWith(const std::string& str, const std::string& suffix)
 	return (str.substr(str.length() - suffix.length(), suffix.length()) == suffix);
 }
 
+/**
+ * @brief Returns true when `str` starts with the given prefix.
+ *
+ * @param str String to test.
+ * @param prefix Leading substring to match.
+ *
+ * @return True when prefix matches.
+ */
 bool	utils::startsWith(const std::string& str, const std::string& prefix)
 {
 	if (str.length() < prefix.length())
@@ -30,6 +46,14 @@ bool	utils::startsWith(const std::string& str, const std::string& prefix)
 	return (str.substr(0, prefix.length()) == prefix);
 }
 
+/**
+ * @brief Splits a string on a delimiter substring.
+ *
+ * @param str Input string.
+ * @param del Delimiter substring.
+ *
+ * @return Vector of split parts.
+ */
 std::vector<std::string>	utils::stringSplit(std::string str, std::string del)
 {
 	std::vector<std::string>	split_str;
@@ -48,6 +72,14 @@ std::vector<std::string>	utils::stringSplit(std::string str, std::string del)
 	return (split_str);
 }
 
+/**
+ * @brief Trims characters in `set` from both ends of the string.
+ *
+ * @param str String to trim (modified in place).
+ * @param set Characters to remove.
+ *
+ * @return Trimmed string.
+ */
 std::string	utils::stringTrim(std::string &str, const std::string &set)
 {
 	unsigned int	last_size = str.size() + 1;
@@ -63,11 +95,25 @@ std::string	utils::stringTrim(std::string &str, const std::string &set)
 	return (str);
 }
 
+/**
+ * @brief Trims whitespace and newline characters from both ends.
+ *
+ * @param str String to trim (modified in place).
+ *
+ * @return Trimmed string.
+ */
 std::string	utils::stringTrimSpaces(std::string &str)
 {
 	return (stringTrim(str, " \r\n\t"));
 }
 
+/**
+ * @brief Converts a string to lowercase.
+ *
+ * @param str Input string.
+ *
+ * @return Lowercased copy.
+ */
 std::string	utils::toLower(const std::string &str)
 {
 	std::string	lower = str;
@@ -77,6 +123,13 @@ std::string	utils::toLower(const std::string &str)
 	return (lower);
 }
 
+/**
+ * @brief Converts a string to uppercase.
+ *
+ * @param str Input string.
+ *
+ * @return Uppercased copy.
+ */
 std::string	utils::toUpper(const std::string &str)
 {
 	std::string	upper = str;
@@ -86,6 +139,13 @@ std::string	utils::toUpper(const std::string &str)
 	return (upper);
 }
 
+/**
+ * @brief Capitalizes dash-separated words and lowercases the rest.
+ *
+ * @param str Input string.
+ *
+ * @return Capitalized copy.
+ */
 std::string	utils::capitalize(const std::string &str)
 {
 	std::string	result = str;
@@ -106,17 +166,35 @@ std::string	utils::capitalize(const std::string &str)
 	return (result);
 }
 
+/**
+ * @brief no fucking clue
+ */
 static bool	CICharComp(char a, char b)
 {
 	return (std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)));
 }
 
+/**
+ * @brief Case-insensitive search of `needle` within `haystack`.
+ *
+ * @param haystack String to search.
+ * @param needle Substring to locate.
+ *
+ * @return Iterator to first match or end iterator.
+ */
 std::string::iterator	utils::caseInsensitiveFind(std::string &haystack, std::string needle)
 {
 	std::string::iterator it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
 	return (it);
 }
 
+/**
+ * @brief Returns file size in bytes or -1 on error.
+ *
+ * @param path Filesystem path.
+ *
+ * @return Size in bytes or -1.
+ */
 ssize_t	utils::getFileSize(const std::string &path)
 {
 	struct stat	st;
@@ -126,6 +204,13 @@ ssize_t	utils::getFileSize(const std::string &path)
 	return (-1);
 }
 
+/**
+ * @brief Converts a MIME string (e.g., text/html) to ContentType flags.
+ *
+ * @param input MIME string.
+ *
+ * @return ContentType bitmask.
+ */
 ContentType	utils::strToContentType(std::string input)
 {
 	if (input == "*/*")
@@ -147,7 +232,7 @@ ContentType	utils::strToContentType(std::string input)
 
 /**
  * @brief Get MIME type string based on detected content type.
- * 
+ *
  * @return The MIME type (e.g., "text/html", "image/png").
  */
 std::string	utils::contentTypeToStr(ContentType type)
@@ -164,7 +249,7 @@ std::string	utils::contentTypeToStr(ContentType type)
 
 /**
  * @brief Detects the type of the resource based on the file extension.
- * 
+ *
  * Updates _status to include IS_CGI for Python and PHP scripts.
  */
 ContentType	utils::extensionToContentTypes(std::string fname)
@@ -185,7 +270,7 @@ ContentType	utils::extensionToContentTypes(std::string fname)
 
 /**
  * @brief Get the file extension associated with the content type.
- * 
+ *
  * @return File extension (e.g., ".html", ".png", ".php").
  */
 std::string	utils::contentTypeToExtensions(ContentType type)
@@ -201,7 +286,13 @@ std::string	utils::contentTypeToExtensions(ContentType type)
 	}
 }
 
-
+/**
+ * @brief Converts an HTTP method enum to its string form.
+ *
+ * @param method HTTP method enum.
+ *
+ * @return Method name.
+ */
 std::string	utils::methodToStr(Method method)
 {
 	switch(method)
@@ -213,6 +304,13 @@ std::string	utils::methodToStr(Method method)
 	}
 }
 
+/**
+ * @brief Converts a method string to its Method enum value.
+ *
+ * @param method_str Method name.
+ *
+ * @return Method enum value or UNKNOWN.
+ */
 Method	utils::strToMethod(const std::string &method_str)
 {
 	if (method_str == "GET")
@@ -226,7 +324,9 @@ Method	utils::strToMethod(const std::string &method_str)
 
 /**
  * @brief Converts an HTTP status code enum to its corresponding string.
+ *
  * @param code The HTTP status code.
+ *
  * @return `std::string` The string representation of the code.
  */
 std::string	utils::httpStatusToStr(HttpStatus code)
@@ -246,7 +346,9 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 
 /**
  * @brief Converts an HTTP status code str to its corresponding enum.
+ *
  * @param code The HTTP status code.
+ *
  * @return `std::string` The string representation of the code.
  */
 HttpStatus	utils::strToHttpStatus(std::string status)
@@ -286,6 +388,13 @@ HttpStatus	utils::strToHttpStatus(std::string status)
 	return (HTTP_UNKNOWN_STATUS);
 }
 
+/**
+ * @brief Converts a RequestStage value to a readable label.
+ *
+ * @param state Request stage.
+ *
+ * @return Stage name.
+ */
 std::string	utils::stateToStr(RequestStage state)
 {
 	switch (state)
@@ -304,6 +413,11 @@ std::string	utils::stateToStr(RequestStage state)
 	}
 }
 
+/**
+ * @brief Returns the current epoch time (seconds).
+ *
+ * @return Epoch time or 0 on error.
+ */
 long	utils::getTime()
 {
 	time_t	t;
