@@ -3,9 +3,9 @@ server {
 	
     listen 127.0.0.1:8080;
     server_name my.site;
-    anotherone  bites   th  dust
-    ;
-    location / {
+    anotherone  bites the dust;
+    location / 
+    {
         root /var/www/html;
         autoindex on;
     }

@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 14:08:49 by ego               #+#    #+#             */
-/*   Updated: 2025/11/26 16:50:03 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/26 17:04:53 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	printTokens(const std::vector<Token> &tokens)
 static void	printIndent(int depth)
 {
 	for (int i = 0; i < depth; ++i)
-		std::cout << "   " << std::endl;
+		std::cout << "   ";
 	return ;
 }
 
@@ -62,9 +62,9 @@ static void	printBlock(const ASTBlock &b, int depth)
 {
 	printIndent(depth);
 	std::cout << b.type;
-
 	if (!b.path.empty())
 		std::cout << " " << b.path;
+	std::cout << std::endl;
 	for (size_t i = 0; i < b.directives.size(); ++i)
 		printDirective(b.directives[i], depth + 1);
 	for (size_t i = 0; i < b.children.size(); ++i)

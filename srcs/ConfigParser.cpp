@@ -6,12 +6,15 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:42 by ego               #+#    #+#             */
-/*   Updated: 2025/11/26 16:56:15 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/26 17:18:02 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 
+/**
+ * @brief Builds a ConfigParser object out of a token vector.
+ */
 ConfigParser::ConfigParser(const std::vector<Token> &tokens)
 	:	_tokens(tokens),
 		_pos(0)
@@ -19,6 +22,14 @@ ConfigParser::ConfigParser(const std::vector<Token> &tokens)
 	return ;
 }
 
+/**
+ * @brief Parse the full token stream and return all top-level server blocks.
+ *
+ * Expects only `server { ... }` blocks at the root. Throws if any other token
+ * appears at top level. Stops on TOKEN_EOF.
+ *
+ * @return Vector of parsed ASTBlock objects representing each server block.
+ */
 std::vector<ASTBlock>	ConfigParser::parse()
 {
 	std::vector<ASTBlock>	servers;
@@ -38,11 +49,23 @@ std::vector<ASTBlock>	ConfigParser::parse()
 	return (servers);
 }
 
+/**
+ * @brief Peek at the current token without advancing the cursor.
+ *
+ * @return Reference to the current Token.
+ */
 const Token	&ConfigParser::_peek() const
 {
 	return (_tokens[_pos]);
 }
 
+/**
+ * @brief Consume and return the current token, advancing the cursor.
+ *
+ * @throws std::runtime_error If called at EOF.
+ *
+ * @return Reference to the consumed Token.
+ */
 const Token	&ConfigParser::_eat()
 {
 	if (_eof())
@@ -51,11 +74,28 @@ const Token	&ConfigParser::_eat()
 	return (_tokens[_pos++]);
 }
 
+/**
+ * @brief Checks whether the parser has reached the end of token stream.
+ *
+ * TOKEN_EOF always marks the end of input.
+ *
+ * @return true if current token is TOKEN_EOF, false otherwise.
+ */
 bool	ConfigParser::_eof() const
 {
 	return	(_tokens[_pos].type == TOKEN_EOF);
 }
 
+/**
+ * @brief Ensure that the current token matches the expected type.
+ *
+ * Consumes the token if correct. Throws on mismatch.
+ * 
+ * @throws std::runtime_error If unexpected token.
+ *
+ * @param type Expected TokenType.
+ * @param expected Description used in error messages.
+ */
 void	ConfigParser::_expect(TokenType type, const std::string &expected)
 {
 	if (_peek().type != type)
@@ -65,6 +105,15 @@ void	ConfigParser::_expect(TokenType type, const std::string &expected)
 	return ;
 }
 
+/**
+ * @brief Parse a `server { ... }` block into an ASTBlock.
+ *
+ * Handles nested `location` blocks and plain directives.
+ * 
+ * @throws std::runtime_error On unexpected tokens or malformed structure.
+ *
+ * @return ASTBlock representing this server block.
+ */
 ASTBlock	ConfigParser::_parseServerBlock()
 {
 	ASTBlock	block;
@@ -89,6 +138,16 @@ ASTBlock	ConfigParser::_parseServerBlock()
 	return (block);
 }
 
+/**
+ * @brief Parse a `location <path> { ... }` block.
+ *
+ * Requires a path argument after 'location', then a `{`, followed by
+ * directives until the matching `}`.
+ *  
+ * @throws std::runtime_error On unexpected tokens or malformed structure.
+ * 
+ * @return ASTBlock representing the location block.
+ */
 ASTBlock	ConfigParser::_parseLocationBlock()
 {
 	ASTBlock	block;
@@ -115,6 +174,16 @@ ASTBlock	ConfigParser::_parseLocationBlock()
 	return (block);
 }
 
+/**
+ * @brief Parse a directive of the form:
+ *        name arg1 arg2 ... ;
+ *
+ * All arguments and the terminating semicolon must appear on the same line.
+ *
+ * @throws std::runtime_error On newline inside the directive or missing ';'.
+ *
+ * @return ASTDirective containing the directive name and its arguments.
+ */
 ASTDirective	ConfigParser::_parseDirective()
 {
 	ASTDirective	directive;
@@ -127,6 +196,10 @@ ASTDirective	ConfigParser::_parseDirective()
 		directive.args.push_back(_peek().value);
 		_eat();
 	}
+	if (_peek().line != directive.line)
+		throw std::runtime_error("Unexpected newline in directive '"
+			+ directive.name + "' starting at line "
+			+ utils::toString(directive.line));
 	_expect(TOKEN_SEMICOLON, ";");
 	return (directive);
 }
