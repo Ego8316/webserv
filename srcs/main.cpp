@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/26 14:12:21 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/26 16:51:20 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,11 +178,14 @@ int	main(int argc, char *argv[])
 		return (1);
 	try
 	{
-		const std::string	&input = readFile(argv[1]);
-		ConfigLexer			lexer(input);
-		std::vector<Token>	tokens = lexer.tokenize();
+		const std::string		&input = readFile(argv[1]);
+		ConfigLexer				lexer(input);
+		std::vector<Token>		tokens = lexer.tokenize();
 		std::cout << "-----\n" << input << "\n-----" << std::endl;
-		printTokens(tokens);
+		std::cout << tokens << std::endl;
+		ConfigParser			parser(tokens);
+		std::vector<ASTBlock>	servers = parser.parse();
+		printAST(servers);
 	}
 	catch (const std::exception &e)
 	{

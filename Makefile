@@ -6,7 +6,7 @@
 #    By: ego <ego@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/11/26 14:12:57 by ego              ###   ########.fr        #
+#    Updated: 2025/11/26 16:49:22 by ego              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ SRC			=	main.cpp
 SRC			+=	ServerCore.cpp Client.cpp Request.cpp \
 				Response.cpp RequestHandler.cpp Resource.cpp \
 				utils.cpp Cookie.cpp Config.cpp WebServ.cpp \
-				ConfigLexer.cpp \
+				ConfigLexer.cpp ConfigParser.cpp \
 				CGI.cpp
 
 SRC			+=	debug/config.cpp
