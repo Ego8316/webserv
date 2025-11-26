@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+         #
+#    By: ego <ego@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/10/23 21:16:25 by victorviter      ###   ########.fr        #
+#    Updated: 2025/11/26 14:12:57 by ego              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,10 @@ SRC			=	main.cpp
 SRC			+=	ServerCore.cpp Client.cpp Request.cpp \
 				Response.cpp RequestHandler.cpp Resource.cpp \
 				utils.cpp Cookie.cpp Config.cpp WebServ.cpp \
+				ConfigLexer.cpp \
 				CGI.cpp
+
+SRC			+=	debug/config.cpp
 
 OBJS		=	$(addprefix $(ODIR), $(SRC:.cpp=.o))
 SRCS		=	$(addprefix $(SDIR), $(SRC))
@@ -45,6 +48,7 @@ $(NAME)		:	$(ODIR) $(OBJS)
 
 $(ODIR)		:
 				mkdir -p $(ODIR)
+				mkdir -p $(ODIR)/debug
 				printf "Object directory created.\n"
 
 $(ODIR)%.o	:	$(SDIR)%.cpp

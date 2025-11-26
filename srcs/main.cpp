@@ -6,12 +6,14 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/24 23:47:20 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/26 14:12:21 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 #include "WebServ.hpp"
+#include "ConfigLexer.hpp"
+#include "debug.hpp"
 
 int g_shutdown = 0;
 
@@ -160,6 +162,35 @@ std::vector<Config *> parseConfigFile(std::string filename)
 	return (configs);
 }
 
+std::string	readFile(const std::string &path)
+{
+	std::ifstream		file(path.c_str());
+	if (!file.is_open())
+		throw std::runtime_error("Could not open: " + path);
+	std::stringstream	buffer;
+	buffer << file.rdbuf();
+	return (buffer.str());
+}
+
+int	main(int argc, char *argv[])
+{
+	if (argc != 2)
+		return (1);
+	try
+	{
+		const std::string	&input = readFile(argv[1]);
+		ConfigLexer			lexer(input);
+		std::vector<Token>	tokens = lexer.tokenize();
+		std::cout << "-----\n" << input << "\n-----" << std::endl;
+		printTokens(tokens);
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << RED << "Error: " << e.what() << RESET << std::endl;
+	}
+	return (0);
+}
+
 /**
  * @brief Program entry point: loads configs, starts servers, runs event loop.
  *
@@ -168,45 +199,45 @@ std::vector<Config *> parseConfigFile(std::string filename)
  *
  * @return Exit status.
  */
-int main(int argc, char *argv[])
-{
-	std::vector<Config *>				configs;
-	std::vector<WebServ *>				web_servers;
+// int main(int argc, char *argv[])
+// {
+// 	std::vector<Config *>				configs;
+// 	std::vector<WebServ *>				web_servers;
 	
-	signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
-    signal(SIGHUP, signal_handler);
-	if (argc == 2)
-		configs = parseConfigFile(argv[1]);
-	else
-	{
-		std::cerr << RED << "Please provide only one config file" << RESET << std::endl;
-		return (1);
-	}
-	if (configs.size() == 0)
-		return (1);
-	ServerCore::setNonBlocking(STDIN_FILENO);
-	for (unsigned int i = 0; i < configs.size(); ++i)
-		web_servers.push_back(new WebServ(configs[i]));
-	for (unsigned int i = 0; i < web_servers.size(); ++i)
-	{
-		if (web_servers[i]->Init() == SERV_ERROR)
-		{
+// 	signal(SIGINT, signal_handler);
+// 	signal(SIGTERM, signal_handler);
+// 	signal(SIGHUP, signal_handler);
+// 	if (argc == 2)
+// 		configs = parseConfigFile(argv[1]);
+// 	else
+// 	{
+// 		std::cerr << RED << "Please provide only one config file" << RESET << std::endl;
+// 		return (1);
+// 	}
+// 	if (configs.size() == 0)
+// 		return (1);
+// 	ServerCore::setNonBlocking(STDIN_FILENO);
+// 	for (unsigned int i = 0; i < configs.size(); ++i)
+// 		web_servers.push_back(new WebServ(configs[i]));
+// 	for (unsigned int i = 0; i < web_servers.size(); ++i)
+// 	{
+// 		if (web_servers[i]->Init() == SERV_ERROR)
+// 		{
 			
-			std::cerr << "Could not init server " << i << std::endl;
-		}
-	}
-	while (!g_shutdown)
-	{
-		for (unsigned int i = 0; i < web_servers.size(); ++i)
-		{
-			if (web_servers[i]->Run() == SERV_ERROR)
-			{
-				deleteServer(web_servers, configs, i);
-				std::cerr << RED << "Server " << i << ": fatal error occured" << RESET << std::endl;
-			}
-		}
-	}
-	shutdown(web_servers, configs);
-	return (0);
-}
+// 			std::cerr << "Could not init server " << i << std::endl;
+// 		}
+// 	}
+// 	while (!g_shutdown)
+// 	{
+// 		for (unsigned int i = 0; i < web_servers.size(); ++i)
+// 		{
+// 			if (web_servers[i]->Run() == SERV_ERROR)
+// 			{
+// 				deleteServer(web_servers, configs, i);
+// 				std::cerr << RED << "Server " << i << ": fatal error occured" << RESET << std::endl;
+// 			}
+// 		}
+// 	}
+// 	shutdown(web_servers, configs);
+// 	return (0);
+// }
