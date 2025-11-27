@@ -32,6 +32,8 @@ class	ConfigInterpreter
 		ServerConfig	_parseServer(const Block &block);
 		Location		_parseLocation(const Block &block, const ServerConfig &server_defaults);
 	
+		void			_parseErrorPages(ServerConfig &conf, const Block &block,
+						bool &seen_error_pages_block);
 		void			_applyServerDirective(ServerConfig  &conf,  const Directive &d,
 						std::set<std::string> &already_applied);
 		void			_applyLocationDirective(Location &loc, const Directive &d,

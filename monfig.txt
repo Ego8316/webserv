@@ -7,7 +7,6 @@ server {
     error_pages
     {
         404 errors/404.html;
-        485 errors/485.html;
     }
     location /
     {

@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:28 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 16:22:53 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 16:57:18 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,25 +63,7 @@ ServerConfig	ConfigInterpreter::_parseServer(const Block &block)
 		const Block	&child  = block.children[i];
 
 		if (child.type == "error_pages")
-		{
-			if (seen_error_pages_block)
-				throw DuplicateError(child.line, "error_pages");
-			seen_error_pages_block = true;
-			for (size_t j = 0; j < child.directives.size(); ++j)
-			{
-				Directive tmp;
-
-				if (child.directives[j].args.empty())
-					throw MissingArgumentError(child.directives[j].line, "error_pages");
-				if (child.directives[j].args.size() > 1)
-					throw TooManyArgumentsError(child.directives[j].line, "error_pages");
-				tmp.name = "error_page";
-				tmp.line = child.directives[j].line;
-				tmp.args.push_back(child.directives[j].name); // code
-				tmp.args.push_back(child.directives[j].args[0]); // path
-				_parseErrorPage(conf, tmp);
-			}
-		}
+			_parseErrorPages(conf, child, seen_error_pages_block);
 		else if (child.type == "location")
 		{
 			Location	loc = _parseLocation(child, conf);
@@ -93,6 +75,27 @@ ServerConfig	ConfigInterpreter::_parseServer(const Block &block)
 			throw UnknownDirectiveError(child.line, child.type);
 	}
 	return (conf);
+}
+
+/**
+ * @brief Parse and apply an `error_pages` block.
+ *
+ * @throws DuplicateError when multiple error_pages blocks are defined.
+ * @throws MissingArgumentError or TooManyArgumentsError on arity issues.
+ */
+void	ConfigInterpreter::_parseErrorPages(ServerConfig &conf, const Block &block, bool &seen_error_pages_block)
+{
+	if (seen_error_pages_block)
+		throw DuplicateError(block.line, "error_pages");
+	seen_error_pages_block = true;
+	for (size_t j = 0; j < block.directives.size(); ++j)
+	{
+		if (block.directives[j].args.empty())
+			throw MissingArgumentError(block.directives[j].line, "error_pages");
+		if (block.directives[j].args.size() > 1)
+			throw TooManyArgumentsError(block.directives[j].line, "error_pages");
+		_parseErrorPage(conf, block.directives[j]);
+	}
 }
 
 /**
@@ -252,11 +255,7 @@ void	ConfigInterpreter::_parseListen(ServerConfig &conf, const Directive &d)
  */
 void	ConfigInterpreter::_parseErrorPage(ServerConfig &conf, const Directive &d)
 {
-	if (d.args.size() < 2)
-		throw MissingArgumentError(d.line, d.name);
-	if (d.args.size() >  2)
-		throw TooManyArgumentsError(d.line, d.name);
-	const std::string	&code_str = d.args[0];
+	const std::string	&code_str = d.name;
 	char				*endptr = 0;
 	long				code_long = std::strtol(code_str.c_str(), &endptr, 10);
 
@@ -267,7 +266,7 @@ void	ConfigInterpreter::_parseErrorPage(ServerConfig &conf, const Directive &d)
 	HttpStatus	status = utils::strToHttpStatus(code_str);
 	if (status == HTTP_UNKNOWN_STATUS)
 		throw UnknownStatusCodeError(d.line, code_str);
-	const std::string	&path  =  d.args[1];
+	const std::string	&path  =  d.args[0];
 	int 				code = static_cast<int>(code_long);
 	if (conf.error_pages.find(code) != conf.error_pages.end())
 		throw DuplicateError(d.line, utils::toString(code));
