@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/11/25 00:13:48 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 03:48:44 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,10 +93,10 @@ bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &co
 {
 	std::string							raw_path_requested(requestTarget);
 	// TODO
-	std::map<std::string, Redirection>	redirs;
+	std::map<std::string, s_Redirection>	redirs;
 	
 	(void)config;
-	for (std::map<std::string, Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
+	for (std::map<std::string, s_Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
 	{
 		// TODO adapter avec location
 		// if ((raw_path_requested == it->first) || (raw_path_requested + config.default_page == it->first))

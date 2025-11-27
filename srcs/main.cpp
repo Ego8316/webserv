@@ -6,13 +6,14 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/26 16:51:20 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 04:19:44 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 #include "WebServ.hpp"
 #include "ConfigLexer.hpp"
+#include "ConfigInterpreter.hpp"
 #include "debug.hpp"
 
 int g_shutdown = 0;
@@ -184,8 +185,11 @@ int	main(int argc, char *argv[])
 		std::cout << "-----\n" << input << "\n-----" << std::endl;
 		std::cout << tokens << std::endl;
 		ConfigParser			parser(tokens);
-		std::vector<ASTBlock>	servers = parser.parse();
-		printAST(servers);
+		std::vector<Block>	servers = parser.parse();
+		ConfigInterpreter		interpreter(servers);
+		printBlocks(servers);
+		std::vector<ServerConfig>  configs = interpreter.interpret();
+		std::cout << configs[0] << std::endl;
 	}
 	catch (const std::exception &e)
 	{

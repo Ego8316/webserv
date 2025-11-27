@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:22 by ego               #+#    #+#             */
-/*   Updated: 2025/11/26 16:14:05 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 02:38:54 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,20 @@
 #include "utils.hpp"
 #include "ConfigLexer.hpp"
 
-struct	ASTDirective
+struct	Directive
 {
 	std::string					name;
 	std::vector<std::string>	args;
 	int							line;
 };
 
-struct	ASTBlock
+struct	Block
 {
-	std::string					type;
-	std::string					path;
-	std::vector<ASTDirective>	directives;
-	std::vector<ASTBlock>		children;
-	int							line;
+	std::string				type;
+	std::string				path;
+	std::vector<Directive>	directives;
+	std::vector<Block>		children;
+	int						line;
 };
 
 class	ConfigParser
@@ -37,7 +37,7 @@ class	ConfigParser
 	public:
 		ConfigParser(const std::vector<Token> &tokens);
 
-		std::vector<ASTBlock>	parse();
+		std::vector<Block>	parse();
 
 	private:
 		const std::vector<Token>	&_tokens;
@@ -47,8 +47,8 @@ class	ConfigParser
 		const Token		&_eat();
 		bool			_eof() const;
 		void			_expect(TokenType type, const std::string &msg);
-		ASTBlock		_parseServerBlock();
-		ASTBlock		_parseLocationBlock();
-		ASTDirective	_parseDirective();
+		Block		_parseServerBlock();
+		Block		_parseLocationBlock();
+		Directive	_parseDirective();
 };
 

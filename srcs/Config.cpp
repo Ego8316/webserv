@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:34:44 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/24 23:46:11 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 03:48:44 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,7 +316,7 @@ void	Config::_parseLocationRedirs(Location &loc, std::istringstream &conf_stream
 		if (equal != "=" && equal != ":")
 			throw Error("Expected `=' or `:' in redirection line");
 
-		Redirection	r;
+		s_Redirection	r;
 		r.dest = dest;
 		// TODO meilleur check de la validite de l'error code?
 		r.error_code = (300 <= code && code <= 308) ? static_cast<HttpStatus>(code) : HTTP_REDIRECT;
@@ -637,7 +637,7 @@ namespace
 			if (loc.accepted_methods & (1 << i))
 				printField(os, "   " + utils::methodToStr(static_cast<Method>(1 << i)), "");
 		printField(os, "Redirections:", "");
-		for (std::map<std::string, Redirection>::const_iterator it = loc.redirs.begin(); it != loc.redirs.end(); ++it)
+		for (std::map<std::string, s_Redirection>::const_iterator it = loc.redirs.begin(); it != loc.redirs.end(); ++it)
 			printField(os, it->first.c_str(), (it->second.dest + " (" + utils::toString(it->second.error_code) + ")").c_str());
 	}
 }

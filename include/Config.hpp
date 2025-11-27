@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:36:39 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/24 23:40:35 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 03:48:44 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class	Config
 			std::string							default_page;
 			Method								accepted_methods;
 			bool								autoindex;
-			std::map<std::string, Redirection>	redirs;
+			std::map<std::string, s_Redirection>	redirs;
 			bool								has_default_page;
 			bool								has_methods;
 			bool								has_autoindex;
@@ -49,28 +49,28 @@ class	Config
 
 		bool										isAcceptedMethod(Method method, const Location &loc) const;
 
-		static int							line_number;
-		std::string							server_name;
-		unsigned int						ip;
-		int									port_number;
-		int									domain;
-		int									type;
-		int									protocol;
-		size_t								max_header_size;
-		size_t								max_body_size;
-		int									client_limit;
-		long								processing_time_limit;
-		long								max_request_time;
-		int									incoming_queue_backlog;
-		size_t								buffer_size;
-		int									cookie_sessions_max;
-		int									cookie_life_time;
-		std::string							server_home;
-		std::map<std::string, Location>		locations;
-		std::string							default_page;
-		bool								default_autoindex;
-		Method								default_accepted_methods;
-		std::map<int, std::string>			default_error_pages;
+		static int							line_number;				// Removed
+		std::string							server_name;				// Unchanged
+		unsigned int						ip;							// Changed to listen_host
+		int									port_number;				// Changed to listen_port
+		int									domain;						// If only IPv4, switch to hard-coded default
+		int									type;						// Changed to hard-coded default
+		int									protocol;					// Changed to hard-coded default
+		size_t								max_header_size;			// Hard-coded default?
+		size_t								max_body_size;				// Changed to client_max_body_size
+		int									client_limit;				// Hard-coded default?
+		long								processing_time_limit;		// Hard-coded default?
+		long								max_request_time;			// Hard-coded default?
+		int									incoming_queue_backlog;		// Hard-coded default?
+		size_t								buffer_size;				// Changed to client_header_buffer_size  and client_body_buffer_size
+		int									cookie_sessions_max;		// Removed
+		int									cookie_life_time;			// Removed
+		std::string							server_home;				// Changed to root
+		std::map<std::string, Location>		locations;					// Unchanged
+		std::string							default_page;				// Changed to index
+		bool								default_autoindex;			// Changed to autoindex
+		Method								default_accepted_methods;	// Changed to methods
+		std::map<int, std::string>			default_error_pages;		// Changed to error_pages
 
 	private:
 		Config(const Config &other);

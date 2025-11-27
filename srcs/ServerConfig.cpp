@@ -1,0 +1,150 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ServerConfig.cpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/27 01:36:17 by ego               #+#    #+#             */
+/*   Updated: 2025/11/27 04:26:15 by ego              ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "ServerConfig.hpp"
+
+ServerConfig::ServerConfig()
+	:	listen_host("0.0.0.0"),
+		listen_port(80),
+		root(""),
+		index("index.html"),
+		autoindex(false),
+		max_clients(1000),
+		client_max_body_size(1 << 20),
+		client_header_timeout(10),
+		client_body_timeout(60),
+		send_timeout(60),
+		client_header_buffer_size(1024),
+		client_body_buffer_size(8 * 1024)
+{
+	return ;	
+}
+
+static void	printBorderTop(std::ostream &os, const std::string &title)
+{
+	os << BORDER_COLOR << TOP_LEFT << title;
+	for (size_t i = 0; i < WIDTH - title.size(); ++i) { os << HORIZONTAL; }
+	os << TOP_RIGHT << RESET << "\n";
+}
+
+static void	printBorderBottom(std::ostream &os)
+{
+	os << BORDER_COLOR << BOTTOM_LEFT;
+	for (size_t i = 0; i < WIDTH; ++i) { os << HORIZONTAL; }
+	os << BOTTOM_RIGHT << RESET << "\n";
+}
+
+static void	printSection(std::ostream &os, const std::string &title, const std::string &subtitle)
+{
+	os << BORDER_COLOR << VERTICAL << RESET << " ";
+	os << SECTION_COLOR << title << RESET;
+	for (size_t i = 0; i <= WIDTH / 2 - (int)title.size(); ++i) { os << " "; }
+	if (subtitle.size() < WIDTH / 2 - 3)
+	{
+		os << SECTION_SUB_COLOR << subtitle << RESET;
+		for (size_t i = 0; i < WIDTH / 2 - 2 - subtitle.size(); ++i) { os << " "; }
+	}
+	else
+		for (size_t i = 0; i < WIDTH / 2 - 2; ++i) { os << " "; }
+	os << BORDER_COLOR << VERTICAL << RESET << "\n";
+}
+
+static void	printField(std::ostream &os, const std::string &name, const std::string &value)
+{
+	os << BORDER_COLOR << VERTICAL << RESET << "   ";
+	if (name.length() < WIDTH / 2)
+	{
+		os << FIELD_NAME_COLOR << name << RESET;
+		for (size_t i = 0; i < WIDTH / 2 - name.length(); ++i) { os << " "; }
+	}
+	else
+		for (size_t i = 0; i < WIDTH / 2; ++i) { os << " "; }
+
+	if (value.length() < WIDTH / 2 - 3)
+	{
+		os << FIELD_VALUE_COLOR << value << RESET;
+		for (size_t i = 0; i < WIDTH / 2 - 3 - value.length(); ++i) { os << " "; }
+	}
+	else
+		for (size_t i = 0; i < WIDTH / 2 - 3; ++i) { os << " "; }
+	os << BORDER_COLOR << VERTICAL << RESET << "\n";
+}
+
+static void	printServerSettings(std::ostream &os, const ServerConfig &cfg)
+{
+	printSection(os, "Server Settings", "");
+	printField(os, "Server name:", cfg.server_name);
+	printField(os, "Listen host:", cfg.listen_host);
+	printField(os, "Listen port:", utils::toString(cfg.listen_port));
+	printField(os, "Root:", cfg.root);
+	printField(os, "Index:", cfg.index);
+	printField(os, "Autoindex:", cfg.autoindex ? "ON" : "OFF");
+	printField(os, "Max body size:", utils::toString(cfg.client_max_body_size));
+}
+
+static void	printTimeouts(std::ostream &os, const ServerConfig &cfg)
+{
+	printSection(os, "Timeouts", "");
+	printField(os, "Header timeout:", utils::toString(cfg.client_header_timeout) + "s");
+	printField(os, "Body timeout:", utils::toString(cfg.client_body_timeout) + "s");
+	printField(os, "Send timeout:", utils::toString(cfg.send_timeout) + "s");
+}
+
+static void	printBuffers(std::ostream &os, const ServerConfig &cfg)
+{
+	printSection(os, "Buffers", "");
+	printField(os, "Header buffer:", utils::toString(cfg.client_header_buffer_size));
+	printField(os, "Body buffer:", utils::toString(cfg.client_body_buffer_size));
+}
+
+static void	printErrorPages(std::ostream &os, const ServerConfig &cfg)
+{
+	printSection(os, "Error pages", "");
+	for (std::map<int, std::string>::const_iterator it = cfg.error_pages.begin();
+			it != cfg.error_pages.end(); ++it)
+		printField(os, utils::toString(it->first), it->second);
+}
+
+static void	printLocation(std::ostream &os, const Location &loc)
+{
+	printSection(os, "Location", loc.path);
+	printField(os, "Root:", loc.root);
+	printField(os, "Index:", loc.index);
+	printField(os, "Autoindex:", loc.autoindex ? "ON" : "OFF");
+	std::string	mlist;
+	if (loc.methods & GET)    mlist += "GET ";
+	if (loc.methods & POST)   mlist += "POST ";
+	if (loc.methods & DELETE) mlist += "DELETE ";
+	printField(os, "Methods:", mlist);
+	if (!loc.upload_path.empty())
+		printField(os, "Upload store:", loc.upload_path);
+	if (!loc.cgi_pass.empty())
+		printField(os, "CGI pass:", loc.cgi_pass);
+	if (loc.has_redirect)
+		printField(os, "Redirect:",
+					utils::toString(loc.redirect.code) + " -> " + loc.redirect.url);
+}
+
+std::ostream &operator<<(std::ostream &os, const ServerConfig &cfg)
+{
+	printBorderTop(os, "SERVER CONFIG");
+
+	printServerSettings(os, cfg);
+	printTimeouts(os, cfg);
+	printBuffers(os, cfg);
+	printErrorPages(os, cfg);
+	for (std::map<std::string, Location>::const_iterator it = cfg.locations.begin();
+	     it != cfg.locations.end(); ++it)
+		printLocation(os, it->second);
+	printBorderBottom(os);
+	return os;
+}

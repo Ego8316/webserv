@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:42 by ego               #+#    #+#             */
-/*   Updated: 2025/11/26 17:18:02 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 03:17:24 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,11 @@ ConfigParser::ConfigParser(const std::vector<Token> &tokens)
  * Expects only `server { ... }` blocks at the root. Throws if any other token
  * appears at top level. Stops on TOKEN_EOF.
  *
- * @return Vector of parsed ASTBlock objects representing each server block.
+ * @return Vector of parsed Block objects representing each server block.
  */
-std::vector<ASTBlock>	ConfigParser::parse()
+std::vector<Block>	ConfigParser::parse()
 {
-	std::vector<ASTBlock>	servers;
+	std::vector<Block>	servers;
 
 	while (!_eof())
 	{
@@ -106,17 +106,17 @@ void	ConfigParser::_expect(TokenType type, const std::string &expected)
 }
 
 /**
- * @brief Parse a `server { ... }` block into an ASTBlock.
+ * @brief Parse a `server { ... }` block into an Block.
  *
  * Handles nested `location` blocks and plain directives.
  * 
  * @throws std::runtime_error On unexpected tokens or malformed structure.
  *
- * @return ASTBlock representing this server block.
+ * @return Block representing this server block.
  */
-ASTBlock	ConfigParser::_parseServerBlock()
+Block	ConfigParser::_parseServerBlock()
 {
-	ASTBlock	block;
+	Block	block;
 
 	block.type = "server";
 	block.path = "";
@@ -146,11 +146,11 @@ ASTBlock	ConfigParser::_parseServerBlock()
  *  
  * @throws std::runtime_error On unexpected tokens or malformed structure.
  * 
- * @return ASTBlock representing the location block.
+ * @return Block representing the location block.
  */
-ASTBlock	ConfigParser::_parseLocationBlock()
+Block	ConfigParser::_parseLocationBlock()
 {
-	ASTBlock	block;
+	Block	block;
 
 	block.type = "location";
 	block.line = _peek().line;
@@ -182,11 +182,11 @@ ASTBlock	ConfigParser::_parseLocationBlock()
  *
  * @throws std::runtime_error On newline inside the directive or missing ';'.
  *
- * @return ASTDirective containing the directive name and its arguments.
+ * @return Directive containing the directive name and its arguments.
  */
-ASTDirective	ConfigParser::_parseDirective()
+Directive	ConfigParser::_parseDirective()
 {
-	ASTDirective	directive;
+	Directive	directive;
 
 	directive.name = _peek().value;
 	directive.line = _peek().line;
@@ -197,9 +197,8 @@ ASTDirective	ConfigParser::_parseDirective()
 		_eat();
 	}
 	if (_peek().line != directive.line)
-		throw std::runtime_error("Unexpected newline in directive '"
-			+ directive.name + "' starting at line "
-			+ utils::toString(directive.line));
+		throw std::runtime_error("Unexpected token at line "
+			+ utils::toString(directive.line) + ": expected ';'");
 	_expect(TOKEN_SEMICOLON, ";");
 	return (directive);
 }

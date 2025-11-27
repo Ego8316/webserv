@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/29 17:07:53 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 04:23:02 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,14 @@
 
 #define NULL_CHUNK "0\r\n\r\n"
 
+// Configuration printing helpers
+#define WIDTH				70UL
+#define BORDER_COLOR		BOLD_PURPLE
+#define SECTION_COLOR		BOLD_RED
+#define SECTION_SUB_COLOR	BLUE
+#define FIELD_NAME_COLOR	BOLD
+#define	FIELD_VALUE_COLOR	RESET
+
 enum	Method
 {
 	UNKNOWN	= 0,
@@ -200,7 +208,7 @@ typedef struct s_Redirection
 {
 	std::string		dest;
 	HttpStatus		error_code;
-}	Redirection;
+}	s_Redirection;
 
 inline Method			operator|(Method a, Method b) { return static_cast<Method>(static_cast<int>(a) | static_cast<int>(b)); }
 inline Method&			operator|=(Method& a, Method b) { a = a | b; return a; }

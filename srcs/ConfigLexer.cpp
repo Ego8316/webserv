@@ -6,16 +6,16 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:35 by ego               #+#    #+#             */
-/*   Updated: 2025/11/26 13:55:34 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/26 20:05:53 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigLexer.hpp"
 
 /**
- * @brief Parametric constructor.
+ * @brief Construct a lexer bound to the given configuration text.
  * 
- * @param input The whole configuration file as a string.
+ * @param input Complete configuration file content.
  */
 ConfigLexer::ConfigLexer(const std::string &input)
 	:	_input(input),
@@ -26,9 +26,9 @@ ConfigLexer::ConfigLexer(const std::string &input)
 }
 
 /**
- * @brief Goes through the input and tokenizes it.
+ * @brief Convert the raw configuration text into a sequence of tokens.
  * 
- * @return The configuration file as a token vector.
+ * @return Vector containing the full token stream.
  */
 std::vector<Token>	ConfigLexer::tokenize()
 {
@@ -45,9 +45,9 @@ std::vector<Token>	ConfigLexer::tokenize()
 }
 
 /**
- * @brief Tells whether end of file has been reached yet.
+ * @brief Checks wheter the end of input has been reached.
  * 
- * @return true if end of file hass been reached, false otherwise.
+ * @return true if the cursor has passed the final character, false otherwise.
  */
 bool	ConfigLexer::_eof() const
 {
@@ -55,10 +55,9 @@ bool	ConfigLexer::_eof() const
 }
 
 /**
- * @brief Gets the next current character without updating position nor
- * line number.
+ * @brief Peek at the current character without consuming it.
  * 
- * @return The current character.
+ * @return The current character, or '\0' on EOF.
  */
 char	ConfigLexer::_peek() const
 {
@@ -66,9 +65,9 @@ char	ConfigLexer::_peek() const
 }
 
 /**
- * @brief Gets the next character. Updates position and line number.
+ * @brief Consume and return the current character.
  * 
- * @return The next character.
+ * @return The consumed character, or '\0' on EOF.
  */
 char	ConfigLexer::_get()
 {
@@ -79,8 +78,7 @@ char	ConfigLexer::_get()
 }
 
 /**
- * @brief Skips whitespace characters and comments starting by `#` until a
- * token is reached.
+ * @brief Skips over whitespaces and '#' comments until a real token begins.
  */
 void	ConfigLexer::_skipJunk()
 {
@@ -99,13 +97,13 @@ void	ConfigLexer::_skipJunk()
 }
 
 /**
- * @brief Builds a new token with the parameters given.
+ * @brief Creates a token of the given type, value and line number.
  * 
  * @param type Token type.
- * @param value Token value.
- * @param line Token line number.
+ * @param value Raw token text.
+ * @param line Line on which the token was read.
  * 
- * @return The freshly born token.
+ * @return The newly constructed token.
  */
 Token	ConfigLexer::_newToken(TokenType type, const std::string &value, int line) const
 {
@@ -118,10 +116,11 @@ Token	ConfigLexer::_newToken(TokenType type, const std::string &value, int line)
 }
 
 /**
- * @brief Reads input until end of current word is reached and builds a token
- * out of it.
+ * @brief Read a continuouss word token.
  * 
- * @return The tokenized word.
+ * A word stops when encountering whitespace, '{', '}', ';' or '#'.
+ * 
+ * @return The token representing the extracted word.
  */
 Token	ConfigLexer::_readWord()
 {
@@ -139,9 +138,11 @@ Token	ConfigLexer::_readWord()
 }
 
 /**
- * @brief Gets the next token in file by first skipping junk.
+ * @brief Extract the next token from input.
  * 
- * @return The next token in file.
+ * Skips leading junk, then returns braces, semicolons, or a word token.
+ * 
+ * @return The next token in the stream.
  */
 Token	ConfigLexer::_getNextToken()
 {

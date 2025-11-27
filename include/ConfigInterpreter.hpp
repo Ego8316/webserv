@@ -6,8 +6,34 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:06 by ego               #+#    #+#             */
-/*   Updated: 2025/11/25 21:09:13 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 03:40:15 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+
+#include "ConfigParser.hpp"
+#include "ServerConfig.hpp"
+
+class	ConfigInterpreter
+{
+	public:
+		ConfigInterpreter(const std::vector<Block> &blocks);
+
+		std::vector<ServerConfig>	interpret();
+	private:
+		const std::vector<Block>	&_blocks;
+
+		ServerConfig	_parseServer(const Block &block);
+		Location		_parseLocation(const Block &block, const ServerConfig &server_defaults);
+	
+		void			_applyServerDirective(ServerConfig  &conf,  const Directive &d);
+		void			_applyLocationDirective(Location &loc, const Directive &d);
+
+		void			_parseListen(ServerConfig &conf, const Directive &d);
+		void			_parseErrorPage(ServerConfig &conf, const Directive  &d);
+		void			_parseMethod(Location &loc, const Directive &d);
+		void			_parseReturn(Location &loc,  const Directive &d);
+
+		size_t			_parseSizeWithSuffix(const std::string &s) const;
+};

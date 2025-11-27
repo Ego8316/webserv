@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 14:08:49 by ego               #+#    #+#             */
-/*   Updated: 2025/11/26 17:04:53 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 02:39:54 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ static void	printIndent(int depth)
 	return ;
 }
 
-static void	printDirective(const ASTDirective &d, int depth)
+static void	printDirective(const Directive &d, int depth)
 {
 	printIndent(depth);
 	std::cout << "directive " << d.name << ":";
@@ -58,7 +58,7 @@ static void	printDirective(const ASTDirective &d, int depth)
 	return ;
 }
 
-static void	printBlock(const ASTBlock &b, int depth)
+static void	printBlock(const Block &b, int depth)
 {
 	printIndent(depth);
 	std::cout << b.type;
@@ -73,7 +73,7 @@ static void	printBlock(const ASTBlock &b, int depth)
 	std::cout << "end " << b.type << std::endl;
 }
 
-void	printAST(const std::vector<ASTBlock> &blocks)
+void	printBlocks(const std::vector<Block> &blocks)
 {
 	for (size_t i = 0; i < blocks.size(); ++i)
 	{
