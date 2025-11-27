@@ -13,7 +13,8 @@
 #include "ServerConfig.hpp"
 
 ServerConfig::ServerConfig()
-	:	listen_host("0.0.0.0"),
+	:	listen_host_string("0.0.0.0"),
+		listen_host(htonl(0x00000000)),
 		listen_port(80),
 		root(""),
 		index("index.html"),
@@ -83,7 +84,7 @@ static void	printServerSettings(std::ostream &os, const ServerConfig &cfg)
 {
 	printSection(os, "Server Settings", "");
 	printField(os, "Server name:", cfg.server_name);
-	printField(os, "Listen host:", cfg.listen_host);
+	printField(os, "Listen host:", cfg.listen_host_string);
 	printField(os, "Listen port:", utils::toString(cfg.listen_port));
 	printField(os, "Root:", cfg.root);
 	printField(os, "Index:", cfg.index);

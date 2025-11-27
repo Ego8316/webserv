@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:42 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 03:17:24 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 16:23:06 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ ConfigParser::ConfigParser(const std::vector<Token> &tokens)
  * Expects only `server { ... }` blocks at the root. Throws if any other token
  * appears at top level. Stops on TOKEN_EOF.
  *
+ * @throws UnexpectedTokenError when a root-level token is not a `server` block.
  * @return Vector of parsed Block objects representing each server block.
  */
 std::vector<Block>	ConfigParser::parse()
@@ -42,9 +43,7 @@ std::vector<Block>	ConfigParser::parse()
 		else if (token.type == TOKEN_EOF)
 			break ;
 		else
-			throw std::runtime_error("Unexpected token '" + token.value
-				+ "' at line " + utils::toString(token.line)
-				+ ": only 'server' blocks allowed at root");
+			throw UnexpectedTokenError(token.line, token.value, "server");
 	}
 	return (servers);
 }
@@ -62,15 +61,14 @@ const Token	&ConfigParser::_peek() const
 /**
  * @brief Consume and return the current token, advancing the cursor.
  *
- * @throws std::runtime_error If called at EOF.
+ * @throws UnexpectedTokenError when called at EOF.
  *
  * @return Reference to the consumed Token.
  */
 const Token	&ConfigParser::_eat()
 {
 	if (_eof())
-		throw std::runtime_error("Unexpected end of file at line "
-			+ _peek().line);
+		throw UnexpectedTokenError(_peek().line, "EOF", "more tokens");
 	return (_tokens[_pos++]);
 }
 
@@ -91,7 +89,7 @@ bool	ConfigParser::_eof() const
  *
  * Consumes the token if correct. Throws on mismatch.
  * 
- * @throws std::runtime_error If unexpected token.
+ * @throws UnexpectedTokenError when the current token does not match `type`.
  *
  * @param type Expected TokenType.
  * @param expected Description used in error messages.
@@ -99,8 +97,7 @@ bool	ConfigParser::_eof() const
 void	ConfigParser::_expect(TokenType type, const std::string &expected)
 {
 	if (_peek().type != type)
-		throw std::runtime_error("Unexpected token at line "
-			+ utils::toString(_peek().line) + ": expected '" + expected + "'");
+		throw UnexpectedTokenError(_peek().line, _peek().value, expected);
 	_eat();
 	return ;
 }
@@ -110,7 +107,7 @@ void	ConfigParser::_expect(TokenType type, const std::string &expected)
  *
  * Handles nested `location` blocks and plain directives.
  * 
- * @throws std::runtime_error On unexpected tokens or malformed structure.
+ * @throws UnexpectedTokenError on unexpected items inside the block.
  *
  * @return Block representing this server block.
  */
@@ -126,13 +123,44 @@ Block	ConfigParser::_parseServerBlock()
 	while (!_eof() && _peek().type != TOKEN_RBRACE)
 	{
 		const Token	&token = _peek();
-		if (token.type == TOKEN_WORD && token.value == "location")
+		if (token.type == TOKEN_WORD && token.value == "error_pages")
+			block.children.push_back(_parseErrorPagesBlock());
+		else if (token.type == TOKEN_WORD && token.value == "location")
 			block.children.push_back(_parseLocationBlock());
 		else if (token.type == TOKEN_WORD)
 			block.directives.push_back(_parseDirective());
 		else
-			throw std::runtime_error("Unexpected token inside server block on line "
-				+ utils::toString(token.line));
+			throw UnexpectedTokenError(token.line, token.value, "directive or 'location'");
+	}
+	_expect(TOKEN_RBRACE, "}");
+	return (block);
+}
+
+/**
+ * @brief Parse a `error_pages { ... }` block at server scope.
+ *
+ * Expected shape: `error_pages { 404 /foo; 500 /bar; }`
+ * Only server scope is allowed.
+ *
+ * @throws UnexpectedTokenError on malformed block contents.
+ */
+Block	ConfigParser::_parseErrorPagesBlock()
+{
+	Block		block;
+	const int	start_line = _peek().line;
+
+	block.type = "error_pages";
+	block.line = start_line;
+	block.path = "";
+	_expect(TOKEN_WORD, "error_pages");
+	_expect(TOKEN_LBRACE, "{");
+	while (!_eof() && _peek().type != TOKEN_RBRACE)
+	{
+		const Token	&token = _peek();
+		if (token.type == TOKEN_WORD)
+			block.directives.push_back(_parseDirective());
+		else
+			throw UnexpectedTokenError(token.line, token.value, "directive");
 	}
 	_expect(TOKEN_RBRACE, "}");
 	return (block);
@@ -144,7 +172,7 @@ Block	ConfigParser::_parseServerBlock()
  * Requires a path argument after 'location', then a `{`, followed by
  * directives until the matching `}`.
  *  
- * @throws std::runtime_error On unexpected tokens or malformed structure.
+ * @throws UnexpectedTokenError on missing path or bad contents.
  * 
  * @return Block representing the location block.
  */
@@ -156,8 +184,7 @@ Block	ConfigParser::_parseLocationBlock()
 	block.line = _peek().line;
 	_expect(TOKEN_WORD, "location");
 	if (_peek().type != TOKEN_WORD)
-		throw std::runtime_error("Expected path after 'location' at line "
-			+ utils::toString(_peek().line));
+		throw UnexpectedTokenError(_peek().line, _peek().value, "path");
 	block.path = _peek().value;
 	_eat();
 	_expect(TOKEN_LBRACE, "{");
@@ -167,8 +194,7 @@ Block	ConfigParser::_parseLocationBlock()
 		if (token.type == TOKEN_WORD)
 			block.directives.push_back(_parseDirective());
 		else
-			throw std::runtime_error("Unexpected token inside location block on line "
-				+ utils::toString(token.line));
+			throw UnexpectedTokenError(token.line, token.value, "directive");
 	}
 	_expect(TOKEN_RBRACE, "}");
 	return (block);
@@ -180,7 +206,7 @@ Block	ConfigParser::_parseLocationBlock()
  *
  * All arguments and the terminating semicolon must appear on the same line.
  *
- * @throws std::runtime_error On newline inside the directive or missing ';'.
+ * @throws UnexpectedTokenError on bad token sequence or missing ';'.
  *
  * @return Directive containing the directive name and its arguments.
  */
@@ -197,8 +223,7 @@ Directive	ConfigParser::_parseDirective()
 		_eat();
 	}
 	if (_peek().line != directive.line)
-		throw std::runtime_error("Unexpected token at line "
-			+ utils::toString(directive.line) + ": expected ';'");
+		throw UnexpectedTokenError(directive.line, _peek().value, ";");
 	_expect(TOKEN_SEMICOLON, ";");
 	return (directive);
 }

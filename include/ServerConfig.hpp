@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:15:57 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 04:19:02 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 16:26:26 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,9 @@ struct	Location
 	bool								has_redirect;
 };
 
+/**
+ * @brief Runtime representation of a single server block.
+ */
 class	ServerConfig
 {
 	public:
@@ -42,7 +45,8 @@ class	ServerConfig
 		const Location	*matchLocation(const std::string &path) const;
 
 		std::string						server_name;
-		std::string						listen_host;
+		std::string						listen_host_string;
+		uint32_t						listen_host;
 		int								listen_port;
 		std::string						root;
 		std::string						index;

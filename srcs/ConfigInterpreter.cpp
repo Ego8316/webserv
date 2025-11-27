@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:28 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 04:43:40 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 16:22:53 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ ConfigInterpreter::ConfigInterpreter(const std::vector<Block> &blocks)
 /**
  * @brief Convert parsed blocks into runtime ServerConfig objects.
  *
+ * @throws ConfigError derivatives when any server block is invalid.
+ * 
  * @return Vector of fully interpreted server configurations.
  */
 std::vector<ServerConfig>	ConfigInterpreter::interpret()
@@ -42,24 +44,53 @@ std::vector<ServerConfig>	ConfigInterpreter::interpret()
  *
  * Applies server-level directives and then parses nested location blocks.
  *
+ * @throws ConfigError derivatives when server contents are invalid.
+ *
  * @param block Parsed server block.
  *
  * @return Filled ServerConfig object.
  */
 ServerConfig	ConfigInterpreter::_parseServer(const Block &block)
 {
-	ServerConfig	conf;
+	ServerConfig			conf;
+	std::set<std::string>	already_applied;
+	bool					seen_error_pages_block = false;
 
 	for (size_t i = 0; i < block.directives.size(); ++i)
-		_applyServerDirective(conf, block.directives[i]);
+		_applyServerDirective(conf, block.directives[i], already_applied);
 	for (size_t i = 0;  i < block.children.size(); ++i)
 	{
-		const Block	&location_block  = block.children[i];
-		Location	loc = _parseLocation(location_block, conf);
-		if (utils::mapHasEntry(conf.locations, loc.path))
-			throw std::runtime_error("Redefinition of location '"
-				+ loc.path + "' at line " + utils::toString(block.line));
-		conf.locations[loc.path] = loc;
+		const Block	&child  = block.children[i];
+
+		if (child.type == "error_pages")
+		{
+			if (seen_error_pages_block)
+				throw DuplicateError(child.line, "error_pages");
+			seen_error_pages_block = true;
+			for (size_t j = 0; j < child.directives.size(); ++j)
+			{
+				Directive tmp;
+
+				if (child.directives[j].args.empty())
+					throw MissingArgumentError(child.directives[j].line, "error_pages");
+				if (child.directives[j].args.size() > 1)
+					throw TooManyArgumentsError(child.directives[j].line, "error_pages");
+				tmp.name = "error_page";
+				tmp.line = child.directives[j].line;
+				tmp.args.push_back(child.directives[j].name); // code
+				tmp.args.push_back(child.directives[j].args[0]); // path
+				_parseErrorPage(conf, tmp);
+			}
+		}
+		else if (child.type == "location")
+		{
+			Location	loc = _parseLocation(child, conf);
+			if (utils::mapHasEntry(conf.locations, loc.path))
+				throw DuplicateError(block.line, "location '" + loc.path + "'");
+			conf.locations[loc.path] = loc;
+		}
+		else
+			throw UnknownDirectiveError(child.line, child.type);
 	}
 	return (conf);
 }
@@ -69,6 +100,8 @@ ServerConfig	ConfigInterpreter::_parseServer(const Block &block)
  *
  * Starts from inherited defaults, then applies location-specific directives.
  *
+ * @throws ConfigError derivatives when location contents are invalid.
+ *
  * @param block Parsed location block.
  * @param server Server defaults to inherit from.
  *
@@ -76,7 +109,8 @@ ServerConfig	ConfigInterpreter::_parseServer(const Block &block)
  */
 Location	ConfigInterpreter::_parseLocation(const Block &block, const ServerConfig &server)
 {
-	Location	loc;
+	Location				loc;
+	std::set<std::string>	already_applied;
 
 	loc.path = block.path;
 	loc.root = server.root;
@@ -85,50 +119,45 @@ Location	ConfigInterpreter::_parseLocation(const Block &block, const ServerConfi
 	loc.methods = GET;
 	loc.has_redirect = false;
 	for (size_t i = 0;  i < block.directives.size(); ++i)
-		_applyLocationDirective(loc, block.directives[i]);
+		_applyLocationDirective(loc, block.directives[i], already_applied);
 	return (loc);
 }
 
 /**
  * @brief Apply one server-level directive to the given config.
  *
- * Validates arity, detects duplicates (except error_page), and dispatches to
- * directive-specific handlers.
+ * Validates arity, detects duplicates, and dispatches to directive-specific
+ * handlers. Server-level error pages are provided via the `error_pages` block.
+ *
+ * @throws ConfigError derivatives when the directive is malformed or duplicated.
  *
  * @param conf Server configuration being built.
  * @param d Directive to apply.
  */
-void	ConfigInterpreter::_applyServerDirective(ServerConfig &conf, const Directive &d)
+void	ConfigInterpreter::_applyServerDirective(ServerConfig &conf, const Directive &d,
+				std::set<std::string> &already_applied)
 {
-	static std::vector<std::string>	already_applied;
-
 	if (d.args.size() < 1)
-		throw std::runtime_error("Missing argument for directive '" + d.name
-			+ "' at line " + utils::toString(d.line));
+		throw MissingArgumentError(d.line, d.name);
 	std::string	name = utils::toLower(d.name);
 	if (name ==  "listen")							_parseListen(conf, d);
 	else if (name == "server_name")					conf.server_name = d.args[0];
 	else if (name == "root")						conf.root = d.args[0];
 	else if (name == "index")						conf.index = d.args[0];
 	else if (name == "autoindex")					conf.autoindex = (d.args[0] == "on");
-	else if (name == "client_max_body_size")		conf.client_max_body_size = _parseSizeWithSuffix(d.args[0]);
-	else if (name == "client_header_timeout")		conf.client_header_timeout = static_cast<long>(_parseSizeWithSuffix(d.args[0]));
-	else if (name == "client_body_timeout")			conf.client_body_timeout = static_cast<long>(_parseSizeWithSuffix(d.args[0]));
-	else if (name == "send_timeout")				conf.send_timeout = static_cast<long>(_parseSizeWithSuffix(d.args[0]));
-	else if (name == "client_header_buffer_size")	conf.client_header_buffer_size = _parseSizeWithSuffix(d.args[0]);
-	else if (name == "client_body_buffer_size")		conf.client_body_buffer_size = _parseSizeWithSuffix(d.args[0]);
-	else if (name == "error_page")					_parseErrorPage(conf, d);
+	else if (name == "client_max_body_size")		conf.client_max_body_size = _parseSizeWithSuffix(d.args[0], d.line);
+	else if (name == "client_header_timeout")		conf.client_header_timeout = static_cast<long>(_parseSizeWithSuffix(d.args[0], d.line));
+	else if (name == "client_body_timeout")			conf.client_body_timeout = static_cast<long>(_parseSizeWithSuffix(d.args[0], d.line));
+	else if (name == "send_timeout")				conf.send_timeout = static_cast<long>(_parseSizeWithSuffix(d.args[0], d.line));
+	else if (name == "client_header_buffer_size")	conf.client_header_buffer_size = _parseSizeWithSuffix(d.args[0], d.line);
+	else if (name == "client_body_buffer_size")		conf.client_body_buffer_size = _parseSizeWithSuffix(d.args[0], d.line);
 	else
-		throw std::runtime_error("Unknown directive '" + d.name
-			+ "' at line " + utils::toString(d.line));
-	if (std::find(already_applied.begin(), already_applied.end(), name) != already_applied.end()
-		&& name != "error_page")
-		throw std::runtime_error("Duplicate directive '" + name
-			+ "' at line " + utils::toString(d.line));
-	already_applied.push_back(name);
+		throw UnknownDirectiveError(d.line, d.name);
+	if (already_applied.count(name))
+		throw DuplicateError(d.line, name);
+	already_applied.insert(name);
 	if (d.args.size() > 1)
-		throw std::runtime_error("Too many arguments for directive '" + d.name
-			+ "' at line " + utils::toString(d.line));
+		throw TooManyArgumentsError(d.line, d.name);
 	return ;
 }
 
@@ -137,14 +166,16 @@ void	ConfigInterpreter::_applyServerDirective(ServerConfig &conf, const Directiv
  *
  * Validates arity and updates the provided Location accordingly.
  *
+ * @throws ConfigError derivatives when the directive is malformed or duplicated.
+ *
  * @param loc Location being configured.
  * @param d Directive to apply.
  */
-void	ConfigInterpreter::_applyLocationDirective(Location &loc, const Directive &d)
+void	ConfigInterpreter::_applyLocationDirective(Location &loc, const Directive &d,
+				std::set<std::string> &already_applied)
 {
 	if (d.args.size() < 1)
-		throw std::runtime_error("Missing argument for directive '" + d.name
-			+ "' at line " + utils::toString(d.line));
+		throw MissingArgumentError(d.line, d.name);
 	std::string	name = utils::toLower(d.name);
 	if (name == "root")					loc.root = d.args[0];
 	else if (name == "index")			loc.index  = d.args[0];
@@ -154,13 +185,19 @@ void	ConfigInterpreter::_applyLocationDirective(Location &loc, const Directive &
 	else if (name == "cgi_pass")		loc.cgi_pass = d.args[0];
 	else if (name == "return")			_parseReturn(loc, d);
 	else
-		throw std::runtime_error("Unknown directive '" + d.name
-			+ "' at line " + utils::toString(d.line));
+		throw UnknownDirectiveError(d.line, d.name);
+	if (already_applied.count(name))
+		throw DuplicateError(d.line, name);
+	already_applied.insert(name);
 	return ;
 }
 
 /**
  * @brief Parse a listen directive of the form `host:port`.
+ *
+ * @throws InvalidListenFormatError on missing colon or empty parts.
+ * @throws InvalidListenHostError on bad IPv4 address.
+ * @throws InvalidListenPortError on out-of-range or non-numeric port.
  *
  * @param conf Server configuration to update.
  * @param d Directive carrying the listen value.
@@ -171,14 +208,44 @@ void	ConfigInterpreter::_parseListen(ServerConfig &conf, const Directive &d)
 	size_t				pos = v.find(':');
 
 	if (pos == std::string::npos)
-		throw  std::runtime_error("NUL");
-	conf.listen_host = v.substr(0, pos);
-	conf.listen_port = std::atoi(v.substr(pos + 1).c_str());
+		throw InvalidListenFormatError(d.line, v);
+	std::string	host = v.substr(0, pos);
+	std::string	port_str = v.substr(pos + 1);
+
+	if (host.empty() || port_str.empty())
+		throw InvalidListenFormatError(d.line, v);
+	std::vector<std::string> parts = utils::stringSplit(host, ".");
+	if (parts.size() != 4)
+		throw InvalidListenHostError(d.line, host);
+	for (size_t i = 0; i < parts.size(); ++i)
+	{
+		char	*endptr = 0;
+		long	octet = std::strtol(parts[i].c_str(), &endptr, 10);
+
+		if (!endptr || *endptr != '\0' || octet < 0 || octet > 255 || parts[i].length() > 3)
+			throw InvalidListenHostError(d.line, host);
+	}
+	char	*endptr = 0;
+	long	port = std::strtol(port_str.c_str(), &endptr, 10);
+	if (!endptr || *endptr != '\0' || port < 1 || port > 65535)
+		throw InvalidListenPortError(d.line, port_str);
+	conf.listen_host_string = host;
+	conf.listen_host = static_cast<uint32_t>(htonl(
+		(static_cast<uint32_t>(std::atoi(parts[0].c_str())) << 24) |
+		(static_cast<uint32_t>(std::atoi(parts[1].c_str())) << 16) |
+		(static_cast<uint32_t>(std::atoi(parts[2].c_str())) << 8)  |
+		static_cast<uint32_t>(std::atoi(parts[3].c_str()))
+	));
+	conf.listen_port = static_cast<int>(port);
 	return ;
 }
 
 /**
  * @brief Parse `error_page` directive and register the mapping.
+ *
+ * @throws MissingArgumentError or TooManyArgumentsError on arity issues.
+ * @throws DuplicateError when the status code is redefined.
+ * @throws InvalidStatusCodeError or UnknownStatusCodeError when the code is invalid.
  *
  * @param conf Server configuration to update.
  * @param d Directive containing status code and path.
@@ -186,19 +253,32 @@ void	ConfigInterpreter::_parseListen(ServerConfig &conf, const Directive &d)
 void	ConfigInterpreter::_parseErrorPage(ServerConfig &conf, const Directive &d)
 {
 	if (d.args.size() < 2)
-		throw std::runtime_error("Missing argument for directive '" + d.name
-			+ "' at line " + utils::toString(d.line));
+		throw MissingArgumentError(d.line, d.name);
 	if (d.args.size() >  2)
-		throw std::runtime_error("Too many arguments for directive '" + d.name
-			+ "' at line " + utils::toString(d.line));
-	int 				code = std::atoi(d.args[0].c_str());
+		throw TooManyArgumentsError(d.line, d.name);
+	const std::string	&code_str = d.args[0];
+	char				*endptr = 0;
+	long				code_long = std::strtol(code_str.c_str(), &endptr, 10);
+
+	if (!endptr || *endptr != '\0')
+		throw InvalidStatusCodeError(d.line, code_str);
+	if (code_long < 100 || code_long > 999)
+		throw InvalidStatusCodeError(d.line, code_str);
+	HttpStatus	status = utils::strToHttpStatus(code_str);
+	if (status == HTTP_UNKNOWN_STATUS)
+		throw UnknownStatusCodeError(d.line, code_str);
 	const std::string	&path  =  d.args[1];
+	int 				code = static_cast<int>(code_long);
+	if (conf.error_pages.find(code) != conf.error_pages.end())
+		throw DuplicateError(d.line, utils::toString(code));
 	conf.error_pages[code] = path;
 	return ;
 }
 
 /**
  * @brief Parse `limit_except` directive and build a method mask.
+ *
+ * @throws UnknownMethodError on unsupported methods.
  *
  * @param loc Location to update.
  * @param d Directive holding the allowed methods.
@@ -211,9 +291,7 @@ void	ConfigInterpreter::_parseMethod(Location &loc, const Directive &d)
 		if (d.args[i] == "GET")			mask |= GET;
 		else if (d.args[i] == "POST")	mask |= POST;
 		else if (d.args[i] == "DELETE")	mask |= DELETE;
-		else
-			throw std::runtime_error("Unknown method '" + d.args[i]
-				+ "' at line " + utils::toString(d.line));
+		else							throw UnknownMethodError(d.line, d.args[i]);
 	}
 	loc.methods = mask;
 }
@@ -221,17 +299,17 @@ void	ConfigInterpreter::_parseMethod(Location &loc, const Directive &d)
 /**
  * @brief Parse `return` directive and store redirect info.
  *
+ * @throws MissingArgumentError or TooManyArgumentsError on arity issues.
+ *
  * @param loc Location to update.
  * @param d Directive containing status code and URL.
  */
 void	ConfigInterpreter::_parseReturn(Location &loc, const Directive &d)
 {
 	if (d.args.size() < 2)
-		throw std::runtime_error("Missing argument for directive '" + d.name
-			+ "' at line " + utils::toString(d.line));
+		throw MissingArgumentError(d.line, d.name);
 	if (d.args.size() >  2)
-		throw std::runtime_error("Too many arguments for directive '" + d.name
-			+ "' at line " + utils::toString(d.line));
+		throw TooManyArgumentsError(d.line, d.name);
 	loc.redirect.code = std::atoi(d.args[0].c_str());
 	loc.redirect.url = d.args[1];
 	loc.has_redirect = true;
@@ -244,22 +322,24 @@ void	ConfigInterpreter::_parseReturn(Location &loc, const Directive &d)
  * Suffix `s` is treated as seconds and returns the numeric value in
  * milliseconds (x1000), suitable for timeout fields.
  *
- * @param s String to parse (e.g., "1024", "8K", "1M", "30s").
+ * @throws InvalidSizeError or InvalidSizeSuffixError on malformed size.
+ * @throws UnknownSizeError on unsupported suffix.
  *
+ * @param s String to parse (e.g., "1024", "8K", "1M", "30s").
  * @return Size in bytes.
  */
-size_t	ConfigInterpreter::_parseSizeWithSuffix(const std::string &s)  const
+size_t	ConfigInterpreter::_parseSizeWithSuffix(const std::string &s, int line)  const
 {
 	char	*endptr;
 	size_t	multiplier;
 	size_t	base = std::strtoul(s.c_str(), &endptr, 10);
 
 	if (base == 0)
-		throw std::runtime_error("Invalid size at line ...");
+		throw InvalidSizeError(line, s);
 	if (!*endptr)
 		return (base);
 	if (*(endptr + 1))
-		throw std::runtime_error("Invalid size suffix at line ...");
+		throw InvalidSizeSuffixError(line, s);
 	if (tolower(*endptr) == 'k')
 		multiplier = 1024;
 	else if (tolower(*endptr) == 'm')
@@ -267,6 +347,6 @@ size_t	ConfigInterpreter::_parseSizeWithSuffix(const std::string &s)  const
 	else if (tolower(*endptr) == 's')
 		multiplier = 1000;
 	else
-		throw std::runtime_error("Unknown size suffix at line ...");
+		throw UnknownSizeError(line, s);
 	return (base * multiplier);
 }

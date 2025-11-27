@@ -30,6 +30,9 @@ struct	Token
 	int			line;
 };
 
+/**
+ * @brief Lexes raw config text into a token stream.
+ */
 class	ConfigLexer
 {
 	public:

@@ -12,9 +12,14 @@
 
 #pragma once
 
+#include <set>
 #include "ConfigParser.hpp"
 #include "ServerConfig.hpp"
+#include "ConfigError.hpp"
 
+/**
+ * @brief Interprets parsed blocks into runnable server configurations.
+ */
 class	ConfigInterpreter
 {
 	public:
@@ -27,13 +32,15 @@ class	ConfigInterpreter
 		ServerConfig	_parseServer(const Block &block);
 		Location		_parseLocation(const Block &block, const ServerConfig &server_defaults);
 	
-		void			_applyServerDirective(ServerConfig  &conf,  const Directive &d);
-		void			_applyLocationDirective(Location &loc, const Directive &d);
+		void			_applyServerDirective(ServerConfig  &conf,  const Directive &d,
+						std::set<std::string> &already_applied);
+		void			_applyLocationDirective(Location &loc, const Directive &d,
+						std::set<std::string> &already_applied);
 
 		void			_parseListen(ServerConfig &conf, const Directive &d);
 		void			_parseErrorPage(ServerConfig &conf, const Directive  &d);
 		void			_parseMethod(Location &loc, const Directive &d);
 		void			_parseReturn(Location &loc,  const Directive &d);
 
-		size_t			_parseSizeWithSuffix(const std::string &s) const;
+		size_t			_parseSizeWithSuffix(const std::string &s, int line) const;
 };

@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:22 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 02:38:54 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 15:55:40 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "headers.hpp"
 #include "utils.hpp"
 #include "ConfigLexer.hpp"
+#include "ConfigError.hpp"
 
 struct	Directive
 {
@@ -32,6 +33,9 @@ struct	Block
 	int						line;
 };
 
+/**
+ * @brief Parses token streams into structured configuration blocks.
+ */
 class	ConfigParser
 {
 	public:
@@ -48,7 +52,7 @@ class	ConfigParser
 		bool			_eof() const;
 		void			_expect(TokenType type, const std::string &msg);
 		Block		_parseServerBlock();
+		Block		_parseErrorPagesBlock();
 		Block		_parseLocationBlock();
 		Directive	_parseDirective();
 };
-
