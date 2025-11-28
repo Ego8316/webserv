@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/11/25 00:32:46 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/28 13:13:27 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,12 @@
  *
  * @param config Configuration to use.
  */
-ServerCore::ServerCore(const Config *config)
+ServerCore::ServerCore(const ServerConfig *config)
 {
 	_config = config;
 	_server_fd = SERV_ERROR;
 	std::memset(&_server_addr, 0, sizeof(_server_addr));
-	_poll_fds.resize(_config->client_limit + 1);
+	_poll_fds.resize(_config->max_clients + 1);
 	return ;
 }
 
@@ -160,7 +160,7 @@ int	ServerCore::socketRead(char *buffer, int bytes_read, Client *client)
 		return (WBLOCK);
 	int	bytes_received = recv(client->getFd(), buffer, bytes_read, MSG_DONTWAIT);
 	if (bytes_received >= 0)
-		std::memset(buffer + bytes_received, 0, this->_config->buffer_size - bytes_received);
+		std::memset(buffer + bytes_received, 0, bytes_read - bytes_received);
 	return (bytes_received);
 }
 
@@ -297,7 +297,7 @@ bool	ServerCore::pollAvailFor(int idx, nfds_t operation)
  */
 bool	ServerCore::_socketCreate()
 {
-	_server_fd = socket(_config->domain, _config->type, _config->protocol);
+	_server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_server_fd == SERV_ERROR)
 		return (false);
 	return (true);
@@ -327,9 +327,9 @@ bool	ServerCore::_socketBind()
 	int	success;
 
 	std::memset(&this->_server_addr, 0, sizeof(this->_server_addr));
-	_server_addr.sin_family = _config->domain;
-	_server_addr.sin_addr.s_addr = _config->ip;
-	_server_addr.sin_port = htons(_config->port_number);
+	_server_addr.sin_family = AF_INET;
+	_server_addr.sin_addr.s_addr = _config->listen_host;
+	_server_addr.sin_port = htons(_config->listen_port);
 	success = ::bind(_server_fd, (struct sockaddr *)&_server_addr, sizeof(_server_addr));
 	if (success == SERV_ERROR)
 		return (false);

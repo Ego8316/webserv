@@ -59,11 +59,11 @@ RequestHandler::~RequestHandler(void)
  * @param request Parsed request.
  * @param config Server configuration.
  */
-void	RequestHandler::handle(Response *response, const Request &request, const Config &config)
+void	RequestHandler::handle(Response *response, const Request &request, const ServerConfig &config)
 {
 	if (request.getError())
 	{
-		if (request.getContentLength() > config.max_body_size)
+		if (request.getContentLength() > config.client_max_body_size)
 			return (_handleError(response, HTTP_CONTENT_TOO_LARGE, config));
 		return (_handleError(response, HTTP_BAD_REQUEST, config));
 	}
@@ -105,7 +105,7 @@ void	RequestHandler::handle(Response *response, const Request &request, const Co
  * @param config Server configuration.
  * @param resource Resolved resource.
  */
-void	RequestHandler::_handleGet(Response *response, const Config &config, const Resource &resource)
+void	RequestHandler::_handleGet(Response *response, const ServerConfig &config, const Resource &resource)
 {
 	int			fd;
 	ssize_t		size;
@@ -117,9 +117,8 @@ void	RequestHandler::_handleGet(Response *response, const Config &config, const 
 	{
 		if (!utils::endsWith(resource.getPath(), "/"))
 			return (_handleError(response, HTTP_REDIRECT_PERM, config));
-		// TODO Adapter avec Location
-		// if (config.enable_listdir)
-		// 	return (_handleListDir(response, config, resource));
+		if (config.autoindex)
+			return (_handleListDir(response, config, resource));
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	}
 	
@@ -143,7 +142,7 @@ void	RequestHandler::_handleGet(Response *response, const Config &config, const 
  * @param config Server configuration.
  * @param resource Resolved resource.
  */
-void	RequestHandler::_handlePost(Response *response, const Request &request, const Config &config, const Resource &resource)
+void	RequestHandler::_handlePost(Response *response, const Request &request, const ServerConfig &config, const Resource &resource)
 {
 	std::ofstream	outfile;
 	bool			existed;
@@ -181,7 +180,7 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
  * @param config Server configuration.
  * @param resource Resolved resource.
  */
-void	RequestHandler::_handleDelete(Response *response, const Config &config, const Resource &resource)
+void	RequestHandler::_handleDelete(Response *response, const ServerConfig &config, const Resource &resource)
 {
 	if (resource.isDirectory() && !utils::endsWith(resource.getPath(), "/"))
 		return (_handleError(response, HTTP_CONFLICT, config));
@@ -207,7 +206,7 @@ void	RequestHandler::_handleDelete(Response *response, const Config &config, con
  * @param config Server configuration.
  * @param resource Resolved resource.
  */
-void	RequestHandler::_handleCGI(Response *response, const Request &request, const Config &config, const Resource &resource)
+void	RequestHandler::_handleCGI(Response *response, const Request &request, const ServerConfig &config, const Resource &resource)
 {
 	//TODO check for errors on Ressource
 	if (!resource.isExecutable() || resource.isDirectory())
@@ -241,7 +240,7 @@ void	RequestHandler::_handleRedirect(Response *response, const Resource &resourc
  * @param config Server configuration.
  * @param resource Resolved directory resource.
  */
-void	RequestHandler::_handleListDir(Response *response, const Config &config, const Resource &resource)
+void	RequestHandler::_handleListDir(Response *response, const ServerConfig &config, const Resource &resource)
 {
 	std::string		response_body;
 	DIR				*dir;
@@ -276,7 +275,7 @@ void	RequestHandler::_handleListDir(Response *response, const Config &config, co
  * @param code HTTP status code to send.
  * @param config Server configuration for custom pages.
  */
-void	RequestHandler::_handleError(Response *response, HttpStatus code, const Config &config)
+void	RequestHandler::_handleError(Response *response, HttpStatus code, const ServerConfig &config)
 {
 	std::string	error_page_path;
 	int			fd;
@@ -285,9 +284,9 @@ void	RequestHandler::_handleError(Response *response, HttpStatus code, const Con
 	response->setStatus(code);
 	response->setContentType("text/html");
 
-	if (utils::mapHasEntry(config.default_error_pages, (int)code))
+	if (utils::mapHasEntry(config.error_pages, (int)code))
 	{
-		error_page_path = config.default_error_pages.at(code);
+		error_page_path = config.error_pages.at(code);
 		if ((fd = open(error_page_path.c_str(), O_RDONLY)) >= 0)
 		{
 			if ((size = utils::getFileSize(error_page_path)) != -1)

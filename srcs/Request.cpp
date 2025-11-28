@@ -86,7 +86,7 @@ Request::~Request()
  *
  * @param config Server configuration for size limits and defaults.
  */
-void	Request::parseHeader(const Config &config)
+void	Request::parseHeader(const ServerConfig &config)
 {
 	std::istringstream	stream(this->_raw_header);
 	std::string			line;
@@ -163,7 +163,7 @@ void		Request::_parseRequestTarget()
  * @param line Header line without CRLF.
  * @param config Server configuration for size limits.
  */
-void		Request::_parseHeaderLine(std::string line, const Config &config)
+void		Request::_parseHeaderLine(std::string line, const ServerConfig &config)
 {
 	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
 	Cookie						*cookie;
@@ -199,7 +199,7 @@ void		Request::_parseHeaderLine(std::string line, const Config &config)
 		else if (key == "Content-Length")
 		{
 			this->_content_length = std::atol(value.c_str());
-			if (this->_content_length > config.max_body_size)
+			if (this->_content_length > config.client_max_body_size)
 			{
 				this->_error = true;
 				return ;

@@ -18,9 +18,10 @@
 #include "Resource.hpp"
 #include "Request.hpp"
 #include "CGI.hpp"
+#include "ServerConfig.hpp"
 
 class	Response;
-class	Config;
+class	ServerConfig;
 class	Client;
 class	Request;
 class	Resource;
@@ -33,7 +34,7 @@ class	Resource;
 class	RequestHandler
 {
 	public:
-		static void	handle(Response *response, const Request &request, const Config &config);
+		static void	handle(Response *response, const Request &request, const ServerConfig &config);
 
 	private:
 		RequestHandler();
@@ -41,11 +42,11 @@ class	RequestHandler
 		RequestHandler &operator=(const RequestHandler &other);
 		~RequestHandler();
 
-		static void	_handleGet(Response *response, const Config &config, const Resource &resource);
-		static void	_handlePost(Response *response, const Request &request, const Config &config, const Resource &resource);
-		static void	_handleDelete(Response *response, const Config &config, const Resource &resource);
+		static void	_handleGet(Response *response, const ServerConfig &config, const Resource &resource);
+		static void	_handlePost(Response *response, const Request &request, const ServerConfig &config, const Resource &resource);
+		static void	_handleDelete(Response *response, const ServerConfig &config, const Resource &resource);
 		static void	_handleRedirect(Response *response, const Resource &resource);
-		static void	_handleListDir(Response *response, const Config &config, const Resource &resource);
-		static void	_handleError(Response *response, HttpStatus code, const Config &config);
-		static void	_handleCGI(Response *response, const Request &request, const Config &config, const Resource &resource);
+		static void	_handleListDir(Response *response, const ServerConfig &config, const Resource &resource);
+		static void	_handleError(Response *response, HttpStatus code, const ServerConfig &config);
+		static void	_handleCGI(Response *response, const Request &request, const ServerConfig &config, const Resource &resource);
 };

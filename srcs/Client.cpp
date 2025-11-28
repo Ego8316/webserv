@@ -12,13 +12,18 @@
 
 #include "Client.hpp"
 
+static long	toSeconds(long value)
+{
+	return (value > 1000 ? value / 1000 : value);
+}
+
 /**
  * @brief Builds a client object attached to a server and config.
  *
  * @param config Server configuration.
  * @param server Owning server core.
  */
-Client::Client(const Config *config, ServerCore *server)
+Client::Client(const ServerConfig *config, ServerCore *server)
 {
 	this->_config = config;
 	this->_server = server;
@@ -216,7 +221,7 @@ int	Client::handleEvent()
 {
 	this->_error = ERR_NONE;
 	if (this->_request_time_limit == 0)
-		this->_request_time_limit = utils::getTime() + _config->max_request_time;
+		this->_request_time_limit = utils::getTime() + toSeconds(_config->client_body_timeout);
 	if (this->_state == TRY_ACCEPTING)
 		this->_tryAccepting();
 	if (this->_state == ABORTING)
@@ -230,7 +235,7 @@ int	Client::handleEvent()
 	}
 	if (this->_state == INIT)
 		this->_requestInit();
-	this->_time_limit = std::min(utils::getTime() + this->_config->processing_time_limit, this->_request_time_limit);
+	this->_time_limit = std::min(utils::getTime() + toSeconds(this->_config->send_timeout), this->_request_time_limit);
 	while (utils::getTime() < this->_time_limit && _state != DONE && _error != WOULD_BLOCK)
 	{
 		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
@@ -295,7 +300,7 @@ int	Client::_requestInit()
 {
 	this->_request = new Request();
 	this->_response = new Response();
-	this->_request_time_limit = utils::getTime() + this->_config->max_request_time;
+	this->_request_time_limit = utils::getTime() + toSeconds(this->_config->client_body_timeout);
 	_state = READING_HEADER;
 	return (0);
 }
@@ -308,7 +313,7 @@ int	Client::_requestInit()
  */
 int	Client::_readHeader()
 {
-	std::vector<char>	buffer(this->_config->buffer_size);
+	std::vector<char>	buffer(this->_config->client_header_buffer_size);
 	std::string			&header_str = this->_request->getRawHeader();
 	size_t				pos;
 
@@ -333,7 +338,7 @@ int	Client::_readHeader()
 	}
 	std::cout << GREEN << "[_readHeader] Read " << bytes_read << " bytes" << RESET << std::endl;
 	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
-	if (header_str.size() > this->_config->max_header_size)
+	if (header_str.size() > this->_config->client_header_buffer_size)
 		return (this->_state = ABORTING, SERV_ERROR);
 	if ((pos = header_str.find("\r\n\r\n")) == std::string::npos)
 	{
@@ -363,7 +368,7 @@ int	Client::_readHeader()
  */
 int	Client::_readBody()
 {
-	std::vector<char>	buffer(this->_config->buffer_size);
+	std::vector<char>	buffer(this->_config->client_body_buffer_size);
 	std::string			&body_str = this->_request->getRawBody();
 	size_t				pos;
 
@@ -487,9 +492,9 @@ int	Client::_sendString()
  */
 int	Client::_sendFile()
 {
-	std::vector<char>	buffer(this->_config->buffer_size);
+	std::vector<char>	buffer(this->_config->client_body_buffer_size);
 
-	ssize_t	bytes_read = read(this->_response->getFd(), &buffer[0], this->_config->buffer_size);
+	ssize_t	bytes_read = read(this->_response->getFd(), &buffer[0], this->_config->client_body_buffer_size);
 	if (bytes_read < 0)
 		return (SERV_ERROR);
 	else if (bytes_read == 0)

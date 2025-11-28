@@ -112,7 +112,7 @@ CGI::~CGI()
  * @param config Server configuration.
  * @param response Response to populate.
  */
-void		CGI::Run(Client &client, Request &request, const Config &config, Response &response)
+void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Response &response)
 {
 	if (this->_is_init)
 		return (this->Nanny(client, request, config, response));
@@ -135,7 +135,7 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 	this->_pid = fork();
 	if (this->_pid == 0)
 	{
-		if (chdir(config.server_home.c_str()) == -1)
+		if (chdir(config.root.c_str()) == -1)
 			exit (1);
 		this->Execute();
 	}
@@ -158,7 +158,7 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
  * @param config Server configuration.
  * @param response Response to populate when CGI completes.
  */
-void	CGI::Nanny(Client &client, Request &request, const Config &config, Response &response)
+void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Response &response)
 {
 	ssize_t				bytes_read = 1;
 	ssize_t				bytes_sent = 1;
@@ -193,22 +193,22 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
  * @param config Server configuration (buffer size).
  * @return Bytes written or -1 on error.
  */
-ssize_t		CGI::writeToCGI(Request &request, const Config &config)
+ssize_t		CGI::writeToCGI(Request &request, const ServerConfig &config)
 {
 	ssize_t				bytes_sent = 0;
-	std::vector<char>	buffer(config.buffer_size);
+	std::vector<char>	buffer(config.client_body_buffer_size);
 	int 				bts;
 	
 	if (this->_total_bytes_sent < static_cast<ssize_t>(request.getRawHeader().size()))
 	{
 		const std::string	&header_str = request.getRawHeader();
-		bts = std::min(config.buffer_size, header_str.size() - this->_total_bytes_sent);
+		bts = std::min(config.client_body_buffer_size, header_str.size() - this->_total_bytes_sent);
 		bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], header_str.c_str() + this->_total_bytes_sent, bts);
 	}
 	else
 	{
 		const std::string	&request_str = request.getRawBody();
-		bts = std::min(config.buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
+		bts = std::min(config.client_body_buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
 		bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent - request.getRawHeader().size(), bts);
 	}
 	if (bytes_sent != -1)
@@ -222,12 +222,12 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config)
  * @param config Server configuration (buffer size).
  * @return Bytes read or -1 on error.
  */
-ssize_t		CGI::readFromCGI(const Config &config)
+ssize_t		CGI::readFromCGI(const ServerConfig &config)
 {
 	ssize_t				bytes_read = 0;
-	std::vector<char>	buffer(config.buffer_size + 1);
+	std::vector<char>	buffer(config.client_body_buffer_size + 1);
 
-	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0], config.buffer_size);
+	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0], config.client_body_buffer_size);
 	if (bytes_read != -1)
 	{
 		std::cout << "read " << bytes_read << " now at " << this->_total_bytes_read << "/" <<  this->_output.length() << std::endl;

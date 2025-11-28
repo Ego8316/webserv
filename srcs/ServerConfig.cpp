@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 01:36:17 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 04:26:15 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/28 13:13:42 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,24 @@ static void	printLocation(std::ostream &os, const Location &loc)
 	if (loc.has_redirect)
 		printField(os, "Redirect:",
 					utils::toString(loc.redirect.code) + " -> " + loc.redirect.url);
+}
+
+const Location	*ServerConfig::matchLocation(const std::string &path) const
+{
+	const Location	*best = NULL;
+	size_t			best_len = 0;
+
+	for (std::map<std::string, Location>::const_iterator it = locations.begin();
+			it != locations.end(); ++it)
+	{
+		const std::string &prefix = it->first;
+		if (path.compare(0, prefix.size(), prefix) == 0 && prefix.size() >= best_len)
+		{
+			best = &it->second;
+			best_len = prefix.size();
+		}
+	}
+	return (best);
 }
 
 std::ostream &operator<<(std::ostream &os, const ServerConfig &cfg)

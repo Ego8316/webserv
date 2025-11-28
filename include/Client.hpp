@@ -14,13 +14,13 @@
 
 #include "headers.hpp"
 #include "Response.hpp"
-#include "Config.hpp"
+#include "ServerConfig.hpp"
 #include "ServerCore.hpp"
 #include "RequestHandler.hpp"
 
 class	Response;
 class	Query;
-class	Config;
+class	ServerConfig;
 class	ServerCore;
 class	Request;
 
@@ -32,7 +32,7 @@ class	Request;
 class Client
 {
 	public:
-		Client(const Config *config, ServerCore *server);
+		Client(const ServerConfig *config, ServerCore *server);
 		Client(const Client &other);
 		Client	&operator=(const Client &other);
 		~Client();
@@ -55,7 +55,7 @@ class Client
 		void	printRequest() const;
 
 	private :
-		const Config					*_config;
+		const ServerConfig				*_config;
 		ServerCore						*_server;
 		int								_client_fd;
 		struct sockaddr_in				_client_addr;

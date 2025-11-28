@@ -69,7 +69,7 @@ Resource::~Resource()
  * @param requestTarget Requested path from the HTTP request.
  * @param config Server configuration.
  */
-void	Resource::build(const Request &request, const Config &config)
+void	Resource::build(const Request &request, const ServerConfig &config)
 {
 	if (_checkRedirect(request.getRequestTarget(), config))
 		return ;
@@ -89,25 +89,13 @@ void	Resource::build(const Request &request, const Config &config)
  *
  * @return True when a redirect is found.
  */
-bool	Resource::_checkRedirect(const std::string &requestTarget, const Config &config)
+bool	Resource::_checkRedirect(const std::string &requestTarget, const ServerConfig &config)
 {
-	std::string							raw_path_requested(requestTarget);
-	// TODO
-	std::map<std::string, s_Redirection>	redirs;
-	
+	std::string	raw_path_requested(requestTarget);
+
 	(void)config;
-	for (std::map<std::string, s_Redirection>::iterator it = redirs.begin(); it != redirs.end(); ++it)
-	{
-		// TODO adapter avec location
-		// if ((raw_path_requested == it->first) || (raw_path_requested + config.default_page == it->first))
-		if ((raw_path_requested == it->first) || (raw_path_requested == it->first))
-		{
-			this->_path = it->second.dest;
-			this->_redir_code = it->second.error_code;
-			this->_status = IS_REDIRECT;
-			return (true);
-		}	
-	}
+	// TODO: integrate location-level redirects when available.
+	(void)raw_path_requested;
 	return (false);
 }
 
@@ -140,11 +128,11 @@ bool	Resource::_checkAccept(const Request &request)
  *
  * @return 0 if the path can be resolved, `SERV_ERROR` otherwise.
  */
-int	Resource::_resolvePath(const std::string &requestTarget, const Config &config)
+int	Resource::_resolvePath(const std::string &requestTarget, const ServerConfig &config)
 {
 	struct stat	file_stat;
 
-	this->_path = config.server_home + requestTarget;
+	this->_path = config.root + requestTarget;
 	this->_status = static_cast<ResourceStatus>(this->_status & ~(EXISTS | IS_DIR));
 	if (stat(this->_path.c_str(), &file_stat) == -1)
 	{
@@ -156,9 +144,10 @@ int	Resource::_resolvePath(const std::string &requestTarget, const Config &confi
 	this->_status |= EXISTS;
 	if (S_ISDIR(file_stat.st_mode))
 	{
-		// TODO adapter avec Location
-		// std::string	index_path = _path + config.default_page;
-		std::string	index_path = this->_path;
+		std::string base = this->_path;
+		if (!utils::endsWith(base, "/"))
+			base += "/";
+		std::string	index_path = base + config.index;
 		if (stat(index_path.c_str(), &file_stat) == 0)
 			this->_path = index_path;
 		else

@@ -19,11 +19,13 @@
 #include "utils.hpp"
 #include "Response.hpp"
 #include "ServerCore.hpp"
+#include "ServerConfig.hpp"
 
 class	Cookie;
 class	Client;
 class	Request;
 class	Response;
+class	ServerConfig;
 
 /**
  * @class CGI
@@ -42,11 +44,11 @@ class CGI
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-		void		Run(Client &client, Request &request, const Config &config, Response &response);
+		void		Run(Client &client, Request &request, const ServerConfig &config, Response &response);
 		
-		void		Nanny(Client &client, Request &request, const Config &config, Response &response);
-		ssize_t		writeToCGI(Request &request, const Config &config);
-		ssize_t		readFromCGI(const Config &config);
+		void		Nanny(Client &client, Request &request, const ServerConfig &config, Response &response);
+		ssize_t		writeToCGI(Request &request, const ServerConfig &config);
+		ssize_t		readFromCGI(const ServerConfig &config);
 		
 		void		parseHeader();
 		void		genFullOutput(Response &response);

@@ -17,12 +17,12 @@
  *
  * @param config Server configuration.
  */
-WebServ::WebServ(const Config *config)
+WebServ::WebServ(const ServerConfig *config)
 {
 	this->_config = config;
 	std::cout << *this->_config << std::endl;
 	this->_core = new ServerCore(config);
-	this->_clients.resize(this->_config->client_limit);
+	this->_clients.resize(this->_config->max_clients);
 	this->_processing_queue.clear();
 }
 
@@ -31,7 +31,7 @@ WebServ::WebServ(const Config *config)
  */
 WebServ::~WebServ()
 {
-	for (int i = 0; i < _config->client_limit; ++i)
+	for (int i = 0; i < _config->max_clients; ++i)
 	{
 		if (this->_clients[i] != NULL)
 		{
@@ -171,12 +171,12 @@ Client	*WebServ::newClient()
 {
 	int indx;
 
-	for (indx = 0; indx < this->_config->client_limit; ++indx)
+	for (indx = 0; indx < this->_config->max_clients; ++indx)
 	{
 		if (!this->_clients[indx])
 			break;
 	}
-	if (indx == this->_config->client_limit)
+	if (indx == this->_config->max_clients)
 	{
 		std::cerr << RED << "[newClient] Cannot accept new clients, limit reached!" << RESET << std::endl;
 		return (NULL);

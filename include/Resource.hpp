@@ -14,10 +14,10 @@
 
 #include "headers.hpp"
 #include "utils.hpp"
-#include "Config.hpp"
+#include "ServerConfig.hpp"
 #include "Request.hpp"
 
-class	Config;
+class	ServerConfig;
 class	Request;
 
 /**
@@ -35,7 +35,7 @@ class	Resource
 		Resource	&operator=(const Resource &other);
 		~Resource();
 
-		void				build(const Request &request, const Config &config);
+		void				build(const Request &request, const ServerConfig &config);
 
 		const std::string	&getPath() const;
 		ResourceStatus		getStatus() const;
@@ -58,9 +58,9 @@ class	Resource
 		ContentType	_type;
 		HttpStatus		_redir_code;
 		
-		bool	_checkRedirect(const std::string &requestTarget, const Config &config);
+		bool	_checkRedirect(const std::string &requestTarget, const ServerConfig &config);
 		bool	_checkAccept(const Request &request);
-		int		_resolvePath(const std::string &requestTarget, const Config &config);
+		int		_resolvePath(const std::string &requestTarget, const ServerConfig &config);
 		void	_evaluatePermissions();
 		void	_detectType();
 };

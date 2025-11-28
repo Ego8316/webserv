@@ -14,10 +14,10 @@
 
 #include "headers.hpp"
 #include "utils.hpp"
-#include "Config.hpp"
+#include "ServerConfig.hpp"
 #include "Cookie.hpp"
 
-class	Config;	
+class	ServerConfig;	
 class	Cookie;
 
 /**
@@ -33,7 +33,7 @@ class	Request
 		Request	&operator=(const Request &other);
 		~Request();
 
-		void					parseHeader(const Config &config);
+		void					parseHeader(const ServerConfig &config);
 
 		std::string							&getRawHeader();
 		std::string							&getRawBody();
@@ -70,7 +70,7 @@ class	Request
 		Cookie 								*_query_cookies;
 
 		void				_parseRequestTarget();
-		void				_parseHeaderLine(std::string line, const Config &config);
+		void				_parseHeaderLine(std::string line, const ServerConfig &config);
 };
 
 std::ostream	&operator<<(std::ostream &os, const Request &src);

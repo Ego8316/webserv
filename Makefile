@@ -18,7 +18,7 @@ ODIR		=	objs/
 SRC			=	main.cpp
 SRC			+=	ServerCore.cpp Client.cpp Request.cpp \
 				Response.cpp RequestHandler.cpp Resource.cpp \
-				utils.cpp Cookie.cpp Config.cpp WebServ.cpp \
+				utils.cpp Cookie.cpp WebServ.cpp \
 				ConfigLexer.cpp ConfigParser.cpp ConfigInterpreter.cpp \
 				ServerConfig.cpp \
 				CGI.cpp

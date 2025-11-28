@@ -14,10 +14,10 @@
 
 #include "headers.hpp"
 #include "Client.hpp"
-#include "Config.hpp"
+#include "ServerConfig.hpp"
 
 class	Client;
-class	Config;
+class	ServerConfig;
 
 /**
  * @class ServerCore
@@ -27,7 +27,7 @@ class	Config;
 class	ServerCore
 {
 	public:
-		ServerCore(const Config *config);
+		ServerCore(const ServerConfig *config);
 		ServerCore(const ServerCore &other);
 		ServerCore	&operator=(const ServerCore &other);
 		~ServerCore();
@@ -46,7 +46,7 @@ class	ServerCore
 
 		static void				setNonBlocking(int fd);
 	private:
-		const Config				*_config;
+		const ServerConfig			*_config;
 		int							_server_fd;
 		struct sockaddr_in			_server_addr;
 		std::vector<struct pollfd>	_poll_fds;

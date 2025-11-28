@@ -16,7 +16,7 @@
 #include "Client.hpp"
 #include "ServerCore.hpp"
 #include "Cookie.hpp"
-#include "Config.hpp"
+#include "ServerConfig.hpp"
 
 /**
  * @class WebServ
@@ -26,7 +26,7 @@
 class WebServ
 {
 	public:
-		WebServ(const Config *config);
+		WebServ(const ServerConfig *config);
 		~WebServ();
 
 		Client 				*getClient(int uid);
@@ -43,7 +43,7 @@ class WebServ
 		WebServ(const WebServ &other);
 		WebServ	&operator=(const WebServ &other);
 
-		const Config						*_config;
+		const ServerConfig					*_config;
 		ServerCore							*_core;
 		std::vector<Client *>				_clients;
 		std::deque<Client *>				_processing_queue;
