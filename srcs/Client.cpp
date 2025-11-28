@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/26 13:54:55 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/27 09:10:40 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,7 @@ int	Client::handleEvent()
 			return (SERV_ERROR);
 		if (_state == PROCESSING_REQUEST)
 			this->_processRequest();
-		if (_state == CGI_RUNNING )
+		if (_state == CGI_RUNNING)
 			this->_monitorCGI();
 		if (this->_state == SENDING_STRING && this->_sendString() == SERV_ERROR)
 			return (SERV_ERROR);
@@ -324,16 +324,13 @@ void	Client::_processRequest()
 
 void	Client::_monitorCGI()
 {
-	if (!_response->getCGI() || _response->getCGI()->isComplete())
+	if (this->_response->getCGI() && !this->_response->getCGI()->isComplete())
 	{
-		this->_state = SENDING_STRING;
-		this->printState();
-		return ;
+		_response->getCGI()->setClientId(this->_client_id);
+		_response->getCGI()->Run(*this, *_request, *_config, *_response, *_server);
 	}
-	_response->getCGI()->Run(*this, *_request, *_config, *_response);
-	if (_response->getCGI()->isComplete())
+	if (this->_response->getCGI() && _response->getCGI()->isComplete())
 	{
-		
 		this->_state = SENDING_STRING;
 		this->printState();
 	}

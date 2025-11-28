@@ -47,7 +47,7 @@ class	ServerCore
 		const Config				*_config;
 		int							_server_fd;
 		struct sockaddr_in			_server_addr;
-		std::vector<struct pollfd>	_poll_fds;
+		std::vector<struct pollfd>	_poll_fds; //[client 0, client 1, ..., client N, server, client 1's pipe to cgi, client 1's pipe from cgi, ..., client N's pipe from cgi] size = 3N + 1
 
 		bool	_socketCreate();
 		bool	_socketSetOptions();

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/30 11:34:27 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/28 11:03:33 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class	Cookie;
 class	Client;
 class	Request;
 class	Response;
-
+class	ServerCore;
 class CGI
 {
 	public :
@@ -37,11 +37,11 @@ class CGI
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-		void		Run(Client &client, Request &request, const Config &config, Response &response);
+		void		Run(Client &client, Request &request, const Config &config, Response &response, ServerCore &_server);
 		
-		void		Nanny(Client &client, Request &request, const Config &config, Response &response);
-		ssize_t		writeToCGI(Request &request, const Config &config);
-		ssize_t		readFromCGI(const Config &config);
+		void		Nanny(Client &client, Request &request, const Config &config, Response &response, ServerCore &server);
+		ssize_t		writeToCGI(Request &request, const Config &config, ServerCore &server);
+		ssize_t		readFromCGI(const Config &config, ServerCore &server);
 		
 		void		parseHeader(const Config &config);
 		void		genFullOutput(Response &response);
@@ -55,7 +55,14 @@ class CGI
 		bool		checkOutputTermination(int bytes_read);
 		void		GenEnvVar(Request &request);
 		void		deleteEnvVar();
+		
+		int			*getPipesToCGI();
+		int			*getPipesFromCGI();
+		bool		getPipesPolled();
+		void		setPipesPolled(bool value);
+		void		setClientId(int value);
 	private :
+		int					_client_id;
 		std::string			_cgi_script;
 		bool				_is_init;
 		bool				_is_complete;
@@ -74,4 +81,5 @@ class CGI
 		char				*_cgi_script_char;
 		char				**_args;
 		char				**_env;
+		bool				_pipes_polled;
 };

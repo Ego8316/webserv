@@ -6,7 +6,7 @@
 #    By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/10/23 21:16:25 by victorviter      ###   ########.fr        #
+#    Updated: 2025/11/25 17:08:05 by victorviter      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -78,12 +78,12 @@ COLOR_I		= \033[3m
 C_RESET		= \033[0m
 
 header	:
-			printf "=====================================================\n"
+			printf "==========================================\n"
 			printf "$(COLOR_O)__        __   _    ____                   $(C_RESET)\n"
 			printf "$(COLOR_R)\ \      / /__| |__/ ___|  ___ _ ____   __ $(C_RESET)\n"
 			printf "$(COLOR_G) \ \ /\ / / _ \ '_ \___ \ / _ \ '__\ \ / / $(C_RESET)\n"
 			printf "$(COLOR_B)  \ V  V /  __/ |_) |__) |  __/ |   \ V /  $(C_RESET)\n"
 			printf "$(COLOR_V)   \_/\_/ \___|_.__/____/ \___|_|    \_/   $(C_RESET)\n"
-			printf "$(COLOR_I)          			 by hcavet & vviterbo$(C_RESET)\n"
-			printf "=====================================================\n"
+			printf "$(COLOR_I)    		      by hcavet & vviterbo$(C_RESET)\n"
+			printf "==========================================\n"
 			

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/30 11:35:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/28 11:56:29 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ CGI::CGI()
 	this->_cgi_script_char = NULL;
 	this->_args = NULL;
 	this->_env = NULL;
+	this->_pipes_polled = false;
 }
 
 CGI::CGI(const CGI &other)
@@ -86,10 +87,10 @@ CGI::~CGI()
 }
 
 
-void		CGI::Run(Client &client, Request &request, const Config &config, Response &response)
+void		CGI::Run(Client &client, Request &request, const Config &config, Response &response, ServerCore &server)
 {
 	if (this->_is_init)
-		return (this->Nanny(client, request, config, response));
+		return (this->Nanny(client, request, config, response, server));
 	if (pipe(this->_pipe_to_CGI) == -1)
 	{
 		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
@@ -100,7 +101,7 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
 		return ;
 	}
-	this->_cgi_script = request.getRequestTarget(); //TODO quand config sera ok refaire les setup de path et les checks
+	this->_cgi_script = request.getRequestTarget();
 	if (!utils::startsWith(this->_cgi_script, "."))
 		this->_cgi_script = "." + this->_cgi_script;
 	this->_cgi_script_char = new char[this->_cgi_script.length() + 1];
@@ -119,12 +120,14 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 		close(this->_pipe_from_CGI[PIPE_WRITE_END]);
 		ServerCore::setNonBlocking(this->_pipe_to_CGI[PIPE_WRITE_END]);
 		ServerCore::setNonBlocking(this->_pipe_from_CGI[PIPE_READ_END]);
-		this->Nanny(client, request, config, response);
+		server.pollAdd(this->_pipe_to_CGI[PIPE_WRITE_END], POLLOUT, config.client_limit + 2 * _client_id + 1);
+		server.pollAdd(this->_pipe_from_CGI[PIPE_READ_END], POLLIN, config.client_limit + 2 * _client_id + 2);
+		this->Nanny(client, request, config, response, server);
 	}
 	this->_is_init = true;
 }
 
-void	CGI::Nanny(Client &client, Request &request, const Config &config, Response &response)
+void	CGI::Nanny(Client &client, Request &request, const Config &config, Response &response, ServerCore &server)
 {
 	ssize_t				bytes_read = 1;
 	ssize_t				bytes_sent = 1;
@@ -137,10 +140,10 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 	while (utils::getTime() < client.getTimeLimit() && !this->_is_complete)
 	{
 		if (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0)
-			bytes_sent = this->writeToCGI(request, config);
+			bytes_sent = this->writeToCGI(request, config, server);
 		if (!checkOutputTermination(bytes_read))
-			bytes_read = this->readFromCGI(config);
-		else if (this->_process_status[0] == 0) // TODO what if the prorgram crash ???
+			bytes_read = this->readFromCGI(config, server);
+		else if (this->_process_status[0] == 0)
 			this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
 		if (this->_process_status[0] != 0) // only set process status if done reading so we are sure the program is both finished and we are done reading
 		{
@@ -152,7 +155,7 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 	}
 }
 
-ssize_t		CGI::writeToCGI(Request &request, const Config &config)
+ssize_t		CGI::writeToCGI(Request &request, const Config &config, ServerCore &server)
 {
 	ssize_t				bytes_sent = 0;
 	std::vector<char>	buffer(config.buffer_size);
@@ -162,12 +165,16 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 	{
 		const std::string	&header_str = request.getRawHeader();
 		bts = std::min(config.buffer_size, header_str.size() - this->_total_bytes_sent);
+		if (!server.pollAvailFor(config.client_limit + 2 * _client_id + 1, POLLOUT))
+			return (0);
 		bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], header_str.c_str() + this->_total_bytes_sent, bts);
 	}
 	else
 	{
 		const std::string	&request_str = request.getRawBody();
 		bts = std::min(config.buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
+		if (!server.pollAvailFor(config.client_limit + 2 * _client_id + 1, POLLOUT))
+			return (0);
 		bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent - request.getRawHeader().size(), bts);
 	}
 	if (bytes_sent != -1)
@@ -175,11 +182,13 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config)
 	return (bytes_sent);
 }
 
-ssize_t		CGI::readFromCGI(const Config &config)
+ssize_t		CGI::readFromCGI(const Config &config, ServerCore &server)
 {
 	ssize_t				bytes_read = 0;
 	std::vector<char>	buffer(config.buffer_size + 1);
 
+	if (!server.pollAvailFor(config.client_limit + 2 * _client_id + 2, POLLIN))
+		return (0);
 	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0], config.buffer_size);
 	if (bytes_read != -1)
 	{
@@ -201,7 +210,7 @@ void	CGI::parseHeader(const Config &config)
 	{
 		long len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ")
 			+ std::string("Content-Length: ").length());
-		if (len > config.max_body_size || len < 0)
+		if (len < 0 || static_cast<size_t>(len) > config.max_body_size)
 		{
 			this->_is_complete = true;
 			this->_status = HTTP_INTERNAL_SERVER_ERROR;
@@ -352,4 +361,29 @@ bool	CGI::checkOutputTermination(int bytes_read)
 		return (this->_output.size() >= this->_header_len + this->_content_len);
 	else
 		return (bytes_read == 0);
+}
+
+int			*CGI::getPipesToCGI()
+{
+	return (this->_pipe_to_CGI);
+}
+
+int			*CGI::getPipesFromCGI()
+{
+	return (this->_pipe_from_CGI);
+}
+
+bool		CGI::getPipesPolled()
+{
+	return (this->_pipes_polled);
+}
+
+void		CGI::setPipesPolled(bool value)
+{
+	this->_pipes_polled = value;
+}
+
+void		CGI::setClientId(int value)
+{
+	this->_client_id = value;
 }

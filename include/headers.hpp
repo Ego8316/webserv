@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/10/29 17:07:53 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/27 08:13:48 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@
 
 # define PIPE_READ_END 0
 # define PIPE_WRITE_END 1
+# define IS_SERVER		-1
 
 // Default pages
 #define POST_PAGE		"<html><body><h1>Upload successful</h1></body></html>"

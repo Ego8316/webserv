@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/10/29 16:34:42 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/28 11:40:06 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,6 @@ void	RequestHandler::_handleDelete(Response *response, const Config &config, con
 
 void	RequestHandler::_handleCGI(Response *response, const Request &request, const Config &config, const Resource &resource)
 {
-	//TODO check for errors on Ressource
 	if (!resource.isExecutable() || resource.isDirectory())
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	(void)request;

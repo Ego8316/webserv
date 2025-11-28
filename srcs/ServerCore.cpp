@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/10/24 17:10:31 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/28 11:55:36 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ ServerCore::ServerCore(const Config *config)
 	_config = config;
 	_server_fd = SERV_ERROR;
 	std::memset(&_server_addr, 0, sizeof(_server_addr));
-	_poll_fds.resize(_config->client_limit + 1);
+	_poll_fds.resize(3 * _config->client_limit + 1); //3 per clients (1 for web commmunications, 2 for cgi pipes) + 1 for server
 	return ;
 }
 
@@ -123,7 +123,7 @@ int	ServerCore::socketWrite(const char *buffer, int bytes_write, Client *client)
 
 void	ServerCore::pollAdd(int fd, nfds_t event, int idx)
 {
-	if (idx == -1)
+	if (idx == IS_SERVER)
 		idx = _poll_fds.size() - 1;
 	struct pollfd	new_poll_fd;
 	new_poll_fd.fd = fd;
@@ -147,8 +147,10 @@ std::vector<PollRevent>	ServerCore::pollWatchRevent()
 	num_event = _pollWait();
 	if (num_event < 0)
 		return (ret);
-	for (unsigned int i = 0; i < _poll_fds.size(); ++i)
+	for (unsigned int i = 0; i < static_cast<unsigned int>(_config->client_limit) + 1; ++i)
 	{
+		//if (i == static_cast<unsigned int>(_config->client_limit))
+		//	i = this->_poll_fds.size() - 1;
 		revent.error = false;
 		revent.server = false;
 		revent.client_id = -1;
