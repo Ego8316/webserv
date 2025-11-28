@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/11/28 11:55:36 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/28 13:53:15 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,8 +149,8 @@ std::vector<PollRevent>	ServerCore::pollWatchRevent()
 		return (ret);
 	for (unsigned int i = 0; i < static_cast<unsigned int>(_config->client_limit) + 1; ++i)
 	{
-		//if (i == static_cast<unsigned int>(_config->client_limit))
-		//	i = this->_poll_fds.size() - 1;
+		if (i == static_cast<unsigned int>(_config->client_limit))
+			i = this->_poll_fds.size() - 1;
 		revent.error = false;
 		revent.server = false;
 		revent.client_id = -1;

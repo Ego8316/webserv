@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/30 11:24:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/28 13:51:08 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,6 @@ int main(int argc, char *argv[])
 	{
 		if (web_servers[i]->Init() == SERV_ERROR)
 		{
-			
 			std::cerr << "Could not init server " << i << std::endl;
 		}
 	}

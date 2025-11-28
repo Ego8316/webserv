@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/26 17:10:53 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/28 14:21:02 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,6 +167,7 @@ int	WebServ::removeClient(int indx)
 			{
 				if (*it == this->_clients[indx])
 				{
+					std::cout << "REMOVED client " << indx << std::endl;
 					this->_processing_queue.erase(it);
 					break ;
 				}
@@ -174,7 +175,7 @@ int	WebServ::removeClient(int indx)
 			}
 		}
 		delete this->_clients[indx];
+		this->_clients[indx] = NULL;
 	}
-	this->_clients[indx] = NULL;
 	return (0);
 }

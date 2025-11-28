@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/27 09:10:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/28 14:20:42 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ int	Client::handleEvent()
 	if (this->_state == INIT)
 		this->_requestInit();
 	this->_time_limit = std::min(utils::getTime() + this->_config->processing_time_limit, this->_request_time_limit);
-	while (utils::getTime() < this->_time_limit && _state != DONE && _error != WOULD_BLOCK)
+	while (utils::getTime() < this->_time_limit && _state != DONE && _state != ABORTING && _error != WOULD_BLOCK)
 	{
 		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
 			return (SERV_ERROR);
@@ -167,6 +167,8 @@ int	Client::handleEvent()
 	}
 	if (this->_request_time_limit <= utils::getTime() && _state != DONE)
 		_error = KILL_REQUEST;
+	if (this->_state == ABORTING)
+		return (KILL_CLIENT);
 	if (this->_state != TRY_ACCEPTING && this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
 		_error = KILL_CLIENT;
 	if (_state == DONE || _error > WOULD_BLOCK)
