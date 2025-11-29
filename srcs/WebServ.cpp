@@ -197,6 +197,12 @@ Client	*WebServ::newClient()
 int	WebServ::removeClient(int indx)
 {
 	this->_core->pollRemove(indx);
+	int base = this->_config->max_clients + 2 * indx;
+	if (base + 1 < static_cast<int>(this->_core->getPollFds().size()))
+	{
+		this->_core->pollRemove(base);
+		this->_core->pollRemove(base + 1);
+	}
 	if (this->_clients[indx] != NULL)
 	{
 		 std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;

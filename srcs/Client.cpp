@@ -441,20 +441,21 @@ void	Client::_processRequest()
  */
 void	Client::_monitorCGI()
 {
-	if (!_response->getCGI() || _response->getCGI()->isComplete())
+	CGI	*cgi = _response->getCGI();
+
+	if (!cgi || cgi->isComplete())
 	{
 		this->_state = SENDING_STRING;
 		this->printState();
 		return ;
 	}
-	_response->getCGI()->Run(*this, *_request, *_config, *_response);
-	if (_response->getCGI()->isComplete())
+	cgi->setClientId(this->_client_id);
+	cgi->Run(*this, *_request, *_config, *_response, *_server);
+	if (cgi->isComplete())
 	{
-		
 		this->_state = SENDING_STRING;
 		this->printState();
 	}
-	return ;
 }
 
 /**

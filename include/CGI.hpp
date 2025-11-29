@@ -25,7 +25,7 @@ class	Cookie;
 class	Client;
 class	Request;
 class	Response;
-class	ServerConfig;
+class	ServerCore;
 
 /**
  * @class CGI
@@ -44,13 +44,13 @@ class CGI
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-		void		Run(Client &client, Request &request, const ServerConfig &config, Response &response);
+		void		Run(Client &client, Request &request, const ServerConfig &config, Response &response, ServerCore &server);
 		
-		void		Nanny(Client &client, Request &request, const ServerConfig &config, Response &response);
-		ssize_t		writeToCGI(Request &request, const ServerConfig &config);
-		ssize_t		readFromCGI(const ServerConfig &config);
+		void		Nanny(Client &client, Request &request, const ServerConfig &config, Response &response, ServerCore &server);
+		ssize_t		writeToCGI(Request &request, const ServerConfig &config, ServerCore &server);
+		ssize_t		readFromCGI(const ServerConfig &config, ServerCore &server);
 		
-		void		parseHeader();
+		void		parseHeader(const ServerConfig &config);
 		void		genFullOutput(Response &response);
 
 		void		Execute();
@@ -62,7 +62,13 @@ class CGI
 		bool		checkOutputTermination(int bytes_read);
 		void		GenEnvVar(Request &request);
 		void		deleteEnvVar();
+		int			*getPipesToCGI();
+		int			*getPipesFromCGI();
+		bool		getPipesPolled();
+		void		setPipesPolled(bool value);
+		void		setClientId(int value);
 	private :
+		int					_client_id;
 		std::string			_cgi_script;
 		bool				_is_init;
 		bool				_is_complete;
@@ -81,4 +87,5 @@ class CGI
 		char				*_cgi_script_char;
 		char				**_args;
 		char				**_env;
+		bool				_pipes_polled;
 };
