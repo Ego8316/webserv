@@ -11,6 +11,9 @@
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include "headers.hpp"
+
+extern int	g_shutdown;
 
 /**
  * @brief Builds a client object attached to a server and config.
@@ -217,6 +220,8 @@ void	Client::setState(RequestStage state)
 int	Client::handleEvent()
 {
 	this->_error = ERR_NONE;
+	if (g_shutdown)
+		return (KILL_SERVER);
 	if (this->_request_time_limit == 0)
 		this->_request_time_limit = utils::getTime() + _config->client_body_timeout;
 	if (this->_state == TRY_ACCEPTING)
@@ -233,7 +238,7 @@ int	Client::handleEvent()
 	if (this->_state == INIT)
 		this->_requestInit();
 	this->_time_limit = std::min(utils::getTime() + this->_config->send_timeout, this->_request_time_limit);
-	while (utils::getTime() < this->_time_limit && _state != DONE && _error != WOULD_BLOCK)
+	while (!g_shutdown && utils::getTime() < this->_time_limit && _state != DONE && _error != WOULD_BLOCK)
 	{
 		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
 			return (SERV_ERROR);
@@ -470,6 +475,8 @@ int	Client::_sendString()
 
 	if (bytes_to_send > 0)
 	{//TODO on devrait pas send config->buffer_size plutot que tout le reste ?
+		if (this->_bytes_sent == 0)
+			utils::logMsg("DEBUG", CYAN, "[_sendString] Response header:\n" + this->_response->getHeader(), this->_client_id);
 		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, bytes_to_send, this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);

@@ -130,11 +130,11 @@ enum ContentType
 		FTYPE_NONE		= 0,	// 0 0 0 0 0 0 0 0
 		FTYPE_HTML		= 1,	// 0 0 0 0 0 0 0 1
 		FTYPE_PLAIN		= 2,	// 0 0 0 0 0 0 1 0
-								// 0 0 0 0 0 1 0 0
+		FTYPE_CSS		= 4,	// 0 0 0 0 0 1 0 0
 		FTYPE_TEXT		= 7,	// 0 0 0 0 0 1 1 1
 		FTYPE_JPEG		= 8,	// 0 0 0 0 1 0 0 0
 		FTYPE_PNG		= 16,	// 0 0 0 1 0 0 0 0
-								// 0 0 1 0 0 0 0 0
+		FTYPE_SVG		= 32,	// 0 0 1 0 0 0 0 0
 		FTYPE_IMAGE		= 56,	// 0 0 1 1 1 0 0 0
 		FTYPE_CGI_PY	= 64,	// 0 1 0 0 0 0 0 0
 		FTYPE_CGI_PHP	= 128,	// 1 0 0 0 0 0 0 0

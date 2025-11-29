@@ -11,6 +11,9 @@
 /* ************************************************************************** */
 
 #include "CGI.hpp"
+#include "headers.hpp"
+
+extern int	g_shutdown;
 
 /**
  * @brief Default constructor initializing CGI state.
@@ -178,7 +181,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		this->_bytes_to_send = request.getRawBody().size() + request.getRawHeader().size();
 		std::cout << "Body = >" << request.getRawBody() << "<\nheader = >" << request.getRawHeader() << "<" << std::endl;
 	}
-	while (utils::getTime() < client.getTimeLimit() && !this->_is_complete)
+	while (!g_shutdown && utils::getTime() < client.getTimeLimit() && !this->_is_complete)
 	{
 		if (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0)
 			bytes_sent = this->writeToCGI(request, config, server);

@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/29 19:44:10 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/29 21:55:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,12 +214,16 @@ ssize_t	utils::getFileSize(const std::string &path)
  */
 ContentType	utils::strToContentType(std::string input)
 {
+	if (input.empty())
+		return (FTYPE_NONE);
 	if (input == "*/*")
 		return (FTYPE_ANY);
 	if (input == "text/*")
 		return (FTYPE_TEXT);
 	if (input == "text/plain")
 		return (FTYPE_PLAIN);
+	if (input == "text/css")
+		return (FTYPE_CSS);
 	if (input == "image/*")
 		return (FTYPE_IMAGE);
 	if (input == "text/html")
@@ -228,6 +232,10 @@ ContentType	utils::strToContentType(std::string input)
 		return (FTYPE_PNG);
 	if (input == "image/jpeg")
 		return (FTYPE_JPEG);
+	if (input == "image/jpg")
+		return (FTYPE_JPEG);
+	if (input == "image/svg+xml")
+		return (FTYPE_SVG);
 	return (FTYPE_NONE);
 }
 
@@ -242,8 +250,12 @@ std::string	utils::contentTypeToStr(ContentType type)
 	{
 		case FTYPE_HTML:	return "text/html";
 		case FTYPE_PLAIN:	return "text/plain";
+		case FTYPE_TEXT:	return "text/plain";
+		case FTYPE_CSS:		return "text/css";
 		case FTYPE_JPEG:	return "image/jpeg";
 		case FTYPE_PNG:		return "image/png";
+		case FTYPE_SVG:		return "image/svg+xml";
+		case FTYPE_IMAGE:	return "image/*";
 		default:			return "";
 	}
 }
@@ -261,10 +273,16 @@ ContentType	utils::extensionToContentTypes(std::string fname)
 		return (FTYPE_CGI_PHP);
 	else if (utils::endsWith(fname, ".html"))
 		return (FTYPE_HTML);
+	else if (utils::endsWith(fname, ".css"))
+		return (FTYPE_CSS);
 	else if (utils::endsWith(fname, ".jpeg"))
+		return (FTYPE_JPEG);
+	else if (utils::endsWith(fname, ".jpg"))
 		return (FTYPE_JPEG);
 	else if (utils::endsWith(fname, ".png"))
 		return (FTYPE_PNG);
+	else if (utils::endsWith(fname, ".svg"))
+		return (FTYPE_SVG);
 	else
 		return (FTYPE_PLAIN);
 }
@@ -279,8 +297,11 @@ std::string	utils::contentTypeToExtensions(ContentType type)
 	switch(type)
 	{
 		case FTYPE_HTML:		return ".html";
+		case FTYPE_PLAIN:		return ".txt";
+		case FTYPE_CSS:			return ".css";
 		case FTYPE_JPEG:		return ".jpeg";
 		case FTYPE_PNG:			return ".png";
+		case FTYPE_SVG:			return ".svg";
 		case FTYPE_CGI_PY:		return ".py";
 		case FTYPE_CGI_PHP:		return ".php";
 		default:				return "";
@@ -335,11 +356,22 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 	switch(code)
 	{
 		case HTTP_OK:						return "OK";
+		case HTTP_CREATED:					return "Created";
+		case HTTP_ACCEPTED:					return "Accepted";
+		case HTTP_NO_CONTENT:				return "No Content";
+		case HTTP_REDIRECT:					return "Multiple Choices";
+		case HTTP_REDIRECT_PERM:			return "Moved Permanently";
+		case HTTP_REDIRECT_TEMP:			return "Found";
 		case HTTP_BAD_REQUEST:				return "Bad Request";
+		case HTTP_UNAUTHORIZED:				return "Unauthorized";
 		case HTTP_FORBIDDEN:				return "Forbidden";
 		case HTTP_NOT_FOUND:				return "Not Found";
+		case HTTP_METHOD_NOT_ALLOWED:		return "Method Not Allowed";
+		case HTTP_CONFLICT:					return "Conflict";
+		case HTTP_CONTENT_TOO_LARGE:		return "Content Too Large";
 		case HTTP_INTERNAL_SERVER_ERROR:	return "Internal Server Error";
 		case HTTP_NOT_IMPLEMENTED:			return "Not Implemented";
+		case HTTP_BAD_GATEWAY:				return "Bad Gateway";
 		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";
 		default:							return "Unknown";
 	}
@@ -354,38 +386,31 @@ std::string	utils::httpStatusToStr(HttpStatus code)
  */
 HttpStatus	utils::strToHttpStatus(std::string status)
 {
-	if (utils::startsWith(status, "200"))
-		return (HTTP_OK);
-	if (utils::startsWith(status, "201"))
-		return (HTTP_CREATED);
-	if (utils::startsWith(status, "202"))
-		return (HTTP_ACCEPTED);
-	if (utils::startsWith(status, "204"))
-		return (HTTP_NO_CONTENT);
-	if (utils::startsWith(status, "300"))
-		return (HTTP_REDIRECT);
-	if (utils::startsWith(status, "301"))
-		return (HTTP_REDIRECT_PERM);
-	if (utils::startsWith(status, "302"))
-		return (HTTP_REDIRECT_TEMP);
-	if (utils::startsWith(status, "400"))
-		return (HTTP_BAD_REQUEST);
-	if (utils::startsWith(status, "401"))
-		return (HTTP_UNAUTHORIZED);
-	if (utils::startsWith(status, "403"))
-		return (HTTP_FORBIDDEN);
-	if (utils::startsWith(status, "404"))
-		return (HTTP_NOT_FOUND);
-	if (utils::startsWith(status, "409"))
-		return (HTTP_CONFLICT);
-	if (utils::startsWith(status, "500"))
-		return (HTTP_INTERNAL_SERVER_ERROR);
-	if (utils::startsWith(status, "501"))
-		return (HTTP_NOT_IMPLEMENTED);
-	if (utils::startsWith(status, "502"))
-		return (HTTP_BAD_GATEWAY);
-	if (utils::startsWith(status, "505"))
-		return (HTTP_VERSION_NOT_SUPPORTED);
+	if (status.size() < 3)
+		return (HTTP_UNKNOWN_STATUS);
+	int	code = std::atoi(status.c_str());
+	switch (code)
+	{
+		case 200: return HTTP_OK;
+		case 201: return HTTP_CREATED;
+		case 202: return HTTP_ACCEPTED;
+		case 204: return HTTP_NO_CONTENT;
+		case 300: return HTTP_REDIRECT;
+		case 301: return HTTP_REDIRECT_PERM;
+		case 302: return HTTP_REDIRECT_TEMP;
+		case 400: return HTTP_BAD_REQUEST;
+		case 401: return HTTP_UNAUTHORIZED;
+		case 403: return HTTP_FORBIDDEN;
+		case 404: return HTTP_NOT_FOUND;
+		case 405: return HTTP_METHOD_NOT_ALLOWED;
+		case 409: return HTTP_CONFLICT;
+		case 413: return HTTP_CONTENT_TOO_LARGE;
+		case 500: return HTTP_INTERNAL_SERVER_ERROR;
+		case 501: return HTTP_NOT_IMPLEMENTED;
+		case 502: return HTTP_BAD_GATEWAY;
+		case 505: return HTTP_VERSION_NOT_SUPPORTED;
+		default: break;
+	}
 	return (HTTP_UNKNOWN_STATUS);
 }
 
