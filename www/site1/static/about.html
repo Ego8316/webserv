@@ -4,16 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About this demo</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2rem auto; max-width: 640px; line-height: 1.7; color: #0f2238; background: #f9fbff; }
-    h1 { color: #1a4c96; }
-    a { color: #1a4c96; }
-  </style>
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <h1>About</h1>
-  <p>This tiny site runs from <code>www/site1</code> using the new <strong>ServerConfig</strong>-powered webserv.</p>
-  <p>Static assets live under <code>/static</code> and uploads go to <code>/upload</code>.</p>
-  <p><a href="/">Back home</a></p>
+  <div class="content">
+    <div class="card">
+      <div class="eyebrow">About this demo</div>
+      <h1>How things are wired</h1>
+      <p class="lede">This site is served from <code>www/site1</code> with <strong>ServerConfig</strong>. Static assets live under <code>/static</code>, uploads go to <code>/upload</code>, and CGI scripts can run from the static directory.</p>
+      <ul class="tight-list">
+        <li>Root: <code>www/site1</code></li>
+        <li>Autoindex enabled under <code>/static/notes/</code></li>
+        <li>Uploads stored in <code>www/site1/uploads</code></li>
+      </ul>
+      <div class="cta-row" style="margin-top: 12px;">
+        <a class="btn primary" href="/">Back home</a>
+        <a class="btn ghost" href="/static/notes/">Browse notes</a>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
