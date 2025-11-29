@@ -6,16 +6,11 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/29 15:28:20 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/30 14:10:20 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
-
-static long	toSeconds(long value)
-{
-	return (value > 1000 ? value / 1000 : value);
-}
 
 /**
  * @brief Builds a client object attached to a server and config.
@@ -129,7 +124,7 @@ socklen_t	&Client::getClientLen()
  *
  * @return Client id.
  */
-int	Client::getId()
+int	Client::getId() const
 {
 	return (this->_client_id);
 }
@@ -223,7 +218,7 @@ int	Client::handleEvent()
 {
 	this->_error = ERR_NONE;
 	if (this->_request_time_limit == 0)
-		this->_request_time_limit = utils::getTime() + toSeconds(_config->client_body_timeout);
+		this->_request_time_limit = utils::getTime() + _config->client_body_timeout;
 	if (this->_state == TRY_ACCEPTING)
 		this->_tryAccepting();
 	if (this->_state == ABORTING)
@@ -237,7 +232,7 @@ int	Client::handleEvent()
 	}
 	if (this->_state == INIT)
 		this->_requestInit();
-	this->_time_limit = std::min(utils::getTime() + toSeconds(this->_config->send_timeout), this->_request_time_limit);
+	this->_time_limit = std::min(utils::getTime() + this->_config->send_timeout, this->_request_time_limit);
 	while (utils::getTime() < this->_time_limit && _state != DONE && _error != WOULD_BLOCK)
 	{
 		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
@@ -288,7 +283,7 @@ int	Client::_tryAccepting()
 	else
 		this->_state = DONE;
 	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id);
-	std::cout << BLUE << "Accepted client " << this->_client_id << RESET << std::endl;
+	utils::logMsg("INFO", GREEN, "Accepted new connection", this->_client_id);
 	this->printState();
 	return (0);
 }
@@ -305,7 +300,7 @@ int	Client::_requestInit()
 	this->_bytes_sent = 0;
 	this->_bytes_in_buffer = 0;
 	this->_keep_alive = true;
-	this->_request_time_limit = utils::getTime() + toSeconds(this->_config->client_body_timeout);
+	this->_request_time_limit = utils::getTime() + this->_config->client_body_timeout;
 	_state = READING_HEADER;
 	return (0);
 }
@@ -324,7 +319,7 @@ int	Client::_readHeader()
 
 	if (!this->_leftover.empty())
 	{
-		std::cout << YELLOW << "[_readHeader] Applying leftover (" << _leftover.size() << " bytes)" << RESET << std::endl;
+		utils::logMsg("DEBUG", CYAN, "[_readHeader] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
 		header_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
@@ -338,21 +333,21 @@ int	Client::_readHeader()
 	}
 	if (bytes_read == 0)
 	{
-		std::cout << CYAN << "[_readHeader] Client " << this->_client_id << " closed the connection" << RESET << std::endl;
+		utils::logMsg("WARN", ORANGE, "[_readHeader] Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
-	std::cout << GREEN << "[_readHeader] Read " << bytes_read << " bytes" << RESET << std::endl;
+	utils::logMsg("INFO", GREEN, "[_readHeader] Read " + utils::toString(bytes_read) + " bytes", this->_client_id);
 	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
 	if (header_str.size() > this->_config->client_header_buffer_size)
 		return (this->_state = ABORTING, SERV_ERROR);
 	if ((pos = header_str.find("\r\n\r\n")) == std::string::npos)
 	{
-		std::cout << CYAN << "[_readHeader] Incomplete header — waiting for more" << RESET << std::endl;
+		utils::logMsg("DEBUG", CYAN, "[_readHeader] Incomplete header — waiting for more", this->_client_id);
 		return (0);
 	}
 	this->_leftover = header_str.substr(pos + 4);
 	header_str.erase(pos);
-	std::cout << CYAN << "[_readHeader] Header fully received (" << header_str.size() << " bytes)" << RESET << std::endl;
+	utils::logMsg("INFO", GREEN, "[_readHeader] Header fully received (" + utils::toString(header_str.size()) + " bytes)", this->_client_id);
 	this->printHeader();
 	this->_request->parseHeader(*this->_config);
 	if (!this->_request->isChunked() && this->_request->getContentLength() == 0)
@@ -381,7 +376,7 @@ int	Client::_readBody()
 		body_str.reserve(this->_request->getContentLength());
 	if (!this->_leftover.empty())
 	{
-		std::cout << YELLOW << "[_readBody] Applying leftover (" << _leftover.size() << " bytes)" << RESET << std::endl;
+		utils::logMsg("DEBUG", CYAN, "[_readBody] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
 		body_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
@@ -392,16 +387,16 @@ int	Client::_readBody()
 		return (0);
 	if (bytes_read == 0)
 	{
-		std::cout << CYAN << "[_readHeader] Client closed the connection" << RESET << std::endl;
+		utils::logMsg("WARN", ORANGE, "[_readBody] Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
 	body_str.append(buffer.begin(), buffer.begin() + bytes_read);
-	std::cout << GREEN << "[_readBody] Read " << bytes_read << " bytes (total: " << body_str.size() << ")" << RESET << std::endl;
+	utils::logMsg("INFO", GREEN, "[_readBody] Read " + utils::toString(bytes_read) + " bytes (total: " + utils::toString(body_str.size()) + ")", this->_client_id);
 	if (body_str.size() >= this->_request->getContentLength())
 	{
 		_leftover = body_str.substr(this->_request->getContentLength());
 		body_str.erase(this->_request->getContentLength());
-		std::cout << CYAN << "[_readBody] Body complete (" << body_str.size() << " bytes)" << RESET << std::endl;
+		utils::logMsg("INFO", GREEN, "[_readBody] Body complete (" + utils::toString(body_str.size()) + " bytes)", this->_client_id);
 		this->_state = PROCESSING_REQUEST;
 		printState();
 		return (0);
@@ -410,12 +405,12 @@ int	Client::_readBody()
 	{
 		_leftover = body_str.substr(pos);
 		body_str.erase(pos);
-		std::cout << CYAN << "[_readBody] Chunked body complete" << RESET << std::endl;
+		utils::logMsg("INFO", GREEN, "[_readBody] Chunked body complete", this->_client_id);
 		this->_state = PROCESSING_REQUEST;
 		printState();
 		return (0);
 	}
-	std::cout << CYAN << "[_readBody] Partial body received — waiting for more" << RESET << std::endl;
+	utils::logMsg("DEBUG", CYAN, "[_readBody] Partial body received — waiting for more", this->_client_id);
 	return (0);
 }
 
@@ -425,8 +420,7 @@ int	Client::_readBody()
 void	Client::_processRequest()
 {
 	RequestHandler::handle(this->_response, *_request, *_config);
-	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
-		<< BLUE << " Processing request" << RESET << std::endl;
+	utils::logMsg("INFO", GREEN, "Processing request", this->_client_id);
 	this->printRequest();
 	std::string conn = utils::toLower(_request->headerGetField("Connection"));
 	if (_request->getVersion() == "HTTP/1.0")
@@ -482,7 +476,7 @@ int	Client::_sendString()
 			return (0);
 		if (sent == 0)
 		{
-			std::cout << CYAN << "[_sendString] Client closed the connection" << RESET << std::endl;
+			utils::logMsg("WARN", ORANGE, "[_sendString] Client closed the connection", this->_client_id);
 			return (this->_state = ABORTING, 0);
 		}
 		this->_bytes_sent += sent;
@@ -529,7 +523,7 @@ int	Client::_sendFile()
 		return (0);
 	if (bytes_sent == 0)
 	{
-		std::cout << CYAN << "[_sendString] Client closed the connection" << RESET << std::endl;
+		utils::logMsg("WARN", ORANGE, "[_sendFile] Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
 	return (0);
@@ -551,8 +545,7 @@ void	Client::_prepareNew()
  */
 void	Client::printState() const
 {
-	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
-		<< BLUE << " State is now " << utils::stateToStr(this->_state) << RESET << std::endl;
+	utils::logMsg("INFO", BLUE, "State is now " + utils::stateToStr(this->_state), this->_client_id);
 	return ;
 }
 

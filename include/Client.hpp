@@ -41,7 +41,7 @@ class Client
 		int						getFd();
 		struct sockaddr_in		&getClientAddr();
 		socklen_t				&getClientLen();
-		int						getId();
+		int						getId() const;
 		RequestStage			getState();
 		ServerCore				&getServer();
 		long					getTimeLimit();

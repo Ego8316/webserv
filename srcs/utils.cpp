@@ -6,11 +6,12 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/25 00:44:16 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/29 19:44:10 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
+#include <sys/time.h>
 
 /**
  * @brief Returns true when `str` ends with the given suffix.
@@ -420,13 +421,41 @@ std::string	utils::stateToStr(RequestStage state)
  */
 long	utils::getTime()
 {
-	time_t	t;
-	
-	t = time(NULL);
-	if (t == -1)
-	{
-		std::cerr << "Clock error. Seting time to 0" << std::endl;
-		return (0);
-	}
-	return (static_cast<long>(t));
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec);
+}
+
+/**
+ * @brief Build a timestamp string.
+ *
+ * @return Timestamp in HH:MM:SS format.
+ */
+std::string	utils::timeStamp()
+{
+	struct timeval	tv;
+	struct tm		tm;
+	char			buffer[32];
+
+	gettimeofday(&tv, NULL);
+	localtime_r(&tv.tv_sec, &tm);
+	std::snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec);
+	return (std::string(buffer));
+}
+
+/**
+ * @brief Log a colored message with timestamp and optional client id.
+ *
+ * @param level  Textual level label.
+ * @param color  ANSI color prefix to apply.
+ * @param msg    Message body.
+ * @param client_id Client identifier (-1 to skip).
+ */
+void	utils::logMsg(const std::string &level, const std::string &color, const std::string &msg, int client_id)
+{
+	std::cout << color << "[" << timeStamp() << "] [" << level << "]";
+	if (client_id >= 0)
+		std::cout << " [client " << client_id << "]";
+	std::cout << " " << msg << RESET << std::endl;
 }

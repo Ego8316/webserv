@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/11/29 18:10:43 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/29 19:09:00 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 	}
 	if (request.getMethod() == UNKNOWN)
 		return (_handleError(response, HTTP_NOT_IMPLEMENTED, config));
-	if (request.getVersion() != "HTTP/1.1" || request.getVersion() != "HTTP/1.0")
+	if (request.getVersion() != "HTTP/1.1" && request.getVersion() != "HTTP/1.0")
 		return (_handleError(response, HTTP_VERSION_NOT_SUPPORTED, config));
 
 	Resource	resource;

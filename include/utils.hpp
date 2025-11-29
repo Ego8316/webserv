@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 15:19:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/29 19:43:03 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,8 @@ std::string					httpStatusToStr(HttpStatus code);
 HttpStatus					strToHttpStatus(std::string status);
 std::string					stateToStr(RequestStage state);
 long						getTime();
+std::string					timeStamp();
+void						logMsg(const std::string &level, const std::string &color, const std::string &msg, int client_id = -1);
 
 template <typename T>
 std::string	toString(const T &src)
