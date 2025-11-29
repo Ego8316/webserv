@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/11/28 13:53:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/29 14:47:31 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,13 +195,14 @@ bool	ServerCore::pollAvailFor(int idx, nfds_t operation)
 	if (ret == -1)
 	{
 		std::cerr << RED << "Poll failed when checking for operation "
-			<< operation << " for client " << idx << std::endl;
+			<< operation << " for client " << idx << RESET << std::endl;
 		return (false);
 	}
 	else if (ret == 0)
 	{
-		std::cerr << RED << "Poll timed out for operation "
-			<< operation << " for client " << idx << std::endl;
+		//this can be misleading, since timeout is 0 and is asynchronous
+		// std::cerr << RED << "Poll timed out for operation "
+		// 	<< operation << " for client " << idx << RESET << std::endl;
 		return (false);
 	}
 	return (_poll_fds[idx].revents & operation);

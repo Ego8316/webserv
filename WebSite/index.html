@@ -1,2 +1,93 @@
-#!/usr/bin/python3
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Welcome Page</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: background-color 0.5s ease;
+        }
 
+        .welcome-container {
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #666;
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <h1 id="welcome-message">Welcome!</h1>
+        <p id="welcome-description">We're glad to see you.</p>
+    </div>
+
+    <script>
+        const welcomeMessages = [
+            "Hello there! Welcome.",
+            "Hey! Great to have you here.",
+            "Greetings! We've been expecting you.",
+            "Salutations! Make yourself at home.",
+            "Hi! You're right on time.",
+            "Welcome! Today is a good day.",
+            "Ahoy there! Welcome aboard.",
+            "Howdy! Great to see you."
+        ];
+
+        const welcomeDescriptions = [
+            "You've found your way to a wonderful place.",
+            "Amazing things happen when you least expect them.",
+            "Your presence makes this place better.",
+            "Ready for a fantastic experience?",
+            "The adventure begins now.",
+            "Good vibes only here.",
+            "Take a moment to appreciate this serendipity.",
+            "You're exactly where you need to be."
+        ];
+
+        const backgroundColors = [
+            "#FFE4E1", // Misty Rose
+            "#E6E6FA", // Lavender
+            "#F0FFF0", // Honeydew
+            "#FFF0F5", // Lavender Blush
+            "#F0F8FF", // Alice Blue
+            "#FFFACD", // Lemon Chiffon
+            "#F5F5DC", // Beige
+            "#E0FFFF"  // Light Cyan
+        ];
+
+        // Function to pick a random item from an array
+        function getRandomItem(array) {
+            const randomIndex = Math.floor(Math.random() * array.length);
+            return array[randomIndex];
+        }
+
+        // Apply random selections when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.backgroundColor = getRandomItem(backgroundColors);
+            document.getElementById('welcome-message').textContent = getRandomItem(welcomeMessages);
+            document.getElementById('welcome-description').textContent = getRandomItem(welcomeDescriptions);
+        });
+    </script>
+</body>
+</html>

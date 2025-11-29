@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/10/25 18:26:17 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/29 15:09:20 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ Response::Response()
 	this->_headers.clear();
 	this->_cgi = NULL;
 	this->_is_cgi = false;
+	this->_skip_header = false;
 	this->_body_fd = -1;
 	return ;
 }
@@ -68,7 +69,7 @@ Response::~Response()
 {
 	if (this->_cgi)
 	{
-		std::cout << "Deleting CGI" << std::endl;
+		std::cout << BLUE << "Destroying CGI instance" << RESET << std::endl;
 		delete this->_cgi;
 		this->_cgi = NULL;
 	}
@@ -154,6 +155,11 @@ void	Response::setCookie(const std::string &cookie)
 	return ;
 }
 
+void	Response::setSkipStatus(bool value)
+{
+	this->_skip_header = value;
+}
+
 /**
  * @brief Builds the HTTP response header string from the status code and
  * currently set headers.
@@ -177,7 +183,10 @@ void	Response::buildHeader()
 void	Response::build()
 {
 	this->buildHeader();
-	this->_string = this->_header + this->_body;
+	if (this->_skip_header)
+		this->_string = this->_body;
+	else
+		this->_string = this->_header + this->_body;
 	return ;
 }
 

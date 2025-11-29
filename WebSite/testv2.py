@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 a = input()
+print("HTTP/1.0 404 Not Found", end="\r\n")
 print("Content-Length: " + str(len(a) + 622) + "\r\n", end="\r\n")
 print("I am the Python script and I received this as an input :\r\n", end="\r\n")
 print(a, end="\r\n")

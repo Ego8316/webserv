@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/10/24 10:41:02 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/29 15:07:15 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class	Response
 		void	setContentType(const std::string &type);
 		void	setContentLength(size_t len);
 		void	setCookie(const std::string &cookie);
+		void	setSkipStatus(bool value);
 
 		void	buildHeader();
 		void	build();
@@ -64,6 +65,7 @@ class	Response
 		std::map<std::string, std::string>	_headers;
 		CGI									*_cgi;
 		bool								_is_cgi;
+		bool								_skip_header;
 		int									_body_fd;
 };
 

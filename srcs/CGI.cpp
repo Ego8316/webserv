@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/28 11:56:29 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/29 15:03:31 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,11 +147,15 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 			this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
 		if (this->_process_status[0] != 0) // only set process status if done reading so we are sure the program is both finished and we are done reading
 		{
+			if (utils::startsWith(this->_output, "HTTP/"))
+				response.setSkipStatus(true);
 			genFullOutput(response);
+			std::cout << "coucou this is body" << std::endl;
+			std::cout << response.getBody() << std::endl;
 			this->_is_complete = true;
 		}
-		std::cout << "this->_chunked = " << this->_chunked << " this->_content_len = " << this->_content_len << " this->_header_len = " << this->_header_len << " bytes_read = " << bytes_read << std::endl;
-		std::cout << " this->_total_bytes_sent " << this->_total_bytes_sent << " this->_bytes_to_send " << this->_bytes_to_send << " bytes_sent " << bytes_sent << " checkOutputTermination(bytes_read) " << checkOutputTermination(bytes_read) << std::endl;
+		//std::cout << "this->_chunked = " << this->_chunked << " this->_content_len = " << this->_content_len << " this->_header_len = " << this->_header_len << " bytes_read = " << bytes_read << std::endl;
+		//std::cout << " this->_total_bytes_sent " << this->_total_bytes_sent << " this->_bytes_to_send " << this->_bytes_to_send << " bytes_sent " << bytes_sent << " checkOutputTermination(bytes_read) " << checkOutputTermination(bytes_read) << std::endl;
 	}
 }
 
@@ -190,6 +194,7 @@ ssize_t		CGI::readFromCGI(const Config &config, ServerCore &server)
 	if (!server.pollAvailFor(config.client_limit + 2 * _client_id + 2, POLLIN))
 		return (0);
 	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0], config.buffer_size);
+	std::cout << "BYTES READ = " << bytes_read << std::endl;
 	if (bytes_read != -1)
 	{
 		std::cout << "read " << bytes_read << " now at " << this->_total_bytes_read << "/" <<  this->_output.length() << std::endl;
@@ -205,11 +210,19 @@ ssize_t		CGI::readFromCGI(const Config &config, ServerCore &server)
 void	CGI::parseHeader(const Config &config)
 {
 	if (!this->_output.length() || utils::startsWith(this->_output, "HTTP/"))
-		return ;
+	{}
+	else if (utils::caseInsensitiveFind(this->_output, "Status: ") != this->_output.end())
+	{
+		std::string::iterator	status_start = utils::caseInsensitiveFind(this->_output, "Status: ") + 8;
+		std::string::iterator	status_end = status_start;
+		std::advance(status_end, 3);
+		std::cout << "STATUS ====== " << std::string(status_start, status_end) << std::endl;
+		this->_status = utils::strToHttpStatus(std::string(status_start, status_end));
+		std::cout << "STATUS ====== " << this->_status << std::endl;
+	}
 	if (utils::caseInsensitiveFind(this->_output, "Content-Length: ") != this->_output.end())
 	{
-		long len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ")
-			+ std::string("Content-Length: ").length());
+		long len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ") + 16);
 		if (len < 0 || static_cast<size_t>(len) > config.max_body_size)
 		{
 			this->_is_complete = true;
@@ -220,8 +233,8 @@ void	CGI::parseHeader(const Config &config)
 	}
 	else if (utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: ") != this->_output.end())
 	{
-		size_t	line_start = utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: ") - this->_output.begin();
-		size_t	line_end = this->_output.find("\r\n", line_start);
+		size_t			line_start = utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: ") - this->_output.begin();
+		size_t			line_end = this->_output.find("\r\n", line_start);
 		std::string		line = this->_output.substr(line_start, line_end);
 		if (utils::caseInsensitiveFind(line, "chunked") != line.end())
 			this->_chunked = true;
@@ -238,7 +251,11 @@ void	CGI::genFullOutput(Response &response)
 		std::cout << "Error : Child process returned " << this->_process_status[1] << std::endl;
 	}
 	else if (utils::startsWith(this->_output, "HTTP/"))
+	{
+		response.setBody(this->_output);
+		response.build();
 		return ;
+	}
 	else if (utils::caseInsensitiveFind(this->_output, "\r\nstatus: ") != this->_output.end())
 	{
 		this->_status = utils::strToHttpStatus(&*utils::caseInsensitiveFind(this->_output, "status: ")
@@ -247,12 +264,11 @@ void	CGI::genFullOutput(Response &response)
 			this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		this->_output.erase(0, this->_output.find("\r\n"));
 	}
-	else
-		this->_status = HTTP_OK;
 	response.setStatus(this->_status);
 	if (!this->_content_len && !this->_chunked)
 		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n"));
 	response.buildHeader();
+	std::cout << "OUTPUT = " << this->_output << std::endl;
 	response.setBody(this->_output);
 	response.build();
 	return ;
@@ -355,12 +371,13 @@ void	CGI::deleteEnvVar()
 
 bool	CGI::checkOutputTermination(int bytes_read)
 {
+	(void)bytes_read;
 	if (this->_chunked)
 		return (utils::endsWith(this->_output, NULL_CHUNK));
 	else if (this->_content_len && this->_header_len)
 		return (this->_output.size() >= this->_header_len + this->_content_len);
 	else
-		return (bytes_read == 0);
+		return (false);
 }
 
 int			*CGI::getPipesToCGI()
