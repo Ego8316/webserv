@@ -238,7 +238,7 @@ int	Client::handleEvent()
 	if (this->_state == INIT)
 		this->_requestInit();
 	this->_time_limit = std::min(utils::getTime() + this->_config->send_timeout, this->_request_time_limit);
-	while (!g_shutdown && utils::getTime() < this->_time_limit && _state != DONE && _error != WOULD_BLOCK)
+	while (!g_shutdown && utils::getTime() < this->_time_limit && _state != DONE && _state != ABORTING && _error != WOULD_BLOCK)
 	{
 		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
 			return (SERV_ERROR);
@@ -255,6 +255,8 @@ int	Client::handleEvent()
 	}
 	if (this->_request_time_limit <= utils::getTime() && _state != DONE)
 		_error = KILL_REQUEST;
+	if (_state == ABORTING)
+		_error = KILL_CLIENT;
 	if (this->_state != TRY_ACCEPTING && this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
 		_error = KILL_CLIENT;
 	if (_state == DONE || _error > WOULD_BLOCK)
@@ -389,7 +391,10 @@ int	Client::_readBody()
 	if (bytes_read == SERV_ERROR)
 		return (SERV_ERROR);
 	if (bytes_read == WBLOCK)
-		return (0);
+	{
+		this->_error = WOULD_BLOCK;
+		return (WOULD_BLOCK);
+	}
 	if (bytes_read == 0)
 	{
 		utils::logMsg("WARN", ORANGE, "[_readBody] Client closed the connection", this->_client_id);
@@ -410,6 +415,7 @@ int	Client::_readBody()
 	{
 		_leftover = body_str.substr(pos);
 		body_str.erase(pos);
+		this->_request->unchunkBody();
 		utils::logMsg("INFO", GREEN, "[_readBody] Chunked body complete", this->_client_id);
 		this->_state = PROCESSING_REQUEST;
 		printState();
@@ -528,7 +534,10 @@ int	Client::_sendFile()
 	if (bytes_sent == SERV_ERROR)
 		return (SERV_ERROR);
 	if (bytes_sent == WBLOCK)
-		return (0);
+	{
+		this->_error = WOULD_BLOCK;
+		return (WOULD_BLOCK);
+	}
 	if (bytes_sent == 0)
 	{
 		utils::logMsg("WARN", ORANGE, "[_sendFile] Client closed the connection", this->_client_id);

@@ -297,6 +297,8 @@ std::vector<PollRevent>	ServerCore::pollWatchRevent()
  */
 bool	ServerCore::pollAvailFor(int idx, nfds_t operation)
 {
+	if (idx < 0 || idx >= static_cast<int>(_poll_fds.size()) || _poll_fds[idx].fd < 0)
+		return (false);
 	int	ret = poll(&_poll_fds[idx], 1, 0);
 
 	if (ret == -1)
