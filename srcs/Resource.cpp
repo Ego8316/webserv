@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 03:48:44 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/29 18:41:52 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,11 @@ Resource::Resource()
 	:	_path(""),
 		_status(EXISTS),
 		_size(0),
-		_type(FTYPE_ANY)
+		_type(FTYPE_ANY),
+		_redir_code(HTTP_UNKNOWN_STATUS),
+		_method_allowed(true),
+		_autoindex(false),
+		_index("")
 {
 	return ;
 }
@@ -51,6 +55,10 @@ Resource	&Resource::operator=(const Resource &other)
 		_status = other._status;
 		_size = other._size;
 		_type = other._type;
+		_redir_code = other._redir_code;
+		_method_allowed = other._method_allowed;
+		_autoindex = other._autoindex;
+		_index = other._index;
 	}
 	return (*this);
 }
@@ -71,9 +79,38 @@ Resource::~Resource()
  */
 void	Resource::build(const Request &request, const ServerConfig &config)
 {
-	if (_checkRedirect(request.getRequestTarget(), config))
-		return ;
-	if (_resolvePath(request.getRequestTarget(), config) == SERV_ERROR)
+	this->_status = static_cast<ResourceStatus>(0);
+	this->_type = FTYPE_ANY;
+	this->_redir_code = HTTP_UNKNOWN_STATUS;
+	this->_method_allowed = (request.getMethod() & GET);
+	this->_autoindex = config.autoindex;
+	this->_index = config.index;
+	this->_path.clear();
+	this->_size = 0;
+
+	const Location	*loc = config.matchLocation(request.getRequestTarget());
+	std::string		root = config.root;
+	std::string		target = request.getRequestTarget();
+
+	if (loc)
+	{
+		_method_allowed = (loc->methods & request.getMethod());
+		_autoindex = loc->autoindex;
+		_index = loc->index;
+		if (_checkRedirect(loc))
+			return ;
+		if (!loc->root.empty())
+			root = loc->root;
+		if (target.compare(0, loc->path.size(), loc->path) == 0)
+			target = target.substr(loc->path.size());
+		if (!loc->upload_path.empty() && request.getMethod() == POST)
+			root = loc->upload_path;
+		if (!loc->cgi_pass.empty())
+			this->_status = static_cast<ResourceStatus>(this->_status | IS_CGI);
+	}
+	if (target.empty() || target[0] != '/')
+		target.insert(0, "/");
+	if (_resolvePath(target, root, _index) == SERV_ERROR)
 		return ;
 	this->_evaluatePermissions();
 	this->_detectType();
@@ -89,14 +126,14 @@ void	Resource::build(const Request &request, const ServerConfig &config)
  *
  * @return True when a redirect is found.
  */
-bool	Resource::_checkRedirect(const std::string &requestTarget, const ServerConfig &config)
+bool	Resource::_checkRedirect(const Location *loc)
 {
-	std::string	raw_path_requested(requestTarget);
-
-	(void)config;
-	// TODO: integrate location-level redirects when available.
-	(void)raw_path_requested;
-	return (false);
+	if (!loc || !loc->has_redirect)
+		return (false);
+	this->_status = IS_REDIRECT;
+	this->_path = loc->redirect.url;
+	this->_redir_code = static_cast<HttpStatus>(loc->redirect.code);
+	return (true);
 }
 
 /**
@@ -128,11 +165,11 @@ bool	Resource::_checkAccept(const Request &request)
  *
  * @return 0 if the path can be resolved, `SERV_ERROR` otherwise.
  */
-int	Resource::_resolvePath(const std::string &requestTarget, const ServerConfig &config)
+int	Resource::_resolvePath(const std::string &requestTarget, const std::string &root, const std::string &index)
 {
 	struct stat	file_stat;
 
-	this->_path = config.root + requestTarget;
+	this->_path = root + requestTarget;
 	this->_status = static_cast<ResourceStatus>(this->_status & ~(EXISTS | IS_DIR));
 	if (stat(this->_path.c_str(), &file_stat) == -1)
 	{
@@ -142,14 +179,19 @@ int	Resource::_resolvePath(const std::string &requestTarget, const ServerConfig 
 		return (SERV_ERROR);
 	}
 	this->_status |= EXISTS;
+	if (!S_ISDIR(file_stat.st_mode))
+		this->_size = static_cast<size_t>(file_stat.st_size);
 	if (S_ISDIR(file_stat.st_mode))
 	{
 		std::string base = this->_path;
 		if (!utils::endsWith(base, "/"))
 			base += "/";
-		std::string	index_path = base + config.index;
+		std::string	index_path = base + index;
 		if (stat(index_path.c_str(), &file_stat) == 0)
+		{
 			this->_path = index_path;
+			this->_size = static_cast<size_t>(file_stat.st_size);
+		}
 		else
 			this->_status |= IS_DIR;
 	}
@@ -183,9 +225,13 @@ void	Resource::_evaluatePermissions()
  */
 void	Resource::_detectType()
 {
+	bool	was_cgi = (_status & IS_CGI);
+
 	this->_type = utils::extensionToContentTypes(_path);
 	this->_status = static_cast<ResourceStatus>(_status & ~IS_CGI);
 	this->_status = static_cast<ResourceStatus>(_status | (IS_CGI * ((FTYPE_IS_CGI & _type) != 0)));
+	if (was_cgi)
+		this->_status = static_cast<ResourceStatus>(_status | IS_CGI);
 	return ;
 }
 
@@ -197,6 +243,21 @@ void	Resource::_detectType()
 const std::string	&Resource::getPath() const
 {
 	return (this->_path);
+}
+
+bool	Resource::methodAllowed() const
+{
+	return (this->_method_allowed);
+}
+
+bool	Resource::autoindex() const
+{
+	return (this->_autoindex);
+}
+
+HttpStatus	Resource::getRedirectCode() const
+{
+	return (this->_redir_code);
 }
 
 /**

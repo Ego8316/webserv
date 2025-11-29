@@ -39,10 +39,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cmath>
-#include <dirent.h>
 #include "colors.hpp"
 #include "default.hpp"
 
@@ -60,10 +56,8 @@
 
 #define NO_TIMEOUT -1
 #define CLIENT_LIMIT 1000
-#define MAX_BODY_SIZE_LIMIT 157286400
-
-# define PIPE_READ_END 0
-# define PIPE_WRITE_END 1
+#define PIPE_READ_END 0
+#define PIPE_WRITE_END 1
 
 // Default pages
 #define POST_PAGE		"<html><body><h1>Upload successful</h1></body></html>"
@@ -80,6 +74,10 @@
 						"<body><h1>404 Not Found</h1>" \
 						"<p>The requested URL was not found on this server.</p></body></html>"
 
+#define ERROR_PAGE_405	"<html><head><title>405 Method Not Allowed</title></head>" \
+						"<body><h1>405 Method Not Allowed</h1>" \
+						"<p>The requested method is not allowed for the requested URL.</p></body></html>"
+
 #define ERROR_PAGE_500	"<html><head><title>500 Internal Server Error</title></head>" \
 						"<body><h1>500 Internal Server Error</h1>" \
 						"<p>The server encountered an unexpected condition.</p></body></html>"
@@ -91,13 +89,6 @@
 #define ERROR_PAGE_505	"<html><head><title>505 HTTP Version Not Supported</title></head>" \
 						"<body><h1>505 HTTP Version Not Supported</h1>" \
 						"<p>The server does not support the HTTP protocol version used in the request.</p></body></html>"
-
-#define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
-#define LISTDIR_PREFIX "  "
-#define LISTDIR_SUFFIX "<br>\n"
-#define LISTDIR_ENDING "</body>\n</html>"
-
-#define NULL_CHUNK "0\r\n\r\n"
 
 #define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
 #define LISTDIR_PREFIX "  "
@@ -165,6 +156,7 @@ enum	HttpStatus
 	HTTP_UNAUTHORIZED = 401,
 	HTTP_FORBIDDEN = 403,
 	HTTP_NOT_FOUND = 404,
+	HTTP_METHOD_NOT_ALLOWED = 405,
 	HTTP_CONFLICT = 409,
 	HTTP_CONTENT_TOO_LARGE = 413,
 	HTTP_INTERNAL_SERVER_ERROR = 500,
@@ -173,7 +165,7 @@ enum	HttpStatus
 	HTTP_VERSION_NOT_SUPPORTED = 505
 };
 
-enum	RequestStage //should be set to DONE whenever not in the queue
+enum	RequestStage
 {
 	TRY_ACCEPTING,
 	INIT,
@@ -203,12 +195,6 @@ typedef struct s_PollRevent
 	short	revent;
 	int		client_id;
 }	PollRevent;
-
-typedef struct s_Redirection
-{
-	std::string		dest;
-	HttpStatus		error_code;
-}	s_Redirection;
 
 inline Method			operator|(Method a, Method b) { return static_cast<Method>(static_cast<int>(a) | static_cast<int>(b)); }
 inline Method&			operator|=(Method& a, Method b) { a = a | b; return a; }

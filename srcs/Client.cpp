@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/24 23:44:34 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/29 15:28:20 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ Client::Client(const ServerConfig *config, ServerCore *server)
 	this->_bytes_in_buffer = 0;
 	this->_time_limit = 0;
 	this->_request_time_limit = 0;
+	this->_keep_alive = true;
 	this->_request = NULL;
 	this->_response = NULL;
 }
@@ -76,6 +77,7 @@ Client	&Client::operator=(const Client &other)
 		this->_bytes_in_buffer = other._bytes_in_buffer;
 		this->_time_limit = other._time_limit;
 		this->_request_time_limit = other._request_time_limit;
+		this->_keep_alive = other._keep_alive;
 		if (this->_request)
 			delete this->_request;
 		this->_request = other._request ? new Request(*other._request) : NULL;
@@ -300,6 +302,9 @@ int	Client::_requestInit()
 {
 	this->_request = new Request();
 	this->_response = new Response();
+	this->_bytes_sent = 0;
+	this->_bytes_in_buffer = 0;
+	this->_keep_alive = true;
 	this->_request_time_limit = utils::getTime() + toSeconds(this->_config->client_body_timeout);
 	_state = READING_HEADER;
 	return (0);
@@ -333,7 +338,7 @@ int	Client::_readHeader()
 	}
 	if (bytes_read == 0)
 	{
-		std::cout << CYAN << "[_readHeader] Client closed the connection" << RESET << std::endl;
+		std::cout << CYAN << "[_readHeader] Client " << this->_client_id << " closed the connection" << RESET << std::endl;
 		return (this->_state = ABORTING, 0);
 	}
 	std::cout << GREEN << "[_readHeader] Read " << bytes_read << " bytes" << RESET << std::endl;
@@ -423,6 +428,12 @@ void	Client::_processRequest()
 	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
 		<< BLUE << " Processing request" << RESET << std::endl;
 	this->printRequest();
+	std::string conn = utils::toLower(_request->headerGetField("Connection"));
+	if (_request->getVersion() == "HTTP/1.0")
+		_keep_alive = (conn.find("keep-alive") != std::string::npos);
+	else
+		_keep_alive = (conn.find("close") == std::string::npos);
+	_response->setHeaders("Connection", _keep_alive ? "keep-alive" : "close");
 	if (_response->isCGI())
 		this->_state = CGI_RUNNING;
 	else
@@ -480,7 +491,11 @@ int	Client::_sendString()
 	if (this->_response->getFd() > -1)
 		this->_state = SENDING_FILE;
 	else
+	{
 		this->_state = DONE;
+		if (!_keep_alive)
+			this->_error = KILL_CLIENT;
+	}
 	this->printState();
 	return (0);
 }
@@ -502,6 +517,8 @@ int	Client::_sendFile()
 		close(this->_response->getFd());
 		this->_response->setFd(-1);
 		this->_state = DONE;
+		if (!_keep_alive)
+			this->_error = KILL_CLIENT;
 		this->printState();
 		return (0);
 	}

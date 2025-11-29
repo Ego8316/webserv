@@ -68,6 +68,7 @@ class Client
 		int								_bytes_in_buffer;
 		long							_time_limit;
 		long							_request_time_limit;
+		bool							_keep_alive;
 		Request							*_request;
 		Response						*_response;
 		

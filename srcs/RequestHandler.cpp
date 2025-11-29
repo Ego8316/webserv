@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/11/24 23:50:35 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/29 18:10:43 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,15 +69,16 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 	}
 	if (request.getMethod() == UNKNOWN)
 		return (_handleError(response, HTTP_NOT_IMPLEMENTED, config));
-	// TODO : BIEN PENSER A CHANGER AVANT DE RENDRE
-	// if (request.getVersion() != "HTTP/1.1" || request.getVersion() != "HTTP/1.0")
-	// 	return (_handleError(HTTP_VERSION_NOT_SUPPORTED, config));
+	if (request.getVersion() != "HTTP/1.1" || request.getVersion() != "HTTP/1.0")
+		return (_handleError(response, HTTP_VERSION_NOT_SUPPORTED, config));
 
 	Resource	resource;
 	resource.build(request, config);
 
 	if (resource.isRedirect())
 		return (_handleRedirect(response, resource));
+	if (!resource.methodAllowed())
+		return (_handleError(response, HTTP_METHOD_NOT_ALLOWED, config));
 	if (!resource.exists() && request.getMethod() != POST)
 	{
 		std::cerr << "Resource not found" << std::endl;
@@ -117,7 +118,7 @@ void	RequestHandler::_handleGet(Response *response, const ServerConfig &config, 
 	{
 		if (!utils::endsWith(resource.getPath(), "/"))
 			return (_handleError(response, HTTP_REDIRECT_PERM, config));
-		if (config.autoindex)
+		if (resource.autoindex())
 			return (_handleListDir(response, config, resource));
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	}
@@ -226,7 +227,7 @@ void	RequestHandler::_handleRedirect(Response *response, const Resource &resourc
 {
 	std::string		response_body;
 
-	response->setStatus(static_cast<HttpStatus>(resource.getStatus()));
+	response->setStatus(resource.getRedirectCode());
 	response->setHeaders("Location", resource.getPath());
 	response->setContentType("text/html");
 	response->setContentLength(0);

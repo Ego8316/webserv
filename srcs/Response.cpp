@@ -184,7 +184,9 @@ void	Response::buildHeader()
 {
 	if (!utils::mapHasEntry(this->_headers, std::string("Server")))
 		this->_headers["Server"] = "Webserv/1.0 (Unix)";
-	this->_header = "HTTP/1.0 " + utils::toString(this->_status_code)
+	if (!utils::mapHasEntry(this->_headers, std::string("Connection")))
+		this->_headers["Connection"] = "keep-alive";
+	this->_header = "HTTP/1.1 " + utils::toString(this->_status_code)
 		+ " " + utils::httpStatusToStr(this->_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); ++it)
 	this->_header += it->first + ": " + it->second + "\r\n";
@@ -288,6 +290,7 @@ std::string	Response::getDefaultErrorPage(HttpStatus code)
 		case HTTP_BAD_REQUEST:				return ERROR_PAGE_400;
 		case HTTP_FORBIDDEN:				return ERROR_PAGE_403;
 		case HTTP_NOT_FOUND:				return ERROR_PAGE_404;
+		case HTTP_METHOD_NOT_ALLOWED:		return ERROR_PAGE_405;
 		case HTTP_INTERNAL_SERVER_ERROR:	return ERROR_PAGE_500;
 		case HTTP_NOT_IMPLEMENTED:			return ERROR_PAGE_501;
 		case HTTP_VERSION_NOT_SUPPORTED:	return ERROR_PAGE_505;

@@ -12,6 +12,12 @@
 
 #include "ServerConfig.hpp"
 
+/**
+ * @brief Construct a server configuration with defaults.
+ *
+ * These values are overridden by parsed configuration files. Defaults mirror a
+ * minimal HTTP server with conservative limits.
+ */
 ServerConfig::ServerConfig()
 	:	listen_host_string("0.0.0.0"),
 		listen_host(htonl(0x00000000)),
@@ -30,6 +36,40 @@ ServerConfig::ServerConfig()
 	return ;	
 }
 
+/**
+ * @brief Find the best-matching location block for a path.
+ *
+ * Selects the longest prefix match among configured locations. Returns NULL
+ * when no location matches.
+ *
+ * @param path Normalized request target (starting with '/').
+ *
+ * @return Pointer to the matching Location or NULL.
+ */
+const Location	*ServerConfig::matchLocation(const std::string &path) const
+{
+	const Location	*best = NULL;
+	size_t			best_len = 0;
+
+	for (std::map<std::string, Location>::const_iterator it = locations.begin();
+			it != locations.end(); ++it)
+	{
+		const std::string &prefix = it->first;
+		if (path.compare(0, prefix.size(), prefix) == 0 && prefix.size() >= best_len)
+		{
+			best = &it->second;
+			best_len = prefix.size();
+		}
+	}
+	return (best);
+}
+
+/**
+ * @brief Print the top border of the formatted configuration table.
+ *
+ * @param os Output stream.
+ * @param title Title text to embed in the border.
+ */
 static void	printBorderTop(std::ostream &os, const std::string &title)
 {
 	os << BORDER_COLOR << TOP_LEFT << title;
@@ -37,6 +77,11 @@ static void	printBorderTop(std::ostream &os, const std::string &title)
 	os << TOP_RIGHT << RESET << "\n";
 }
 
+/**
+ * @brief Print the bottom border of the formatted table.
+ *
+ * @param os Output stream.
+ */
 static void	printBorderBottom(std::ostream &os)
 {
 	os << BORDER_COLOR << BOTTOM_LEFT;
@@ -44,6 +89,13 @@ static void	printBorderBottom(std::ostream &os)
 	os << BOTTOM_RIGHT << RESET << "\n";
 }
 
+/**
+ * @brief Print a section header row with optional subtitle.
+ *
+ * @param os Output stream.
+ * @param title Section title.
+ * @param subtitle Right-aligned subtitle text.
+ */
 static void	printSection(std::ostream &os, const std::string &title, const std::string &subtitle)
 {
 	os << BORDER_COLOR << VERTICAL << RESET << " ";
@@ -59,6 +111,13 @@ static void	printSection(std::ostream &os, const std::string &title, const std::
 	os << BORDER_COLOR << VERTICAL << RESET << "\n";
 }
 
+/**
+ * @brief Print a name/value field on one row of the table.
+ *
+ * @param os Output stream.
+ * @param name Field label.
+ * @param value Field value.
+ */
 static void	printField(std::ostream &os, const std::string &name, const std::string &value)
 {
 	os << BORDER_COLOR << VERTICAL << RESET << "   ";
@@ -80,6 +139,12 @@ static void	printField(std::ostream &os, const std::string &name, const std::str
 	os << BORDER_COLOR << VERTICAL << RESET << "\n";
 }
 
+/**
+ * @brief Render server-level settings rows.
+ *
+ * @param os Output stream.
+ * @param cfg Configuration to read.
+ */
 static void	printServerSettings(std::ostream &os, const ServerConfig &cfg)
 {
 	printSection(os, "Server Settings", "");
@@ -92,6 +157,12 @@ static void	printServerSettings(std::ostream &os, const ServerConfig &cfg)
 	printField(os, "Max body size:", utils::toString(cfg.client_max_body_size));
 }
 
+/**
+ * @brief Render timeout-related fields.
+ *
+ * @param os Output stream.
+ * @param cfg Configuration to read.
+ */
 static void	printTimeouts(std::ostream &os, const ServerConfig &cfg)
 {
 	printSection(os, "Timeouts", "");
@@ -100,6 +171,12 @@ static void	printTimeouts(std::ostream &os, const ServerConfig &cfg)
 	printField(os, "Send timeout:", utils::toString(cfg.send_timeout) + "s");
 }
 
+/**
+ * @brief Render buffer-related fields.
+ *
+ * @param os Output stream.
+ * @param cfg Configuration to read.
+ */
 static void	printBuffers(std::ostream &os, const ServerConfig &cfg)
 {
 	printSection(os, "Buffers", "");
@@ -107,6 +184,12 @@ static void	printBuffers(std::ostream &os, const ServerConfig &cfg)
 	printField(os, "Body buffer:", utils::toString(cfg.client_body_buffer_size));
 }
 
+/**
+ * @brief Render configured error pages.
+ *
+ * @param os Output stream.
+ * @param cfg Configuration to read.
+ */
 static void	printErrorPages(std::ostream &os, const ServerConfig &cfg)
 {
 	printSection(os, "Error pages", "");
@@ -115,6 +198,12 @@ static void	printErrorPages(std::ostream &os, const ServerConfig &cfg)
 		printField(os, utils::toString(it->first), it->second);
 }
 
+/**
+ * @brief Render a location block summary.
+ *
+ * @param os Output stream.
+ * @param loc Location to render.
+ */
 static void	printLocation(std::ostream &os, const Location &loc)
 {
 	printSection(os, "Location", loc.path);
@@ -135,24 +224,16 @@ static void	printLocation(std::ostream &os, const Location &loc)
 					utils::toString(loc.redirect.code) + " -> " + loc.redirect.url);
 }
 
-const Location	*ServerConfig::matchLocation(const std::string &path) const
-{
-	const Location	*best = NULL;
-	size_t			best_len = 0;
-
-	for (std::map<std::string, Location>::const_iterator it = locations.begin();
-			it != locations.end(); ++it)
-	{
-		const std::string &prefix = it->first;
-		if (path.compare(0, prefix.size(), prefix) == 0 && prefix.size() >= best_len)
-		{
-			best = &it->second;
-			best_len = prefix.size();
-		}
-	}
-	return (best);
-}
-
+/**
+ * @brief Pretty-print a server configuration.
+ *
+ * Produces a table view used at startup to visualize active settings.
+ *
+ * @param os Output stream.
+ * @param cfg Configuration to render.
+ *
+ * @return Reference to the output stream.
+ */
 std::ostream &operator<<(std::ostream &os, const ServerConfig &cfg)
 {
 	printBorderTop(os, "SERVER CONFIG");
