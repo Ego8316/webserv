@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/29 15:03:31 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/29 21:20:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,12 +134,14 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 	
 	if (this->_bytes_to_send == 0)
 	{
-		this->_bytes_to_send = request.getRawBody().size() + request.getRawHeader().size();
+		this->_bytes_to_send = request.getRawBody().size();// + request.getRawHeader().size();
 		std::cout << "Body = >" << request.getRawBody() << "<\nheader = >" << request.getRawHeader() << "<" << std::endl;
 	}
 	while (utils::getTime() < client.getTimeLimit() && !this->_is_complete)
 	{
-		if (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0)
+		if (this->_pipe_to_CGI[PIPE_WRITE_END] == -1)
+		{}
+		else if (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0)
 			bytes_sent = this->writeToCGI(request, config, server);
 		if (!checkOutputTermination(bytes_read))
 			bytes_read = this->readFromCGI(config, server);
@@ -165,7 +167,7 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config, ServerCore &ser
 	std::vector<char>	buffer(config.buffer_size);
 	int 				bts;
 	
-	if (this->_total_bytes_sent < static_cast<ssize_t>(request.getRawHeader().size()))
+	/*if (this->_total_bytes_sent < static_cast<ssize_t>(request.getRawHeader().size()))
 	{
 		const std::string	&header_str = request.getRawHeader();
 		bts = std::min(config.buffer_size, header_str.size() - this->_total_bytes_sent);
@@ -174,15 +176,25 @@ ssize_t		CGI::writeToCGI(Request &request, const Config &config, ServerCore &ser
 		bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], header_str.c_str() + this->_total_bytes_sent, bts);
 	}
 	else
-	{
-		const std::string	&request_str = request.getRawBody();
-		bts = std::min(config.buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
-		if (!server.pollAvailFor(config.client_limit + 2 * _client_id + 1, POLLOUT))
-			return (0);
-		bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent - request.getRawHeader().size(), bts);
-	}
+	{*/
+	const std::string	&request_str = request.getRawBody();
+	bts = std::min(config.buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
+	std::cout << "request_str" << std::endl;
+	std::cout << request_str << std::endl;
+	std::cout << "bts" << std::endl;
+	std::cout << bts << std::endl;
+	if (!server.pollAvailFor(config.client_limit + 2 * _client_id + 1, POLLOUT))
+		return (0);
+	bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent - request.getRawHeader().size(), bts);
+	// }
 	if (bytes_sent != -1)
 		this->_total_bytes_sent += bytes_sent;
+	if (this->_total_bytes_sent == this->_bytes_to_send)
+	{
+		close(this->_pipe_to_CGI[PIPE_WRITE_END]);
+		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
+		// TODO pollRemove @hugo 
+	}
 	return (bytes_sent);
 }
 
