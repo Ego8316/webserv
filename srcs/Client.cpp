@@ -6,13 +6,22 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/28 14:20:42 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/30 22:25:29 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include "headers.hpp"
 
-Client::Client(const Config *config, ServerCore *server)
+extern int	g_shutdown;
+
+/**
+ * @brief Builds a client object attached to a server and config.
+ *
+ * @param config Server configuration.
+ * @param server Owning server core.
+ */
+Client::Client(const ServerConfig *config, ServerCore *server)
 {
 	this->_config = config;
 	this->_server = server;
@@ -27,15 +36,28 @@ Client::Client(const Config *config, ServerCore *server)
 	this->_bytes_in_buffer = 0;
 	this->_time_limit = 0;
 	this->_request_time_limit = 0;
+	this->_keep_alive = true;
 	this->_request = NULL;
 	this->_response = NULL;
 }
 
+/**
+ * @brief Copy constructor.
+ *
+ * @param other Source client.
+ */
 Client::Client(const Client &other)
 {
 	*this = other;
 }
 
+/**
+ * @brief Assignment operator.
+ *
+ * @param other Source client.
+ *
+ * @return Reference to this client.
+ */
 Client	&Client::operator=(const Client &other)
 {
 	if (this != &other)
@@ -53,6 +75,7 @@ Client	&Client::operator=(const Client &other)
 		this->_bytes_in_buffer = other._bytes_in_buffer;
 		this->_time_limit = other._time_limit;
 		this->_request_time_limit = other._request_time_limit;
+		this->_keep_alive = other._keep_alive;
 		if (this->_request)
 			delete this->_request;
 		this->_request = other._request ? new Request(*other._request) : NULL;
@@ -63,6 +86,9 @@ Client	&Client::operator=(const Client &other)
 	return (*this);
 }
 
+/**
+ * @brief Destructor closing socket and freeing request/response.
+ */
 Client::~Client()
 {
 	if (this->_client_fd > 0)
@@ -76,66 +102,128 @@ Client::~Client()
 		delete _response;
 }
 
+/**
+ * @brief Returns client sockaddr storage.
+ *
+ * @return Reference to sockaddr_in.
+ */
 struct sockaddr_in	&Client::getClientAddr()
 {
 	return (this->_client_addr);
 }
 
+/**
+ * @brief Returns stored sockaddr length reference.
+ *
+ * @return Reference to socklen_t.
+ */
 socklen_t	&Client::getClientLen()
 {
 	return (this->_client_len);
 }
 
-int	Client::getId()
+/**
+ * @brief Returns client identifier.
+ *
+ * @return Client id.
+ */
+int	Client::getId() const
 {
 	return (this->_client_id);
 }
 
+/**
+ * @brief Returns client socket descriptor.
+ *
+ * @return Socket fd.
+ */
 int	Client::getFd()
 {
 	return (this->_client_fd);
 }
 
+/**
+ * @brief Returns current processing state.
+ *
+ * @return RequestStage value.
+ */
 RequestStage	Client::getState()
 {
 	return (this->_state);
 }
 
+/**
+ * @brief Returns reference to owning ServerCore.
+ *
+ * @return ServerCore reference.
+ */
 ServerCore	&Client::getServer()
 {
 	return (*this->_server);
 }
 
+/**
+ * @brief Returns per-iteration processing time limit.
+ *
+ * @return Time limit in seconds.
+ */
 long	Client::getTimeLimit()
 {
 	return (this->_time_limit);
 }
 
+/**
+ * @brief Returns absolute request timeout.
+ *
+ * @return Timeout in seconds.
+ */
 long	Client::getRequestTimeLimit()
 {
 	return (this->_request_time_limit);
 }
 
+/**
+ * @brief Sets client identifier.
+ *
+ * @param id New client id.
+ */
 void	Client::setClientId(int id)
 {
 	this->_client_id = id;
 }
 
+/**
+ * @brief Stores accepted socket descriptor.
+ *
+ * @param fd Socket descriptor.
+ */
 void	Client::setFd(int fd)
 {
 	this->_client_fd = fd;
 }
 
+/**
+ * @brief Updates state machine stage.
+ *
+ * @param state New state.
+ */
 void	Client::setState(RequestStage state)
 {
 	this->_state = state;
 }
 
+/**
+ * @brief Drives the client state machine for one poll cycle.
+ *
+ * @return ProcessError code (or SERV_ERROR).
+ */
 int	Client::handleEvent()
 {
 	this->_error = ERR_NONE;
+	if (g_shutdown)
+		return (KILL_SERVER);
 	if (this->_request_time_limit == 0)
-		this->_request_time_limit = utils::getTime() + _config->max_request_time;
+		this->_request_time_limit = utils::getTime() + _config->client_body_timeout;
 	if (this->_state == TRY_ACCEPTING)
 		this->_tryAccepting();
 	if (this->_state == ABORTING)
@@ -149,8 +237,8 @@ int	Client::handleEvent()
 	}
 	if (this->_state == INIT)
 		this->_requestInit();
-	this->_time_limit = std::min(utils::getTime() + this->_config->processing_time_limit, this->_request_time_limit);
-	while (utils::getTime() < this->_time_limit && _state != DONE && _state != ABORTING && _error != WOULD_BLOCK)
+	this->_time_limit = std::min(utils::getTime() + this->_config->send_timeout, this->_request_time_limit);
+	while (!g_shutdown && utils::getTime() < this->_time_limit && _state != DONE && _state != ABORTING && _error != WOULD_BLOCK)
 	{
 		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
 			return (SERV_ERROR);
@@ -158,7 +246,7 @@ int	Client::handleEvent()
 			return (SERV_ERROR);
 		if (_state == PROCESSING_REQUEST)
 			this->_processRequest();
-		if (_state == CGI_RUNNING)
+		if (_state == CGI_RUNNING )
 			this->_monitorCGI();
 		if (this->_state == SENDING_STRING && this->_sendString() == SERV_ERROR)
 			return (SERV_ERROR);
@@ -167,8 +255,8 @@ int	Client::handleEvent()
 	}
 	if (this->_request_time_limit <= utils::getTime() && _state != DONE)
 		_error = KILL_REQUEST;
-	if (this->_state == ABORTING)
-		return (KILL_CLIENT);
+	if (_state == ABORTING)
+		_error = KILL_CLIENT;
 	if (this->_state != TRY_ACCEPTING && this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
 		_error = KILL_CLIENT;
 	if (_state == DONE || _error > WOULD_BLOCK)
@@ -183,6 +271,11 @@ int	Client::handleEvent()
 	return (_error);
 }
 
+/**
+ * @brief Accepts a pending connection and registers it with poll.
+ *
+ * @return 0 on success, SERV_ERROR or WBLOCK otherwise.
+ */
 int	Client::_tryAccepting()
 {
 	if (this->_server->socketAcceptClient(this) == SERV_ERROR)
@@ -197,30 +290,43 @@ int	Client::_tryAccepting()
 	else
 		this->_state = DONE;
 	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id);
-	std::cout << BLUE << "Accepted client " << this->_client_id << RESET << std::endl;
+	utils::logMsg("INFO", GREEN, "Accepted new connection", this->_client_id);
 	this->printState();
 	return (0);
 }
 
+/**
+ * @brief Allocates Request/Response objects and primes header reading.
+ *
+ * @return 0 on success.
+ */
 int	Client::_requestInit()
 {
 	this->_request = new Request();
 	this->_response = new Response();
-	this->_request_time_limit = utils::getTime() + this->_config->max_request_time;
+	this->_bytes_sent = 0;
+	this->_bytes_in_buffer = 0;
+	this->_keep_alive = true;
+	this->_request_time_limit = utils::getTime() + this->_config->client_body_timeout;
 	_state = READING_HEADER;
 	return (0);
 }
 
 
+/**
+ * @brief Reads the HTTP header, advancing state when complete.
+ *
+ * @return 0, SERV_ERROR, or WOULD_BLOCK.
+ */
 int	Client::_readHeader()
 {
-	std::vector<char>	buffer(this->_config->buffer_size);
+	std::vector<char>	buffer(this->_config->client_header_buffer_size);
 	std::string			&header_str = this->_request->getRawHeader();
 	size_t				pos;
 
 	if (!this->_leftover.empty())
 	{
-		std::cout << YELLOW << "[_readHeader] Applying leftover (" << _leftover.size() << " bytes)" << RESET << std::endl;
+		utils::logMsg("DEBUG", CYAN, "[_readHeader] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
 		header_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
@@ -234,21 +340,21 @@ int	Client::_readHeader()
 	}
 	if (bytes_read == 0)
 	{
-		std::cout << CYAN << "[_readHeader] Client closed the connection" << RESET << std::endl;
+		utils::logMsg("WARN", ORANGE, "[_readHeader] Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
-	std::cout << GREEN << "[_readHeader] Read " << bytes_read << " bytes" << RESET << std::endl;
+	utils::logMsg("INFO", GREEN, "[_readHeader] Read " + utils::toString(bytes_read) + " bytes", this->_client_id);
 	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
-	if (header_str.size() > this->_config->max_header_size)
+	if (header_str.size() > this->_config->client_header_buffer_size)
 		return (this->_state = ABORTING, SERV_ERROR);
 	if ((pos = header_str.find("\r\n\r\n")) == std::string::npos)
 	{
-		std::cout << CYAN << "[_readHeader] Incomplete header — waiting for more" << RESET << std::endl;
+		utils::logMsg("DEBUG", CYAN, "[_readHeader] Incomplete header — waiting for more", this->_client_id);
 		return (0);
 	}
 	this->_leftover = header_str.substr(pos + 4);
 	header_str.erase(pos);
-	std::cout << CYAN << "[_readHeader] Header fully received (" << header_str.size() << " bytes)" << RESET << std::endl;
+	utils::logMsg("INFO", GREEN, "[_readHeader] Header fully received (" + utils::toString(header_str.size()) + " bytes)", this->_client_id);
 	this->printHeader();
 	this->_request->parseHeader(*this->_config);
 	if (!this->_request->isChunked() && this->_request->getContentLength() == 0)
@@ -262,37 +368,49 @@ int	Client::_readHeader()
 	return (0);
 }
 
+/**
+ * @brief Reads the HTTP body, handling both content-length and chunked.
+ *
+ * @return 0, SERV_ERROR, or WOULD_BLOCK.
+ */
 int	Client::_readBody()
 {
-	std::vector<char>	buffer(this->_config->buffer_size);
+	std::vector<char>	buffer(this->_config->client_body_buffer_size);
 	std::string			&body_str = this->_request->getRawBody();
 	size_t				pos;
-
+	
 	if (body_str.empty() && !this->_request->isChunked())
 		body_str.reserve(this->_request->getContentLength());
 	if (!this->_leftover.empty())
 	{
-		std::cout << YELLOW << "[_readBody] Applying leftover (" << _leftover.size() << " bytes)" << RESET << std::endl;
+		utils::logMsg("DEBUG", CYAN, "[_readBody] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
 		body_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
-	ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
-	if (bytes_read == SERV_ERROR)
-		return (SERV_ERROR);
-	if (bytes_read == WBLOCK)
-		return (0);
-	if (bytes_read == 0)
+	if (!(body_str.size() >= this->_request->getContentLength())
+		&& !(this->_request->isChunked() && (pos = body_str.find(NULL_CHUNK)) != std::string::npos))
 	{
-		std::cout << CYAN << "[_readHeader] Client closed the connection" << RESET << std::endl;
-		return (this->_state = ABORTING, 0);
+		ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
+		if (bytes_read == SERV_ERROR)
+			return (SERV_ERROR);
+		if (bytes_read == WBLOCK)
+		{
+			this->_error = WOULD_BLOCK;
+			return (WOULD_BLOCK);
+		}
+		if (bytes_read == 0)
+		{
+			utils::logMsg("WARN", ORANGE, "[_readBody] Client closed the connection", this->_client_id);
+			return (this->_state = ABORTING, 0);
+		}
+		body_str.append(buffer.begin(), buffer.begin() + bytes_read);
+		utils::logMsg("INFO", GREEN, "[_readBody] Read " + utils::toString(bytes_read) + " bytes (total: " + utils::toString(body_str.size()) + ")", this->_client_id);
 	}
-	body_str.append(buffer.begin(), buffer.begin() + bytes_read);
-	std::cout << GREEN << "[_readBody] Read " << bytes_read << " bytes (total: " << body_str.size() << ")" << RESET << std::endl;
 	if (body_str.size() >= this->_request->getContentLength())
 	{
 		_leftover = body_str.substr(this->_request->getContentLength());
 		body_str.erase(this->_request->getContentLength());
-		std::cout << CYAN << "[_readBody] Body complete (" << body_str.size() << " bytes)" << RESET << std::endl;
+		utils::logMsg("INFO", GREEN, "[_readBody] Body complete (" + utils::toString(body_str.size()) + " bytes)", this->_client_id);
 		this->_state = PROCESSING_REQUEST;
 		printState();
 		return (0);
@@ -301,21 +419,30 @@ int	Client::_readBody()
 	{
 		_leftover = body_str.substr(pos);
 		body_str.erase(pos);
-		std::cout << CYAN << "[_readBody] Chunked body complete" << RESET << std::endl;
+		this->_request->unchunkBody();
+		utils::logMsg("INFO", GREEN, "[_readBody] Chunked body complete", this->_client_id);
 		this->_state = PROCESSING_REQUEST;
 		printState();
 		return (0);
 	}
-	std::cout << CYAN << "[_readBody] Partial body received — waiting for more" << RESET << std::endl;
+	utils::logMsg("DEBUG", CYAN, "[_readBody] Partial body received — waiting for more", this->_client_id);
 	return (0);
 }
 
+/**
+ * @brief Builds the Response based on the parsed Request.
+ */
 void	Client::_processRequest()
 {
 	RequestHandler::handle(this->_response, *_request, *_config);
-	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
-		<< BLUE << " Processing request" << RESET << std::endl;
+	utils::logMsg("INFO", GREEN, "Processing request", this->_client_id);
 	this->printRequest();
+	std::string conn = utils::toLower(_request->headerGetField("Connection"));
+	if (_request->getVersion() == "HTTP/1.0")
+		_keep_alive = (conn.find("keep-alive") != std::string::npos);
+	else
+		_keep_alive = (conn.find("close") == std::string::npos);
+	_response->setHeaders("Connection", _keep_alive ? "keep-alive" : "close");
 	if (_response->isCGI())
 		this->_state = CGI_RUNNING;
 	else
@@ -324,21 +451,33 @@ void	Client::_processRequest()
 	return ;
 }
 
+/**
+ * @brief Monitors CGI execution until completion.
+ */
 void	Client::_monitorCGI()
 {
-	if (this->_response->getCGI() && !this->_response->getCGI()->isComplete())
+	CGI	*cgi = _response->getCGI();
+
+	if (!cgi || cgi->isComplete())
 	{
-		_response->getCGI()->setClientId(this->_client_id);
-		_response->getCGI()->Run(*this, *_request, *_config, *_response, *_server);
+		this->_state = SENDING_STRING;
+		this->printState();
+		return ;
 	}
-	if (this->_response->getCGI() && _response->getCGI()->isComplete())
+	cgi->setClientId(this->_client_id);
+	cgi->Run(*this, *_request, *_config, *_response, *_server);
+	if (cgi->isComplete())
 	{
 		this->_state = SENDING_STRING;
 		this->printState();
 	}
-	return ;
 }
 
+/**
+ * @brief Sends buffered response string over the socket.
+ *
+ * @return 0 on progress/completion, SERV_ERROR or WOULD_BLOCK otherwise.
+ */
 int	Client::_sendString()
 {
 	const std::string	&response_str = this->_response->getString();
@@ -346,6 +485,8 @@ int	Client::_sendString()
 
 	if (bytes_to_send > 0)
 	{//TODO on devrait pas send config->buffer_size plutot que tout le reste ?
+		if (this->_bytes_sent == 0)
+			utils::logMsg("DEBUG", CYAN, "[_sendString] Response header:\n" + this->_response->getHeader(), this->_client_id);
 		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, bytes_to_send, this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);
@@ -353,7 +494,7 @@ int	Client::_sendString()
 			return (0);
 		if (sent == 0)
 		{
-			std::cout << CYAN << "[_sendString] Client closed the connection" << RESET << std::endl;
+			utils::logMsg("WARN", ORANGE, "[_sendString] Client closed the connection", this->_client_id);
 			return (this->_state = ABORTING, 0);
 		}
 		this->_bytes_sent += sent;
@@ -362,16 +503,25 @@ int	Client::_sendString()
 	if (this->_response->getFd() > -1)
 		this->_state = SENDING_FILE;
 	else
+	{
 		this->_state = DONE;
+		if (!_keep_alive)
+			this->_error = KILL_CLIENT;
+	}
 	this->printState();
 	return (0);
 }
 
+/**
+ * @brief Streams response file descriptor contents to the client.
+ *
+ * @return 0 on progress/completion, SERV_ERROR or WOULD_BLOCK otherwise.
+ */
 int	Client::_sendFile()
 {
-	std::vector<char>	buffer(this->_config->buffer_size);
+	std::vector<char>	buffer(this->_config->client_body_buffer_size);
 
-	ssize_t	bytes_read = read(this->_response->getFd(), &buffer[0], this->_config->buffer_size);
+	ssize_t	bytes_read = read(this->_response->getFd(), &buffer[0], this->_config->client_body_buffer_size);
 	if (bytes_read < 0)
 		return (SERV_ERROR);
 	else if (bytes_read == 0)
@@ -379,6 +529,8 @@ int	Client::_sendFile()
 		close(this->_response->getFd());
 		this->_response->setFd(-1);
 		this->_state = DONE;
+		if (!_keep_alive)
+			this->_error = KILL_CLIENT;
 		this->printState();
 		return (0);
 	}
@@ -386,15 +538,21 @@ int	Client::_sendFile()
 	if (bytes_sent == SERV_ERROR)
 		return (SERV_ERROR);
 	if (bytes_sent == WBLOCK)
-		return (0);
+	{
+		this->_error = WOULD_BLOCK;
+		return (WOULD_BLOCK);
+	}
 	if (bytes_sent == 0)
 	{
-		std::cout << CYAN << "[_sendString] Client closed the connection" << RESET << std::endl;
+		utils::logMsg("WARN", ORANGE, "[_sendFile] Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
 	return (0);
 }
 
+/**
+ * @brief Resets request/response objects for a new exchange.
+ */
 void	Client::_prepareNew()
 {
 	delete this->_request;
@@ -403,13 +561,18 @@ void	Client::_prepareNew()
 	this->_response = new Response();
 }
 
+/**
+ * @brief Logs the current client state.
+ */
 void	Client::printState() const
 {
-	std::cout << BOLD_BLUE << "[Client " <<  this->_client_id << "]" << RESET
-		<< BLUE << " State is now " << utils::stateToStr(this->_state) << RESET << std::endl;
+	utils::logMsg("INFO", BLUE, "State is now " + utils::stateToStr(this->_state), this->_client_id);
 	return ;
 }
 
+/**
+ * @brief Logs the raw HTTP header for debugging.
+ */
 void	Client::printHeader() const
 {
 	std::cout << BOLD_GRAY << "[Client " << this->_client_id << "]" << RESET
@@ -419,6 +582,9 @@ void	Client::printHeader() const
 	return ;
 }
 
+/**
+ * @brief Logs the parsed request for debugging.
+ */
 void	Client::printRequest() const
 {
 	std::cout << BOLD_GRAY << "[Client " << this->_client_id << "]" << RESET

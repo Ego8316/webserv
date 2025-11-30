@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/28 11:03:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/30 22:16:08 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,25 @@
 
 #include "headers.hpp"
 #include "Response.hpp"
-#include "Config.hpp"
+#include "ServerConfig.hpp"
 #include "ServerCore.hpp"
 #include "RequestHandler.hpp"
 
 class	Response;
 class	Query;
-class	Config;
+class	ServerConfig;
 class	ServerCore;
 class	Request;
 
+/**
+ * @class Client
+ *
+ * @brief Tracks a connected client state machine and its request/response.
+ */
 class Client
 {
 	public:
-		Client(const Config *config, ServerCore *server);
+		Client(const ServerConfig *config, ServerCore *server);
 		Client(const Client &other);
 		Client	&operator=(const Client &other);
 		~Client();
@@ -36,7 +41,7 @@ class Client
 		int						getFd();
 		struct sockaddr_in		&getClientAddr();
 		socklen_t				&getClientLen();
-		int						getId();
+		int						getId() const;
 		RequestStage			getState();
 		ServerCore				&getServer();
 		long					getTimeLimit();
@@ -50,7 +55,7 @@ class Client
 		void	printRequest() const;
 
 	private :
-		const Config					*_config;
+		const ServerConfig				*_config;
 		ServerCore						*_server;
 		int								_client_fd;
 		struct sockaddr_in				_client_addr;
@@ -63,6 +68,7 @@ class Client
 		int								_bytes_in_buffer;
 		long							_time_limit;
 		long							_request_time_limit;
+		bool							_keep_alive;
 		Request							*_request;
 		Response						*_response;
 		
@@ -70,6 +76,7 @@ class Client
 		int		_requestInit();
 		int		_readHeader();
 		int		_readBody();
+		bool	_body_is_complete(std::string &body_str);
 		void	_processRequest();
 		int		_sendString();
 		int		_sendFile();

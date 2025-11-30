@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/11/29 15:07:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/30 20:56:55 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,9 @@ class	CGI;
 
 /**
  * @class Response
+ *
  * @brief Represents an HTTP response.
- * 
+ *
  * Stores the HTTP status code, headers and body. Provides utility functions to
  * build the full HTTP response string to be sent to a client.
  */

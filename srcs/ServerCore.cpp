@@ -6,21 +6,37 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/11/29 14:47:31 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/30 21:03:30 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerCore.hpp"
 
-ServerCore::ServerCore(const Config *config)
+/**
+ * @brief Initializes the server core with config defaults.
+ *
+ * @param config Configuration to use.
+ */
+ServerCore::ServerCore(const ServerConfig *config)
 {
 	_config = config;
 	_server_fd = SERV_ERROR;
 	std::memset(&_server_addr, 0, sizeof(_server_addr));
-	_poll_fds.resize(3 * _config->client_limit + 1); //3 per clients (1 for web commmunications, 2 for cgi pipes) + 1 for server
+	_poll_fds.resize(_config->max_clients * 3 + 1); // clients + server + 2 pipes per client
+	for (size_t i = 0; i < _poll_fds.size(); ++i)
+	{
+		_poll_fds[i].fd = -1;
+		_poll_fds[i].events = 0;
+		_poll_fds[i].revents = 0;
+	}
 	return ;
 }
 
+/**
+ * @brief Copy constructor.
+ *
+ * @param other Source core.
+ */
 ServerCore::ServerCore(const ServerCore &other)
 {
 	_config = other._config;
@@ -30,6 +46,13 @@ ServerCore::ServerCore(const ServerCore &other)
 	return ;
 }
 
+/**
+ * @brief Assignment operator.
+ *
+ * @param other Source core.
+ *
+ * @return Reference to this core.
+ */
 ServerCore	&ServerCore::operator=(const ServerCore &other)
 {
 	if (this != &other)
@@ -42,6 +65,9 @@ ServerCore	&ServerCore::operator=(const ServerCore &other)
 	return (*this);
 }
 
+/**
+ * @brief Destructor closing the listening socket if needed.
+ */
 ServerCore::~ServerCore()
 {
 	if (_server_fd > 0)
@@ -52,16 +78,31 @@ ServerCore::~ServerCore()
 	return ;
 }
 
+/**
+ * @brief Returns the listening socket file descriptor.
+ *
+ * @return Listening fd.
+ */
 int	ServerCore::getFd() const
 {
 	return (this->_server_fd);
 }
 
+/**
+ * @brief Returns the mutable vector of pollfd structures.
+ *
+ * @return Reference to pollfd vector.
+ */
 std::vector<struct pollfd>	&ServerCore::getPollFds()
 {
 	return (this->_poll_fds);
 }
 
+/**
+ * @brief Sets up the listening socket (create, options, bind, listen).
+ *
+ * @return 0 on success, SERV_ERROR on failure.
+ */
 int	ServerCore::init()
 {
 	if (!_socketCreate())
@@ -91,6 +132,13 @@ int	ServerCore::init()
 	return (0);
 }
 
+/**
+ * @brief Accepts a new client connection and sets non-blocking when needed.
+ *
+ * @param new_client Client object to fill.
+ *
+ * @return Accepted socket fd or SERV_ERROR.
+ */
 int	ServerCore::socketAcceptClient(Client *new_client)
 {
 	new_client->setFd(accept(_server_fd,
@@ -103,16 +151,34 @@ int	ServerCore::socketAcceptClient(Client *new_client)
 	return (new_client->getFd());
 }
 
+/**
+ * @brief Reads from a client socket if poll marks it readable.
+ *
+ * @param buffer Destination buffer.
+ * @param bytes_read Buffer capacity.
+ * @param client Client descriptor owner.
+ *
+ * @return Bytes read, WBLOCK, or SERV_ERROR.
+ */
 int	ServerCore::socketRead(char *buffer, int bytes_read, Client *client)
 {
 	if (!pollAvailFor(client->getId(), POLLIN))
 		return (WBLOCK);
 	int	bytes_received = recv(client->getFd(), buffer, bytes_read, MSG_DONTWAIT);
 	if (bytes_received >= 0)
-		std::memset(buffer + bytes_received, 0, this->_config->buffer_size - bytes_received);
+		std::memset(buffer + bytes_received, 0, bytes_read - bytes_received);
 	return (bytes_received);
 }
 
+/**
+ * @brief Writes to a client socket if poll marks it writable.
+ *
+ * @param buffer Data to send.
+ * @param bytes_write Number of bytes to write.
+ * @param client Client descriptor owner.
+ *
+ * @return Bytes written, WBLOCK, or SERV_ERROR.
+ */
 int	ServerCore::socketWrite(const char *buffer, int bytes_write, Client *client)
 {
 	if (!pollAvailFor(client->getId(), POLLOUT))
@@ -121,54 +187,67 @@ int	ServerCore::socketWrite(const char *buffer, int bytes_write, Client *client)
 	return (bytes_sent);
 }
 
+/**
+ * @brief Adds or replaces a pollfd entry for a file descriptor.
+ *
+ * @param fd File descriptor.
+ * @param event Poll events mask.
+ * @param idx Index in poll vector (-1 for last).
+ */
 void	ServerCore::pollAdd(int fd, nfds_t event, int idx)
 {
-	if (idx == IS_SERVER)
+	if (idx == -1)
 		idx = _poll_fds.size() - 1;
 	struct pollfd	new_poll_fd;
 	new_poll_fd.fd = fd;
 	new_poll_fd.events = event;
 	_poll_fds[idx] = new_poll_fd;
+	_poll_fds[idx].revents = 0;
 	return ;
 }
 
+/**
+ * @brief Clears a pollfd entry.
+ *
+ * @param idx Index to clear.
+ */
 void	ServerCore::pollRemove(int idx)
 {
-	std::memset(&_poll_fds[idx], 0, sizeof(pollfd));
+	_poll_fds[idx].fd = -1;
+	_poll_fds[idx].events = 0;
+	_poll_fds[idx].revents = 0;
 }
 
+/**
+ * @brief Polls for events and collects them into a convenience vector.
+ *
+ * @return Vector of poll events.
+ */
 std::vector<PollRevent>	ServerCore::pollWatchRevent()
 {
 	std::vector<PollRevent>	ret;
 	PollRevent				revent;
 	int						num_event;
+	int						server_idx = _poll_fds.size() - 1;
 
 	ret.resize(0);
 	num_event = _pollWait();
 	if (num_event < 0)
 		return (ret);
-	for (unsigned int i = 0; i < static_cast<unsigned int>(_config->client_limit) + 1; ++i)
+	for (int i = 0; i < _config->max_clients && num_event > 0; ++i)
 	{
-		if (i == static_cast<unsigned int>(_config->client_limit))
-			i = this->_poll_fds.size() - 1;
 		revent.error = false;
 		revent.server = false;
 		revent.client_id = -1;
 		revent.revent = 0;
-		if (_poll_fds[i].fd == 0)
+		if (_poll_fds[i].fd < 0)
 			continue ;
 		if (_poll_fds[i].revents & POLLHUP || _poll_fds[i].revents & POLLERR)
 		{
 			revent.error = true;
 			revent.revent = _poll_fds[i].revents;
-			if (i == _poll_fds.size() - 1)
-				revent.server = true;
-			else
-				revent.client_id = i;
-			if (i == 0)
-				std::cerr << ORANGE << "Server ended connection." << RESET << std::endl;
-			else
-				std::cerr << ORANGE << "Client " << i << " ended connection." << RESET << std::endl;
+			revent.client_id = i;
+			std::cerr << ORANGE << "Client " << i << " ended connection." << RESET << std::endl;
 			ret.push_back(revent);
 			--num_event;
 		}
@@ -176,20 +255,50 @@ std::vector<PollRevent>	ServerCore::pollWatchRevent()
 		{
 			revent.error = false;
 			revent.revent = POLLIN;
-			if (i == this->_poll_fds.size() - 1)
-				revent.server = true;
-			else
-				revent.client_id = i;
+			revent.client_id = i;
 			ret.push_back(revent);
 			--num_event;
 		}
 		_poll_fds[i].revents = 0;
 	}
+	if (num_event > 0 && _poll_fds[server_idx].fd != 0)
+	{
+		revent.error = false;
+		revent.server = false;
+		revent.client_id = -1;
+		revent.revent = 0;
+		if (_poll_fds[server_idx].revents & POLLHUP || _poll_fds[server_idx].revents & POLLERR)
+		{
+			revent.error = true;
+			revent.revent = _poll_fds[server_idx].revents;
+			revent.server = true;
+			std::cerr << ORANGE << "Server ended connection." << RESET << std::endl;
+			ret.push_back(revent);
+		}
+		else if (_poll_fds[server_idx].revents & POLLIN)
+		{
+			revent.error = false;
+			revent.revent = POLLIN;
+			revent.server = true;
+			ret.push_back(revent);
+		}
+		_poll_fds[server_idx].revents = 0;
+	}
 	return (ret);
 }
 
+/**
+ * @brief Checks whether poll marks an fd ready for the given operation.
+ *
+ * @param idx Index in poll vector.
+ * @param operation Event mask to test (POLLIN/POLLOUT).
+ *
+ * @return True when ready.
+ */
 bool	ServerCore::pollAvailFor(int idx, nfds_t operation)
 {
+	if (idx < 0 || idx >= static_cast<int>(_poll_fds.size()) || _poll_fds[idx].fd < 0)
+		return (false);
 	int	ret = poll(&_poll_fds[idx], 1, 0);
 
 	if (ret == -1)
@@ -208,14 +317,24 @@ bool	ServerCore::pollAvailFor(int idx, nfds_t operation)
 	return (_poll_fds[idx].revents & operation);
 }
 
+/**
+ * @brief Creates the listening socket.
+ *
+ * @return True on success.
+ */
 bool	ServerCore::_socketCreate()
 {
-	_server_fd = socket(_config->domain, _config->type, _config->protocol);
+	_server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_server_fd == SERV_ERROR)
 		return (false);
 	return (true);
 }
 
+/**
+ * @brief Applies socket options (currently SO_REUSEADDR).
+ *
+ * @return True on success.
+ */
 bool	ServerCore::_socketSetOptions()
 {
 	int	opt = 1;
@@ -225,20 +344,30 @@ bool	ServerCore::_socketSetOptions()
 	return (true);
 }
 
+/**
+ * @brief Binds the listening socket to configured address/port.
+ *
+ * @return True on success.
+ */
 bool	ServerCore::_socketBind()
 {
 	int	success;
 
 	std::memset(&this->_server_addr, 0, sizeof(this->_server_addr));
-	_server_addr.sin_family = _config->domain;
-	_server_addr.sin_addr.s_addr = _config->ip;
-	_server_addr.sin_port = htons(_config->port_number);
+	_server_addr.sin_family = AF_INET;
+	_server_addr.sin_addr.s_addr = _config->listen_host;
+	_server_addr.sin_port = htons(_config->listen_port);
 	success = ::bind(_server_fd, (struct sockaddr *)&_server_addr, sizeof(_server_addr));
 	if (success == SERV_ERROR)
 		return (false);
 	return (true);
 }
 
+/**
+ * @brief Starts listening with the configured backlog.
+ *
+ * @return True on success.
+ */
 bool		ServerCore::_socketListen()
 {
 	if (listen(_server_fd, _config->incoming_queue_backlog) == SERV_ERROR)
@@ -246,6 +375,11 @@ bool		ServerCore::_socketListen()
 	return (true);
 }
 
+/**
+ * @brief Sets a file descriptor to non-blocking mode.
+ *
+ * @param fd File descriptor.
+ */
 void	ServerCore::setNonBlocking(int fd)
 {
 	int	flags = fcntl(fd, F_GETFL, 0);
@@ -255,6 +389,11 @@ void	ServerCore::setNonBlocking(int fd)
 	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
+/**
+ * @brief Waits for events on the poll set (non-blocking timeout 0).
+ *
+ * @return Number of ready fds or SERV_ERROR.
+ */
 int	ServerCore::_pollWait()
 {
 	int	poll_count;

@@ -6,12 +6,18 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/29 21:20:59 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/30 22:03:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGI.hpp"
+#include "headers.hpp"
 
+extern int	g_shutdown;
+
+/**
+ * @brief Default constructor initializing CGI state.
+ */
 CGI::CGI()
 {
 	this->_cgi_script = "";
@@ -21,6 +27,7 @@ CGI::CGI()
 	this->_output = "";
 	this->_header_len = 0;
 	this->_content_len = 0;
+	this->_client_id = -1;
 	this->_pid = 0;
 	this->_process_status[0] = 0;
 	this->_process_status[1] = 0;
@@ -30,18 +37,32 @@ CGI::CGI()
 	this->_pipe_from_CGI[1] = 0;
  	this->_total_bytes_sent = 0;
 	this->_bytes_to_send = 0;
+	this->_total_bytes_read = 0;
 	this->_chunked = false;
 	this->_cgi_script_char = NULL;
 	this->_args = NULL;
 	this->_env = NULL;
-	this->_pipes_polled = false;
+	this->_pipe_to_cgi_idx = -1;
+	this->_pipe_from_cgi_idx = -1;
 }
 
+/**
+ * @brief Copy constructor.
+ *
+ * @param other Source CGI.
+ */
 CGI::CGI(const CGI &other)
 {
 	*this = other;
 }
 
+/**
+ * @brief Assignment operator.
+ *
+ * @param other Source CGI.
+ *
+ * @return Reference to this CGI.
+ */
 CGI &CGI::operator=(const CGI &other)
 {
 	if (this != &other)
@@ -69,6 +90,9 @@ CGI &CGI::operator=(const CGI &other)
 	return (*this);
 }
 
+/**
+ * @brief Destructor terminating process and cleaning pipes/env.
+ */
 CGI::~CGI()
 {
 	if (this->_process_status[0] == 0 && this->_pid != 0)
@@ -77,17 +101,27 @@ CGI::~CGI()
 	{
 		close(this->_pipe_to_CGI[PIPE_WRITE_END]);
 		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
+		this->_server_link->pollRemove(this->_pipe_to_cgi_idx);
 	}
 	if (this->_pipe_from_CGI[PIPE_READ_END] != -1)
 	{
 		close(this->_pipe_from_CGI[PIPE_READ_END]);
 		this->_pipe_from_CGI[PIPE_READ_END] = -1;
+		this->_server_link->pollRemove(this->_pipe_from_cgi_idx);
 	}
 	deleteEnvVar();
 }
 
 
-void		CGI::Run(Client &client, Request &request, const Config &config, Response &response, ServerCore &server)
+/**
+ * @brief Runs the CGI lifecycle (init then nanny loop).
+ *
+ * @param client Client issuing the request.
+ * @param request Parsed HTTP request.
+ * @param config Server configuration.
+ * @param response Response to populate.
+ */
+void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Response &response, ServerCore &server)
 {
 	if (this->_is_init)
 		return (this->Nanny(client, request, config, response, server));
@@ -101,7 +135,7 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
 		return ;
 	}
-	this->_cgi_script = request.getRequestTarget();
+	this->_cgi_script = request.getRequestTarget(); //TODO quand config sera ok refaire les setup de path et les checks
 	if (!utils::startsWith(this->_cgi_script, "."))
 		this->_cgi_script = "." + this->_cgi_script;
 	this->_cgi_script_char = new char[this->_cgi_script.length() + 1];
@@ -110,34 +144,45 @@ void		CGI::Run(Client &client, Request &request, const Config &config, Response 
 	this->_pid = fork();
 	if (this->_pid == 0)
 	{
-		if (chdir(config.server_home.c_str()) == -1)
+		if (chdir(config.root.c_str()) == -1)
 			exit (1);
 		this->Execute();
 	}
 	else
 	{
+		this->_server_link = &server;
 		close(this->_pipe_to_CGI[PIPE_READ_END]);
 		close(this->_pipe_from_CGI[PIPE_WRITE_END]);
 		ServerCore::setNonBlocking(this->_pipe_to_CGI[PIPE_WRITE_END]);
 		ServerCore::setNonBlocking(this->_pipe_from_CGI[PIPE_READ_END]);
-		server.pollAdd(this->_pipe_to_CGI[PIPE_WRITE_END], POLLOUT, config.client_limit + 2 * _client_id + 1);
-		server.pollAdd(this->_pipe_from_CGI[PIPE_READ_END], POLLIN, config.client_limit + 2 * _client_id + 2);
+		if (this->_client_id > 0 && this->_pipe_to_cgi_idx == -1 && this->_pipe_from_cgi_idx == -1)
+		{
+			this->_pipe_to_cgi_idx = config.max_clients + 2 * _client_id + 1;
+			this->_pipe_from_cgi_idx = config.max_clients + 2 * _client_id + 2;
+			server.pollAdd(this->_pipe_to_CGI[PIPE_WRITE_END], POLLOUT, this->_pipe_to_cgi_idx);
+			server.pollAdd(this->_pipe_from_CGI[PIPE_READ_END], POLLIN, this->_pipe_from_cgi_idx);
+		}
 		this->Nanny(client, request, config, response, server);
 	}
 	this->_is_init = true;
 }
 
-void	CGI::Nanny(Client &client, Request &request, const Config &config, Response &response, ServerCore &server)
+/**
+ * @brief Supervises CGI I/O once initialized.
+ *
+ * @param client Client issuing the request.
+ * @param request Parsed request.
+ * @param config Server configuration.
+ * @param response Response to populate when CGI completes.
+ */
+void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Response &response, ServerCore &server)
 {
 	ssize_t				bytes_read = 1;
 	ssize_t				bytes_sent = 1;
 	
 	if (this->_bytes_to_send == 0)
-	{
 		this->_bytes_to_send = request.getRawBody().size();// + request.getRawHeader().size();
-		std::cout << "Body = >" << request.getRawBody() << "<\nheader = >" << request.getRawHeader() << "<" << std::endl;
-	}
-	while (utils::getTime() < client.getTimeLimit() && !this->_is_complete)
+	while (!g_shutdown && utils::getTime() < client.getTimeLimit() && !this->_is_complete)
 	{
 		if (this->_pipe_to_CGI[PIPE_WRITE_END] == -1)
 		{}
@@ -145,71 +190,66 @@ void	CGI::Nanny(Client &client, Request &request, const Config &config, Response
 			bytes_sent = this->writeToCGI(request, config, server);
 		if (!checkOutputTermination(bytes_read))
 			bytes_read = this->readFromCGI(config, server);
-		else if (this->_process_status[0] == 0)
+		else if (this->_process_status[0] == 0) // TODO what if the prorgram crash ???
 			this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
 		if (this->_process_status[0] != 0) // only set process status if done reading so we are sure the program is both finished and we are done reading
 		{
 			if (utils::startsWith(this->_output, "HTTP/"))
 				response.setSkipStatus(true);
 			genFullOutput(response);
-			std::cout << "coucou this is body" << std::endl;
-			std::cout << response.getBody() << std::endl;
 			this->_is_complete = true;
+			close(this->_pipe_to_CGI[PIPE_WRITE_END]);
+			this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
+			server.pollRemove(this->_pipe_to_cgi_idx);
 		}
-		//std::cout << "this->_chunked = " << this->_chunked << " this->_content_len = " << this->_content_len << " this->_header_len = " << this->_header_len << " bytes_read = " << bytes_read << std::endl;
-		//std::cout << " this->_total_bytes_sent " << this->_total_bytes_sent << " this->_bytes_to_send " << this->_bytes_to_send << " bytes_sent " << bytes_sent << " checkOutputTermination(bytes_read) " << checkOutputTermination(bytes_read) << std::endl;
 	}
 }
 
-ssize_t		CGI::writeToCGI(Request &request, const Config &config, ServerCore &server)
+/**
+ * @brief Writes request data to the CGI process.
+ *
+ * @param request Parsed request.
+ * @param config Server configuration (buffer size).
+ * @return Bytes written or -1 on error.
+ */
+ssize_t		CGI::writeToCGI(Request &request, const ServerConfig &config, ServerCore &server)
 {
 	ssize_t				bytes_sent = 0;
-	std::vector<char>	buffer(config.buffer_size);
+	std::vector<char>	buffer(config.client_body_buffer_size);
 	int 				bts;
-	
-	/*if (this->_total_bytes_sent < static_cast<ssize_t>(request.getRawHeader().size()))
-	{
-		const std::string	&header_str = request.getRawHeader();
-		bts = std::min(config.buffer_size, header_str.size() - this->_total_bytes_sent);
-		if (!server.pollAvailFor(config.client_limit + 2 * _client_id + 1, POLLOUT))
-			return (0);
-		bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], header_str.c_str() + this->_total_bytes_sent, bts);
-	}
-	else
-	{*/
+
 	const std::string	&request_str = request.getRawBody();
-	bts = std::min(config.buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
-	std::cout << "request_str" << std::endl;
-	std::cout << request_str << std::endl;
-	std::cout << "bts" << std::endl;
-	std::cout << bts << std::endl;
-	if (!server.pollAvailFor(config.client_limit + 2 * _client_id + 1, POLLOUT))
+	bts = std::min(config.client_body_buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
+	if (!server.pollAvailFor(this->_pipe_to_cgi_idx, POLLOUT))
 		return (0);
 	bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent - request.getRawHeader().size(), bts);
-	// }
 	if (bytes_sent != -1)
 		this->_total_bytes_sent += bytes_sent;
 	if (this->_total_bytes_sent == this->_bytes_to_send)
 	{
 		close(this->_pipe_to_CGI[PIPE_WRITE_END]);
 		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
-		// TODO pollRemove @hugo 
+		server.pollRemove(this->_pipe_to_cgi_idx);
 	}
 	return (bytes_sent);
 }
 
-ssize_t		CGI::readFromCGI(const Config &config, ServerCore &server)
+/**
+ * @brief Reads output from the CGI process.
+ *
+ * @param config Server configuration (buffer size).
+ * @return Bytes read or -1 on error.
+ */
+ssize_t		CGI::readFromCGI(const ServerConfig &config, ServerCore &server)
 {
 	ssize_t				bytes_read = 0;
-	std::vector<char>	buffer(config.buffer_size + 1);
+	std::vector<char>	buffer(config.client_body_buffer_size + 1);
 
-	if (!server.pollAvailFor(config.client_limit + 2 * _client_id + 2, POLLIN))
+	if (!server.pollAvailFor(this->_pipe_from_cgi_idx, POLLIN))
 		return (0);
-	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0], config.buffer_size);
-	std::cout << "BYTES READ = " << bytes_read << std::endl;
+	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0], config.client_body_buffer_size);
 	if (bytes_read != -1)
 	{
-		std::cout << "read " << bytes_read << " now at " << this->_total_bytes_read << "/" <<  this->_output.length() << std::endl;
 		buffer[bytes_read] = '\0';
 		this->_output += std::string(buffer.begin(), buffer.begin() + bytes_read);
 		this->_total_bytes_read += bytes_read;
@@ -219,7 +259,10 @@ ssize_t		CGI::readFromCGI(const Config &config, ServerCore &server)
 	return (bytes_read);
 }
 
-void	CGI::parseHeader(const Config &config)
+/**
+ * @brief Parses CGI output header to fill metadata.
+ */
+void	CGI::parseHeader(const ServerConfig &config)
 {
 	if (!this->_output.length() || utils::startsWith(this->_output, "HTTP/"))
 	{}
@@ -228,14 +271,12 @@ void	CGI::parseHeader(const Config &config)
 		std::string::iterator	status_start = utils::caseInsensitiveFind(this->_output, "Status: ") + 8;
 		std::string::iterator	status_end = status_start;
 		std::advance(status_end, 3);
-		std::cout << "STATUS ====== " << std::string(status_start, status_end) << std::endl;
 		this->_status = utils::strToHttpStatus(std::string(status_start, status_end));
-		std::cout << "STATUS ====== " << this->_status << std::endl;
 	}
 	if (utils::caseInsensitiveFind(this->_output, "Content-Length: ") != this->_output.end())
 	{
 		long len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ") + 16);
-		if (len < 0 || static_cast<size_t>(len) > config.max_body_size)
+		if (len < 0 || static_cast<size_t>(len) > config.client_max_body_size)
 		{
 			this->_is_complete = true;
 			this->_status = HTTP_INTERNAL_SERVER_ERROR;
@@ -255,6 +296,11 @@ void	CGI::parseHeader(const Config &config)
 		this->_header_len = this->_output.find("\r\n\r\n") + 4;
 }
 
+/**
+ * @brief Builds the final HTTP response from CGI output.
+ *
+ * @param response Response to populate.
+ */
 void	CGI::genFullOutput(Response &response)
 {
 	if (!WIFEXITED(this->_process_status[1]))
@@ -280,27 +326,44 @@ void	CGI::genFullOutput(Response &response)
 	if (!this->_content_len && !this->_chunked)
 		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n"));
 	response.buildHeader();
-	std::cout << "OUTPUT = " << this->_output << std::endl;
 	response.setBody(this->_output);
 	response.build();
 	return ;
 }
 
+/**
+ * @brief Returns the raw CGI output buffer.
+ *
+ * @return Reference to output string.
+ */
 std::string	&CGI::getOutput()
 {
 	return (this->_output);
 }
 
+/**
+ * @brief Returns the CGI-generated status code.
+ *
+ * @return HttpStatus value.
+ */
 HttpStatus	CGI::getStatus()
 {
 	return (this->_status);
 }
 
+/**
+ * @brief Indicates whether CGI processing finished.
+ *
+ * @return True when complete.
+ */
 bool		CGI::isComplete()
 {
 	return (this->_is_complete);
 }
 
+/**
+ * @brief Forked child entry to exec the CGI script.
+ */
 void		CGI::Execute()
 {
 	close(this->_pipe_to_CGI[PIPE_WRITE_END]);
@@ -320,6 +383,11 @@ void		CGI::Execute()
 	}
 }
 
+/**
+ * @brief Builds the CGI environment variables and argv.
+ *
+ * @param request Parsed HTTP request.
+ */
 void		CGI::GenEnvVar(Request &request)
 {
 	std::vector<std::string>	env;
@@ -350,6 +418,9 @@ void		CGI::GenEnvVar(Request &request)
 	return ;
 }
 
+/**
+ * @brief Frees allocated argv/env structures and script path buffer.
+ */
 void	CGI::deleteEnvVar()
 {
 	int i = 0;
@@ -381,6 +452,13 @@ void	CGI::deleteEnvVar()
 	}
 }
 
+/**
+ * @brief Determines whether CGI output is complete based on headers/encoding.
+ *
+ * @param bytes_read Last read byte count.
+ *
+ * @return True when no more data is expected.
+ */
 bool	CGI::checkOutputTermination(int bytes_read)
 {
 	(void)bytes_read;
@@ -390,26 +468,6 @@ bool	CGI::checkOutputTermination(int bytes_read)
 		return (this->_output.size() >= this->_header_len + this->_content_len);
 	else
 		return (false);
-}
-
-int			*CGI::getPipesToCGI()
-{
-	return (this->_pipe_to_CGI);
-}
-
-int			*CGI::getPipesFromCGI()
-{
-	return (this->_pipe_from_CGI);
-}
-
-bool		CGI::getPipesPolled()
-{
-	return (this->_pipes_polled);
-}
-
-void		CGI::setPipesPolled(bool value)
-{
-	this->_pipes_polled = value;
 }
 
 void		CGI::setClientId(int value)

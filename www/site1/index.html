@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webserv playground</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-mark">WS</span>
+      <div>
+        <div class="eyebrow">self-hosted playground</div>
+        <h1>webserv sandbox</h1>
+      </div>
+    </div>
+    <div class="pill">root: <code>www/site1</code></div>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Ready to poke at</p>
+        <h2>Your server, your rules</h2>
+        <p class="lede">
+          Static assets, uploads, and CGI scripts all live here. Use the quick actions
+          to hit endpoints, test uploads, or explore auto-indexed directories.
+        </p>
+        <div class="cta-row">
+          <a class="btn primary" href="/static/about.html">About this demo</a>
+          <a class="btn ghost" href="/static/notes/">Auto-indexed folder</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-title">Endpoints</div>
+        <ul class="pill-list">
+          <li class="pill">GET <code>/</code></li>
+          <li class="pill">GET <code>/static/hello.txt</code></li>
+          <li class="pill">GET <code>/static/about.html</code></li>
+          <li class="pill">POST <code>/upload/&lt;file&gt;</code></li>
+        </ul>
+        <div class="meta">
+          <span class="dot online"></span> HTTP/1.1 keep-alive
+        </div>
+      </div>
+    </section>
+
+    <section class="card-grid">
+      <article class="card">
+        <div class="eyebrow">Static files</div>
+        <h3>Instant checks</h3>
+        <ul class="tight-list">
+          <li><a href="/static/hello.txt">Plain text sample</a></li>
+          <li><a href="/static/about.html">Styled about page</a></li>
+          <li><a href="/errors/404.html">Custom 404</a></li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="eyebrow">Uploads</div>
+        <h3>Send a file</h3>
+        <p class="lede">POST any file to <code>/upload/&lt;filename&gt;</code>. Files land in <code>www/site1/uploads</code>.</p>
+        <pre class="code-block">curl -X POST --data-binary @hello.txt http://127.0.0.1:8070/upload/hello.txt</pre>
+      </article>
+
+      <article class="card">
+        <div class="eyebrow">CGI (Python)</div>
+        <h3>Cookie echo</h3>
+        <p class="lede">Scripts under <code>/static</code> (like <code>test_cookie.py</code>) can set/read cookies.</p>
+        <a class="btn ghost" href="/static/test_cookie.py">Run test_cookie.py</a>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">cURL shortcuts</div>
+      <h3>Try these locally</h3>
+      <div class="code-grid">
+        <pre class="code-block">curl http://127.0.0.1:8070/static/hello.txt</pre>
+        <pre class="code-block">curl -i -X POST \
+  --data 'ping=ok' \
+  http://127.0.0.1:8070/upload/ping.txt</pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>webserv demo · served by your branch</span>
+    <span class="dot online"></span>
+  </footer>
+</body>
+</html>

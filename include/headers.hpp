@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 08:13:48 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/27 04:23:02 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cmath>
-#include <dirent.h>
 #include "colors.hpp"
 #include "default.hpp"
 
@@ -60,11 +56,8 @@
 
 #define NO_TIMEOUT -1
 #define CLIENT_LIMIT 1000
-#define MAX_BODY_SIZE_LIMIT 157286400
-
-# define PIPE_READ_END 0
-# define PIPE_WRITE_END 1
-# define IS_SERVER		-1
+#define PIPE_READ_END 0
+#define PIPE_WRITE_END 1
 
 // Default pages
 #define POST_PAGE		"<html><body><h1>Upload successful</h1></body></html>"
@@ -80,6 +73,10 @@
 #define ERROR_PAGE_404	"<html><head><title>404 Not Found</title></head>" \
 						"<body><h1>404 Not Found</h1>" \
 						"<p>The requested URL was not found on this server.</p></body></html>"
+
+#define ERROR_PAGE_405	"<html><head><title>405 Method Not Allowed</title></head>" \
+						"<body><h1>405 Method Not Allowed</h1>" \
+						"<p>The requested method is not allowed for the requested URL.</p></body></html>"
 
 #define ERROR_PAGE_500	"<html><head><title>500 Internal Server Error</title></head>" \
 						"<body><h1>500 Internal Server Error</h1>" \
@@ -100,12 +97,13 @@
 
 #define NULL_CHUNK "0\r\n\r\n"
 
-#define LISTDIR_HEADER "<!DOCTYPE html>\n<html><body>\n"
-#define LISTDIR_PREFIX "  "
-#define LISTDIR_SUFFIX "<br>\n"
-#define LISTDIR_ENDING "</body>\n</html>"
-
-#define NULL_CHUNK "0\r\n\r\n"
+// Configuration printing helpers
+#define WIDTH				70UL
+#define BORDER_COLOR		BOLD_PURPLE
+#define SECTION_COLOR		BOLD_RED
+#define SECTION_SUB_COLOR	BLUE
+#define FIELD_NAME_COLOR	BOLD
+#define	FIELD_VALUE_COLOR	RESET
 
 enum	Method
 {
@@ -132,11 +130,11 @@ enum ContentType
 		FTYPE_NONE		= 0,	// 0 0 0 0 0 0 0 0
 		FTYPE_HTML		= 1,	// 0 0 0 0 0 0 0 1
 		FTYPE_PLAIN		= 2,	// 0 0 0 0 0 0 1 0
-								// 0 0 0 0 0 1 0 0
+		FTYPE_CSS		= 4,	// 0 0 0 0 0 1 0 0
 		FTYPE_TEXT		= 7,	// 0 0 0 0 0 1 1 1
 		FTYPE_JPEG		= 8,	// 0 0 0 0 1 0 0 0
 		FTYPE_PNG		= 16,	// 0 0 0 1 0 0 0 0
-								// 0 0 1 0 0 0 0 0
+		FTYPE_SVG		= 32,	// 0 0 1 0 0 0 0 0
 		FTYPE_IMAGE		= 56,	// 0 0 1 1 1 0 0 0
 		FTYPE_CGI_PY	= 64,	// 0 1 0 0 0 0 0 0
 		FTYPE_CGI_PHP	= 128,	// 1 0 0 0 0 0 0 0
@@ -158,6 +156,7 @@ enum	HttpStatus
 	HTTP_UNAUTHORIZED = 401,
 	HTTP_FORBIDDEN = 403,
 	HTTP_NOT_FOUND = 404,
+	HTTP_METHOD_NOT_ALLOWED = 405,
 	HTTP_CONFLICT = 409,
 	HTTP_CONTENT_TOO_LARGE = 413,
 	HTTP_INTERNAL_SERVER_ERROR = 500,
@@ -166,7 +165,7 @@ enum	HttpStatus
 	HTTP_VERSION_NOT_SUPPORTED = 505
 };
 
-enum	RequestStage //should be set to DONE whenever not in the queue
+enum	RequestStage
 {
 	TRY_ACCEPTING,
 	INIT,
@@ -196,12 +195,6 @@ typedef struct s_PollRevent
 	short	revent;
 	int		client_id;
 }	PollRevent;
-
-typedef struct s_Redirection
-{
-	std::string		dest;
-	HttpStatus		error_code;
-}	Redirection;
 
 inline Method			operator|(Method a, Method b) { return static_cast<Method>(static_cast<int>(a) | static_cast<int>(b)); }
 inline Method&			operator|=(Method& a, Method b) { a = a | b; return a; }

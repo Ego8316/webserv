@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+         #
+#    By: ego <ego@student.42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/11/25 17:08:05 by victorviter      ###   ########.fr        #
+#    Updated: 2025/11/27 04:12:40 by ego              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,8 +18,12 @@ ODIR		=	objs/
 SRC			=	main.cpp
 SRC			+=	ServerCore.cpp Client.cpp Request.cpp \
 				Response.cpp RequestHandler.cpp Resource.cpp \
-				utils.cpp Cookie.cpp Config.cpp WebServ.cpp \
+				utils.cpp Cookie.cpp WebServ.cpp \
+				ConfigLexer.cpp ConfigParser.cpp ConfigInterpreter.cpp \
+				ServerConfig.cpp \
 				CGI.cpp
+
+SRC			+=	debug/config.cpp
 
 OBJS		=	$(addprefix $(ODIR), $(SRC:.cpp=.o))
 SRCS		=	$(addprefix $(SDIR), $(SRC))
@@ -45,6 +49,7 @@ $(NAME)		:	$(ODIR) $(OBJS)
 
 $(ODIR)		:
 				mkdir -p $(ODIR)
+				mkdir -p $(ODIR)/debug
 				printf "Object directory created.\n"
 
 $(ODIR)%.o	:	$(SDIR)%.cpp
@@ -78,12 +83,11 @@ COLOR_I		= \033[3m
 C_RESET		= \033[0m
 
 header	:
-			printf "==========================================\n"
+			printf "=====================================================\n"
 			printf "$(COLOR_O)__        __   _    ____                   $(C_RESET)\n"
 			printf "$(COLOR_R)\ \      / /__| |__/ ___|  ___ _ ____   __ $(C_RESET)\n"
 			printf "$(COLOR_G) \ \ /\ / / _ \ '_ \___ \ / _ \ '__\ \ / / $(C_RESET)\n"
 			printf "$(COLOR_B)  \ V  V /  __/ |_) |__) |  __/ |   \ V /  $(C_RESET)\n"
 			printf "$(COLOR_V)   \_/\_/ \___|_.__/____/ \___|_|    \_/   $(C_RESET)\n"
-			printf "$(COLOR_I)    		      by hcavet & vviterbo$(C_RESET)\n"
-			printf "==========================================\n"
-			
+			printf "$(COLOR_I)          			 by hcavet & vviterbo$(C_RESET)\n"
+			printf "=====================================================\n"

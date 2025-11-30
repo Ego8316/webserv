@@ -3,15 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/10/29 16:34:03 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/24 23:48:39 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
+/**
+ * @brief Initializes an empty request with default values.
+ */
 Request::Request()
 {
 	this->_raw_header = "";
@@ -29,12 +32,24 @@ Request::Request()
 	return ;
 }
 
+/**
+ * @brief Copy constructor.
+ *
+ * @param other Source request.
+ */
 Request::Request(const Request &other)
 {
 	*this = other;
 	return ;
 }
 
+/**
+ * @brief Assignment operator.
+ *
+ * @param other Source request.
+ *
+ * @return Reference to this request.
+ */
 Request &Request::operator=(const Request &other)
 {
 	if (this != &other)
@@ -57,13 +72,21 @@ Request &Request::operator=(const Request &other)
 	return (*this);
 }
 
+/**
+ * @brief Destructor. Frees any allocated cookies.
+ */
 Request::~Request()
 {
 	delete this->_query_cookies;
 	return ;
 }
 
-void	Request::parseHeader(const Config &config)
+/**
+ * @brief Parses the raw header into method, target, version, and headers.
+ *
+ * @param config Server configuration for size limits and defaults.
+ */
+void	Request::parseHeader(const ServerConfig &config)
 {
 	std::istringstream	stream(this->_raw_header);
 	std::string			line;
@@ -117,6 +140,9 @@ void	Request::parseHeader(const Config &config)
 	return ;
 }
 
+/**
+ * @brief Extracts query string and strips scheme/host prefixes from target.
+ */
 void		Request::_parseRequestTarget()
 {
 	if (this->_request_target.find("?") != std::string::npos)
@@ -131,7 +157,13 @@ void		Request::_parseRequestTarget()
 	return ;
 }
 
-void		Request::_parseHeaderLine(std::string line, const Config &config)
+/**
+ * @brief Parses a single header line and updates internal state.
+ *
+ * @param line Header line without CRLF.
+ * @param config Server configuration for size limits.
+ */
+void		Request::_parseHeaderLine(std::string line, const ServerConfig &config)
 {
 	std::vector<std::string>	field_split = utils::stringSplit(line, ": ");
 	Cookie						*cookie;
@@ -167,7 +199,7 @@ void		Request::_parseHeaderLine(std::string line, const Config &config)
 		else if (key == "Content-Length")
 		{
 			this->_content_length = std::atol(value.c_str());
-			if (this->_content_length > config.max_body_size)
+			if (this->_content_length > config.client_max_body_size)
 			{
 				this->_error = true;
 				return ;
@@ -179,56 +211,111 @@ void		Request::_parseHeaderLine(std::string line, const Config &config)
 	return ;
 }
 
+/**
+ * @brief Returns a mutable reference to the raw header buffer.
+ *
+ * @return Reference to raw header string.
+ */
 std::string	&Request::getRawHeader()
 {
 	return (this->_raw_header);
 }
 
+/**
+ * @brief Returns a mutable reference to the raw body buffer.
+ *
+ * @return Reference to raw body string.
+ */
 std::string &Request::getRawBody()
 {
 	return (this->_raw_body);
 }
 
+/**
+ * @brief Returns a const reference to the raw body buffer.
+ *
+ * @return Const reference to raw body string.
+ */
 const std::string &Request::getRawBody() const
 {
 	return (this->_raw_body);
 }
 
+/**
+ * @brief Returns the parsed HTTP method.
+ *
+ * @return Method enum value.
+ */
 Method	Request::getMethod() const
 {
 	return (this->_method);
 }
 
+/**
+ * @brief Returns the normalized request target without query string.
+ *
+ * @return Request target path.
+ */
 std::string	Request::getRequestTarget() const
 {
 	return (this->_request_target);
 }
 
+/**
+ * @brief Returns the HTTP version string.
+ *
+ * @return HTTP version.
+ */
 std::string Request::getVersion() const
 {
 	return (this->_version);
 }
 
+/**
+ * @brief Returns Content-Length value (0 if missing).
+ *
+ * @return Declared content length.
+ */
 size_t	Request::getContentLength() const
 {
 	return (this->_content_length);
 }
 
+/**
+ * @brief Indicates whether Transfer-Encoding included chunked.
+ *
+ * @return True when chunked.
+ */
 bool	Request::isChunked() const
 {
 	return (this->_chunked);
 }
 
+/**
+ * @brief Returns a copy of parsed headers.
+ *
+ * @return Headers map.
+ */
 std::map<std::string, std::string>	Request::getHeaders(void) const
 {
 	return (this->_headers);
 }
 
+/**
+ * @brief True when parsing failed.
+ *
+ * @return Error flag.
+ */
 bool	Request::getError() const
 {
 	return (this->_error);
 }
 
+/**
+ * @brief Returns parsed cookies, allocating an empty one if needed.
+ *
+ * @return Reference to query cookies object.
+ */
 const Cookie	&Request::getQueryCookies()
 {
 	if (!this->_query_cookies)
@@ -236,16 +323,29 @@ const Cookie	&Request::getQueryCookies()
 	return (*this->_query_cookies);
 }
 
+/**
+ * @brief Returns aggregated Accept content types.
+ *
+ * @return Accept bitmask.
+ */
 ContentType	Request::getAccept() const
 {
 	return (this->_accept);
 }
 
+/**
+ * @brief Returns the raw query string without leading '?'.
+ *
+ * @return Query string.
+ */
 std::string	Request::getQueryString() const
 {
 	return (this->_query_string);
 }
 
+/**
+ * @brief Converts a chunked-encoded body to a raw body buffer.
+ */
 void	Request::unchunkBody()
 {
 	size_t				pos;
@@ -286,16 +386,35 @@ void	Request::setMethod(Method method)
 	this->_method = method;
 }
 
+/**
+ * @brief Marks the request as erroneous or valid.
+ *
+ * @param error Error flag.
+ */
 void	Request::setError(bool error)
 {
 	this->_error = error;
 }
 
+/**
+ * @brief Checks if a header field exists.
+ *
+ * @param field Header name.
+ *
+ * @return True when present.
+ */
 bool	Request::headerHasField(const std::string field)
 {
 	return (this->_headers.find(field) != this->_headers.end());
 }
 
+/**
+ * @brief Returns a header value or an empty string when missing.
+ *
+ * @param field Header name.
+ *
+ * @return Header value or empty string.
+ */
 std::string	Request::headerGetField(const std::string field)
 {
 	if (this->_headers.find(field) != this->_headers.end())
@@ -303,6 +422,14 @@ std::string	Request::headerGetField(const std::string field)
 	return ("");
 }
 
+/**
+ * @brief Stream insertion for debugging request state.
+ *
+ * @param os Output stream.
+ * @param src Request to render.
+ *
+ * @return Reference to output stream.
+ */
 std::ostream	&operator<<(std::ostream &os, const Request &src)
 {
 	Method										method = src.getMethod();

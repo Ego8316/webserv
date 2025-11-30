@@ -6,12 +6,21 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/27 15:19:18 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/29 21:55:37 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
+#include <sys/time.h>
 
+/**
+ * @brief Returns true when `str` ends with the given suffix.
+ *
+ * @param str String to test.
+ * @param suffix Trailing substring to match.
+ *
+ * @return True when suffix matches.
+ */
 bool	utils::endsWith(const std::string& str, const std::string& suffix)
 {
 	if (str.length() < suffix.length())
@@ -21,6 +30,14 @@ bool	utils::endsWith(const std::string& str, const std::string& suffix)
 	return (str.substr(str.length() - suffix.length(), suffix.length()) == suffix);
 }
 
+/**
+ * @brief Returns true when `str` starts with the given prefix.
+ *
+ * @param str String to test.
+ * @param prefix Leading substring to match.
+ *
+ * @return True when prefix matches.
+ */
 bool	utils::startsWith(const std::string& str, const std::string& prefix)
 {
 	if (str.length() < prefix.length())
@@ -30,6 +47,14 @@ bool	utils::startsWith(const std::string& str, const std::string& prefix)
 	return (str.substr(0, prefix.length()) == prefix);
 }
 
+/**
+ * @brief Splits a string on a delimiter substring.
+ *
+ * @param str Input string.
+ * @param del Delimiter substring.
+ *
+ * @return Vector of split parts.
+ */
 std::vector<std::string>	utils::stringSplit(std::string str, std::string del)
 {
 	std::vector<std::string>	split_str;
@@ -48,6 +73,14 @@ std::vector<std::string>	utils::stringSplit(std::string str, std::string del)
 	return (split_str);
 }
 
+/**
+ * @brief Trims characters in `set` from both ends of the string.
+ *
+ * @param str String to trim (modified in place).
+ * @param set Characters to remove.
+ *
+ * @return Trimmed string.
+ */
 std::string	utils::stringTrim(std::string &str, const std::string &set)
 {
 	unsigned int	last_size = str.size() + 1;
@@ -63,11 +96,25 @@ std::string	utils::stringTrim(std::string &str, const std::string &set)
 	return (str);
 }
 
+/**
+ * @brief Trims whitespace and newline characters from both ends.
+ *
+ * @param str String to trim (modified in place).
+ *
+ * @return Trimmed string.
+ */
 std::string	utils::stringTrimSpaces(std::string &str)
 {
 	return (stringTrim(str, " \r\n\t"));
 }
 
+/**
+ * @brief Converts a string to lowercase.
+ *
+ * @param str Input string.
+ *
+ * @return Lowercased copy.
+ */
 std::string	utils::toLower(const std::string &str)
 {
 	std::string	lower = str;
@@ -77,6 +124,13 @@ std::string	utils::toLower(const std::string &str)
 	return (lower);
 }
 
+/**
+ * @brief Converts a string to uppercase.
+ *
+ * @param str Input string.
+ *
+ * @return Uppercased copy.
+ */
 std::string	utils::toUpper(const std::string &str)
 {
 	std::string	upper = str;
@@ -86,6 +140,13 @@ std::string	utils::toUpper(const std::string &str)
 	return (upper);
 }
 
+/**
+ * @brief Capitalizes dash-separated words and lowercases the rest.
+ *
+ * @param str Input string.
+ *
+ * @return Capitalized copy.
+ */
 std::string	utils::capitalize(const std::string &str)
 {
 	std::string	result = str;
@@ -106,17 +167,35 @@ std::string	utils::capitalize(const std::string &str)
 	return (result);
 }
 
+/**
+ * @brief no fucking clue
+ */
 static bool	CICharComp(char a, char b)
 {
 	return (std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)));
 }
 
+/**
+ * @brief Case-insensitive search of `needle` within `haystack`.
+ *
+ * @param haystack String to search.
+ * @param needle Substring to locate.
+ *
+ * @return Iterator to first match or end iterator.
+ */
 std::string::iterator	utils::caseInsensitiveFind(std::string &haystack, std::string needle)
 {
 	std::string::iterator it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), CICharComp);
 	return (it);
 }
 
+/**
+ * @brief Returns file size in bytes or -1 on error.
+ *
+ * @param path Filesystem path.
+ *
+ * @return Size in bytes or -1.
+ */
 ssize_t	utils::getFileSize(const std::string &path)
 {
 	struct stat	st;
@@ -126,14 +205,25 @@ ssize_t	utils::getFileSize(const std::string &path)
 	return (-1);
 }
 
+/**
+ * @brief Converts a MIME string (e.g., text/html) to ContentType flags.
+ *
+ * @param input MIME string.
+ *
+ * @return ContentType bitmask.
+ */
 ContentType	utils::strToContentType(std::string input)
 {
+	if (input.empty())
+		return (FTYPE_NONE);
 	if (input == "*/*")
 		return (FTYPE_ANY);
 	if (input == "text/*")
 		return (FTYPE_TEXT);
 	if (input == "text/plain")
 		return (FTYPE_PLAIN);
+	if (input == "text/css")
+		return (FTYPE_CSS);
 	if (input == "image/*")
 		return (FTYPE_IMAGE);
 	if (input == "text/html")
@@ -142,12 +232,16 @@ ContentType	utils::strToContentType(std::string input)
 		return (FTYPE_PNG);
 	if (input == "image/jpeg")
 		return (FTYPE_JPEG);
+	if (input == "image/jpg")
+		return (FTYPE_JPEG);
+	if (input == "image/svg+xml")
+		return (FTYPE_SVG);
 	return (FTYPE_NONE);
 }
 
 /**
  * @brief Get MIME type string based on detected content type.
- * 
+ *
  * @return The MIME type (e.g., "text/html", "image/png").
  */
 std::string	utils::contentTypeToStr(ContentType type)
@@ -156,15 +250,19 @@ std::string	utils::contentTypeToStr(ContentType type)
 	{
 		case FTYPE_HTML:	return "text/html";
 		case FTYPE_PLAIN:	return "text/plain";
+		case FTYPE_TEXT:	return "text/plain";
+		case FTYPE_CSS:		return "text/css";
 		case FTYPE_JPEG:	return "image/jpeg";
 		case FTYPE_PNG:		return "image/png";
+		case FTYPE_SVG:		return "image/svg+xml";
+		case FTYPE_IMAGE:	return "image/*";
 		default:			return "";
 	}
 }
 
 /**
  * @brief Detects the type of the resource based on the file extension.
- * 
+ *
  * Updates _status to include IS_CGI for Python and PHP scripts.
  */
 ContentType	utils::extensionToContentTypes(std::string fname)
@@ -175,17 +273,23 @@ ContentType	utils::extensionToContentTypes(std::string fname)
 		return (FTYPE_CGI_PHP);
 	else if (utils::endsWith(fname, ".html"))
 		return (FTYPE_HTML);
+	else if (utils::endsWith(fname, ".css"))
+		return (FTYPE_CSS);
 	else if (utils::endsWith(fname, ".jpeg"))
+		return (FTYPE_JPEG);
+	else if (utils::endsWith(fname, ".jpg"))
 		return (FTYPE_JPEG);
 	else if (utils::endsWith(fname, ".png"))
 		return (FTYPE_PNG);
+	else if (utils::endsWith(fname, ".svg"))
+		return (FTYPE_SVG);
 	else
 		return (FTYPE_PLAIN);
 }
 
 /**
  * @brief Get the file extension associated with the content type.
- * 
+ *
  * @return File extension (e.g., ".html", ".png", ".php").
  */
 std::string	utils::contentTypeToExtensions(ContentType type)
@@ -193,15 +297,24 @@ std::string	utils::contentTypeToExtensions(ContentType type)
 	switch(type)
 	{
 		case FTYPE_HTML:		return ".html";
+		case FTYPE_PLAIN:		return ".txt";
+		case FTYPE_CSS:			return ".css";
 		case FTYPE_JPEG:		return ".jpeg";
 		case FTYPE_PNG:			return ".png";
+		case FTYPE_SVG:			return ".svg";
 		case FTYPE_CGI_PY:		return ".py";
 		case FTYPE_CGI_PHP:		return ".php";
 		default:				return "";
 	}
 }
 
-
+/**
+ * @brief Converts an HTTP method enum to its string form.
+ *
+ * @param method HTTP method enum.
+ *
+ * @return Method name.
+ */
 std::string	utils::methodToStr(Method method)
 {
 	switch(method)
@@ -213,6 +326,13 @@ std::string	utils::methodToStr(Method method)
 	}
 }
 
+/**
+ * @brief Converts a method string to its Method enum value.
+ *
+ * @param method_str Method name.
+ *
+ * @return Method enum value or UNKNOWN.
+ */
 Method	utils::strToMethod(const std::string &method_str)
 {
 	if (method_str == "GET")
@@ -226,7 +346,9 @@ Method	utils::strToMethod(const std::string &method_str)
 
 /**
  * @brief Converts an HTTP status code enum to its corresponding string.
+ *
  * @param code The HTTP status code.
+ *
  * @return `std::string` The string representation of the code.
  */
 std::string	utils::httpStatusToStr(HttpStatus code)
@@ -234,11 +356,22 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 	switch(code)
 	{
 		case HTTP_OK:						return "OK";
+		case HTTP_CREATED:					return "Created";
+		case HTTP_ACCEPTED:					return "Accepted";
+		case HTTP_NO_CONTENT:				return "No Content";
+		case HTTP_REDIRECT:					return "Multiple Choices";
+		case HTTP_REDIRECT_PERM:			return "Moved Permanently";
+		case HTTP_REDIRECT_TEMP:			return "Found";
 		case HTTP_BAD_REQUEST:				return "Bad Request";
+		case HTTP_UNAUTHORIZED:				return "Unauthorized";
 		case HTTP_FORBIDDEN:				return "Forbidden";
 		case HTTP_NOT_FOUND:				return "Not Found";
+		case HTTP_METHOD_NOT_ALLOWED:		return "Method Not Allowed";
+		case HTTP_CONFLICT:					return "Conflict";
+		case HTTP_CONTENT_TOO_LARGE:		return "Content Too Large";
 		case HTTP_INTERNAL_SERVER_ERROR:	return "Internal Server Error";
 		case HTTP_NOT_IMPLEMENTED:			return "Not Implemented";
+		case HTTP_BAD_GATEWAY:				return "Bad Gateway";
 		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";
 		default:							return "Unknown";
 	}
@@ -246,46 +379,48 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 
 /**
  * @brief Converts an HTTP status code str to its corresponding enum.
+ *
  * @param code The HTTP status code.
+ *
  * @return `std::string` The string representation of the code.
  */
 HttpStatus	utils::strToHttpStatus(std::string status)
 {
-	if (utils::startsWith(status, "200"))
-		return (HTTP_OK);
-	if (utils::startsWith(status, "201"))
-		return (HTTP_CREATED);
-	if (utils::startsWith(status, "202"))
-		return (HTTP_ACCEPTED);
-	if (utils::startsWith(status, "204"))
-		return (HTTP_NO_CONTENT);
-	if (utils::startsWith(status, "300"))
-		return (HTTP_REDIRECT);
-	if (utils::startsWith(status, "301"))
-		return (HTTP_REDIRECT_PERM);
-	if (utils::startsWith(status, "302"))
-		return (HTTP_REDIRECT_TEMP);
-	if (utils::startsWith(status, "400"))
-		return (HTTP_BAD_REQUEST);
-	if (utils::startsWith(status, "401"))
-		return (HTTP_UNAUTHORIZED);
-	if (utils::startsWith(status, "403"))
-		return (HTTP_FORBIDDEN);
-	if (utils::startsWith(status, "404"))
-		return (HTTP_NOT_FOUND);
-	if (utils::startsWith(status, "409"))
-		return (HTTP_CONFLICT);
-	if (utils::startsWith(status, "500"))
-		return (HTTP_INTERNAL_SERVER_ERROR);
-	if (utils::startsWith(status, "501"))
-		return (HTTP_NOT_IMPLEMENTED);
-	if (utils::startsWith(status, "502"))
-		return (HTTP_BAD_GATEWAY);
-	if (utils::startsWith(status, "505"))
-		return (HTTP_VERSION_NOT_SUPPORTED);
+	if (status.size() < 3)
+		return (HTTP_UNKNOWN_STATUS);
+	int	code = std::atoi(status.c_str());
+	switch (code)
+	{
+		case 200: return HTTP_OK;
+		case 201: return HTTP_CREATED;
+		case 202: return HTTP_ACCEPTED;
+		case 204: return HTTP_NO_CONTENT;
+		case 300: return HTTP_REDIRECT;
+		case 301: return HTTP_REDIRECT_PERM;
+		case 302: return HTTP_REDIRECT_TEMP;
+		case 400: return HTTP_BAD_REQUEST;
+		case 401: return HTTP_UNAUTHORIZED;
+		case 403: return HTTP_FORBIDDEN;
+		case 404: return HTTP_NOT_FOUND;
+		case 405: return HTTP_METHOD_NOT_ALLOWED;
+		case 409: return HTTP_CONFLICT;
+		case 413: return HTTP_CONTENT_TOO_LARGE;
+		case 500: return HTTP_INTERNAL_SERVER_ERROR;
+		case 501: return HTTP_NOT_IMPLEMENTED;
+		case 502: return HTTP_BAD_GATEWAY;
+		case 505: return HTTP_VERSION_NOT_SUPPORTED;
+		default: break;
+	}
 	return (HTTP_UNKNOWN_STATUS);
 }
 
+/**
+ * @brief Converts a RequestStage value to a readable label.
+ *
+ * @param state Request stage.
+ *
+ * @return Stage name.
+ */
 std::string	utils::stateToStr(RequestStage state)
 {
 	switch (state)
@@ -304,15 +439,48 @@ std::string	utils::stateToStr(RequestStage state)
 	}
 }
 
+/**
+ * @brief Returns the current epoch time (seconds).
+ *
+ * @return Epoch time or 0 on error.
+ */
 long	utils::getTime()
 {
-	time_t	t;
-	
-	t = time(NULL);
-	if (t == -1)
-	{
-		std::cerr << "Clock error. Seting time to 0" << std::endl;
-		return (0);
-	}
-	return (static_cast<long>(t));
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec);
+}
+
+/**
+ * @brief Build a timestamp string.
+ *
+ * @return Timestamp in HH:MM:SS format.
+ */
+std::string	utils::timeStamp()
+{
+	struct timeval	tv;
+	struct tm		tm;
+	char			buffer[32];
+
+	gettimeofday(&tv, NULL);
+	localtime_r(&tv.tv_sec, &tm);
+	std::snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec);
+	return (std::string(buffer));
+}
+
+/**
+ * @brief Log a colored message with timestamp and optional client id.
+ *
+ * @param level  Textual level label.
+ * @param color  ANSI color prefix to apply.
+ * @param msg    Message body.
+ * @param client_id Client identifier (-1 to skip).
+ */
+void	utils::logMsg(const std::string &level, const std::string &color, const std::string &msg, int client_id)
+{
+	std::cout << color << "[" << timeStamp() << "] [" << level << "]";
+	if (client_id >= 0)
+		std::cout << " [client " << client_id << "]";
+	std::cout << " " << msg << RESET << std::endl;
 }

@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/28 11:03:33 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/30 21:55:22 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,19 @@
 #include "utils.hpp"
 #include "Response.hpp"
 #include "ServerCore.hpp"
+#include "ServerConfig.hpp"
 
 class	Cookie;
 class	Client;
 class	Request;
 class	Response;
 class	ServerCore;
+
+/**
+ * @class CGI
+ *
+ * @brief Manages execution of CGI scripts and marshals I/O to/from responses.
+ */
 class CGI
 {
 	public :
@@ -37,13 +44,13 @@ class CGI
 	//GETTERS
 	//SETTERS
 	//MEMBER FUNCTIONS
-		void		Run(Client &client, Request &request, const Config &config, Response &response, ServerCore &_server);
+		void		Run(Client &client, Request &request, const ServerConfig &config, Response &response, ServerCore &server);
 		
-		void		Nanny(Client &client, Request &request, const Config &config, Response &response, ServerCore &server);
-		ssize_t		writeToCGI(Request &request, const Config &config, ServerCore &server);
-		ssize_t		readFromCGI(const Config &config, ServerCore &server);
+		void		Nanny(Client &client, Request &request, const ServerConfig &config, Response &response, ServerCore &server);
+		ssize_t		writeToCGI(Request &request, const ServerConfig &config, ServerCore &server);
+		ssize_t		readFromCGI(const ServerConfig &config, ServerCore &server);
 		
-		void		parseHeader(const Config &config);
+		void		parseHeader(const ServerConfig &config);
 		void		genFullOutput(Response &response);
 
 		void		Execute();
@@ -55,11 +62,8 @@ class CGI
 		bool		checkOutputTermination(int bytes_read);
 		void		GenEnvVar(Request &request);
 		void		deleteEnvVar();
-		
 		int			*getPipesToCGI();
 		int			*getPipesFromCGI();
-		bool		getPipesPolled();
-		void		setPipesPolled(bool value);
 		void		setClientId(int value);
 	private :
 		int					_client_id;
@@ -81,5 +85,7 @@ class CGI
 		char				*_cgi_script_char;
 		char				**_args;
 		char				**_env;
-		bool				_pipes_polled;
+		int					_pipe_to_cgi_idx;
+		int					_pipe_from_cgi_idx;
+		ServerCore			*_server_link;
 };

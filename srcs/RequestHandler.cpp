@@ -3,56 +3,82 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/11/28 11:40:06 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/29 19:09:00 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "RequestHandler.hpp"
 
+/**
+ * @brief Default constructor (unused because all methods are static).
+ */
 RequestHandler::RequestHandler(void)
 {
 	return ;
 }
 
+/**
+ * @brief Copy constructor (unused).
+ *
+ * @param other Source handler.
+ */
 RequestHandler::RequestHandler(const RequestHandler &other)
 {
 	(void)other;
 	return ;
 }
 
+/**
+ * @brief Assignment operator (unused).
+ *
+ * @param other Source handler.
+ *
+ * @return Reference to this handler.
+ */
 RequestHandler	&RequestHandler::operator=(const RequestHandler &other)
 {
 	(void)other;
 	return (*this);
 }
 
+/**
+ * @brief Destructor.
+ */
 RequestHandler::~RequestHandler(void)
 {
 	return ;
 }
 
-void	RequestHandler::handle(Response *response, const Request &request, const Config &config)
+/**
+ * @brief Entry point that routes a parsed request to the proper handler.
+ *
+ * @param response Response object to fill.
+ * @param request Parsed request.
+ * @param config Server configuration.
+ */
+void	RequestHandler::handle(Response *response, const Request &request, const ServerConfig &config)
 {
 	if (request.getError())
 	{
-		if (request.getContentLength() > config.max_body_size)
+		if (request.getContentLength() > config.client_max_body_size)
 			return (_handleError(response, HTTP_CONTENT_TOO_LARGE, config));
 		return (_handleError(response, HTTP_BAD_REQUEST, config));
 	}
 	if (request.getMethod() == UNKNOWN)
 		return (_handleError(response, HTTP_NOT_IMPLEMENTED, config));
-	// TODO : BIEN PENSER A CHANGER AVANT DE RENDRE
-	// if (request.getVersion() != "HTTP/1.1" || request.getVersion() != "HTTP/1.0")
-	// 	return (_handleError(HTTP_VERSION_NOT_SUPPORTED, config));
+	if (request.getVersion() != "HTTP/1.1" && request.getVersion() != "HTTP/1.0")
+		return (_handleError(response, HTTP_VERSION_NOT_SUPPORTED, config));
 
 	Resource	resource;
 	resource.build(request, config);
 
 	if (resource.isRedirect())
 		return (_handleRedirect(response, resource));
+	if (!resource.methodAllowed())
+		return (_handleError(response, HTTP_METHOD_NOT_ALLOWED, config));
 	if (!resource.exists() && request.getMethod() != POST)
 	{
 		std::cerr << "Resource not found" << std::endl;
@@ -73,7 +99,14 @@ void	RequestHandler::handle(Response *response, const Request &request, const Co
 	}
 }
 
-void	RequestHandler::_handleGet(Response *response, const Config &config, const Resource &resource)
+/**
+ * @brief Handles GET requests by serving files or emitting directory errors.
+ *
+ * @param response Response to populate.
+ * @param config Server configuration.
+ * @param resource Resolved resource.
+ */
+void	RequestHandler::_handleGet(Response *response, const ServerConfig &config, const Resource &resource)
 {
 	int			fd;
 	ssize_t		size;
@@ -85,9 +118,8 @@ void	RequestHandler::_handleGet(Response *response, const Config &config, const 
 	{
 		if (!utils::endsWith(resource.getPath(), "/"))
 			return (_handleError(response, HTTP_REDIRECT_PERM, config));
-		// TODO Adapter avec Location
-		// if (config.enable_listdir)
-		// 	return (_handleListDir(response, config, resource));
+		if (resource.autoindex())
+			return (_handleListDir(response, config, resource));
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	}
 	
@@ -103,7 +135,15 @@ void	RequestHandler::_handleGet(Response *response, const Config &config, const 
 	response->build();
 }
 
-void	RequestHandler::_handlePost(Response *response, const Request &request, const Config &config, const Resource &resource)
+/**
+ * @brief Handles POST uploads by writing the body to the resolved path.
+ *
+ * @param response Response to populate.
+ * @param request Client request.
+ * @param config Server configuration.
+ * @param resource Resolved resource.
+ */
+void	RequestHandler::_handlePost(Response *response, const Request &request, const ServerConfig &config, const Resource &resource)
 {
 	std::ofstream	outfile;
 	bool			existed;
@@ -134,7 +174,14 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 	response->build();
 }
 
-void	RequestHandler::_handleDelete(Response *response, const Config &config, const Resource &resource)
+/**
+ * @brief Handles DELETE requests, mapping errno to HTTP status codes.
+ *
+ * @param response Response to populate.
+ * @param config Server configuration.
+ * @param resource Resolved resource.
+ */
+void	RequestHandler::_handleDelete(Response *response, const ServerConfig &config, const Resource &resource)
 {
 	if (resource.isDirectory() && !utils::endsWith(resource.getPath(), "/"))
 		return (_handleError(response, HTTP_CONFLICT, config));
@@ -152,8 +199,17 @@ void	RequestHandler::_handleDelete(Response *response, const Config &config, con
 	response->build();
 }
 
-void	RequestHandler::_handleCGI(Response *response, const Request &request, const Config &config, const Resource &resource)
+/**
+ * @brief Initializes CGI handling when the resource is executable.
+ *
+ * @param response Response to populate with CGI handler.
+ * @param request Parsed request.
+ * @param config Server configuration.
+ * @param resource Resolved resource.
+ */
+void	RequestHandler::_handleCGI(Response *response, const Request &request, const ServerConfig &config, const Resource &resource)
 {
+	//TODO check for errors on Ressource
 	if (!resource.isExecutable() || resource.isDirectory())
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	(void)request;
@@ -161,18 +217,31 @@ void	RequestHandler::_handleCGI(Response *response, const Request &request, cons
 		response->setCGI(new CGI());
 }
 
+/**
+ * @brief Sends an HTTP redirect response using the resource redirection info.
+ *
+ * @param response Response to populate.
+ * @param resource Redirect resource.
+ */
 void	RequestHandler::_handleRedirect(Response *response, const Resource &resource)
 {
 	std::string		response_body;
 
-	response->setStatus(static_cast<HttpStatus>(resource.getStatus()));
+	response->setStatus(resource.getRedirectCode());
 	response->setHeaders("Location", resource.getPath());
 	response->setContentType("text/html");
 	response->setContentLength(0);
 	response->build();
 }
 
-void	RequestHandler::_handleListDir(Response *response, const Config &config, const Resource &resource)
+/**
+ * @brief Builds a simple directory listing response body.
+ *
+ * @param response Response to populate.
+ * @param config Server configuration.
+ * @param resource Resolved directory resource.
+ */
+void	RequestHandler::_handleListDir(Response *response, const ServerConfig &config, const Resource &resource)
 {
 	std::string		response_body;
 	DIR				*dir;
@@ -200,7 +269,14 @@ void	RequestHandler::_handleListDir(Response *response, const Config &config, co
 	response->build();
 }
 
-void	RequestHandler::_handleError(Response *response, HttpStatus code, const Config &config)
+/**
+ * @brief Builds an error response, preferring configured custom pages.
+ *
+ * @param response Response to populate.
+ * @param code HTTP status code to send.
+ * @param config Server configuration for custom pages.
+ */
+void	RequestHandler::_handleError(Response *response, HttpStatus code, const ServerConfig &config)
 {
 	std::string	error_page_path;
 	int			fd;
@@ -209,9 +285,9 @@ void	RequestHandler::_handleError(Response *response, HttpStatus code, const Con
 	response->setStatus(code);
 	response->setContentType("text/html");
 
-	if (utils::mapHasEntry(config.default_error_pages, (int)code))
+	if (utils::mapHasEntry(config.error_pages, (int)code))
 	{
-		error_page_path = config.default_error_pages.at(code);
+		error_page_path = config.error_pages.at(code);
 		if ((fd = open(error_page_path.c_str(), O_RDONLY)) >= 0)
 		{
 			if ((size = utils::getFileSize(error_page_path)) != -1)

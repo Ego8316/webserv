@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/10/24 16:51:02 by ego              ###   ########.fr       */
+/*   Updated: 2025/11/24 23:41:12 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,17 @@
 #include "Client.hpp"
 #include "ServerCore.hpp"
 #include "Cookie.hpp"
-#include "Config.hpp"
+#include "ServerConfig.hpp"
 
+/**
+ * @class WebServ
+ *
+ * @brief High-level server wrapper coordinating clients and the event loop.
+ */
 class WebServ
 {
 	public:
-		WebServ(const Config *config);
+		WebServ(const ServerConfig *config);
 		~WebServ();
 
 		Client 				*getClient(int uid);
@@ -38,7 +43,7 @@ class WebServ
 		WebServ(const WebServ &other);
 		WebServ	&operator=(const WebServ &other);
 
-		const Config						*_config;
+		const ServerConfig					*_config;
 		ServerCore							*_core;
 		std::vector<Client *>				_clients;
 		std::deque<Client *>				_processing_queue;

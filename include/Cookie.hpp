@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/28 16:21:30 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/30 20:55:49 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,11 @@
 
 class Client;
 
+/**
+ * @class Cookie
+ *
+ * @brief Parses and stores HTTP cookie attributes from request headers.
+ */
 class Cookie {
 	public :
 	// CONSTRUCTORS

@@ -6,24 +6,32 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/28 14:21:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/11/30 21:03:46 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServ.hpp"
 
-WebServ::WebServ(const Config *config)
+/**
+ * @brief Constructs a web server instance with its own ServerCore.
+ *
+ * @param config Server configuration.
+ */
+WebServ::WebServ(const ServerConfig *config)
 {
 	this->_config = config;
 	std::cout << *this->_config << std::endl;
 	this->_core = new ServerCore(config);
-	this->_clients.resize(this->_config->client_limit);
+	this->_clients.resize(this->_config->max_clients);
 	this->_processing_queue.clear();
 }
 
+/**
+ * @brief Destructor freeing clients and core.
+ */
 WebServ::~WebServ()
 {
-	for (int i = 0; i < _config->client_limit; ++i)
+	for (int i = 0; i < _config->max_clients; ++i)
 	{
 		if (this->_clients[i] != NULL)
 		{
@@ -36,6 +44,11 @@ WebServ::~WebServ()
 	std::cerr << RED << "Destroying server" << RESET << std::endl;
 }
 
+/**
+ * @brief Initializes sockets and poll entries.
+ *
+ * @return 0 on success, SERV_ERROR on failure.
+ */
 int	WebServ::Init()
 {
 	if (!this->_config || !this->_core)
@@ -47,6 +60,11 @@ int	WebServ::Init()
 	return (0);
 }
 
+/**
+ * @brief Performs one loop iteration: updates queue then processes it.
+ *
+ * @return 0 on success, SERV_ERROR on fatal errors.
+ */
 int	WebServ::Run()
 {
 	if (this->UpdateQueue() == SERV_ERROR)
@@ -62,6 +80,11 @@ int	WebServ::Run()
 	return (0);
 }
 
+/**
+ * @brief Moves ready clients into the processing queue based on poll events.
+ *
+ * @return 0 on success, SERV_ERROR on fatal server error.
+ */
 int	WebServ::UpdateQueue()
 {
 	std::vector<PollRevent>	events;
@@ -109,6 +132,11 @@ int	WebServ::UpdateQueue()
 	return (0);
 }
 
+/**
+ * @brief Handles one client from the processing queue.
+ *
+ * @return Error code from client handling.
+ */
 int	WebServ::ProcessQueue()
 {
 	Client	*next_client;
@@ -134,16 +162,21 @@ int	WebServ::ProcessQueue()
 	return (error);
 }
 
+/**
+ * @brief Creates a new Client or returns NULL if capacity reached.
+ *
+ * @return Pointer to new Client or NULL on failure/limit.
+ */
 Client	*WebServ::newClient()
 {
 	int indx;
 
-	for (indx = 0; indx < this->_config->client_limit; ++indx)
+	for (indx = 0; indx < this->_config->max_clients; ++indx)
 	{
 		if (!this->_clients[indx])
 			break;
 	}
-	if (indx == this->_config->client_limit)
+	if (indx == this->_config->max_clients)
 	{
 		std::cerr << RED << "[newClient] Cannot accept new clients, limit reached!" << RESET << std::endl;
 		return (NULL);
@@ -154,9 +187,22 @@ Client	*WebServ::newClient()
 	return (this->_clients[indx]);
 }
 
+/**
+ * @brief Removes a client by index and cleans processing queue references.
+ *
+ * @param indx Client index.
+ *
+ * @return 0 on completion.
+ */
 int	WebServ::removeClient(int indx)
 {
 	this->_core->pollRemove(indx);
+	int base = this->_config->max_clients + 2 * indx;
+	if (base + 1 < static_cast<int>(this->_core->getPollFds().size()))
+	{
+		this->_core->pollRemove(base);
+		this->_core->pollRemove(base + 1);
+	}
 	if (this->_clients[indx] != NULL)
 	{
 		 std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;
@@ -167,7 +213,6 @@ int	WebServ::removeClient(int indx)
 			{
 				if (*it == this->_clients[indx])
 				{
-					std::cout << "REMOVED client " << indx << std::endl;
 					this->_processing_queue.erase(it);
 					break ;
 				}
@@ -175,7 +220,7 @@ int	WebServ::removeClient(int indx)
 			}
 		}
 		delete this->_clients[indx];
-		this->_clients[indx] = NULL;
 	}
+	this->_clients[indx] = NULL;
 	return (0);
 }
