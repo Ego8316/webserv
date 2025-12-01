@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCore.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/12/01 15:29:36 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 00:57:56 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,26 +228,33 @@ std::vector<PollRevent>	ServerCore::pollWatchRevent()
 	std::vector<PollRevent>	ret;
 	PollRevent				revent;
 	int						num_event;
-	int						server_idx = _poll_fds.size() - 1;
 
 	ret.resize(0);
 	num_event = _pollWait();
 	if (num_event < 0)
 		return (ret);
-	for (int i = 0; i < _config->max_clients && num_event > 0; ++i)
+	for (unsigned int i = 0; i < static_cast<unsigned int>(_config->client_limit) + 1; ++i)
 	{
+		if (i == static_cast<unsigned int>(_config->client_limit))
+			i = this->_poll_fds.size() - 1;
 		revent.error = false;
 		revent.server = false;
 		revent.client_id = -1;
 		revent.revent = 0;
-		if (_poll_fds[i].fd < 0)
+		if (_poll_fds[i].fd == 0)
 			continue ;
 		if (_poll_fds[i].revents & POLLHUP || _poll_fds[i].revents & POLLERR)
 		{
 			revent.error = true;
 			revent.revent = _poll_fds[i].revents;
-			revent.client_id = i;
-			std::cerr << ORANGE << "Client " << i << " ended connection." << RESET << std::endl;
+			if (i == _poll_fds.size() - 1)
+				revent.server = true;
+			else
+				revent.client_id = i;
+			if (i == 0)
+				std::cerr << ORANGE << "Server ended connection." << RESET << std::endl;
+			else
+				std::cerr << ORANGE << "Client " << i << " ended connection." << RESET << std::endl;
 			ret.push_back(revent);
 			--num_event;
 		}
@@ -255,34 +262,14 @@ std::vector<PollRevent>	ServerCore::pollWatchRevent()
 		{
 			revent.error = false;
 			revent.revent = POLLIN;
-			revent.client_id = i;
+			if (i == this->_poll_fds.size() - 1)
+				revent.server = true;
+			else
+				revent.client_id = i;
 			ret.push_back(revent);
 			--num_event;
 		}
 		_poll_fds[i].revents = 0;
-	}
-	if (num_event > 0 && _poll_fds[server_idx].fd != 0)
-	{
-		revent.error = false;
-		revent.server = false;
-		revent.client_id = -1;
-		revent.revent = 0;
-		if (_poll_fds[server_idx].revents & POLLHUP || _poll_fds[server_idx].revents & POLLERR)
-		{
-			revent.error = true;
-			revent.revent = _poll_fds[server_idx].revents;
-			revent.server = true;
-			std::cerr << ORANGE << "Server ended connection." << RESET << std::endl;
-			ret.push_back(revent);
-		}
-		else if (_poll_fds[server_idx].revents & POLLIN)
-		{
-			revent.error = false;
-			revent.revent = POLLIN;
-			revent.server = true;
-			ret.push_back(revent);
-		}
-		_poll_fds[server_idx].revents = 0;
 	}
 	return (ret);
 }
