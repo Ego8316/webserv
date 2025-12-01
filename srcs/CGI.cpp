@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/30 22:03:27 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/01 15:53:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,29 +180,28 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 	ssize_t				bytes_read = 1;
 	ssize_t				bytes_sent = 1;
 	
+	(void)client;
 	if (this->_bytes_to_send == 0)
 		this->_bytes_to_send = request.getRawBody().size();// + request.getRawHeader().size();
-	while (!g_shutdown && utils::getTime() < client.getTimeLimit() && !this->_is_complete)
+	// while (!g_shutdown && utils::getTime() < client.getTimeLimit() && !this->_is_complete)
+	// {
+	if (this->_pipe_to_CGI[PIPE_WRITE_END] != -1 && (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0))
+		bytes_sent = this->writeToCGI(request, config, server);
+	if (!checkOutputTermination(bytes_read))
+		bytes_read = this->readFromCGI(config, server);
+	else if (this->_process_status[0] == 0) // TODO what if the prorgram crash ???
+		this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
+	if (this->_process_status[0] != 0) // only set process status if done reading so we are sure the program is both finished and we are done reading
 	{
-		if (this->_pipe_to_CGI[PIPE_WRITE_END] == -1)
-		{}
-		else if (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0)
-			bytes_sent = this->writeToCGI(request, config, server);
-		if (!checkOutputTermination(bytes_read))
-			bytes_read = this->readFromCGI(config, server);
-		else if (this->_process_status[0] == 0) // TODO what if the prorgram crash ???
-			this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
-		if (this->_process_status[0] != 0) // only set process status if done reading so we are sure the program is both finished and we are done reading
-		{
-			if (utils::startsWith(this->_output, "HTTP/"))
-				response.setSkipStatus(true);
-			genFullOutput(response);
-			this->_is_complete = true;
-			close(this->_pipe_to_CGI[PIPE_WRITE_END]);
-			this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
-			server.pollRemove(this->_pipe_to_cgi_idx);
-		}
+		if (utils::startsWith(this->_output, "HTTP/"))
+			response.setSkipStatus(true);
+		genFullOutput(response);
+		this->_is_complete = true;
+		close(this->_pipe_to_CGI[PIPE_WRITE_END]);
+		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
+		server.pollRemove(this->_pipe_to_cgi_idx);
 	}
+	// }
 }
 
 /**
@@ -394,7 +393,7 @@ void		CGI::GenEnvVar(Request &request)
 	std::string					varvalue;
 	Cookie						cookies = request.getQueryCookies();
 	
-	env.push_back("METHOD=" + utils::methodToStr(request.getMethod()));
+	env.push_back("REQUEST_METHOD=" + utils::methodToStr(request.getMethod()));
 	env.push_back("QUERY_STRING=" + request.getQueryString());
 	std::map<std::string, std::string>	attr = cookies.getAllAttributes();
 	for (std::map<std::string, std::string>::iterator it = attr.begin(); it != attr.end(); ++it)
@@ -404,7 +403,7 @@ void		CGI::GenEnvVar(Request &request)
 	{
 		this->_env[i] = new char[env[i].length() + 1];
 		if (!this->_env[i])
-		{	//TODO test
+		{
 			deleteEnvVar();
 			return ;
 		}

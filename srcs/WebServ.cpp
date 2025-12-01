@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/30 21:03:46 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/01 20:31:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,7 @@ int	WebServ::UpdateQueue()
 				{
 					std::cout << MAGENTA << "[UpdateQueue] Client " << event->client_id << " added to processing queue" << RESET << std::endl;
 					this->_clients[event->client_id]->setState(INIT);
+					this->_clients[event->client_id]->setTimeLimit(utils::getTime() + this->_config->_timeout);
 					this->_processing_queue.push_back(this->_clients[event->client_id]);
 				}
 			}
@@ -146,6 +147,12 @@ int	WebServ::ProcessQueue()
 		return (0);
 	next_client = this->_processing_queue.front();
 	this->_processing_queue.pop_front();
+	while (next_client->getTimeLimit() < utils::getTime())
+	{
+		removeClient(next_client->getId());
+		next_client = this->_processing_queue.front();
+		this->_processing_queue.pop_front();
+	}
 	error = next_client->handleEvent();
 	if (error == KILL_SERVER)
 		return (SERV_ERROR);

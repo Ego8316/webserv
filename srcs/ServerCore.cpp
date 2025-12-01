@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/11/30 21:03:30 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/01 15:29:36 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -308,12 +308,7 @@ bool	ServerCore::pollAvailFor(int idx, nfds_t operation)
 		return (false);
 	}
 	else if (ret == 0)
-	{
-		//this can be misleading, since timeout is 0 and is asynchronous
-		// std::cerr << RED << "Poll timed out for operation "
-		// 	<< operation << " for client " << idx << RESET << std::endl;
 		return (false);
-	}
 	return (_poll_fds[idx].revents & operation);
 }
 

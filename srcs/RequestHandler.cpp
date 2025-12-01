@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/11/29 19:09:00 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/01 12:59:37 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,7 +209,6 @@ void	RequestHandler::_handleDelete(Response *response, const ServerConfig &confi
  */
 void	RequestHandler::_handleCGI(Response *response, const Request &request, const ServerConfig &config, const Resource &resource)
 {
-	//TODO check for errors on Ressource
 	if (!resource.isExecutable() || resource.isDirectory())
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	(void)request;

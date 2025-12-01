@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/30 22:16:08 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/01 19:05:38 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class Client
 		RequestStage			getState();
 		ServerCore				&getServer();
 		long					getTimeLimit();
+		void					setTimeLimit(long value);
 		long					getRequestTimeLimit();
 		void					setFd(int fd);
 		void					setClientId(int id);
@@ -67,7 +68,6 @@ class Client
 		int								_bytes_sent;
 		int								_bytes_in_buffer;
 		long							_time_limit;
-		long							_request_time_limit;
 		bool							_keep_alive;
 		Request							*_request;
 		Response						*_response;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 01:36:17 by ego               #+#    #+#             */
-/*   Updated: 2025/11/28 13:13:42 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/01 15:37:11 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,9 +166,9 @@ static void	printServerSettings(std::ostream &os, const ServerConfig &cfg)
 static void	printTimeouts(std::ostream &os, const ServerConfig &cfg)
 {
 	printSection(os, "Timeouts", "");
-	printField(os, "Header timeout:", utils::toString(cfg.client_header_timeout) + "s");
-	printField(os, "Body timeout:", utils::toString(cfg.client_body_timeout) + "s");
-	printField(os, "Send timeout:", utils::toString(cfg.send_timeout) + "s");
+	printField(os, "Header timeout:", utils::toString(cfg.client_header_timeout) + "ms");
+	printField(os, "Body timeout:", utils::toString(cfg.client_body_timeout) + "ms");
+	printField(os, "Send timeout:", utils::toString(cfg.send_timeout) + "ms");
 }
 
 /**

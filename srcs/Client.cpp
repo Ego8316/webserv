@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/30 22:26:19 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/01 19:08:50 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,6 @@ Client::Client(const ServerConfig *config, ServerCore *server)
 	this->_leftover = "";
 	this->_bytes_sent = 0;
 	this->_bytes_in_buffer = 0;
-	this->_time_limit = 0;
-	this->_request_time_limit = 0;
 	this->_keep_alive = true;
 	this->_request = NULL;
 	this->_response = NULL;
@@ -73,8 +71,6 @@ Client	&Client::operator=(const Client &other)
 		this->_leftover = other._leftover;
 		this->_bytes_sent = other._bytes_sent;
 		this->_bytes_in_buffer = other._bytes_in_buffer;
-		this->_time_limit = other._time_limit;
-		this->_request_time_limit = other._request_time_limit;
 		this->_keep_alive = other._keep_alive;
 		if (this->_request)
 			delete this->_request;
@@ -173,13 +169,11 @@ long	Client::getTimeLimit()
 }
 
 /**
- * @brief Returns absolute request timeout.
- *
- * @return Timeout in seconds.
+ * @brief Sets the time limit for the current request
  */
-long	Client::getRequestTimeLimit()
+void	Client::setTimeLimit(long value)
 {
-	return (this->_request_time_limit);
+	this->_time_limit = value;
 }
 
 /**
@@ -222,8 +216,6 @@ int	Client::handleEvent()
 	this->_error = ERR_NONE;
 	if (g_shutdown)
 		return (KILL_SERVER);
-	if (this->_request_time_limit == 0)
-		this->_request_time_limit = utils::getTime() + _config->client_body_timeout;
 	if (this->_state == TRY_ACCEPTING)
 		this->_tryAccepting();
 	if (this->_state == ABORTING)
@@ -231,30 +223,21 @@ int	Client::handleEvent()
 	else if (this->_error == WOULD_BLOCK)
 		return (ERR_NONE);
 	else if (this->_state == DONE)
-	{
-		this->_request_time_limit = 0;
 		return (ERR_NONE);
-	}
 	if (this->_state == INIT)
 		this->_requestInit();
-	this->_time_limit = std::min(utils::getTime() + this->_config->send_timeout, this->_request_time_limit);
-	while (!g_shutdown && utils::getTime() < this->_time_limit && _state != DONE && _state != ABORTING && _error != WOULD_BLOCK)
-	{
-		if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
-			return (SERV_ERROR);
-		if (this->_state == READING_BODY && this->_readBody() == SERV_ERROR)
-			return (SERV_ERROR);
-		if (_state == PROCESSING_REQUEST)
-			this->_processRequest();
-		if (_state == CGI_RUNNING )
-			this->_monitorCGI();
-		if (this->_state == SENDING_STRING && this->_sendString() == SERV_ERROR)
-			return (SERV_ERROR);
-		if (this->_state == SENDING_FILE && this->_sendFile() == SERV_ERROR)
-			return (SERV_ERROR);
-	}
-	if (this->_request_time_limit <= utils::getTime() && _state != DONE)
-		_error = KILL_REQUEST;
+	if (this->_state == READING_HEADER && this->_readHeader() == SERV_ERROR)
+		return (SERV_ERROR);
+	if (this->_state == READING_BODY && this->_readBody() == SERV_ERROR)
+		return (SERV_ERROR);
+	if (_state == PROCESSING_REQUEST)
+		this->_processRequest();
+	if (_state == CGI_RUNNING )
+		this->_monitorCGI();
+	if (this->_state == SENDING_STRING && this->_sendString() == SERV_ERROR)
+		return (SERV_ERROR);
+	if (this->_state == SENDING_FILE && this->_sendFile() == SERV_ERROR)
+		return (SERV_ERROR);
 	if (_state == ABORTING)
 		_error = KILL_CLIENT;
 	if (this->_state != TRY_ACCEPTING && this->_response->getHttpStatus() == HTTP_BAD_REQUEST)
@@ -265,7 +248,6 @@ int	Client::handleEvent()
 		this->_request = NULL;
 		delete this->_response;
 		this->_response = NULL;
-		this->_request_time_limit = 0;
 	}
 	printState();
 	return (_error);
@@ -307,7 +289,6 @@ int	Client::_requestInit()
 	this->_bytes_sent = 0;
 	this->_bytes_in_buffer = 0;
 	this->_keep_alive = true;
-	this->_request_time_limit = utils::getTime() + this->_config->client_body_timeout;
 	_state = READING_HEADER;
 	return (0);
 }
