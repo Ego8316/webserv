@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/01 19:08:50 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/01 21:12:47 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,7 @@ Client::~Client()
 		delete _request;
 	if (this->_response)
 		delete _response;
+	this->_server->pollRemove(this->_client_id);
 }
 
 /**
@@ -462,13 +463,13 @@ void	Client::_monitorCGI()
 int	Client::_sendString()
 {
 	const std::string	&response_str = this->_response->getString();
-	int					bytes_to_send = response_str.size() - this->_bytes_sent;
+	size_t				bytes_to_send = response_str.size() - this->_bytes_sent;
 
 	if (bytes_to_send > 0)
-	{//TODO on devrait pas send config->buffer_size plutot que tout le reste ?
+	{
 		if (this->_bytes_sent == 0)
 			utils::logMsg("DEBUG", CYAN, "[_sendString] Response header:\n" + this->_response->getHeader(), this->_client_id);
-		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, bytes_to_send, this);
+		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, std::min(bytes_to_send, this->_config->client_body_buffer_size), this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);
 		if (sent == WBLOCK)

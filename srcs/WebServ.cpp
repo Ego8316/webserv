@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/01 20:43:43 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/01 21:11:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,16 +203,9 @@ Client	*WebServ::newClient()
  */
 int	WebServ::removeClient(int indx)
 {
-	this->_core->pollRemove(indx);
-	int base = this->_config->max_clients + 2 * indx;
-	if (base + 1 < static_cast<int>(this->_core->getPollFds().size()))
-	{
-		this->_core->pollRemove(base);
-		this->_core->pollRemove(base + 1);
-	}
 	if (this->_clients[indx] != NULL)
 	{
-		 std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;
+		std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;
 		if (this->_clients[indx]->getState() != DONE)
 		{
 			std::deque<Client *>::iterator it = this->_processing_queue.begin();
