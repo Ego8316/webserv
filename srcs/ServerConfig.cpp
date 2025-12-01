@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 01:36:17 by ego               #+#    #+#             */
-/*   Updated: 2025/12/01 15:37:11 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/01 20:37:16 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,7 @@ ServerConfig::ServerConfig()
 		autoindex(false),
 		max_clients(1000),
 		client_max_body_size(1 << 20),
-		client_header_timeout(10),
-		client_body_timeout(60),
-		send_timeout(60),
+		timeout(2000),
 		client_header_buffer_size(1024),
 		client_body_buffer_size(8 * 1024)
 {
@@ -155,20 +153,7 @@ static void	printServerSettings(std::ostream &os, const ServerConfig &cfg)
 	printField(os, "Index:", cfg.index);
 	printField(os, "Autoindex:", cfg.autoindex ? "ON" : "OFF");
 	printField(os, "Max body size:", utils::toString(cfg.client_max_body_size));
-}
-
-/**
- * @brief Render timeout-related fields.
- *
- * @param os Output stream.
- * @param cfg Configuration to read.
- */
-static void	printTimeouts(std::ostream &os, const ServerConfig &cfg)
-{
-	printSection(os, "Timeouts", "");
-	printField(os, "Header timeout:", utils::toString(cfg.client_header_timeout) + "ms");
-	printField(os, "Body timeout:", utils::toString(cfg.client_body_timeout) + "ms");
-	printField(os, "Send timeout:", utils::toString(cfg.send_timeout) + "ms");
+	printField(os, "Timeout:", utils::toString(cfg.timeout) + "ms");
 }
 
 /**
@@ -239,7 +224,6 @@ std::ostream &operator<<(std::ostream &os, const ServerConfig &cfg)
 	printBorderTop(os, "SERVER CONFIG");
 
 	printServerSettings(os, cfg);
-	printTimeouts(os, cfg);
 	printBuffers(os, cfg);
 	printErrorPages(os, cfg);
 	for (std::map<std::string, Location>::const_iterator it = cfg.locations.begin();

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/01 20:31:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/01 20:38:08 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ int	WebServ::UpdateQueue()
 				{
 					std::cout << MAGENTA << "[UpdateQueue] Client " << event->client_id << " added to processing queue" << RESET << std::endl;
 					this->_clients[event->client_id]->setState(INIT);
-					this->_clients[event->client_id]->setTimeLimit(utils::getTime() + this->_config->_timeout);
+					this->_clients[event->client_id]->setTimeLimit(utils::getTime() + this->_config->timeout);
 					this->_processing_queue.push_back(this->_clients[event->client_id]);
 				}
 			}

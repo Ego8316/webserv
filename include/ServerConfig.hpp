@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:15:57 by ego               #+#    #+#             */
-/*   Updated: 2025/11/28 13:11:20 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/01 20:35:55 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,9 +55,7 @@ class	ServerConfig
 		bool							autoindex;
 		int								max_clients;
 		size_t							client_max_body_size;
-		long							client_header_timeout;
-		long							client_body_timeout;
-		long							send_timeout;
+		long							timeout;
 		size_t							client_header_buffer_size;
 		size_t							client_body_buffer_size;
 		std::map<std::string, Location>	locations;
