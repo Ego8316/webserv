@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/01 12:07:35 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 17:16:54 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,13 +74,13 @@ static std::string	readFile(const std::string &path)
  */
 static std::vector<ServerConfig>	parseFile(const std::string &path)
 {
-		const std::string		&input = readFile(path);
-		ConfigLexer				lexer(input);
-		std::vector<Token>		tokens = lexer.tokenize();
-		ConfigParser			parser(tokens);
-		std::vector<Block>		blocks = parser.parse();
-		ConfigInterpreter		interpreter(blocks);
-		return (interpreter.interpret());
+	const std::string		&input = readFile(path);
+	ConfigLexer				lexer(input);
+	std::vector<Token>		tokens = lexer.tokenize();
+	ConfigParser			parser(tokens);
+	std::vector<Block>		blocks = parser.parse();
+	ConfigInterpreter		interpreter(blocks);
+	return (interpreter.interpret());
 }
 
 /**
