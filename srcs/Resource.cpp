@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/11/29 18:41:52 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 01:06:50 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,7 @@ void	Resource::build(const Request &request, const ServerConfig &config)
 
 	if (loc)
 	{
+		std::cout << "loc path:" << loc->path;
 		_method_allowed = (loc->methods & request.getMethod());
 		_autoindex = loc->autoindex;
 		_index = loc->index;

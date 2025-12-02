@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 01:36:17 by ego               #+#    #+#             */
-/*   Updated: 2025/12/01 20:37:16 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 01:21:42 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,16 @@ const Location	*ServerConfig::matchLocation(const std::string &path) const
 			it != locations.end(); ++it)
 	{
 		const std::string &prefix = it->first;
-		if (path.compare(0, prefix.size(), prefix) == 0 && prefix.size() >= best_len)
+
+		if (prefix == "/" && best == NULL)
+		{
+			best = &it->second;
+			best_len = 1;
+			continue;
+		}
+		if (path.compare(0, prefix.size(), prefix) == 0
+				&& (prefix.size() == path.size() || path[prefix.size()] == '/')
+				&& prefix.size() >= best_len)
 		{
 			best = &it->second;
 			best_len = prefix.size();
@@ -227,7 +236,7 @@ std::ostream &operator<<(std::ostream &os, const ServerConfig &cfg)
 	printBuffers(os, cfg);
 	printErrorPages(os, cfg);
 	for (std::map<std::string, Location>::const_iterator it = cfg.locations.begin();
-	     it != cfg.locations.end(); ++it)
+		 it != cfg.locations.end(); ++it)
 		printLocation(os, it->second);
 	printBorderBottom(os);
 	return os;

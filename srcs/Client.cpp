@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/01 22:46:04 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 01:05:16 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -418,7 +418,7 @@ void	Client::_processRequest()
 {
 	RequestHandler::handle(this->_response, *_request, *_config);
 	utils::logMsg("INFO", GREEN, "Processing request", this->_client_id);
-	//this->printRequest();
+	// this->printRequest();
 	std::string conn = utils::toLower(_request->headerGetField("Connection"));
 	if (_request->getVersion() == "HTTP/1.0")
 		_keep_alive = (conn.find("keep-alive") != std::string::npos);

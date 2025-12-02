@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/01 12:59:37 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 01:05:50 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,8 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 
 	Resource	resource;
 	resource.build(request, config);
+
+	std::cout << resource.getPath() << std::endl;
 
 	if (resource.isRedirect())
 		return (_handleRedirect(response, resource));
