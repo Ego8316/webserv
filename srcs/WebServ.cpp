@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 16:28:54 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/02 16:36:52 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,8 +135,8 @@ int	WebServ::UpdateQueue()
 			}
 		}
 	}
-	utils::printProcessQueue(this->_processing_queue);
-	utils::printClients(this->_clients);
+	//utils::printProcessQueue(this->_processing_queue);
+	//utils::printClients(this->_clients);
 	return (0);
 }
 
@@ -220,32 +220,25 @@ int	WebServ::removeClient(size_t indx)
 		std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;
 		//if (this->_clients[indx]->getState() != DONE)
 		//{
-		std::cout << "step 1" << std::endl;
 		std::deque<Client *>::iterator it = this->_processing_queue.begin();
 		while (it != this->_processing_queue.end())
 		{
 
-			std::cout << "step 11" << std::endl;
 			if (*it == this->_clients[indx])
 			{
-			std::cout << "step 112" << std::endl;
 				this->_processing_queue.erase(it);
 				it = this->_processing_queue.begin();
 				std::advance(it, i);
-			std::cout << "step 113" << std::endl;
 			}
 			else
 			{
-			std::cout << "step 131" << std::endl;
 				++it;
 				++i;
 			}
 		}
-		std::cout << "step 2" << std::endl;
 		//}
 		delete this->_clients[indx];
 		this->_clients[indx] = NULL;
-		std::cout << "step 3" << std::endl;
 	}
 	return (0);
 }
