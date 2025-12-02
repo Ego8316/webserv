@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/11/24 23:48:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 16:25:35 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ void	Request::parseHeader(const ServerConfig &config)
 		if (this->_error)
 			return ;
 	}
-	if (_chunked && _content_length) //TODO on est sur de ca ?
+	if (_chunked && _content_length)
 	{
 		this->_error = true;
 		return ;
@@ -196,6 +196,8 @@ void		Request::_parseHeaderLine(std::string line, const ServerConfig &config)
 			this->_headers[key] = value;
 		if (key == "Transfer-Encoding" && utils::toLower(value).find("chunked") != std::string::npos)
 			this->_chunked = true;
+		if (this->getMethod() == GET && key == "Content-Length")
+			this->_error = true;
 		else if (key == "Content-Length")
 		{
 			this->_content_length = std::atol(value.c_str());

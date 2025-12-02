@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 15:04:28 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/02 16:28:54 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,15 +160,6 @@ int	WebServ::ProcessQueue()
 	}
 	next_client = this->_processing_queue.front();
 	this->_processing_queue.pop_front();
-	/*while (!this->_processing_queue.empty() && next_client->getTimeLimit() < utils::getTime())
-	{
-		std::cout << "Client " << next_client->getId() << " timed out" << std::endl;
-		removeClient(next_client->getId());
-		if (this->_processing_queue.empty())
-			return(0) ;
-		next_client = this->_processing_queue.front();
-		this->_processing_queue.pop_front();
-	}*/
 	if (!next_client)
 		return (ERR_NONE);
 	error = next_client->handleEvent();

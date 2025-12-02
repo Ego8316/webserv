@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 13:40:11 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/02 16:29:32 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -338,7 +338,6 @@ int	Client::_readHeader()
 	this->_leftover = header_str.substr(pos + 4);
 	header_str.erase(pos);
 	utils::logMsg("INFO", GREEN, "[_readHeader] Header fully received (" + utils::toString(header_str.size()) + " bytes)", this->_client_id);
-	//this->printHeader();
 	this->_request->parseHeader(*this->_config);
 	if (!this->_request->isChunked() && this->_request->getContentLength() == 0)
 	{
@@ -419,7 +418,6 @@ void	Client::_processRequest()
 {
 	RequestHandler::handle(this->_response, *_request, *_config);
 	utils::logMsg("INFO", GREEN, "Processing request", this->_client_id);
-	// this->printRequest();
 	std::string conn = utils::toLower(_request->headerGetField("Connection"));
 	if (_request->getVersion() == "HTTP/1.0")
 		_keep_alive = (conn.find("keep-alive") != std::string::npos);
