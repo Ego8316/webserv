@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/11/24 23:48:39 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 20:23:44 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,7 +143,7 @@ void	Request::parseHeader(const ServerConfig &config)
 /**
  * @brief Extracts query string and strips scheme/host prefixes from target.
  */
-void		Request::_parseRequestTarget()
+void	Request::_parseRequestTarget()
 {
 	if (this->_request_target.find("?") != std::string::npos)
 	{

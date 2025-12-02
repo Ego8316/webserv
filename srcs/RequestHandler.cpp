@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 01:05:50 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 20:26:23 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 	if (resource.getStatus() & ACCEPT_ERROR)
 		return (_handleError(response, HTTP_BAD_REQUEST, config));
 	if (resource.isCGI())
-		return (_handleCGI(response, request, config, resource));
+		return (_handleCGI(response, config, resource));
 	switch (request.getMethod())
 	{
 		case GET:		return _handleGet(response, config, resource);
@@ -209,13 +209,12 @@ void	RequestHandler::_handleDelete(Response *response, const ServerConfig &confi
  * @param config Server configuration.
  * @param resource Resolved resource.
  */
-void	RequestHandler::_handleCGI(Response *response, const Request &request, const ServerConfig &config, const Resource &resource)
+void	RequestHandler::_handleCGI(Response *response, const ServerConfig &config, const Resource &resource)
 {
 	if (!resource.isExecutable() || resource.isDirectory())
 		return (_handleError(response, HTTP_FORBIDDEN, config));
-	(void)request;
 	if (response->getCGI() == NULL)
-		response->setCGI(new CGI());
+		response->setCGI(new CGI(resource.getPath()));
 }
 
 /**

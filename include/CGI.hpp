@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/30 21:55:22 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 20:25:22 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class CGI
 	public :
 	// CONSTRUCTORS
 		CGI();
+		CGI(const std::string &cgi_script);
 		CGI(const CGI &other);
 		CGI &operator=(const CGI &other);
 	//DESTUCTORS
@@ -51,7 +52,7 @@ class CGI
 		ssize_t		readFromCGI(const ServerConfig &config, ServerCore &server);
 		
 		void		parseHeader(const ServerConfig &config);
-		void		genFullOutput(Response &response);
+		void		genFullOutput(Response &response, const ServerConfig &config);
 
 		void		Execute();
 		

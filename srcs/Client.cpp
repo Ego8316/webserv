@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 01:05:16 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 18:57:15 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,7 +250,7 @@ int	Client::handleEvent()
 		delete this->_response;
 		this->_response = NULL;
 	}
-	printState();
+	// printState();
 	return (_error);
 }
 
@@ -468,7 +468,7 @@ int	Client::_sendString()
 	if (bytes_to_send > 0)
 	{
 		if (this->_bytes_sent == 0)
-			utils::logMsg("DEBUG", CYAN, "[_sendString] Response header:\n" + this->_response->getHeader(), this->_client_id);
+			utils::logMsg("DEBUG", CYAN, "[_sendString] Response string:\n" + response_str, this->_client_id);
 		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, std::min(bytes_to_send, this->_config->client_body_buffer_size), this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);
