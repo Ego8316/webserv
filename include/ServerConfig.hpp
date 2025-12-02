@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:15:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/01 20:35:55 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 13:27:34 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class	ServerConfig
 		const Location	*matchLocation(const std::string &path) const;
 
 		static const unsigned int		client_limit = 1000;
-		static const unsigned int		incoming_queue_backlog = 1000;
+		static const unsigned int		incoming_queue_backlog = 100;
 		std::string						server_name;
 		std::string						listen_host_string;
 		uint32_t						listen_host;

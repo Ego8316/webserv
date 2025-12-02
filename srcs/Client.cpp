@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 01:05:16 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 13:40:11 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ Client::Client(const ServerConfig *config, ServerCore *server)
 	this->_keep_alive = true;
 	this->_request = NULL;
 	this->_response = NULL;
+	this->_time_limit = utils::getTime() + config->timeout;
 }
 
 /**

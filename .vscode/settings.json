@@ -81,6 +81,9 @@
         "__functional_base": "cpp",
         "__memory": "cpp",
         "filesystem": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "cinttypes": "cpp"
     }
 }

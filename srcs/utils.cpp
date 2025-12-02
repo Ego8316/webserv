@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/29 21:55:37 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 13:17:12 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -483,4 +483,32 @@ void	utils::logMsg(const std::string &level, const std::string &color, const std
 	if (client_id >= 0)
 		std::cout << " [client " << client_id << "]";
 	std::cout << " " << msg << RESET << std::endl;
+}
+
+void	utils::printProcessQueue(std::deque<Client *> q)
+{
+	std::deque<Client *>::iterator	it = q.begin();
+	size_t	i = 0;
+
+	std::cout << "Processing Queue" << std::endl;
+	while (it != q.end())
+	{
+		std::cout << "PQ[" << i << "]" << " = " << *it << std::endl;
+		++it;
+		++i;
+	}
+}
+
+void	utils::printClients(std::vector<Client *> v)
+{
+	std::vector<Client *>::iterator	it = v.begin();
+	size_t	i = 0;
+
+	std::cout << "Clients" << std::endl;
+	while (it != v.end())
+	{
+		std::cout << "Clients[" << i << "]" << " = " << *it << std::endl;
+		++it;
+		++i;
+	}
 }

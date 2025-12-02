@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/01 22:22:49 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 15:04:28 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ WebServ::WebServ(const ServerConfig *config)
 	std::cout << *this->_config << std::endl;
 	this->_core = new ServerCore(config);
 	this->_clients.resize(this->_config->max_clients);
-	this->_processing_queue.clear();
+	this->_processing_queue.resize(0);
 }
 
 /**
@@ -98,13 +98,14 @@ int	WebServ::UpdateQueue()
 		{
 			if (event->server == true)
 			{
-				 std::cerr << RED << "[UpdateQueue] Server error: closing connection!" << RESET << std::endl;
+				 std::cerr << RED << "[UpdateQueue] Server error: closing all connections !" << RESET << std::endl;
 				return (SERV_ERROR);
 			}
 			else
 			{
 				std::cout << RED << "[UpdateQueue] Removing client " << event->client_id << " due to error" << RESET << std::endl;
-				removeClient(event->client_id);
+				if (this->_clients[event->client_id])
+					removeClient(event->client_id);
 			}
 		}
 		else
@@ -114,7 +115,11 @@ int	WebServ::UpdateQueue()
 				std::cout << GREEN << "[UpdateQueue] New connection detected. Creating client..." << RESET << std::endl;
 				Client	*new_client = newClient();
 				if (new_client)
+				{
+					new_client->setState(TRY_ACCEPTING);
+					new_client->setTimeLimit(utils::getTime() + this->_config->timeout);
 					this->_processing_queue.push_back(new_client);
+				}
 				else
 					std::cerr << RED << "[UpdateQueue] Error creating Client instance" << RESET << std::endl;
 			}
@@ -130,6 +135,8 @@ int	WebServ::UpdateQueue()
 			}
 		}
 	}
+	utils::printProcessQueue(this->_processing_queue);
+	utils::printClients(this->_clients);
 	return (0);
 }
 
@@ -137,7 +144,7 @@ int	WebServ::UpdateQueue()
  * @brief Handles one client from the processing queue.
  *
  * @return Error code from client handling.
- */
+ */    
 int	WebServ::ProcessQueue()
 {
 	Client	*next_client;
@@ -145,14 +152,23 @@ int	WebServ::ProcessQueue()
 
 	if (this->_processing_queue.empty())
 		return (0);
-	next_client = this->_processing_queue.front();
-	this->_processing_queue.pop_front();
-	while (!this->_processing_queue.empty() && next_client->getTimeLimit() < utils::getTime())
+	while (!this->_processing_queue.empty() && this->_processing_queue.front()->getTimeLimit() < utils::getTime())
 	{
-		removeClient(next_client->getId());
-		next_client = this->_processing_queue.front();
+		std::cout << "Client " << this->_processing_queue.front()->getId() << " timed out" << std::endl;
+		removeClient(this->_processing_queue.front()->getId());
 		this->_processing_queue.pop_front();
 	}
+	next_client = this->_processing_queue.front();
+	this->_processing_queue.pop_front();
+	/*while (!this->_processing_queue.empty() && next_client->getTimeLimit() < utils::getTime())
+	{
+		std::cout << "Client " << next_client->getId() << " timed out" << std::endl;
+		removeClient(next_client->getId());
+		if (this->_processing_queue.empty())
+			return(0) ;
+		next_client = this->_processing_queue.front();
+		this->_processing_queue.pop_front();
+	}*/
 	if (!next_client)
 		return (ERR_NONE);
 	error = next_client->handleEvent();
@@ -192,6 +208,7 @@ Client	*WebServ::newClient()
 	}
 	this->_clients[indx] = new Client(this->_config, this->_core);
 	this->_clients[indx]->setClientId(indx);
+	this->_clients[indx]->setState(TRY_ACCEPTING);
 	std::cout << GREEN << "[newClient] Client " << indx << " created." << RESET << std::endl;
 	return (this->_clients[indx]);
 }
@@ -203,26 +220,41 @@ Client	*WebServ::newClient()
  *
  * @return 0 on completion.
  */
-int	WebServ::removeClient(int indx)
+int	WebServ::removeClient(size_t indx)
 {
-	if (this->_clients[indx] != NULL)
+	size_t	i = 0;
+
+	if (indx < this->_config->client_limit && this->_clients[indx] != NULL)
 	{
 		std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;
-		if (this->_clients[indx]->getState() != DONE)
+		//if (this->_clients[indx]->getState() != DONE)
+		//{
+		std::cout << "step 1" << std::endl;
+		std::deque<Client *>::iterator it = this->_processing_queue.begin();
+		while (it != this->_processing_queue.end())
 		{
-			std::deque<Client *>::iterator it = this->_processing_queue.begin();
-			while (it != this->_processing_queue.end())
+
+			std::cout << "step 11" << std::endl;
+			if (*it == this->_clients[indx])
 			{
-				if (*it == this->_clients[indx])
-				{
-					this->_processing_queue.erase(it);
-					break ;
-				}
+			std::cout << "step 112" << std::endl;
+				this->_processing_queue.erase(it);
+				it = this->_processing_queue.begin();
+				std::advance(it, i);
+			std::cout << "step 113" << std::endl;
+			}
+			else
+			{
+			std::cout << "step 131" << std::endl;
 				++it;
+				++i;
 			}
 		}
+		std::cout << "step 2" << std::endl;
+		//}
 		delete this->_clients[indx];
+		this->_clients[indx] = NULL;
+		std::cout << "step 3" << std::endl;
 	}
-	this->_clients[indx] = NULL;
 	return (0);
 }

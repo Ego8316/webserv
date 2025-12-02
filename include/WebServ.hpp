@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/24 23:41:12 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 13:58:12 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ class WebServ
 		int 				UpdateQueue();
 		int 				ProcessQueue();
 		Client				*newClient();
-		int					removeClient(int indx);
+		int					removeClient(size_t indx);
 
 	private:
 		WebServ(const WebServ &other);
