@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCore.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 11:53:24 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/02 17:14:35 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,13 +141,16 @@ int	ServerCore::init()
  */
 int	ServerCore::socketAcceptClient(Client *new_client)
 {
+	std::cout << "Enter try accepting" << std::endl;
 	new_client->setFd(accept(_server_fd,
 		(struct sockaddr *)&new_client->getClientAddr(),
 		&new_client->getClientLen()));
+	std::cout << "try accepting 1" << std::endl;
 	if (new_client->getFd() == SERV_ERROR)
 		std::cerr << BOLD_RED << "Accept failed: " << RED << strerror(errno) << RESET << std::endl;
 	else if (std::string(OS_NAME) == "macOs")
 		setNonBlocking(new_client->getFd());
+	std::cout << "try accepting 2" << std::endl;
 	return (new_client->getFd());
 }
 

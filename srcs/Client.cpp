@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 16:29:32 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/02 17:11:10 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,6 +216,7 @@ void	Client::setState(RequestStage state)
 int	Client::handleEvent()
 {
 	this->_error = ERR_NONE;
+	printState();
 	if (g_shutdown)
 		return (KILL_SERVER);
 	if (this->_state == TRY_ACCEPTING)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 16:36:52 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/02 17:10:23 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,7 @@ int	WebServ::ProcessQueue()
 	this->_processing_queue.pop_front();
 	if (!next_client)
 		return (ERR_NONE);
+	std::cout << "Processing client #" << next_client->getId() << std::endl;
 	error = next_client->handleEvent();
 	if (error == KILL_SERVER)
 		return (SERV_ERROR);
