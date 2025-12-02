@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 13:34:25 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/02 17:46:00 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,8 +153,12 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 		this->_server_link = &server;
 		close(this->_pipe_to_CGI[PIPE_READ_END]);
 		close(this->_pipe_from_CGI[PIPE_WRITE_END]);
-		ServerCore::setNonBlocking(this->_pipe_to_CGI[PIPE_WRITE_END]);
-		ServerCore::setNonBlocking(this->_pipe_from_CGI[PIPE_READ_END]);
+		if (!ServerCore::setNonBlocking(this->_pipe_to_CGI[PIPE_WRITE_END])
+			|| !ServerCore::setNonBlocking(this->_pipe_from_CGI[PIPE_READ_END]))
+		{
+			std::cout << "ohoh" << std::endl;
+			//TODO take into account potential failure here
+		}
 		if (this->_client_id > 0 && this->_pipe_to_cgi_idx == -1 && this->_pipe_from_cgi_idx == -1)
 		{
 			this->_pipe_to_cgi_idx = config.max_clients + 2 * _client_id + 1;

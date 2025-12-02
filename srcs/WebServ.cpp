@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 17:10:23 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 17:34:49 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,8 +116,8 @@ int	WebServ::UpdateQueue()
 				Client	*new_client = newClient();
 				if (new_client)
 				{
-					new_client->setState(TRY_ACCEPTING);
-					new_client->setTimeLimit(utils::getTime() + this->_config->timeout);
+					//new_client->setState(TRY_ACCEPTING);
+					//new_client->setTimeLimit(utils::getTime() + this->_config->timeout);
 					this->_processing_queue.push_back(new_client);
 				}
 				else
