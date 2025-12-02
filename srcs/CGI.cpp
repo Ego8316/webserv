@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 20:24:59 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 22:12:04 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,8 +172,8 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 	this->_pid = fork();
 	if (this->_pid == 0)
 	{
-		if (chdir(config.root.c_str()) == -1)
-			exit (1);
+		// if (chdir(config.root.c_str()) == -1)
+		// 	exit (1);
 		this->Execute();
 	}
 	else
@@ -217,15 +217,15 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		bytes_sent = this->writeToCGI(request, config, server);
 	if (!checkOutputTermination(bytes_read))
 	{
-		std::cout << "here?" << std::endl;
+		// std::cout << "here?" << std::endl;
 		bytes_read = this->readFromCGI(config, server);
 	}
-	std::cout << _process_status[0] << std::endl;
+	// std::cout << _process_status[0] << std::endl;
 	if (this->_process_status[0] == 0) // TODO what if the prorgram crash ???
 		this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
 	if (this->_process_status[0] != 0) // only set process status if done reading so we are sure the program is both finished and we are done reading
 	{
-		std::cout << "et la ???" << std::endl;
+		// std::cout << "et la ???" << std::endl;
 		if (utils::startsWith(this->_output, "HTTP/"))
 			response.setSkipStatus(true);
 		genFullOutput(response, config);
@@ -413,7 +413,8 @@ void		CGI::Execute()
 	}
 	if (execve(this->_cgi_script_char, this->_args, this->_env) == -1)
 	{
-		std::cerr << RED << "CGI execution failed" << RESET << std::endl;
+		std::cout << _cgi_script_char << std::endl;
+		std::cerr << RED << "CGI execution failed:" << strerror(errno) << RESET << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
 	}
@@ -461,8 +462,7 @@ void	CGI::deleteEnvVar()
 {
 	int i = 0;
 	
-	// TODO leak ici ? delete[] nan ?
-	delete this->_cgi_script_char;
+	delete[] this->_cgi_script_char;
 	this->_cgi_script_char = NULL;
 	if (this->_args)
 	{

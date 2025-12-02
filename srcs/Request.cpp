@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 20:23:44 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 20:39:59 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,7 @@ void	Request::parseHeader(const ServerConfig &config)
 	}
 	this->_method = utils::strToMethod(method_str);
 	this->_parseRequestTarget();
+	std::cout << _request_target << std::endl << _query_string << std::endl;
 	// TODO adapter avec location
 	// if (!config.isAcceptedMethod(this->_method))
 	// {
