@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:15:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/01 20:35:55 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 17:06:33 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class	ServerConfig
 
 		const Location	*matchLocation(const std::string &path) const;
 
-		static const unsigned int		client_limit = 1000;
+		static const unsigned int		max_clients = 1000;
 		static const unsigned int		incoming_queue_backlog = 1000;
 		std::string						server_name;
 		std::string						listen_host_string;
@@ -53,7 +53,6 @@ class	ServerConfig
 		std::string						root;
 		std::string						index;
 		bool							autoindex;
-		int								max_clients;
 		size_t							client_max_body_size;
 		long							timeout;
 		size_t							client_header_buffer_size;

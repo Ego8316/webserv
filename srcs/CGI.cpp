@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/01 15:53:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 16:34:27 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -424,6 +424,7 @@ void	CGI::deleteEnvVar()
 {
 	int i = 0;
 	
+	// TODO leak ici ? delete[] nan ?
 	delete this->_cgi_script_char;
 	this->_cgi_script_char = NULL;
 	if (this->_args)

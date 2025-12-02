@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 01:36:17 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 01:21:42 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 17:08:27 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ ServerConfig::ServerConfig()
 		root(""),
 		index("index.html"),
 		autoindex(false),
-		max_clients(1000),
 		client_max_body_size(1 << 20),
 		timeout(2000),
 		client_header_buffer_size(1024),

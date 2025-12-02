@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 00:57:56 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 17:06:29 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,9 +233,9 @@ std::vector<PollRevent>	ServerCore::pollWatchRevent()
 	num_event = _pollWait();
 	if (num_event < 0)
 		return (ret);
-	for (unsigned int i = 0; i < static_cast<unsigned int>(_config->client_limit) + 1; ++i)
+	for (unsigned int i = 0; i < static_cast<unsigned int>(_config->max_clients) + 1; ++i)
 	{
-		if (i == static_cast<unsigned int>(_config->client_limit))
+		if (i == static_cast<unsigned int>(_config->max_clients))
 			i = this->_poll_fds.size() - 1;
 		revent.error = false;
 		revent.server = false;
