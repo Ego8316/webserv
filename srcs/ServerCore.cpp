@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 17:46:18 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/03 01:11:03 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,21 +141,18 @@ int	ServerCore::init()
  */
 int	ServerCore::socketAcceptClient(Client *new_client)
 {
-	std::cout << "Enter try accepting" << std::endl;
-	std::cout << "ALREADY A FD ? " << new_client->getFd() << std::endl;
-	std::cout << "server fd = " << _server_fd << std::endl;
-	new_client->setFd(accept(_server_fd,
-		(struct sockaddr *)&new_client->getClientAddr(),
+	new_client->setFd(accept(_server_fd, (struct sockaddr *)&new_client->getClientAddr(),
 		&new_client->getClientLen()));
-	std::cout << "try accepting 1" << std::endl;
 	if (new_client->getFd() == SERV_ERROR)
 	{
 		std::cerr << BOLD_RED << "Accept failed: " << RED << strerror(errno) << RESET << std::endl;
-		return (new_client->getFd());
+		return (SERV_ERROR);
 	}
-	//else if (std::string(OS_NAME) == "macOs")
 	if (!setNonBlocking(new_client->getFd()))
-	std::cout << "try accepting 2" << std::endl;
+	{
+		std::cerr << BOLD_RED << "Set socket to nonblocking failed: " << RED << strerror(errno) << RESET << std::endl;
+		return (SERV_ERROR);
+	}
 	return (new_client->getFd());
 }
 

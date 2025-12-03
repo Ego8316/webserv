@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 17:11:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 23:31:27 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,7 +220,7 @@ int	Client::handleEvent()
 	if (g_shutdown)
 		return (KILL_SERVER);
 	if (this->_state == TRY_ACCEPTING)
-		this->_tryAccepting();
+		return (this->_tryAccepting());
 	if (this->_state == ABORTING)
 		return (SERV_ERROR);
 	else if (this->_error == WOULD_BLOCK)

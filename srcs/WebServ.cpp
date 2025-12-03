@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 17:34:49 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 23:32:05 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ int	WebServ::UpdateQueue()
 				{
 					//new_client->setState(TRY_ACCEPTING);
 					//new_client->setTimeLimit(utils::getTime() + this->_config->timeout);
-					this->_processing_queue.push_back(new_client);
+					this->_processing_queue.push_front(new_client);
 				}
 				else
 					std::cerr << RED << "[UpdateQueue] Error creating Client instance" << RESET << std::endl;
