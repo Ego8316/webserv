@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/03 15:36:31 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/03 15:38:36 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,8 +191,6 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 	(void)client;
 	if (this->_bytes_to_send == 0)
 		this->_bytes_to_send = request.getRawBody().size();
-	// while (!g_shutdown && utils::getTime() < client.getTimeLimit() && !this->_is_complete)
-	// {
 	if (this->_pipe_to_CGI[PIPE_WRITE_END] != -1 && (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0))
 		bytes_sent = this->writeToCGI(request, config, server);
 	if (!checkOutputTermination(bytes_read))
@@ -209,7 +207,6 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
 		server.pollRemove(this->_pipe_to_cgi_idx);
 	}
-	// }
 }
 
 /**
