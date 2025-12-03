@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 23:31:27 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/03 14:25:00 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

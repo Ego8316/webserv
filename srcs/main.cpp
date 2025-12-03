@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 16:28:33 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/03 12:52:30 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,9 +122,9 @@ int	main(int argc, char *argv[])
 		configs = parseFile(argv[1]);
 		if (configs.empty())
 			throw std::runtime_error("No server blocks found");
-		// signal(SIGINT, signal_handler);
-		// signal(SIGTERM, signal_handler);
-		// signal(SIGHUP, signal_handler);
+	signal(SIGINT, signal_handler);
+	signal(SIGTERM, signal_handler);
+	signal(SIGHUP, signal_handler);
 		for (size_t i = 0; i < configs.size(); ++i)
 		{
 			web_servers.push_back(new WebServ(&configs[i]));

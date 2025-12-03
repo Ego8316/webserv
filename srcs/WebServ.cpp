@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 23:32:05 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/03 14:24:22 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,6 @@ int	WebServ::ProcessQueue()
 	this->_processing_queue.pop_front();
 	if (!next_client)
 		return (ERR_NONE);
-	std::cout << "Processing client #" << next_client->getId() << std::endl;
 	error = next_client->handleEvent();
 	if (error == KILL_SERVER)
 		return (SERV_ERROR);
@@ -219,8 +218,6 @@ int	WebServ::removeClient(size_t indx)
 	if (indx < this->_config->client_limit && this->_clients[indx] != NULL)
 	{
 		std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;
-		//if (this->_clients[indx]->getState() != DONE)
-		//{
 		std::deque<Client *>::iterator it = this->_processing_queue.begin();
 		while (it != this->_processing_queue.end())
 		{
@@ -237,7 +234,6 @@ int	WebServ::removeClient(size_t indx)
 				++i;
 			}
 		}
-		//}
 		delete this->_clients[indx];
 		this->_clients[indx] = NULL;
 	}
