@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/11/24 23:40:54 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 20:26:11 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class	RequestHandler
 {
 	public:
 		static void	handle(Response *response, const Request &request, const ServerConfig &config);
+		static void	_handleError(Response *response, HttpStatus code, const ServerConfig &config);
 
 	private:
 		RequestHandler();
@@ -47,6 +48,5 @@ class	RequestHandler
 		static void	_handleDelete(Response *response, const ServerConfig &config, const Resource &resource);
 		static void	_handleRedirect(Response *response, const Resource &resource);
 		static void	_handleListDir(Response *response, const ServerConfig &config, const Resource &resource);
-		static void	_handleError(Response *response, HttpStatus code, const ServerConfig &config);
-		static void	_handleCGI(Response *response, const Request &request, const ServerConfig &config, const Resource &resource);
+		static void	_handleCGI(Response *response, const ServerConfig &config, const Resource &resource);
 };

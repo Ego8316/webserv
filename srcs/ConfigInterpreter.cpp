@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:28 by ego               #+#    #+#             */
-/*   Updated: 2025/12/01 20:38:51 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 17:06:56 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,6 @@ void	ConfigInterpreter::_applyServerDirective(ServerConfig &conf, const Directiv
 	else if (name == "root")						conf.root = d.args[0];
 	else if (name == "index")						conf.index = d.args[0];
 	else if (name == "autoindex")					conf.autoindex = (d.args[0] == "on");
-	else if (name == "client_limit")				conf.max_clients = std::atoi(d.args[0].c_str());
 	else if (name == "client_max_body_size")		conf.client_max_body_size = _parseSizeWithSuffix(d.args[0], d.line);
 	else if (name == "timeout")						conf.timeout = static_cast<long>(_parseSizeWithSuffix(d.args[0], d.line));
 	else if (name == "client_header_buffer_size")	conf.client_header_buffer_size = _parseSizeWithSuffix(d.args[0], d.line);

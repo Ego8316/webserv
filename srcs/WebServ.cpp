@@ -3,10 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
+<<<<<<< HEAD
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
 /*   Updated: 2025/12/03 14:24:22 by vviterbo         ###   ########.fr       */
+=======
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
+/*   Updated: 2025/12/02 17:07:53 by ego              ###   ########.fr       */
+>>>>>>> CGI_check
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +38,7 @@ WebServ::WebServ(const ServerConfig *config)
  */
 WebServ::~WebServ()
 {
-	for (int i = 0; i < _config->max_clients; ++i)
+	for (unsigned int i = 0; i < _config->max_clients; ++i)
 	{
 		if (this->_clients[i] != NULL)
 		{
@@ -185,7 +192,7 @@ int	WebServ::ProcessQueue()
  */
 Client	*WebServ::newClient()
 {
-	int indx;
+	unsigned int	indx;
 
 	for (indx = 0; indx < this->_config->max_clients; ++indx)
 	{

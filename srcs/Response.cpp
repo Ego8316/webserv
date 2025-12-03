@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/11/30 21:03:40 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/02 20:23:30 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,17 +160,6 @@ void	Response::setContentType(const std::string &type)
 void	Response::setContentLength(size_t len)
 {
 	this->_headers["Content-Length"] = utils::toString(len);
-	return ;
-}
-
-/**
- * @brief Sets or updates the cookie header field.
- *
- * @param type Cookie.
- */
-void	Response::setCookie(const std::string &cookie)
-{
-	this->_headers["Set-Cookie"] = cookie;
 	return ;
 }
 

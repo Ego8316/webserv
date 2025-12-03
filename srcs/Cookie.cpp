@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/11/24 23:46:55 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/02 16:04:19 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ Cookie &Cookie::operator=(const Cookie &other)
 	if (this != &other)
 	{
 		this->_path = other._path;
-		this->_attributes = other.getAllAttributes();
+		this->_attributes = other._attributes;
 	}
 	return (*this);
 }
@@ -71,7 +71,7 @@ Cookie::~Cookie() {}
  *
  * @return True when found, false otherwise.
  */
-bool		Cookie::hasAttribute(std::string key) const
+bool	Cookie::hasAttribute(std::string key) const
 {
 	if (this->_attributes.find(key) == this->_attributes.end())
 		return (false);
@@ -84,7 +84,7 @@ bool		Cookie::hasAttribute(std::string key) const
  * @param key Attribute name.
  * @param newvalue Attribute value (falls back to "TRUE" when empty).
  */
-void		Cookie::setAttribute(std::string key, std::string newvalue)
+void	Cookie::setAttribute(std::string key, std::string newvalue)
 {
 	if (newvalue == "")
 		newvalue = "TRUE";
@@ -124,21 +124,32 @@ const std::map<std::string, std::string>	&Cookie::getAllAttributes() const
  * 
  * @return 0 on success.
  */
-int			Cookie::updateCookie(std::string header)
+int	Cookie::updateCookie(std::string header)
 {
-	std::vector<std::string>	field_split = utils::stringSplit(header, "; ");
-	std::istringstream			line(header);
+	std::vector<std::string>	field_split = utils::stringSplit(header, ";");
 	std::string					field_name;
 	std::string					field_value;
 	size_t						pos;
-	std::string					separator;
 
 	for (unsigned int i = 0; i < field_split.size(); ++i)
 	{
+		utils::stringTrimSpaces(field_split[i]);
+		if (field_split[i].empty())
+			continue ;
 		pos = field_split[i].find("=");
-		field_name = field_split[i].substr(0, pos);
-		field_value = field_split[i].erase(0, pos + 1);
-		if (field_name == "Path")
+		if (pos == std::string::npos)
+		{
+			field_name = field_split[i];
+			field_value = "";
+		}
+		else
+		{
+			field_name = field_split[i].substr(0, pos);
+			field_value = field_split[i].substr(pos + 1);
+			utils::stringTrimSpaces(field_name);
+			utils::stringTrimSpaces(field_value);
+		}
+		if (utils::toLower(field_name) == "path")
 			this->_path = field_value;
 		setAttribute(field_name, field_value);
 	}
@@ -152,11 +163,11 @@ int			Cookie::updateCookie(std::string header)
  *
  * @return True when the cookie applies to the path.
  */
-bool		Cookie::applyToPath(std::string path)
+bool	Cookie::applyToPath(std::string path)
 {
 	if (this->_path.length() == 0 || this->_path == "/")
 		return (true);
-	if (utils::startsWith(path, _path))
+	if (path == _path || utils::startsWith(path, _path + "/"))
 		return (true);
 	return (false);
 }

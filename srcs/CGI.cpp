@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/03 15:38:36 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/03 17:30:06 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,34 @@ extern int	g_shutdown;
 CGI::CGI()
 {
 	this->_cgi_script = "";
+	this->_is_init = false;
+	this->_is_complete = false;
+	this->_status = HTTP_OK;
+	this->_output = "";
+	this->_header_len = 0;
+	this->_content_len = 0;
+	this->_client_id = -1;
+	this->_pid = 0;
+	this->_process_status[0] = 0;
+	this->_process_status[1] = 0;
+	this->_pipe_to_CGI[0] = 0;
+	this->_pipe_to_CGI[1] = 0;
+	this->_pipe_from_CGI[0] = 0;
+	this->_pipe_from_CGI[1] = 0;
+ 	this->_total_bytes_sent = 0;
+	this->_bytes_to_send = 0;
+	this->_total_bytes_read = 0;
+	this->_chunked = false;
+	this->_cgi_script_char = NULL;
+	this->_args = NULL;
+	this->_env = NULL;
+	this->_pipe_to_cgi_idx = -1;
+	this->_pipe_from_cgi_idx = -1;
+}
+
+CGI::CGI(const std::string &cgi_script)
+{
+	this->_cgi_script = cgi_script;
 	this->_is_init = false;
 	this->_is_complete = false;
 	this->_status = HTTP_OK;
@@ -112,7 +140,6 @@ CGI::~CGI()
 	deleteEnvVar();
 }
 
-
 /**
  * @brief Runs the CGI lifecycle (init then nanny loop).
  *
@@ -127,17 +154,18 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 		return (this->Nanny(client, request, config, response, server));
 	if (pipe(this->_pipe_to_CGI) == -1)
 	{
-		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
+		std::cerr << "Could not initialize pipe: " << strerror(errno) << std::endl;
 		return ;
 	}
 	if (pipe(this->_pipe_from_CGI) == -1)
 	{
-		std::cerr << "Could not initialize pipe " << strerror(errno) << std::endl;
+		std::cerr << "Could not initialize pipe: " << strerror(errno) << std::endl;
 		return ;
 	}
-	this->_cgi_script = request.getRequestTarget(); //TODO quand config sera ok refaire les setup de path et les checks
+	std::cout << "CGI script: " << _cgi_script << std::endl;
 	if (!utils::startsWith(this->_cgi_script, "."))
 		this->_cgi_script = "." + this->_cgi_script;
+	std::cout << "CGI script: " << _cgi_script << std::endl;
 	this->_cgi_script_char = new char[this->_cgi_script.length() + 1];
 	strcpy(this->_cgi_script_char, this->_cgi_script.c_str());
 	GenEnvVar(request);
@@ -194,14 +222,22 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 	if (this->_pipe_to_CGI[PIPE_WRITE_END] != -1 && (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0))
 		bytes_sent = this->writeToCGI(request, config, server);
 	if (!checkOutputTermination(bytes_read))
+	{
+		// std::cout << "here?" << std::endl;
 		bytes_read = this->readFromCGI(config, server);
+<<<<<<< HEAD
 	else if (this->_process_status[0] == 0)
+=======
+	}
+	// std::cout << _process_status[0] << std::endl;
+	if (this->_process_status[0] == 0) // TODO what if the prorgram crash ???
+>>>>>>> CGI_check
 		this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
 	if (this->_process_status[0] != 0)
 	{
 		if (utils::startsWith(this->_output, "HTTP/"))
 			response.setSkipStatus(true);
-		genFullOutput(response);
+		genFullOutput(response, config);
 		this->_is_complete = true;
 		close(this->_pipe_to_CGI[PIPE_WRITE_END]);
 		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
@@ -305,12 +341,16 @@ void	CGI::parseHeader(const ServerConfig &config)
  *
  * @param response Response to populate.
  */
-void	CGI::genFullOutput(Response &response)
+void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 {
-	if (!WIFEXITED(this->_process_status[1]))
+	if ((WIFEXITED(this->_process_status[1]) && WEXITSTATUS(this->_process_status[1]))
+		|| !WIFEXITED(this->_process_status[1]))
 	{
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
+		response.setHeaders("aa", "\r\n");
+		RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 		std::cout << "Error : Child process returned " << this->_process_status[1] << std::endl;
+		return ;
 	}
 	else if (utils::startsWith(this->_output, "HTTP/"))
 	{
@@ -381,7 +421,8 @@ void		CGI::Execute()
 	}
 	if (execve(this->_cgi_script_char, this->_args, this->_env) == -1)
 	{
-		std::cerr << RED << "CGI execution failed" << RESET << std::endl;
+		std::cout << _cgi_script_char << std::endl;
+		std::cerr << RED << "CGI execution failed:" << strerror(errno) << RESET << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
 	}
@@ -429,7 +470,7 @@ void	CGI::deleteEnvVar()
 {
 	int i = 0;
 	
-	delete this->_cgi_script_char;
+	delete[] this->_cgi_script_char;
 	this->_cgi_script_char = NULL;
 	if (this->_args)
 	{

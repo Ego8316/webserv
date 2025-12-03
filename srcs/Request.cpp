@@ -6,7 +6,11 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2025/12/03 14:07:43 by vviterbo         ###   ########.fr       */
+=======
+/*   Updated: 2025/12/02 20:39:59 by ego              ###   ########.fr       */
+>>>>>>> CGI_check
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +114,7 @@ void	Request::parseHeader(const ServerConfig &config)
 	}
 	this->_method = utils::strToMethod(method_str);
 	this->_parseRequestTarget();
+	std::cout << _request_target << std::endl << _query_string << std::endl;
 	// TODO adapter avec location
 	// if (!config.isAcceptedMethod(this->_method))
 	// {
@@ -143,7 +148,7 @@ void	Request::parseHeader(const ServerConfig &config)
 /**
  * @brief Extracts query string and strips scheme/host prefixes from target.
  */
-void		Request::_parseRequestTarget()
+void	Request::_parseRequestTarget()
 {
 	if (this->_request_target.find("?") != std::string::npos)
 	{
