@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigInterpreter.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:28 by ego               #+#    #+#             */
-/*   Updated: 2025/12/03 20:10:35 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/04 12:58:55 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -359,5 +359,7 @@ size_t	ConfigInterpreter::_parseSizeWithSuffix(const std::string &s, int line)  
 		multiplier = 1000;
 	else
 		throw UnknownSizeError(line, s);
+	if (base * multiplier < 500)
+		throw SizeTooLowError(line, utils::toString(base * multiplier));
 	return (base * multiplier);
 }

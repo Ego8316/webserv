@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigError.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 05:04:56 by ego               #+#    #+#             */
-/*   Updated: 2025/12/03 20:04:21 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/04 12:58:11 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,17 @@ class	InvalidSizeError	:	public	ConfigError
 	public:
 		InvalidSizeError(int line, const std::string &value)
 			: ConfigError(line, "Invalid size value '" + value + "'")
+		{}
+};
+
+/**
+ * @brief Thrown when a size is too low.
+ */
+class	SizeTooLowError	:	public	ConfigError
+{
+	public:
+		SizeTooLowError(int line, const std::string &value)
+			:	ConfigError(line, "Size too low '" + value + "'")
 		{}
 };
 
