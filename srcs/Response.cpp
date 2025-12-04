@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 14:21:45 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 15:39:49 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,7 +186,7 @@ void	Response::buildHeader()
 	this->_header += " " + utils::httpStatusToStr(this->_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); ++it)
 	this->_header += it->first + ": " + it->second + "\r\n";
-	if (!this->_is_cgi && this->_status_code < HTTP_BAD_REQUEST)
+	if (!this->_is_cgi || (this->_is_cgi && this->_status_code >= HTTP_BAD_REQUEST))
 		this->_header += "\r\n";
 	return ;
 }

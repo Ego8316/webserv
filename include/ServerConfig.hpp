@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:15:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/03 17:08:33 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 13:21:49 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,15 +23,15 @@ struct	Redirection
 
 struct	Location
 {
-	std::string							path;
-	std::string							root;
-	std::string							index;
-	bool								autoindex;
-	Method								methods;
-	std::string							upload_path;
-	std::string							cgi_pass;
-	Redirection							redirect;
-	bool								has_redirect;
+	std::string	path;
+	std::string	root;
+	std::string	index;
+	bool		autoindex;
+	Method		methods;
+	std::string	upload_path;
+	bool		cgi;
+	Redirection	redirect;
+	bool		has_redirect;
 };
 
 /**

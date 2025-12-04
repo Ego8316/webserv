@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 20:26:23 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/04 15:39:06 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,10 +150,8 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 	std::ofstream	outfile;
 	bool			existed;
 
-	// TODO reflechir a ca
-	if (request.getRawBody().empty() || resource.isDirectory())
-		return (_handleError(response, HTTP_BAD_REQUEST, config));
-
+	if (resource.isDirectory())
+		return (_handleError(response, HTTP_CONFLICT, config));
 	std::ifstream	check(resource.getPath().c_str());
 	existed = check.good();
 	check.close();
@@ -161,7 +159,8 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 	outfile.open(resource.getPath().c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
 	if (!outfile.is_open())
 		return (_handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
-	outfile << request.getRawBody();
+	if (!request.getRawBody().empty())
+		outfile << request.getRawBody();
 	outfile.close();
 	if (existed)
 		response->setStatus(HTTP_NO_CONTENT);

@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 13:58:29 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 15:40:41 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -425,7 +425,7 @@ void	Client::_processRequest()
 	utils::logMsg("INFO", GREEN, "Processing request", this->_client_id);
 	std::string conn = utils::toLower(_request->headerGetField("Connection"));
 	if (_request->getVersion() == "HTTP/1.0")
-		_keep_alive = (conn.find("keep-alive") != std::string::npos);
+		_keep_alive = false;
 	else
 		_keep_alive = (conn.find("close") == std::string::npos);
 	_response->setHeaders("Connection", _keep_alive ? "keep-alive" : "close");

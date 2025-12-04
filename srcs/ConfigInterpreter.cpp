@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigInterpreter.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:28 by ego               #+#    #+#             */
-/*   Updated: 2025/12/03 20:10:35 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/04 14:40:33 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ Location	ConfigInterpreter::_parseLocation(const Block &block, const ServerConfi
 	loc.index = server.index;
 	loc.autoindex = server.autoindex;
 	loc.methods = GET;
+	loc.cgi = false;
 	loc.has_redirect = false;
 	for (size_t i = 0;  i < block.directives.size(); ++i)
 		_applyLocationDirective(loc, block.directives[i], already_applied);
@@ -182,10 +183,10 @@ void	ConfigInterpreter::_applyLocationDirective(Location &loc, const Directive &
 	std::string	name = utils::toLower(d.name);
 	if (name == "root")					loc.root = d.args[0];
 	else if (name == "index")			loc.index  = d.args[0];
-	else if (name == "autoindex")		loc.autoindex = (d.args[0] == "on");
+	else if (name == "autoindex")		loc.autoindex = (utils::toLower(d.args[0]) == "on");
 	else if (name == "limit_except")	_parseMethod(loc, d);
 	else if (name == "upload_path")		loc.upload_path = d.args[0];
-	else if (name == "cgi_pass")		loc.cgi_pass = d.args[0];
+	else if (name == "cgi")				loc.cgi = (utils::toLower(d.args[0]) == "on");
 	else if (name == "return")			_parseReturn(loc, d);
 	else
 		throw UnknownDirectiveError(d.line, d.name);
@@ -359,5 +360,7 @@ size_t	ConfigInterpreter::_parseSizeWithSuffix(const std::string &s, int line)  
 		multiplier = 1000;
 	else
 		throw UnknownSizeError(line, s);
+	if (base * multiplier < 100)
+		throw SizeTooLowError(line, utils::toString(base * multiplier));
 	return (base * multiplier);
 }

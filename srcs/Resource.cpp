@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 18:20:05 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/04 14:39:47 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ Resource::~Resource()
  */
 void	Resource::build(const Request &request, const ServerConfig &config)
 {
-	this->_status = static_cast<ResourceStatus>(0);
+	this->_status = CGI_FORBIDDEN;
 	this->_type = FTYPE_ANY;
 	this->_redir_code = HTTP_UNKNOWN_STATUS;
 	this->_method_allowed = (request.getMethod() & GET);
@@ -106,8 +106,8 @@ void	Resource::build(const Request &request, const ServerConfig &config)
 			target = target.substr(loc->path.size());
 		if (!loc->upload_path.empty() && request.getMethod() == POST)
 			root = loc->upload_path;
-		if (!loc->cgi_pass.empty())
-			this->_status = static_cast<ResourceStatus>(this->_status | IS_CGI);
+		if (loc->cgi)
+			this->_status = static_cast<ResourceStatus>(this->_status & ~CGI_FORBIDDEN);
 	}
 	if (target.empty() || target[0] != '/')
 		target.insert(0, "/");
@@ -226,13 +226,9 @@ void	Resource::_evaluatePermissions()
  */
 void	Resource::_detectType()
 {
-	bool	was_cgi = (_status & IS_CGI);
-
 	this->_type = utils::extensionToContentTypes(_path);
 	this->_status = static_cast<ResourceStatus>(_status & ~IS_CGI);
 	this->_status = static_cast<ResourceStatus>(_status | (IS_CGI * ((FTYPE_IS_CGI & _type) != 0)));
-	if (was_cgi)
-		this->_status = static_cast<ResourceStatus>(_status | IS_CGI);
 	return ;
 }
 
@@ -368,5 +364,6 @@ bool	Resource::isExecutable() const
  */
 bool	Resource::isForbidden() const
 {
-	return (this->_status & EXISTS && !(this->_status & (PERM_ROK | PERM_WOK | PERM_XOK)));
+	return ((this->_status & EXISTS && !(this->_status & (PERM_ROK | PERM_WOK | PERM_XOK)))
+			|| (this->_status & (CGI_FORBIDDEN & IS_CGI)));
 }

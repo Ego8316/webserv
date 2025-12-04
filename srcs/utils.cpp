@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 13:22:04 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 15:23:51 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -363,7 +363,6 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 		case HTTP_REDIRECT_PERM:			return "Moved Permanently";
 		case HTTP_REDIRECT_TEMP:			return "Found";
 		case HTTP_BAD_REQUEST:				return "Bad Request";
-		case HTTP_UNAUTHORIZED:				return "Unauthorized";
 		case HTTP_FORBIDDEN:				return "Forbidden";
 		case HTTP_NOT_FOUND:				return "Not Found";
 		case HTTP_METHOD_NOT_ALLOWED:		return "Method Not Allowed";
@@ -399,7 +398,6 @@ HttpStatus	utils::strToHttpStatus(std::string status)
 		case 301: return HTTP_REDIRECT_PERM;
 		case 302: return HTTP_REDIRECT_TEMP;
 		case 400: return HTTP_BAD_REQUEST;
-		case 401: return HTTP_UNAUTHORIZED;
 		case 403: return HTTP_FORBIDDEN;
 		case 404: return HTTP_NOT_FOUND;
 		case 405: return HTTP_METHOD_NOT_ALLOWED;
