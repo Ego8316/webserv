@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 23:23:49 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 23:50:12 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -348,6 +348,8 @@ void	CGI::parseHeader(const ServerConfig &config)
  */
 void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 {
+	std::cout << "CGI returned " << std::endl;
+	std::cout << this->_output << std::endl;
 	if ((WIFEXITED(this->_process_status[1]) && WEXITSTATUS(this->_process_status[1]))
 		|| !WIFEXITED(this->_process_status[1]))
 	{
@@ -364,12 +366,12 @@ void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 	if (this->_status >= HTTP_BAD_REQUEST)
 		return (RequestHandler::_handleError(&response, this->_status, config));
 	response.setStatus(this->_status);
-	size_t	header_end = this->_output.find("\r\n\r\n");
-	std::cout << "header_end = " << header_end << std::endl;
-	if (header_end == std::string::npos)
+	std::cout << "header_end = " << this->_header_len << std::endl;
+	if (!this->_header_len && !this->_chunked)
 		return (RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config));
-	if (!this->_content_len && !this->_chunked)
+	if (!this->_content_len && !this->_chunked && this->_output.length() - this->_output.find("\r\n\r\n") - 4 > 0)
 		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n") - 4);
+	response.setBody(this->_output);
 	response.build();
 	return ;
 }
@@ -456,8 +458,10 @@ void		CGI::GenEnvVar(Request &request)
 	if (it != request.getHeaders().end() && isValidContentType(it->second))
     	env.push_back("CONTENT_TYPE=" + it->second);
 	std::map<std::string, std::string>	attr = cookies.getAllAttributes();
+	std::string							cookie_str =  "HTTP_COOKIE=";
 	for (std::map<std::string, std::string>::iterator it = attr.begin(); it != attr.end(); ++it)
-		env.push_back("HTTP_COOKIE_" + it->first + "=" + it->second);
+		cookie_str += it->first + "=" + it->second + "; ";
+	env.push_back(cookie_str);
 	this->_env = new char *[env.size() + 1];
 	for (unsigned int i = 0; i < env.size(); ++i)
 	{

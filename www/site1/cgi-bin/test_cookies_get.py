@@ -3,7 +3,6 @@
 import os
 import sys
 
-# Function for minimal cookie value extraction
 def get_cookie_value(cookie_string, key):
     """
     Parses a minimal cookie string (key=value; key2=value2) 
@@ -17,36 +16,27 @@ def get_cookie_value(cookie_string, key):
         if '=' in part:
             k, v = part.strip().split('=', 1)
             if k.strip() == key:
-                # Returns the value, handles cases where the value itself might contain spaces
                 return v.strip()
     return None
 
 def application():
-    # 1. Identify where the raw cookie data is located (HTTP_COOKIE environment variable in CGI)
     cookie_header = os.environ.get('HTTP_COOKIE')
     cookie_name = "visit_count"
     
     current_count = 0
     
     if cookie_header:
-        # Minimal parsing to find the specific cookie
         count_str = get_cookie_value(cookie_header, cookie_name)
         try:
-            # Convert the found value to an integer
             current_count = int(count_str)
         except (ValueError, TypeError):
-            # If the cookie is malformed or missing, reset the count
             current_count = 0
 
-    # 2. Determine the new cookie value for the next request
     new_count = current_count + 1
     
-    # Manually construct the Set-Cookie header string.
-    # Max-Age=3600 means the cookie will expire in 1 hour (3600 seconds).
     set_cookie_header = f"Set-Cookie: {cookie_name}={new_count}; Max-Age=3600; Path=/"
     content_type_header = "Content-type: text/html"
 
-    # --- 3. Generate HTML Body Content and calculate length ---
     title = "Minimal CGI Cookie Test"
     
     if current_count == 0:
@@ -55,8 +45,6 @@ def application():
     else:
         message = f"Hello again! You have visited this page {new_count} times."
         detail = f"The cookie '{cookie_name}' (old value: {current_count}) has been updated to '{new_count}'."
-
-    # This placeholder will be replaced with the calculated Content-Length for display purposes.
     content_length_display_placeholder = "[CONTENT_LENGTH_PLACEHOLDER]"
     
     html_content_template = f"""
@@ -96,28 +84,15 @@ def application():
     </html>
     """
     
-    # Calculate the Content-Length in bytes using the configured encoding (UTF-8)
     content_length = len(html_content_template.encode('utf-8'))
     content_length_header = f"Content-Length: {content_length}"
     
-    # Finalize the HTML content by inserting the calculated length for display
     html_content = html_content_template.replace(content_length_display_placeholder, str(content_length))
-
-
-    # --- 4. Print Headers ---
-    # The first line is the Content-type
-    print(content_type_header)
-    # The second line is the Set-Cookie header we manually constructed
-    print(set_cookie_header)
-    # The new Content-Length header, which is critical for non-chunked transfers
-    print(content_length_header)
-    # The critical blank line that separates HTTP headers from the body.
-    print()
-
-    # --- 5. Print HTML Body ---
-    print(html_content)
+    print(content_type_header, end="\r\n")
+    print(set_cookie_header, end="\r\n")
+    print(content_length_header, end="\r\n")
+    print(html_content, end="\r\n")
 
 if __name__ == "__main__":
-    # Ensure stdout is configured for UTF-8 encoding
     sys.stdout.reconfigure(encoding='utf-8')
     application()
