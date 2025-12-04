@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/11/29 18:07:08 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/04 19:16:54 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ class	Resource
 		bool	isWritable() const;
 		bool	isExecutable() const;
 		bool	isForbidden() const;
+		bool	isHidden() const;
 
 	private:
 		std::string		_path;
@@ -64,6 +65,7 @@ class	Resource
 		bool			_autoindex;
 		std::string		_index;
 		
+		bool	_checkHidden(const std::string &requestTarget);
 		bool	_checkRedirect(const Location *loc);
 		bool	_checkAccept(const Request &request);
 		int		_resolvePath(const std::string &requestTarget, const std::string &root, const std::string &index);

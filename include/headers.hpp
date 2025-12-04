@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 15:24:26 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 19:16:31 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,8 @@ enum	ResourceStatus
 	PERM_XOK			= 1 << 5,
 	IS_REDIRECT			= 1 << 6,
 	ACCEPT_ERROR		= 1 << 7,
-	CGI_FORBIDDEN		= 1 << 8
+	CGI_FORBIDDEN		= 1 << 8,
+	IS_HIDDEN			= 1 << 9
 };
 
 enum ContentType
