@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 21:34:46 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 22:35:24 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,16 @@
 						"<body><h1>408 Request Time Out</h1>" \
 						"<p>The request could not be fully received and responded in time</p></body></html>"
 
+#define ERROR_PAGE_409	"<html><head><title>409 Conflict</title></head>" \
+						"<body><h1>409 Conflict</h1>" \
+						"<p>The request could not be completed due to a conflict with the current state of the resource.</p></body></html>"
+
+
+#define ERROR_PAGE_413	"<html><head><title>413 Payload Too Large</title></head>" \
+						"<body><h1>413 Payload Too Large</h1>" \
+						"<p>The request is larger than the server is willing or able to process.</p></body></html>"
+
+
 #define ERROR_PAGE_500	"<html><head><title>500 Internal Server Error</title></head>" \
 						"<body><h1>500 Internal Server Error</h1>" \
 						"<p>The server encountered an unexpected condition.</p></body></html>"
@@ -130,7 +140,8 @@ enum	ResourceStatus
 	PERM_XOK			= 1 << 5,
 	IS_REDIRECT			= 1 << 6,
 	ACCEPT_ERROR		= 1 << 7,
-	CGI_FORBIDDEN		= 1 << 8
+	CGI_FORBIDDEN		= 1 << 8,
+	IS_HIDDEN			= 1 << 9
 };
 
 enum ContentType

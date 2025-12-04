@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/12/03 17:06:52 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 23:01:56 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,20 +36,20 @@ class	Request
 
 		void					parseHeader(const ServerConfig &config);
 
-		std::string							&getRawHeader();
-		std::string							&getRawBody();
-		const std::string					&getRawBody() const;
-		Method								getMethod() const;
-		std::string							getRequestTarget() const;
-		std::string							getVersion() const;
-		size_t								getContentLength() const;
-		bool								isChunked() const;
-		std::map<std::string, std::string>	getHeaders() const;
-		bool								getError() const;
-		const Cookie						&getQueryCookies();
-		ContentType							getAccept() const;
-		std::string							getQueryString() const;
-		void								unchunkBody();
+		std::string									&getRawHeader();
+		std::string									&getRawBody();
+		const std::string							&getRawBody() const;
+		Method										getMethod() const;
+		std::string									getRequestTarget() const;
+		std::string									getVersion() const;
+		size_t										getContentLength() const;
+		bool										isChunked() const;
+		const std::map<std::string, std::string>	&getHeaders() const;
+		bool										getError() const;
+		const Cookie								&getQueryCookies();
+		ContentType									getAccept() const;
+		std::string									getQueryString() const;
+		void										unchunkBody();
 
 		void								setMethod(Method method);
 		void								setError(bool error);

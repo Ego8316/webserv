@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 20:53:03 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 21:05:10 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,8 @@ void	Resource::build(const Request &request, const ServerConfig &config)
 	this->_path.clear();
 	this->_size = 0;
 
+	if (_checkHidden(request.getRequestTarget()))
+		return ;
 	const Location	*loc = config.matchLocation(request.getRequestTarget());
 	std::string		root = config.root;
 	std::string		target = request.getRequestTarget();
@@ -117,6 +119,25 @@ void	Resource::build(const Request &request, const ServerConfig &config)
 	this->_detectType();
 	this->_checkAccept(request);
 	return ;
+}
+
+/**
+ * @brief Detects if the request target contains a hidden file. This also
+ * detects traversals.
+ * 
+ * @param requestTarget Requested path.
+ * 
+ * @return True if the requested path is hidden, false otherwise.
+ */
+bool	Resource::_checkHidden(const std::string &requestTarget)
+{
+	std::stringstream	ss(requestTarget);
+	std::string			str;
+
+	while (std::getline(ss, str, '/'))
+		if (str[0] == '.')
+			return (_status = IS_HIDDEN, true);
+	return (false);
 }
 
 /**
@@ -366,4 +387,14 @@ bool	Resource::isForbidden() const
 {
 	return ((this->_status & EXISTS && !(this->_status & (PERM_ROK | PERM_WOK | PERM_XOK)))
 			|| (this->_status & (CGI_FORBIDDEN & IS_CGI)));
+}
+
+/**
+ * @brief Checks if an existing resource is hidden.
+ *
+ * @return True if it is, false otherwise.
+ */
+bool	Resource::isHidden() const
+{
+	return (this->_status & IS_HIDDEN);
 }

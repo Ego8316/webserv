@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigInterpreter.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:06 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 03:40:15 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/04 20:43:42 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,5 +44,5 @@ class	ConfigInterpreter
 		void			_parseMethod(Location &loc, const Directive &d);
 		void			_parseReturn(Location &loc,  const Directive &d);
 
-		size_t			_parseSizeWithSuffix(const std::string &s, int line) const;
+		size_t			_parseSizeWithSuffix(const std::string &s, int line, int type) const;
 };

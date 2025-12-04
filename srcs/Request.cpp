@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 17:16:50 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 23:01:25 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -292,7 +292,7 @@ bool	Request::isChunked() const
  *
  * @return Headers map.
  */
-std::map<std::string, std::string>	Request::getHeaders(void) const
+const std::map<std::string, std::string>	&Request::getHeaders(void) const
 {
 	return (this->_headers);
 }

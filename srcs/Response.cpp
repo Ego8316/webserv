@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 15:46:18 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 23:24:05 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,7 +179,7 @@ void	Response::buildHeader()
 {
 	if (!utils::mapHasEntry(this->_headers, std::string("Server")))
 		this->_headers["Server"] = "Webserv/1.0 (Unix)";
-	if (!utils::mapHasEntry(this->_headers, std::string("Connection")) && this->_headers["Connection: "] == "keep-alive")
+	if (!utils::mapHasEntry(this->_headers, std::string("Connection")) && this->_headers["Connection"] == "keep-alive")
 		this->_header = "HTTP/1.1 " + utils::toString(this->_status_code);
 	else
 		this->_header = "HTTP/1.0 " + utils::toString(this->_status_code);

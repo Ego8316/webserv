@@ -6,7 +6,7 @@
 /*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 05:04:56 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 12:58:11 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/04 20:48:13 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,17 @@ class	SizeTooLowError	:	public	ConfigError
 	public:
 		SizeTooLowError(int line, const std::string &value)
 			:	ConfigError(line, "Size too low '" + value + "'")
+		{}
+};
+
+/**
+ * @brief Thrown when a size is too high.
+ */
+class	SizeTooHighError	:	public	ConfigError
+{
+	public:
+		SizeTooHighError(int line, const std::string &value)
+			:	ConfigError(line, "Size too high '" + value + "'")
 		{}
 };
 

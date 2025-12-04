@@ -4,14 +4,24 @@ import cgi, os
 
 form = cgi.FieldStorage()
 
-fileitem = form['filename']
+# Check if the field exists
+if "filename" not in form:
+    print("Content-Type: text/html", end = "\r\n\r\n")
+
+    print("<h1>No file uploaded</h1>")
+
+fileitem = form["filename"]
 
 if fileitem.filename:
-   open(os.getcwd() + '/cgi-bin/tmp/' + os.path.basename(fileitem.filename), 'wb').write(fileitem.file.read())
-   message = 'The file "' + os.path.basename(fileitem.filename) + '" was uploaded to ' + os.getcwd() + '/cgi-bin/tmp'
-else:
-   message = 'Uploading Failed'
+    upload_dir = os.getcwd() + '/tmp/'
+    filepath = os.path.join(upload_dir, os.path.basename(fileitem.filename))
 
-print("Content-Type: text/html;charset=utf-8")
-print ("Content-type:text/html\r\n")
-print("<H1> " + message + " </H1>")
+    with open(filepath, 'wb') as f:
+        f.write(fileitem.file.read())
+
+    message = f'File "{os.path.basename(fileitem.filename)}" uploaded to {upload_dir}'
+else:
+    message = 'Uploading failed'
+
+print("Content-Type: text/html; charset=utf-8", end = "\r\n\r\n")
+print(f"<h1>{message}</h1>")

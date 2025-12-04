@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 17:16:38 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 19:16:48 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,13 +79,10 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 		return (_handleRedirect(response, resource));
 	if (!resource.methodAllowed())
 		return (_handleError(response, HTTP_METHOD_NOT_ALLOWED, config));
-	if (!resource.exists() && request.getMethod() != POST)
-	{
-		std::cerr << "Resource not found" << std::endl;
-		return (_handleError(response, HTTP_NOT_FOUND, config));
-	}
-	if (resource.isForbidden())
+	if (resource.isForbidden() || resource.isHidden())
 		return (_handleError(response, HTTP_FORBIDDEN, config));
+	if (!resource.exists() && request.getMethod() != POST)
+		return (_handleError(response, HTTP_NOT_FOUND, config));
 	if (resource.getStatus() & ACCEPT_ERROR)
 		return (_handleError(response, HTTP_BAD_REQUEST, config));
 	if (resource.isCGI())
