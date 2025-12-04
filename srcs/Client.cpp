@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 20:40:12 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 21:16:27 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -421,17 +421,14 @@ int	Client::_readBody()
  */
 void	Client::_processRequest()
 {
-	RequestHandler::handle(this->_response, *_request, *_config);
-	utils::logMsg("INFO", GREEN, "Processing request", this->_client_id);
 	std::string conn = utils::toLower(_request->headerGetField("Connection"));
 	if (_request->getVersion() == "HTTP/1.0")
 		_keep_alive = false;
 	else
 		_keep_alive = (conn.find("close") == std::string::npos);
-	if (_keep_alive)
-		_response->setHeaders("Connection", "keep-alive");
-	else
-		_response->setHeaders("Connection", "close");
+	_response->setHeaders("Connection", _keep_alive ? "keep-alive" : "close");
+	RequestHandler::handle(this->_response, *_request, *_config);
+	utils::logMsg("INFO", GREEN, "Processing request", this->_client_id);
 	if (_response->isCGI())
 		this->_state = CGI_RUNNING;
 	else
