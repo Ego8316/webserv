@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 13:11:13 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 15:14:16 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,17 +163,17 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 		close(this->_pipe_to_CGI[PIPE_READ_END]);
 		return ;
 	}
-	std::cout << "CGI script: " << _cgi_script << std::endl;
-	if (!utils::startsWith(this->_cgi_script, "."))
-		this->_cgi_script = "." + this->_cgi_script;
-	std::cout << "CGI script: " << _cgi_script << std::endl;
+	size_t				last_slash = this->_cgi_script.find_last_of('/');
+	const std::string	&root = this->_cgi_script.substr(0, last_slash);
+	this->_cgi_script = "." + this->_cgi_script.substr(last_slash);
+	std::cout << "CGI script: " << _cgi_script << std::endl << std::endl << "In dir: " << root << std::endl;
 	this->_cgi_script_char = new char[this->_cgi_script.length() + 1];
 	strcpy(this->_cgi_script_char, this->_cgi_script.c_str());
 	GenEnvVar(request);
 	this->_pid = fork();
 	if (this->_pid == 0)
 	{
-		if (chdir(config.root.c_str()) == -1)
+		if (chdir(root.c_str()) == -1)
 			exit (1);
 		this->Execute();
 	}
