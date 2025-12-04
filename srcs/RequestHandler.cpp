@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 20:26:23 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/04 14:44:43 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,6 +159,7 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 	check.close();
 
 	outfile.open(resource.getPath().c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
+	std::cout << "HERE???" << std::endl;
 	if (!outfile.is_open())
 		return (_handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
 	outfile << request.getRawBody();
