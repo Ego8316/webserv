@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 23:50:12 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 00:24:04 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,6 +225,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		bytes_sent = this->writeToCGI(request, config, server);
 	if (!checkOutputTermination(bytes_read))
 	{
+		std::cout << "still reading from cgi" << std::endl;
 		bytes_read = this->readFromCGI(config, server);
 	}
 	if (this->_process_status[0] == 0)
@@ -246,6 +247,12 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
 		server.pollRemove(this->_pipe_to_cgi_idx);
 	}
+	std::cout << "checkOutputTermination = " << checkOutputTermination(bytes_read) << std::endl;
+	std::cout << "this->_process_status[0] = " << this->_process_status[0] << std::endl;
+	std::cout << "this output_length = " << this->_output.length() << std::endl;
+	std::cout << "leaving parse header with header_len == " << this->_header_len << std::endl;
+	std::cout << "leaving parse header with content_len " << this->_content_len << std::endl;
+	
 }
 
 /**
@@ -307,22 +314,30 @@ ssize_t		CGI::readFromCGI(const ServerConfig &config, ServerCore &server)
  */
 void	CGI::parseHeader(const ServerConfig &config)
 {
+	std::cout << "current output == "<< std::endl;
+	std::cout << this->_output << std::endl;
 	if (!this->_output.length() || utils::startsWith(this->_output, "HTTP/"))
 	{}
 	else if (utils::caseInsensitiveFind(this->_output, "Status: ") != this->_output.end())
 	{
 		std::string::iterator	status_start = utils::caseInsensitiveFind(this->_output, "Status: ") + 8;
-		std::string::iterator	status_end = status_start;
-		std::advance(status_end, 3);
-		this->_status = utils::strToHttpStatus(std::string(status_start, status_end));
-		if (this->_status == HTTP_UNKNOWN_STATUS)
+		if (utils::caseInsensitiveFind(this->_output, "\r\n\r\n") < status_start)
 			this->_status = HTTP_INTERNAL_SERVER_ERROR;
+		else
+		{
+			std::string::iterator	status_end = status_start;
+			std::advance(status_end, 3);
+			this->_status = utils::strToHttpStatus(std::string(status_start, status_end));
+			if (this->_status == HTTP_UNKNOWN_STATUS)
+				this->_status = HTTP_INTERNAL_SERVER_ERROR;
+		}
 	}
 	if (utils::caseInsensitiveFind(this->_output, "Content-Length: ") != this->_output.end())
 	{
 		long len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ") + 16);
 		if (len < 0 || static_cast<size_t>(len) > config.client_max_body_size)
 		{
+			std::cout << "WAT ???" << std::endl;
 			this->_is_complete = true;
 			this->_status = HTTP_INTERNAL_SERVER_ERROR;
 			return ;
@@ -339,6 +354,8 @@ void	CGI::parseHeader(const ServerConfig &config)
 	}
 	if (this->_output.find("\r\n\r\n") != std::string::npos)
 		this->_header_len = this->_output.find("\r\n\r\n") + 4;
+	else
+		std::cout << "could not find end of header" << std::endl;
 }
 
 /**

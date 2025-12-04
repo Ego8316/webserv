@@ -91,6 +91,7 @@ def application():
     print(content_type_header, end="\r\n")
     print(set_cookie_header, end="\r\n")
     print(content_length_header, end="\r\n")
+    print("\r\n");
     print(html_content, end="\r\n")
 
 if __name__ == "__main__":

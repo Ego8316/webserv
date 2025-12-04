@@ -66,7 +66,7 @@ def get_full_http_response_from_object(response):
 
 
 ################# NO BODY TEST #############################
-
+"""
 testf = "test_get.py"
 print(f"{RED}" + testf + f"{RESET}")
 response = requests.get(url + "cgi-bin/"+testf)
@@ -79,7 +79,7 @@ response = requests.get(url + "cgi-bin/"+testf)
 print(f"{BLUE}" + testf + " returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
 get_full_http_response_from_object(response)
 
-input("press enter to continue")
+input("press enter to continue")"""
 testf = "test_cookies_get.py"
 print(f"{RED}" + testf + f"{RESET}")
 response = requests.get(url + "cgi-bin/"+testf)
