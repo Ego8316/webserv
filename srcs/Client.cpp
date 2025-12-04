@@ -6,7 +6,7 @@
 /*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 21:16:27 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/04 21:56:42 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -552,6 +552,7 @@ void	Client::_prepareNew()
  */
 void	Client::printState() const
 {
+	return ;
 	utils::logMsg("INFO", BLUE, "State is now " + utils::stateToStr(this->_state), this->_client_id);
 	return ;
 }

@@ -6,7 +6,7 @@
 /*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 21:04:52 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/04 21:56:35 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,9 @@
 #include <fcntl.h>
 #include "colors.hpp"
 #include "default.hpp"
+
+#include <filesystem>
+
 
 #if defined(__APPLE__)
 	#define OS_NAME "macOS"
