@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:28 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 17:06:56 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/03 20:10:35 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,8 @@ Location	ConfigInterpreter::_parseLocation(const Block &block, const ServerConfi
 	std::set<std::string>	already_applied;
 
 	loc.path = block.path;
+	if (loc.path[0] != '/')
+		throw InvalidLocationFormatError(block.line, loc.path);
 	loc.root = server.root;
 	loc.index = server.index;
 	loc.autoindex = server.autoindex;
@@ -259,7 +261,7 @@ void	ConfigInterpreter::_parseErrorPage(ServerConfig &conf, const Directive &d)
 
 	if (!endptr || *endptr != '\0')
 		throw InvalidStatusCodeError(d.line, code_str);
-	if (code_long < 100 || code_long > 999)
+	if (code_long < 400 || code_long > 599)
 		throw InvalidStatusCodeError(d.line, code_str);
 	HttpStatus	status = utils::strToHttpStatus(code_str);
 	if (status == HTTP_UNKNOWN_STATUS)
@@ -307,7 +309,19 @@ void	ConfigInterpreter::_parseReturn(Location &loc, const Directive &d)
 		throw MissingArgumentError(d.line, d.name);
 	if (d.args.size() >  2)
 		throw TooManyArgumentsError(d.line, d.name);
-	loc.redirect.code = std::atoi(d.args[0].c_str());
+
+	const std::string	&code_str = d.args[0];
+	char				*endptr = 0;
+	long				code_long = std::strtol(code_str.c_str(), &endptr, 10);
+
+	if (!endptr || *endptr != '\0')
+		throw InvalidStatusCodeError(d.line, code_str);
+	if (code_long < 300 || code_long > 399)
+		throw InvalidStatusCodeError(d.line, code_str);
+	HttpStatus	status = utils::strToHttpStatus(code_str);
+	if (status == HTTP_UNKNOWN_STATUS)
+		throw UnknownStatusCodeError(d.line, code_str);
+	loc.redirect.code = static_cast<int>(code_long);
 	loc.redirect.url = d.args[1];
 	loc.has_redirect = true;
 	return ;

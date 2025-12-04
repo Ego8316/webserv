@@ -64,6 +64,12 @@
         <h3>Send a file</h3>
         <p class="lede">POST any file to <code>/upload/&lt;filename&gt;</code>. Files land in <code>www/site1/uploads</code>.</p>
         <pre class="code-block">curl -X POST --data-binary @hello.txt http://127.0.0.1:8070/upload/hello.txt</pre>
+        <br>
+        <form enctype="multipart/form-data" action="../cgi-bin/upload.py" method="post">
+          <p>File: <input type="file" name="filename" id="fileid" class="form-control">
+            <input type="submit" value="SEND" href="#"></p>
+        </form>
+        <br>
       </article>
 
       <article class="card">

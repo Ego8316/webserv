@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 05:04:56 by ego               #+#    #+#             */
-/*   Updated: 2025/11/27 17:47:05 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/03 20:04:21 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,5 +200,16 @@ class	UnknownStatusCodeError	:	public ConfigError
 	public:
 		UnknownStatusCodeError(int line, const std::string &value)
 			: ConfigError(line, "Unknown status code '" + value + "'")
+		{}
+};
+
+/**
+ * @brief Thrown when a location is malformed.
+ */
+class	InvalidLocationFormatError	:	public ConfigError
+{
+	public:
+		InvalidLocationFormatError(int line, const std::string &value)
+			: ConfigError(line, "Invalid location format '" + value + "'")
 		{}
 };
