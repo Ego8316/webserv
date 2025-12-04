@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 17:15:34 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 20:24:46 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,7 +265,7 @@ ssize_t		CGI::writeToCGI(Request &request, const ServerConfig &config, ServerCor
 	bts = std::min(config.client_body_buffer_size, static_cast<size_t>(this->_bytes_to_send - this->_total_bytes_sent));
 	if (!server.pollAvailFor(this->_pipe_to_cgi_idx, POLLOUT))
 		return (0);
-	bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent - request.getRawHeader().size(), bts);
+	bytes_sent = write(this->_pipe_to_CGI[PIPE_WRITE_END], request_str.c_str() + this->_total_bytes_sent, bts);
 	if (bytes_sent != -1)
 		this->_total_bytes_sent += bytes_sent;
 	if (this->_total_bytes_sent == this->_bytes_to_send)

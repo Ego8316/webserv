@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 15:23:51 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 20:39:21 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -357,7 +357,6 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 	{
 		case HTTP_OK:						return "OK";
 		case HTTP_CREATED:					return "Created";
-		case HTTP_ACCEPTED:					return "Accepted";
 		case HTTP_NO_CONTENT:				return "No Content";
 		case HTTP_REDIRECT:					return "Multiple Choices";
 		case HTTP_REDIRECT_PERM:			return "Moved Permanently";
@@ -366,11 +365,11 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 		case HTTP_FORBIDDEN:				return "Forbidden";
 		case HTTP_NOT_FOUND:				return "Not Found";
 		case HTTP_METHOD_NOT_ALLOWED:		return "Method Not Allowed";
+		case HTTP_TIMEOUT:					return "Request Timeout";
 		case HTTP_CONFLICT:					return "Conflict";
 		case HTTP_CONTENT_TOO_LARGE:		return "Content Too Large";
 		case HTTP_INTERNAL_SERVER_ERROR:	return "Internal Server Error";
 		case HTTP_NOT_IMPLEMENTED:			return "Not Implemented";
-		case HTTP_BAD_GATEWAY:				return "Bad Gateway";
 		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";
 		default:							return "Unknown";
 	}
@@ -392,7 +391,6 @@ HttpStatus	utils::strToHttpStatus(std::string status)
 	{
 		case 200: return HTTP_OK;
 		case 201: return HTTP_CREATED;
-		case 202: return HTTP_ACCEPTED;
 		case 204: return HTTP_NO_CONTENT;
 		case 300: return HTTP_REDIRECT;
 		case 301: return HTTP_REDIRECT_PERM;
@@ -406,7 +404,6 @@ HttpStatus	utils::strToHttpStatus(std::string status)
 		case 413: return HTTP_CONTENT_TOO_LARGE;
 		case 500: return HTTP_INTERNAL_SERVER_ERROR;
 		case 501: return HTTP_NOT_IMPLEMENTED;
-		case 502: return HTTP_BAD_GATEWAY;
 		case 505: return HTTP_VERSION_NOT_SUPPORTED;
 		default: break;
 	}
@@ -448,7 +445,7 @@ long	utils::getTime()
 	struct timeval	tv;
 
 	gettimeofday(&tv, NULL);
-	return (tv.tv_sec);
+	return (tv.tv_sec * 1000);
 }
 
 /**
@@ -484,13 +481,13 @@ void	utils::logMsg(const std::string &level, const std::string &color, const std
 	std::cout << " " << msg << RESET << std::endl;
 }
 
-void	utils::printProcessQueue(std::deque<Client *> q)
+void	utils::printProcessQueue(std::deque<Client *> &q)
 {
 	std::deque<Client *>::iterator	it = q.begin();
 	size_t	i = 0;
 
 	std::cout << "Processing Queue" << std::endl;
-	while (it != q.end())
+	while (it != q.end() && i < 10)
 	{
 		std::cout << "PQ[" << i << "]" << " = " << *it << std::endl;
 		++it;
@@ -498,13 +495,13 @@ void	utils::printProcessQueue(std::deque<Client *> q)
 	}
 }
 
-void	utils::printClients(std::vector<Client *> v)
+void	utils::printClients(std::vector<Client *> &v)
 {
 	std::vector<Client *>::iterator	it = v.begin();
 	size_t	i = 0;
 
 	std::cout << "Clients" << std::endl;
-	while (it != v.end())
+	while (it != v.end() && i < 10)
 	{
 		std::cout << "Clients[" << i << "]" << " = " << *it << std::endl;
 		++it;

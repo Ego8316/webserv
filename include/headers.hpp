@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 15:24:26 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 20:39:32 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,6 @@ enum	HttpStatus
 	HTTP_UNKNOWN_STATUS = 0,
 	HTTP_OK = 200,
 	HTTP_CREATED = 201,
-	HTTP_ACCEPTED = 202,
 	HTTP_NO_CONTENT = 204,
 	HTTP_REDIRECT = 300,
 	HTTP_REDIRECT_PERM = 301,
@@ -166,7 +165,6 @@ enum	HttpStatus
 	HTTP_CONTENT_TOO_LARGE = 413,
 	HTTP_INTERNAL_SERVER_ERROR = 500,
 	HTTP_NOT_IMPLEMENTED = 501,
-	HTTP_BAD_GATEWAY = 502,
 	HTTP_VERSION_NOT_SUPPORTED = 505
 };
 

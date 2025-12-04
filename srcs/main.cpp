@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 12:07:47 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 17:20:21 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 #include "ConfigLexer.hpp"
 #include "ConfigParser.hpp"
 #include "ConfigInterpreter.hpp"
-#include "debug.hpp"
 #include "utils.hpp"
 
 int g_shutdown = 0;
