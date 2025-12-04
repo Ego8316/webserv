@@ -6,7 +6,7 @@
 #    By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/12/02 16:35:13 by vviterbo         ###   ########.fr        #
+#    Updated: 2025/12/04 17:17:53 by vviterbo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,8 +22,6 @@ SRC			+=	ServerCore.cpp Client.cpp Request.cpp \
 				ConfigLexer.cpp ConfigParser.cpp ConfigInterpreter.cpp \
 				ServerConfig.cpp \
 				CGI.cpp
-
-SRC			+=	debug/config.cpp
 
 OBJS		=	$(addprefix $(ODIR), $(SRC:.cpp=.o))
 SRCS		=	$(addprefix $(SDIR), $(SRC))

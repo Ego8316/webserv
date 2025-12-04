@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 01:36:17 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 13:23:45 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/04 16:45:10 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ ServerConfig::ServerConfig()
 	:	listen_host_string("0.0.0.0"),
 		listen_host(htonl(0x00000000)),
 		listen_port(80),
-		root(""),
+		root("."),
 		index("index.html"),
 		autoindex(false),
 		client_max_body_size(1 << 20),

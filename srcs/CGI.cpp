@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 15:14:16 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/04 17:15:34 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,14 +129,16 @@ CGI::~CGI()
 	{
 		close(this->_pipe_to_CGI[PIPE_WRITE_END]);
 		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
-		this->_server_link->pollRemove(this->_pipe_to_cgi_idx);
 	}
 	if (this->_pipe_from_CGI[PIPE_READ_END] != -1)
 	{
 		close(this->_pipe_from_CGI[PIPE_READ_END]);
 		this->_pipe_from_CGI[PIPE_READ_END] = -1;
-		this->_server_link->pollRemove(this->_pipe_from_cgi_idx);
 	}
+	if (this->_pipe_to_cgi_idx != -1)
+		this->_server_link->pollRemove(this->_pipe_to_cgi_idx);
+	if (this->_pipe_from_cgi_idx != -1)
+		this->_server_link->pollRemove(this->_pipe_from_cgi_idx);
 	deleteEnvVar();
 }
 
@@ -166,7 +168,6 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 	size_t				last_slash = this->_cgi_script.find_last_of('/');
 	const std::string	&root = this->_cgi_script.substr(0, last_slash);
 	this->_cgi_script = "." + this->_cgi_script.substr(last_slash);
-	std::cout << "CGI script: " << _cgi_script << std::endl << std::endl << "In dir: " << root << std::endl;
 	this->_cgi_script_char = new char[this->_cgi_script.length() + 1];
 	strcpy(this->_cgi_script_char, this->_cgi_script.c_str());
 	GenEnvVar(request);
@@ -192,12 +193,12 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 			kill(this->_pid, SIGTERM);
 			return ;
 		}
-		if (this->_client_id > 0 && this->_pipe_to_cgi_idx == -1 && this->_pipe_from_cgi_idx == -1)
+		if (this->_client_id >= 0 && this->_pipe_to_cgi_idx == -1 && this->_pipe_from_cgi_idx == -1)
 		{
-			this->_pipe_to_cgi_idx = config.max_clients + 2 * _client_id + 1;
-			this->_pipe_from_cgi_idx = config.max_clients + 2 * _client_id + 2;
+			this->_pipe_to_cgi_idx = config.max_clients + 2 * _client_id ;
+			this->_pipe_from_cgi_idx = config.max_clients + 2 * _client_id + 1;
 			server.pollAdd(this->_pipe_to_CGI[PIPE_WRITE_END], POLLOUT, this->_pipe_to_cgi_idx);
-			server.pollAdd(this->_pipe_from_CGI[PIPE_READ_END], POLLIN, this->_pipe_from_cgi_idx);
+			server.pollAdd(this->_pipe_from_CGI[PIPE_READ_END], POLLIN | POLLHUP, this->_pipe_from_cgi_idx);
 		}
 		this->Nanny(client, request, config, response, server);
 	}
@@ -235,7 +236,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 		return ;
 	}
-	if (this->_process_status[0] != 0)
+	if (this->_process_status[0] != 0 && checkOutputTermination(bytes_read))
 	{
 		if (utils::startsWith(this->_output, "HTTP/"))
 			response.setSkipStatus(true);
@@ -287,7 +288,7 @@ ssize_t		CGI::readFromCGI(const ServerConfig &config, ServerCore &server)
 	ssize_t				bytes_read = 0;
 	std::vector<char>	buffer(config.client_body_buffer_size + 1);
 
-	if (!server.pollAvailFor(this->_pipe_from_cgi_idx, POLLIN))
+	if (!server.pollAvailFor(this->_pipe_from_cgi_idx, POLLIN | POLLHUP))
 		return (0);
 	bytes_read = read(this->_pipe_from_CGI[PIPE_READ_END], &buffer[0], config.client_body_buffer_size);
 	if (bytes_read != -1)
@@ -421,7 +422,7 @@ void		CGI::Execute()
 	}
 	if (execve(this->_cgi_script_char, this->_args, this->_env) == -1)
 	{
-		std::cout << _cgi_script_char << std::endl;
+		std::cout << BLUE << _cgi_script_char << RESET << std::endl;
 		std::cerr << RED << "CGI execution failed:" << strerror(errno) << RESET << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
@@ -508,9 +509,11 @@ bool	CGI::checkOutputTermination(int bytes_read)
 {
 	(void)bytes_read;
 	if (this->_chunked)
-		return (utils::endsWith(this->_output, NULL_CHUNK));
+		return (this->_output.find(NULL_CHUNK) != std::string::npos);
 	else if (this->_content_len && this->_header_len)
 		return (this->_output.size() >= this->_header_len + this->_content_len);
+	else if (bytes_read == 0)
+		return (true);
 	else
 		return (false);
 }

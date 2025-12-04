@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 15:40:41 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 15:52:51 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -428,7 +428,10 @@ void	Client::_processRequest()
 		_keep_alive = false;
 	else
 		_keep_alive = (conn.find("close") == std::string::npos);
-	_response->setHeaders("Connection", _keep_alive ? "keep-alive" : "close");
+	if (_keep_alive)
+		_response->setHeaders("Connection", "keep-alive");
+	else
+		_response->setHeaders("Connection", "close");
 	if (_response->isCGI())
 		this->_state = CGI_RUNNING;
 	else
@@ -552,6 +555,7 @@ void	Client::_prepareNew()
  */
 void	Client::printState() const
 {
+	return ;
 	utils::logMsg("INFO", BLUE, "State is now " + utils::stateToStr(this->_state), this->_client_id);
 	return ;
 }

@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 12:29:16 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 17:16:50 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,13 +110,6 @@ void	Request::parseHeader(const ServerConfig &config)
 	}
 	this->_method = utils::strToMethod(method_str);
 	this->_parseRequestTarget();
-	std::cout << _request_target << std::endl << _query_string << std::endl;
-	// TODO adapter avec location
-	// if (!config.isAcceptedMethod(this->_method))
-	// {
-	// 	this->_error = true;
-	// 	return ;
-	// }
 	while (std::getline(stream, line))
 	{
 		line = utils::stringTrim(line, "\r\n \t");

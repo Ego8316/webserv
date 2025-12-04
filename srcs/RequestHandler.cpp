@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 15:39:06 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 17:16:38 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,6 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 
 	Resource	resource;
 	resource.build(request, config);
-
-	std::cout << resource.getPath() << std::endl;
 
 	if (resource.isRedirect())
 		return (_handleRedirect(response, resource));
