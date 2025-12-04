@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 13:58:12 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 14:02:23 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class WebServ
 		int 				ProcessQueue();
 		Client				*newClient();
 		int					removeClient(size_t indx);
+		void				sendTimeOut(Client *client);
 
 	private:
 		WebServ(const WebServ &other);

@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 12:23:45 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 13:21:17 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,10 @@
 #define ERROR_PAGE_405	"<html><head><title>405 Method Not Allowed</title></head>" \
 						"<body><h1>405 Method Not Allowed</h1>" \
 						"<p>The requested method is not allowed for the requested URL.</p></body></html>"
+
+#define ERROR_PAGE_408	"<html><head><title>408 Request Time Out</title></head>" \
+						"<body><h1>408 Request Time Out</h1>" \
+						"<p>The request could not be fully received and responded in time</p></body></html>"
 
 #define ERROR_PAGE_500	"<html><head><title>500 Internal Server Error</title></head>" \
 						"<body><h1>500 Internal Server Error</h1>" \
@@ -157,6 +161,7 @@ enum	HttpStatus
 	HTTP_FORBIDDEN = 403,
 	HTTP_NOT_FOUND = 404,
 	HTTP_METHOD_NOT_ALLOWED = 405,
+	HTTP_TIMEOUT = 408,
 	HTTP_CONFLICT = 409,
 	HTTP_CONTENT_TOO_LARGE = 413,
 	HTTP_INTERNAL_SERVER_ERROR = 500,

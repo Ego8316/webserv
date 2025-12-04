@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 13:17:12 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 13:22:04 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -403,6 +403,7 @@ HttpStatus	utils::strToHttpStatus(std::string status)
 		case 403: return HTTP_FORBIDDEN;
 		case 404: return HTTP_NOT_FOUND;
 		case 405: return HTTP_METHOD_NOT_ALLOWED;
+		case 408: return HTTP_TIMEOUT;
 		case 409: return HTTP_CONFLICT;
 		case 413: return HTTP_CONTENT_TOO_LARGE;
 		case 500: return HTTP_INTERNAL_SERVER_ERROR;

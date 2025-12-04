@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 13:12:45 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 14:19:36 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,10 +179,11 @@ void	Response::buildHeader()
 {
 	if (!utils::mapHasEntry(this->_headers, std::string("Server")))
 		this->_headers["Server"] = "Webserv/1.0 (Unix)";
-	if (!utils::mapHasEntry(this->_headers, std::string("Connection")))
-		this->_headers["Connection"] = "keep-alive";
-	this->_header = "HTTP/1.1 " + utils::toString(this->_status_code)
-		+ " " + utils::httpStatusToStr(this->_status_code) + "\r\n";
+	if (!utils::mapHasEntry(this->_headers, std::string("Connection")) && this->_headers["Connection: "] == "keep-alive")
+		this->_header = "HTTP/1.1 " + utils::toString(this->_status_code);
+	else
+		this->_header = "HTTP/1.0 " + utils::toString(this->_status_code);
+	+ " " + utils::httpStatusToStr(this->_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); ++it)
 	this->_header += it->first + ": " + it->second + "\r\n";
 	if (!this->_is_cgi && this->_status_code < HTTP_BAD_REQUEST)
@@ -289,6 +290,7 @@ std::string	Response::getDefaultErrorPage(HttpStatus code)
 		case HTTP_FORBIDDEN:				return ERROR_PAGE_403;
 		case HTTP_NOT_FOUND:				return ERROR_PAGE_404;
 		case HTTP_METHOD_NOT_ALLOWED:		return ERROR_PAGE_405;
+		case HTTP_TIMEOUT:					return ERROR_PAGE_408;
 		case HTTP_INTERNAL_SERVER_ERROR:	return ERROR_PAGE_500;
 		case HTTP_NOT_IMPLEMENTED:			return ERROR_PAGE_501;
 		case HTTP_VERSION_NOT_SUPPORTED:	return ERROR_PAGE_505;

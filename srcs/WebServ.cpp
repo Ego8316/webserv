@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 12:23:28 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 14:05:18 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ int	WebServ::ProcessQueue()
 		return (0);
 	while (!this->_processing_queue.empty() && this->_processing_queue.front()->getTimeLimit() < utils::getTime())
 	{
-		std::cout << "Client " << this->_processing_queue.front()->getId() << " timed out" << std::endl;
+		sendTimeOut(this->_processing_queue.front());
 		removeClient(this->_processing_queue.front()->getId());
 		this->_processing_queue.pop_front();
 	}
@@ -234,4 +234,16 @@ int	WebServ::removeClient(size_t indx)
 		this->_clients[indx] = NULL;
 	}
 	return (0);
+}
+
+void	WebServ::sendTimeOut(Client *client)
+{
+	std::cout << RED << "Client " << this->_processing_queue.front()->getId() << " timed out" << RESET << std::endl;
+	RequestHandler::_handleError(client->getResponse(), HTTP_TIMEOUT, *this->_config);
+	client->setState(SENDING_STRING);
+	if (client->handleEvent() == ERR_NONE)
+		std::cout << ORANGE << "TimeOut successfully sent to Client " << client->getId() << RESET << std::endl; 
+	else
+		std::cout << ORANGE << "Could not send TimeOut to Client " << client->getId() << ", aborting..." << RESET << std::endl; 
+	return ;
 }

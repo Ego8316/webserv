@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 12:07:14 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 13:58:29 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,6 +206,11 @@ void	Client::setFd(int fd)
 void	Client::setState(RequestStage state)
 {
 	this->_state = state;
+}
+
+Response	*Client::getResponse()
+{
+	return(this->_response);
 }
 
 /**
@@ -574,3 +579,4 @@ void	Client::printRequest() const
 		<< "\t[REQUEST END]" << RESET << std::endl;
 	return ;
 }
+
