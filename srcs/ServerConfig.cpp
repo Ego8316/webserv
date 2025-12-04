@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 01:36:17 by ego               #+#    #+#             */
-/*   Updated: 2025/12/02 17:08:27 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/04 13:23:45 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,8 +210,7 @@ static void	printLocation(std::ostream &os, const Location &loc)
 	printField(os, "Methods:", mlist);
 	if (!loc.upload_path.empty())
 		printField(os, "Upload store:", loc.upload_path);
-	if (!loc.cgi_pass.empty())
-		printField(os, "CGI pass:", loc.cgi_pass);
+	printField(os, "CGI:", loc.cgi ? "ON" : "OFF");
 	if (loc.has_redirect)
 		printField(os, "Redirect:",
 					utils::toString(loc.redirect.code) + " -> " + loc.redirect.url);
