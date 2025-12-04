@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 21:41:19 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 23:21:50 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,6 +315,8 @@ void	CGI::parseHeader(const ServerConfig &config)
 		std::string::iterator	status_end = status_start;
 		std::advance(status_end, 3);
 		this->_status = utils::strToHttpStatus(std::string(status_start, status_end));
+		if (this->_status == HTTP_UNKNOWN_STATUS)
+			this->_status = HTTP_INTERNAL_SERVER_ERROR;
 	}
 	if (utils::caseInsensitiveFind(this->_output, "Content-Length: ") != this->_output.end())
 	{
@@ -359,17 +361,11 @@ void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 		response.build();
 		return ;
 	}
-	else if (utils::caseInsensitiveFind(this->_output, "\r\nstatus: ") != this->_output.end())
-	{
-		this->_status = utils::strToHttpStatus(&*utils::caseInsensitiveFind(this->_output, "status: ")
-			+ std::string("status: ").length());
-		if (this->_status == HTTP_UNKNOWN_STATUS)
-			this->_status = HTTP_INTERNAL_SERVER_ERROR;
-		this->_output.erase(0, this->_output.find("\r\n"));
-	}
+	if (this->_status >= HTTP_BAD_REQUEST)
+		return (RequestHandler::_handleError(&response, this->_status, config));
 	response.setStatus(this->_status);
 	if (!this->_content_len && !this->_chunked)
-		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n"));
+		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n") - 4);
 	response.buildHeader();
 	response.setBody(this->_output);
 	response.build();
