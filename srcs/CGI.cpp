@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 12:03:08 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 13:11:13 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,8 +184,8 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 		close(this->_pipe_from_CGI[PIPE_WRITE_END]);
 		if (!ServerCore::setNonBlocking(this->_pipe_to_CGI[PIPE_WRITE_END])
 			|| !ServerCore::setNonBlocking(this->_pipe_from_CGI[PIPE_READ_END]))
-		{
-			response.setStatus(HTTP_INTERNAL_SERVER_ERROR);
+		{	
+			RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 			this->_is_complete = true;
 			close(this->_pipe_to_CGI[PIPE_WRITE_END]);
 			close(this->_pipe_from_CGI[PIPE_READ_END]);
@@ -232,7 +232,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		|| (this->_process_status[0] != 0 && this->_process_status[0] != this->_pid))
 	{
 		this->_is_complete = true;
-		response.setStatus(HTTP_INTERNAL_SERVER_ERROR);
+		RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 		return ;
 	}
 	if (this->_process_status[0] != 0)
@@ -348,8 +348,6 @@ void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 	if ((WIFEXITED(this->_process_status[1]) && WEXITSTATUS(this->_process_status[1]))
 		|| !WIFEXITED(this->_process_status[1]))
 	{
-		this->_status = HTTP_INTERNAL_SERVER_ERROR;
-		response.setHeaders("aa", "\r\n");
 		RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 		std::cout << "Error : Child process returned " << this->_process_status[1] << std::endl;
 		return ;
