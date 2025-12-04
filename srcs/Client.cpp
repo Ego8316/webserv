@@ -6,11 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2025/12/03 14:25:00 by vviterbo         ###   ########.fr       */
-=======
-/*   Updated: 2025/12/02 18:57:15 by ego              ###   ########.fr       */
->>>>>>> CGI_check
+/*   Updated: 2025/12/04 12:07:14 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +252,6 @@ int	Client::handleEvent()
 		delete this->_response;
 		this->_response = NULL;
 	}
-	// printState();
 	return (_error);
 }
 

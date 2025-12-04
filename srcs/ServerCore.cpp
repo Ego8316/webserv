@@ -3,14 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCore.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2025/12/03 01:11:03 by victorviter      ###   ########.fr       */
-=======
-/*   Updated: 2025/12/02 17:06:29 by ego              ###   ########.fr       */
->>>>>>> CGI_check
+/*   Updated: 2025/12/04 12:13:09 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -377,6 +373,8 @@ bool	ServerCore::setNonBlocking(int fd)
 {
 	int	flags = fcntl(fd, F_GETFL, 0);
 
+	if (std::string(OS_NAME) != "macOs")
+		return (true);
 	if (flags == SERV_ERROR)
 		flags = 0;
 	return (fcntl(fd, F_SETFL, flags | O_NONBLOCK) != -1);

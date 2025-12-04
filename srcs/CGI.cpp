@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/03 17:30:06 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 12:03:08 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,7 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 	if (pipe(this->_pipe_from_CGI) == -1)
 	{
 		std::cerr << "Could not initialize pipe: " << strerror(errno) << std::endl;
+		close(this->_pipe_to_CGI[PIPE_READ_END]);
 		return ;
 	}
 	std::cout << "CGI script: " << _cgi_script << std::endl;
@@ -223,16 +224,17 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		bytes_sent = this->writeToCGI(request, config, server);
 	if (!checkOutputTermination(bytes_read))
 	{
-		// std::cout << "here?" << std::endl;
 		bytes_read = this->readFromCGI(config, server);
-<<<<<<< HEAD
-	else if (this->_process_status[0] == 0)
-=======
 	}
-	// std::cout << _process_status[0] << std::endl;
-	if (this->_process_status[0] == 0) // TODO what if the prorgram crash ???
->>>>>>> CGI_check
+	if (this->_process_status[0] == 0)
 		this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
+	if ((this->_process_status[0] != 0 && this->_process_status[1] != 0)
+		|| (this->_process_status[0] != 0 && this->_process_status[0] != this->_pid))
+	{
+		this->_is_complete = true;
+		response.setStatus(HTTP_INTERNAL_SERVER_ERROR);
+		return ;
+	}
 	if (this->_process_status[0] != 0)
 	{
 		if (utils::startsWith(this->_output, "HTTP/"))

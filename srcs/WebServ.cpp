@@ -3,17 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-<<<<<<< HEAD
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/03 14:24:22 by vviterbo         ###   ########.fr       */
-=======
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 17:07:53 by ego              ###   ########.fr       */
->>>>>>> CGI_check
+/*   Updated: 2025/12/04 12:23:28 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,8 +116,6 @@ int	WebServ::UpdateQueue()
 				Client	*new_client = newClient();
 				if (new_client)
 				{
-					//new_client->setState(TRY_ACCEPTING);
-					//new_client->setTimeLimit(utils::getTime() + this->_config->timeout);
 					this->_processing_queue.push_front(new_client);
 				}
 				else
@@ -142,8 +133,6 @@ int	WebServ::UpdateQueue()
 			}
 		}
 	}
-	//utils::printProcessQueue(this->_processing_queue);
-	//utils::printClients(this->_clients);
 	return (0);
 }
 
@@ -222,7 +211,7 @@ int	WebServ::removeClient(size_t indx)
 {
 	size_t	i = 0;
 
-	if (indx < this->_config->client_limit && this->_clients[indx] != NULL)
+	if (indx < this->_config->max_clients && this->_clients[indx] != NULL)
 	{
 		std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;
 		std::deque<Client *>::iterator it = this->_processing_queue.begin();
