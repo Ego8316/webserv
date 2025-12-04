@@ -6,7 +6,7 @@
 /*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 21:05:10 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 00:24:11 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,7 @@ void	Resource::_evaluatePermissions()
 /**
  * @brief Detects the type of the resource based on the file extension.
  *
- * Updates _status to include IS_CGI for Python and PHP scripts.
+ * Updates _status to include IS_CGI for Python and Perl scripts.
  */
 void	Resource::_detectType()
 {

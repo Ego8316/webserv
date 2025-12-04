@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 20:39:21 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 00:24:34 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -263,14 +263,14 @@ std::string	utils::contentTypeToStr(ContentType type)
 /**
  * @brief Detects the type of the resource based on the file extension.
  *
- * Updates _status to include IS_CGI for Python and PHP scripts.
+ * Updates _status to include IS_CGI for Python and Perl scripts.
  */
 ContentType	utils::extensionToContentTypes(std::string fname)
 {
 	if (utils::endsWith(fname, ".py"))
 		return (FTYPE_CGI_PY);
-	else if (utils::endsWith(fname, ".php"))
-		return (FTYPE_CGI_PHP);
+	else if (utils::endsWith(fname, ".pl"))
+		return (FTYPE_CGI_PL);
 	else if (utils::endsWith(fname, ".html"))
 		return (FTYPE_HTML);
 	else if (utils::endsWith(fname, ".css"))
@@ -290,7 +290,7 @@ ContentType	utils::extensionToContentTypes(std::string fname)
 /**
  * @brief Get the file extension associated with the content type.
  *
- * @return File extension (e.g., ".html", ".png", ".php").
+ * @return File extension (e.g., ".html", ".png", ".pl").
  */
 std::string	utils::contentTypeToExtensions(ContentType type)
 {
@@ -303,7 +303,7 @@ std::string	utils::contentTypeToExtensions(ContentType type)
 		case FTYPE_PNG:			return ".png";
 		case FTYPE_SVG:			return ".svg";
 		case FTYPE_CGI_PY:		return ".py";
-		case FTYPE_CGI_PHP:		return ".php";
+		case FTYPE_CGI_PL:		return ".pl";
 		default:				return "";
 	}
 }
