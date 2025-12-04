@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 20:39:32 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 21:34:46 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,9 @@
 #include <fcntl.h>
 #include "colors.hpp"
 #include "default.hpp"
+
+#include <filesystem>
+
 
 #if defined(__APPLE__)
 	#define OS_NAME "macOS"

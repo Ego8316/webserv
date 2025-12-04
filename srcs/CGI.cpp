@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 20:24:46 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 21:41:19 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -422,8 +422,8 @@ void		CGI::Execute()
 	}
 	if (execve(this->_cgi_script_char, this->_args, this->_env) == -1)
 	{
-		std::cout << BLUE << _cgi_script_char << RESET << std::endl;
-		std::cerr << RED << "CGI execution failed:" << strerror(errno) << RESET << std::endl;
+		std::cerr << RED << "CGI execution failed: " << strerror(errno) << RESET << std::endl;
+		std::cerr << RED << "While trying to run cgi " <<_cgi_script_char << RESET << std::endl;
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
 	}
