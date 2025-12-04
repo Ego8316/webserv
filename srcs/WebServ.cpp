@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 14:05:18 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 19:37:17 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,8 +152,9 @@ int	WebServ::ProcessQueue()
 	{
 		sendTimeOut(this->_processing_queue.front());
 		removeClient(this->_processing_queue.front()->getId());
-		this->_processing_queue.pop_front();
 	}
+	if (this->_processing_queue.empty())
+		return (0);
 	next_client = this->_processing_queue.front();
 	this->_processing_queue.pop_front();
 	if (!next_client)

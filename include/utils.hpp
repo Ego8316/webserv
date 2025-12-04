@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:38 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 13:15:40 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 19:19:07 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ std::string					stateToStr(RequestStage state);
 long						getTime();
 std::string					timeStamp();
 void						logMsg(const std::string &level, const std::string &color, const std::string &msg, int client_id = -1);
-void						printProcessQueue(std::deque<Client *> q);
-void						printClients(std::vector<Client *> v);
+void						printProcessQueue(std::deque<Client *> &q);
+void						printClients(std::vector<Client *> &v);
 
 template <typename T>
 std::string	toString(const T &src)
