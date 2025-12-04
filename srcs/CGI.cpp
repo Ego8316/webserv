@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 21:41:19 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/04 23:17:10 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -361,17 +361,19 @@ void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 	}
 	else if (utils::caseInsensitiveFind(this->_output, "\r\nstatus: ") != this->_output.end())
 	{
-		this->_status = utils::strToHttpStatus(&*utils::caseInsensitiveFind(this->_output, "status: ")
-			+ std::string("status: ").length());
+		this->_status = utils::strToHttpStatus(&*utils::caseInsensitiveFind(this->_output, "status: ") + 8);
 		if (this->_status == HTTP_UNKNOWN_STATUS)
 			this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		this->_output.erase(0, this->_output.find("\r\n"));
 	}
 	response.setStatus(this->_status);
+	size_t	header_end = this->_output.find("\r\n\r\n");
+	std::cout << "header_end = " << header_end << std::endl;
+	if (header_end == std::string::npos)
+		return (RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config));
 	if (!this->_content_len && !this->_chunked)
-		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n"));
+		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n") - 4);
 	response.buildHeader();
-	response.setBody(this->_output);
 	response.build();
 	return ;
 }
@@ -429,6 +431,17 @@ void		CGI::Execute()
 	}
 }
 
+static bool	isValidContentType(const std::string &ct)
+{
+	for (size_t i = 0; i < ct.size(); ++i)
+	{
+		char	c = ct[i];
+		if (c == '\n' || c == '\r')
+			return (false);
+	}
+	return (true);
+}
+
 /**
  * @brief Builds the CGI environment variables and argv.
  *
@@ -442,6 +455,10 @@ void		CGI::GenEnvVar(Request &request)
 	
 	env.push_back("REQUEST_METHOD=" + utils::methodToStr(request.getMethod()));
 	env.push_back("QUERY_STRING=" + request.getQueryString());
+	env.push_back("CONTENT_LENGTH=" + utils::toString(request.getContentLength()));
+	std::map<std::string, std::string>::const_iterator	it = request.getHeaders().find("Content-Type");
+	if (it != request.getHeaders().end() && isValidContentType(it->second))
+    	env.push_back("CONTENT_TYPE=" + it->second);
 	std::map<std::string, std::string>	attr = cookies.getAllAttributes();
 	for (std::map<std::string, std::string>::iterator it = attr.begin(); it != attr.end(); ++it)
 		env.push_back("HTTP_COOKIE_" + it->first + "=" + it->second);

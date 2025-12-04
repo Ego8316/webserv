@@ -63,12 +63,18 @@
         <div class="eyebrow">Uploads</div>
         <h3>Send a file</h3>
         <p class="lede">POST any file to <code>/upload/&lt;filename&gt;</code>. Files land in <code>www/site1/uploads</code>.</p>
-        <pre class="code-block">curl -X POST --data-binary @hello.txt http://127.0.0.1:8070/upload/hello.txt</pre>
+        <pre class="code-block">curl -X POST --data-binary @hello.txt http://127.0.0.1:8080/upload/hello.txt</pre>
         <br>
-        <form enctype="multipart/form-data" action="../cgi-bin/upload.py" method="post">
-          <p>File: <input type="file" name="filename" id="fileid" class="form-control">
-            <input type="submit" value="SEND" href="#"></p>
+
+        <!-- ✅ FIXED + CORRECT CGI UPLOAD FORM -->
+        <form enctype="multipart/form-data" action="/cgi-bin/upload.py" method="post">
+          <p>
+            File:
+            <input type="file" name="filename" id="fileid" class="form-control">
+            <input type="submit" value="SEND">
+          </p>
         </form>
+
         <br>
       </article>
 
@@ -84,10 +90,10 @@
       <div class="eyebrow">cURL shortcuts</div>
       <h3>Try these locally</h3>
       <div class="code-grid">
-        <pre class="code-block">curl http://127.0.0.1:8070/static/hello.txt</pre>
+        <pre class="code-block">curl http://127.0.0.1:8080/static/hello.txt</pre>
         <pre class="code-block">curl -i -X POST \
   --data 'ping=ok' \
-  http://127.0.0.1:8070/upload/ping.txt</pre>
+  http://127.0.0.1:8080/upload/ping.txt</pre>
       </div>
     </section>
   </main>

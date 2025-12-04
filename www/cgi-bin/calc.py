@@ -12,8 +12,8 @@ oper = form.getvalue('oper')
 arg3 = form.getvalue('s_num')
 
 print(os.environ["QUERY_STRING"], file=sys.stderr)
-print("HTTP/1.1 200 OK")
-print("Content-type: text/html")
+print("status: 200")
+print("Content-type: text/html\r\n\r\n")
 
 if not oper or not arg1 or not arg3:
 	print("Parameters are not correct")
@@ -64,5 +64,5 @@ try:
 except:
     to_send = "<b>Something went wrong</b>: <br>"
 
-print("Content-Length: {}\r\n".format(len(to_send)))
+# print("Content-Length: {}\r\n".format(len(to_send)))
 print(to_send)

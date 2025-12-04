@@ -6,7 +6,7 @@
 /*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 21:56:35 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/04 22:35:24 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,16 @@
 #define ERROR_PAGE_408	"<html><head><title>408 Request Time Out</title></head>" \
 						"<body><h1>408 Request Time Out</h1>" \
 						"<p>The request could not be fully received and responded in time</p></body></html>"
+
+#define ERROR_PAGE_409	"<html><head><title>409 Conflict</title></head>" \
+						"<body><h1>409 Conflict</h1>" \
+						"<p>The request could not be completed due to a conflict with the current state of the resource.</p></body></html>"
+
+
+#define ERROR_PAGE_413	"<html><head><title>413 Payload Too Large</title></head>" \
+						"<body><h1>413 Payload Too Large</h1>" \
+						"<p>The request is larger than the server is willing or able to process.</p></body></html>"
+
 
 #define ERROR_PAGE_500	"<html><head><title>500 Internal Server Error</title></head>" \
 						"<body><h1>500 Internal Server Error</h1>" \
