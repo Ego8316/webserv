@@ -6,7 +6,7 @@
 /*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:28 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 14:40:33 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/04 20:55:21 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,10 +151,10 @@ void	ConfigInterpreter::_applyServerDirective(ServerConfig &conf, const Directiv
 	else if (name == "root")						conf.root = d.args[0];
 	else if (name == "index")						conf.index = d.args[0];
 	else if (name == "autoindex")					conf.autoindex = (d.args[0] == "on");
-	else if (name == "client_max_body_size")		conf.client_max_body_size = _parseSizeWithSuffix(d.args[0], d.line);
-	else if (name == "timeout")						conf.timeout = static_cast<long>(_parseSizeWithSuffix(d.args[0], d.line));
-	else if (name == "client_header_buffer_size")	conf.client_header_buffer_size = _parseSizeWithSuffix(d.args[0], d.line);
-	else if (name == "client_body_buffer_size")		conf.client_body_buffer_size = _parseSizeWithSuffix(d.args[0], d.line);
+	else if (name == "client_max_body_size")		conf.client_max_body_size = _parseSizeWithSuffix(d.args[0], d.line, 2);
+	else if (name == "timeout")						conf.timeout = static_cast<long>(_parseSizeWithSuffix(d.args[0], d.line, 0));
+	else if (name == "client_header_buffer_size")	conf.client_header_buffer_size = _parseSizeWithSuffix(d.args[0], d.line, 1);
+	else if (name == "client_body_buffer_size")		conf.client_body_buffer_size = _parseSizeWithSuffix(d.args[0], d.line, 1);
 	else
 		throw UnknownDirectiveError(d.line, d.name);
 	if (already_applied.count(name))
@@ -336,11 +336,16 @@ void	ConfigInterpreter::_parseReturn(Location &loc, const Directive &d)
  *
  * @throws InvalidSizeError or InvalidSizeSuffixError on malformed size.
  * @throws UnknownSizeError on unsupported suffix.
+ * @throws SizeTooLowError or SizeTooHighError on boundary breaking.
  *
  * @param s String to parse (e.g., "1024", "8K", "1M", "30s").
+ * @param line Directive line.
+ * @param type Type of the number: 0 for time, 1 for buffer size and 2 for
+ * body size.
+ * 
  * @return Size in bytes.
  */
-size_t	ConfigInterpreter::_parseSizeWithSuffix(const std::string &s, int line)  const
+size_t	ConfigInterpreter::_parseSizeWithSuffix(const std::string &s, int line, int type)  const
 {
 	char	*endptr;
 	size_t	multiplier;
@@ -352,15 +357,19 @@ size_t	ConfigInterpreter::_parseSizeWithSuffix(const std::string &s, int line)  
 		return (base);
 	if (*(endptr + 1))
 		throw InvalidSizeSuffixError(line, s);
-	if (tolower(*endptr) == 'k')
+	if (tolower(*endptr) == 'k' && type > 0)
 		multiplier = 1024;
-	else if (tolower(*endptr) == 'm')
+	else if (tolower(*endptr) == 'm' && type > 0)
 		multiplier = 1024 * 1024;
-	else if (tolower(*endptr) == 's')
+	else if (tolower(*endptr) == 's' && type == 0)
 		multiplier = 1000;
 	else
 		throw UnknownSizeError(line, s);
 	if (base * multiplier < 100)
 		throw SizeTooLowError(line, utils::toString(base * multiplier));
+	if ((type == 0 && base * multiplier > 3600000)
+		|| (type == 1 && base * multiplier > 65536)
+		|| (type == 2 && base * multiplier > 10485760 * 2))
+		throw SizeTooHighError(line, utils::toString(base * multiplier));
 	return (base * multiplier);
 }
