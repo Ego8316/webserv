@@ -4,10 +4,6 @@ import os
 import sys
 
 def get_cookie_value(cookie_string, key):
-    """
-    Parses a minimal cookie string (key=value; key2=value2) 
-    to extract the value for a specific key.
-    """
     if not cookie_string:
         return None
     
@@ -85,13 +81,14 @@ def application():
     """
     
     content_length = len(html_content_template.encode('utf-8'))
+    content_length = content_length - len(content_length_display_placeholder) + len(str(content_length))
     content_length_header = f"Content-Length: {content_length}"
     
     html_content = html_content_template.replace(content_length_display_placeholder, str(content_length))
     print(content_type_header, end="\r\n")
     print(set_cookie_header, end="\r\n")
     print(content_length_header, end="\r\n")
-    print("\r\n");
+    print("\r\n")
     print(html_content, end="\r\n")
 
 if __name__ == "__main__":

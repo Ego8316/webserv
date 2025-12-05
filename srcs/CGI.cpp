@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 00:30:43 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 01:05:30 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,7 +252,11 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 	std::cout << "this output_length = " << this->_output.length() << std::endl;
 	std::cout << "leaving parse header with header_len == " << this->_header_len << std::endl;
 	std::cout << "leaving parse header with content_len " << this->_content_len << std::endl;
-	
+	if (this->_header_len)
+	{
+		std::cout << "HEADER>>>" << this->_output.substr(0, this->_header_len) << "<<< END";
+		std::cout << "BODY>>>" << this->_output.substr(this->_header_len+4) << "<<< END";
+	}
 }
 
 /**
