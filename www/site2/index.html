@@ -1,132 +1,15 @@
-<!doctype html>
-<html lang="en" data-theme="dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cookie & Session Lab</title>
-  <style>
-    :root {
-      --bg: #0f111a;
-      --card: #151928;
-      --card-light: #ffffff;
-      --text: #e9efff;
-      --text-dark: #0f111a;
-      --muted: #9baccc;
-      --accent: #78f0c1;
-      --accent-2: #8fb5ff;
-      --border: rgba(255,255,255,0.08);
-      --shadow: 0 12px 30px rgba(0,0,0,0.25);
-    }
-    [data-theme="light"] {
-      --bg: #f5f7fb;
-      --card: #ffffff;
-      --text: #0f111a;
-      --muted: #5f6c86;
-      --border: rgba(0,0,0,0.08);
-      --shadow: 0 10px 22px rgba(0,0,0,0.08);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: "Inter", system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .content { max-width: 960px; margin: 0 auto; }
-    .site-header { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 16px; }
-    .logo { display: flex; gap: 10px; align-items: center; }
-    .logo-mark { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #0a0f1a; display: grid; place-items: center; font-weight: 800; box-shadow: var(--shadow); }
-    h1, h2, h3 { margin: 0; line-height: 1.1; }
-    .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; color: var(--muted); }
-    .pill { padding: 10px 12px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); box-shadow: var(--shadow); }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 14px; margin-bottom: 14px; }
-    .lede { color: var(--muted); margin: 8px 0; }
-    .btn { border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: var(--text); padding: 10px 12px; border-radius: 10px; font-weight: 600; cursor: pointer; }
-    .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #0a0f1a; border: none; }
-    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    pre { background: rgba(255,255,255,0.04); padding: 10px; border-radius: 10px; border: 1px solid var(--border); overflow-x: auto; }
-    .theme-toggle { margin-left: auto; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Webserv Session Demo</title>
+    <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
-  <div class="content">
-    <header class="site-header">
-      <div class="logo">
-        <span class="logo-mark">CK</span>
-        <div>
-          <div class="eyebrow">cookie playground</div>
-          <h1>Site 2 — Sessions</h1>
-        </div>
-      </div>
-      <div class="btn theme-toggle" onclick="toggleTheme()">Toggle theme</div>
-    </header>
-
-    <section class="card-grid">
-      <article class="card">
-        <div class="eyebrow">Session seed</div>
-        <h3>Set a session cookie</h3>
-        <p class="lede">Generate a random session id and store it in <code>ws_session</code>.</p>
-        <div class="btn-row">
-          <button class="btn primary" onclick="setSession()">Set cookie</button>
-          <button class="btn" onclick="clearSession()">Clear cookie</button>
-        </div>
-        <p class="lede" id="session-status"></p>
-      </article>
-
-      <article class="card">
-        <div class="eyebrow">Echo</div>
-        <h3>Current cookies</h3>
-        <pre id="cookie-dump">loading…</pre>
-      </article>
-    </section>
-
-    <section class="card">
-      <div class="eyebrow">Quick fetch</div>
-      <h3>Call CGI (optional)</h3>
-      <p class="lede">Hit <code>/static/test_cookie.py</code> to see CGI-set cookies.</p>
-      <div class="btn-row">
-        <a class="btn" href="/static/test_cookie.py">Run test_cookie.py</a>
-        <a class="btn" href="/">Back to site1</a>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    function dumpCookies() {
-      document.getElementById('cookie-dump').textContent = document.cookie || '(no cookies)';
-      const sess = getCookie('ws_session');
-      const status = sess ? `Session cookie: ${sess}` : 'No session cookie set.';
-      document.getElementById('session-status').textContent = status;
-    }
-    function getCookie(name) {
-      const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-      return match ? decodeURIComponent(match[1]) : null;
-    }
-    function setSession() {
-      const id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-      const expires = new Date(Date.now() + 24*60*60*1000).toUTCString();
-      document.cookie = `ws_session=${id}; Path=/; SameSite=Lax; Expires=${expires}`;
-      dumpCookies();
-    }
-    function clearSession() {
-      document.cookie = 'ws_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      dumpCookies();
-    }
-    function toggleTheme() {
-      const html = document.documentElement;
-      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      document.cookie = `ws_theme=${next}; Path=/; SameSite=Lax; Expires=${new Date(Date.now()+7*24*3600*1000).toUTCString()}`;
-    }
-    function applyThemeFromCookie() {
-      const t = getCookie('ws_theme');
-      if (t === 'light' || t === 'dark')
-        document.documentElement.setAttribute('data-theme', t);
-    }
-    applyThemeFromCookie();
-    dumpCookies();
-  </script>
+    <h1>Webserv Session Demo</h1>
+    <p>
+        Another webiste. Impressive right?
+    </p>
+    <img src="assets/cute_cat.jpg" alt="Cute cat" style="width:500px;height:600px;">
 </body>
 </html>
