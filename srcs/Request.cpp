@@ -6,7 +6,7 @@
 /*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 23:01:25 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 10:10:09 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,8 +108,13 @@ void	Request::parseHeader(const ServerConfig &config)
 		this->_error = true;
 		return ;
 	}
-	this->_method = utils::strToMethod(method_str);
+	if (this->_request_target[0] != '/')
+	{
+		this->_error = true;
+		return ;
+	}
 	this->_parseRequestTarget();
+	this->_method = utils::strToMethod(method_str);
 	while (std::getline(stream, line))
 	{
 		line = utils::stringTrim(line, "\r\n \t");
@@ -144,10 +149,6 @@ void	Request::_parseRequestTarget()
 		this->_query_string = this->_request_target.substr(this->_request_target.find("?") + 1, this->_request_target.length());
 		this->_request_target.erase(this->_request_target.find("?"), this->_request_target.length());
 	}
-	if (utils::startsWith(this->_request_target, "http://"))
-		this->_request_target.erase(0, 8);
-	if (utils::startsWith(this->_request_target, "www"))
-		this->_request_target.erase(0, this->_request_target.find("/"));
 	return ;
 }
 
