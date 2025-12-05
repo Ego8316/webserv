@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigInterpreter.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:28 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 02:38:13 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/05 11:38:30 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -348,16 +348,16 @@ void	ConfigInterpreter::_parseReturn(Location &loc, const Directive &d)
 size_t	ConfigInterpreter::_parseSizeWithSuffix(const std::string &s, int line, int type)  const
 {
 	char	*endptr;
-	size_t	multiplier;
+	size_t	multiplier = 1;
 	size_t	base = std::strtoul(s.c_str(), &endptr, 10);
 
 	if (base == 0)
 		throw InvalidSizeError(line, s);
 	if (!*endptr)
-		return (base);
-	if (*(endptr + 1))
+		multiplier = 1;
+	else if (*(endptr + 1))
 		throw InvalidSizeSuffixError(line, s);
-	if (tolower(*endptr) == 'k' && type > 0)
+	else if (tolower(*endptr) == 'k' && type > 0)
 		multiplier = 1024;
 	else if (tolower(*endptr) == 'm' && type > 0)
 		multiplier = 1024 * 1024;

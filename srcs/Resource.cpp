@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 10:56:09 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 11:22:09 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,8 @@ void	Resource::build(const Request &request, const ServerConfig &config)
 			target = target.substr(this->_loc->path.size());
 		if (!this->_loc->upload_path.empty() && request.getMethod() == POST)
 			root = this->_loc->upload_path;
+		else if (this->_loc->upload_path.empty() && request.getMethod() == POST)
+			this->_status |= UPLOAD_FORBIDDEN;
 		if (this->_loc->cgi)
 			this->_status = static_cast<ResourceStatus>(this->_status & ~CGI_FORBIDDEN);
 	}
@@ -360,8 +362,10 @@ bool	Resource::isExecutable() const
  */
 bool	Resource::isForbidden() const
 {
-	return ((this->_status & EXISTS && !(this->_status & (PERM_ROK | PERM_WOK | PERM_XOK)))
-			|| ((this->_status & CGI_FORBIDDEN) && (this->_status & IS_CGI)));
+	bool	auth_ko		= (this->_status & EXISTS && !(this->_status & (PERM_ROK | PERM_WOK | PERM_XOK)));
+	bool	CGI_ko		= ((this->_status & CGI_FORBIDDEN) && (this->_status & IS_CGI));
+	bool	upload_ko	= (this->_status & UPLOAD_FORBIDDEN) && !(this->_status & IS_CGI);
+	return (auth_ko || CGI_ko || upload_ko);
 }
 
 /**

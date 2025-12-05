@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 10:58:59 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 11:54:45 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -358,7 +358,6 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 		case HTTP_OK:						return "OK";
 		case HTTP_CREATED:					return "Created";
 		case HTTP_NO_CONTENT:				return "No Content";
-		case HTTP_REDIRECT:					return "Multiple Choices";
 		case HTTP_REDIRECT_PERM:			return "Moved Permanently";
 		case HTTP_REDIRECT_TEMP:			return "Found";
 		case HTTP_BAD_REQUEST:				return "Bad Request";
@@ -393,7 +392,6 @@ HttpStatus	utils::strToHttpStatus(std::string status)
 		case 200:	return HTTP_OK;
 		case 201:	return HTTP_CREATED;
 		case 204:	return HTTP_NO_CONTENT;
-		case 300:	return HTTP_REDIRECT;
 		case 301:	return HTTP_REDIRECT_PERM;
 		case 302:	return HTTP_REDIRECT_TEMP;
 		case 400:	return HTTP_BAD_REQUEST;

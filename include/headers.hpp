@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 10:50:31 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 11:54:33 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,8 @@ enum	ResourceStatus
 	IS_REDIRECT			= 1 << 6,
 	ACCEPT_ERROR		= 1 << 7,
 	CGI_FORBIDDEN		= 1 << 8,
-	IS_HIDDEN			= 1 << 9
+	IS_HIDDEN			= 1 << 9,
+	UPLOAD_FORBIDDEN	= 1 << 10
 };
 
 enum ContentType
@@ -168,7 +169,6 @@ enum	HttpStatus
 	HTTP_OK = 200,
 	HTTP_CREATED = 201,
 	HTTP_NO_CONTENT = 204,
-	HTTP_REDIRECT = 300,
 	HTTP_REDIRECT_PERM = 301,
 	HTTP_REDIRECT_TEMP = 302,
 	HTTP_BAD_REQUEST = 400,
