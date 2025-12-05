@@ -68,7 +68,13 @@ def application():
     html_content = f"""
 <!DOCTYPE html>
 <html>
-<head><title>{title}</title></head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
 <body>
     <h1>{title}</h1>
     <p><strong>{message}</strong></p>
@@ -77,7 +83,7 @@ def application():
 </body>
 </html>
 """
-    body_bytes = html_content.encode('utf-8')
+    body_bytes = html_content #.encode('utf-8')
     content_length_header = f"Content-Length: {len(body_bytes)}"
     print(content_type_header, end="\r\n")
     print(set_cookie_header, end="\r\n")
