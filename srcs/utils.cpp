@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 00:24:34 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 01:56:12 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -365,6 +365,7 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 		case HTTP_FORBIDDEN:				return "Forbidden";
 		case HTTP_NOT_FOUND:				return "Not Found";
 		case HTTP_METHOD_NOT_ALLOWED:		return "Method Not Allowed";
+		case HTTP_NOT_ACCEPTABLE:			return "Not Acceptable";
 		case HTTP_TIMEOUT:					return "Request Timeout";
 		case HTTP_CONFLICT:					return "Conflict";
 		case HTTP_CONTENT_TOO_LARGE:		return "Content Too Large";
@@ -389,23 +390,24 @@ HttpStatus	utils::strToHttpStatus(std::string status)
 	int	code = std::atoi(status.c_str());
 	switch (code)
 	{
-		case 200: return HTTP_OK;
-		case 201: return HTTP_CREATED;
-		case 204: return HTTP_NO_CONTENT;
-		case 300: return HTTP_REDIRECT;
-		case 301: return HTTP_REDIRECT_PERM;
-		case 302: return HTTP_REDIRECT_TEMP;
-		case 400: return HTTP_BAD_REQUEST;
-		case 403: return HTTP_FORBIDDEN;
-		case 404: return HTTP_NOT_FOUND;
-		case 405: return HTTP_METHOD_NOT_ALLOWED;
-		case 408: return HTTP_TIMEOUT;
-		case 409: return HTTP_CONFLICT;
-		case 413: return HTTP_CONTENT_TOO_LARGE;
-		case 500: return HTTP_INTERNAL_SERVER_ERROR;
-		case 501: return HTTP_NOT_IMPLEMENTED;
-		case 505: return HTTP_VERSION_NOT_SUPPORTED;
-		default: break;
+		case 200:	return HTTP_OK;
+		case 201:	return HTTP_CREATED;
+		case 204:	return HTTP_NO_CONTENT;
+		case 300:	return HTTP_REDIRECT;
+		case 301:	return HTTP_REDIRECT_PERM;
+		case 302:	return HTTP_REDIRECT_TEMP;
+		case 400:	return HTTP_BAD_REQUEST;
+		case 403:	return HTTP_FORBIDDEN;
+		case 404:	return HTTP_NOT_FOUND;
+		case 405:	return HTTP_METHOD_NOT_ALLOWED;
+		case 406:	return HTTP_NOT_ACCEPTABLE;
+		case 408:	return HTTP_TIMEOUT;
+		case 409:	return HTTP_CONFLICT;
+		case 413:	return HTTP_CONTENT_TOO_LARGE;
+		case 500:	return HTTP_INTERNAL_SERVER_ERROR;
+		case 501:	return HTTP_NOT_IMPLEMENTED;
+		case 505:	return HTTP_VERSION_NOT_SUPPORTED;
+		default:	break;
 	}
 	return (HTTP_UNKNOWN_STATUS);
 }

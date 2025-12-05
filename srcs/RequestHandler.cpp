@@ -3,14 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 19:16:48 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 02:16:26 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "RequestHandler.hpp"
+
+static std::string	getAllow(const Location *loc)
+{
+	if (loc == NULL)
+		return ("GET");
+	std::string	methods;
+	if (loc->methods & GET)    methods += "GET, ";
+	if (loc->methods & POST)   methods += "POST, ";
+	if (loc->methods & DELETE) methods += "DELETE, ";
+	std::cout << methods << std::endl;
+	methods.erase(methods.size() - 2);
+	return (methods);
+}
 
 /**
  * @brief Default constructor (unused because all methods are static).
@@ -78,13 +91,16 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 	if (resource.isRedirect())
 		return (_handleRedirect(response, resource));
 	if (!resource.methodAllowed())
+	{
+		response->setHeaders("Allow", getAllow(resource.getLocation()));
 		return (_handleError(response, HTTP_METHOD_NOT_ALLOWED, config));
+	}
 	if (resource.isForbidden() || resource.isHidden())
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	if (!resource.exists() && request.getMethod() != POST)
 		return (_handleError(response, HTTP_NOT_FOUND, config));
 	if (resource.getStatus() & ACCEPT_ERROR)
-		return (_handleError(response, HTTP_BAD_REQUEST, config));
+		return (_handleError(response, HTTP_NOT_ACCEPTABLE, config));
 	if (resource.isCGI())
 		return (_handleCGI(response, config, resource));
 	switch (request.getMethod())
@@ -278,7 +294,6 @@ void	RequestHandler::_handleError(Response *response, HttpStatus code, const Ser
 
 	response->setStatus(code);
 	response->setContentType("text/html");
-
 	if (utils::mapHasEntry(config.error_pages, (int)code))
 	{
 		error_page_path = config.error_pages.at(code);

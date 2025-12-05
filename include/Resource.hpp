@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 19:16:54 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 02:07:22 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ class	Resource
 		bool				methodAllowed() const;
 		bool				autoindex() const;
 		HttpStatus			getRedirectCode() const;
+		const Location		*getLocation() const;
 
 		bool	exists() const;
 		bool	isCGI() const;
@@ -64,6 +65,7 @@ class	Resource
 		bool			_method_allowed;
 		bool			_autoindex;
 		std::string		_index;
+		const Location	*_loc;
 		
 		bool	_checkHidden(const std::string &requestTarget);
 		bool	_checkRedirect(const Location *loc);
