@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 02:38:28 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/05 02:43:10 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,24 +90,24 @@ void	Resource::build(const Request &request, const ServerConfig &config)
 
 	if (_checkHidden(request.getRequestTarget()))
 		return ;
-	const Location	*loc = config.matchLocation(request.getRequestTarget());
+	this->_loc = config.matchLocation(request.getRequestTarget());
 	std::string		root = config.root;
 	std::string		target = request.getRequestTarget();
 
-	if (loc)
+	if (this->_loc)
 	{
-		_method_allowed = (loc->methods & request.getMethod());
-		_autoindex = loc->autoindex;
-		_index = loc->index;
-		if (_checkRedirect(loc))
+		_method_allowed = (this->_loc->methods & request.getMethod());
+		_autoindex = this->_loc->autoindex;
+		_index = this->_loc->index;
+		if (_checkRedirect(this->_loc))
 			return ;
-		if (!loc->root.empty())
-			root = loc->root;
-		if (target.compare(0, loc->path.size(), loc->path) == 0)
-			target = target.substr(loc->path.size());
-		if (!loc->upload_path.empty() && request.getMethod() == POST)
-			root = loc->upload_path;
-		if (loc->cgi)
+		if (!this->_loc->root.empty())
+			root = this->_loc->root;
+		if (target.compare(0, this->_loc->path.size(), this->_loc->path) == 0)
+			target = target.substr(this->_loc->path.size());
+		if (!this->_loc->upload_path.empty() && request.getMethod() == POST)
+			root = this->_loc->upload_path;
+		if (this->_loc->cgi)
 			this->_status = static_cast<ResourceStatus>(this->_status & ~CGI_FORBIDDEN);
 	}
 	if (target.empty() || target[0] != '/')
@@ -277,6 +277,11 @@ HttpStatus	Resource::getRedirectCode() const
 	return (this->_redir_code);
 }
 
+const Location	*Resource::getLocation() const
+{
+	return (this->_loc);
+}
+
 /**
  * @brief Returns the status.
  *
@@ -384,8 +389,12 @@ bool	Resource::isExecutable() const
  */
 bool	Resource::isForbidden() const
 {
+	std::cout << "adssasdda" << std::endl;
+	std::cout << static_cast<int>(this->_status & CGI_FORBIDDEN) << std::endl;
+	std::cout << static_cast<int>(this->_status & IS_CGI) << std::endl;
+	std::cout << "adsasdads" << std::endl;
 	return ((this->_status & EXISTS && !(this->_status & (PERM_ROK | PERM_WOK | PERM_XOK)))
-			|| (this->_status & (CGI_FORBIDDEN & IS_CGI)));
+			|| ((this->_status & CGI_FORBIDDEN) && (this->_status & IS_CGI)));
 }
 
 /**

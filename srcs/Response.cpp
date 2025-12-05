@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 23:24:05 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 01:53:28 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -290,7 +290,10 @@ std::string	Response::getDefaultErrorPage(HttpStatus code)
 		case HTTP_FORBIDDEN:				return ERROR_PAGE_403;
 		case HTTP_NOT_FOUND:				return ERROR_PAGE_404;
 		case HTTP_METHOD_NOT_ALLOWED:		return ERROR_PAGE_405;
+		case HTTP_NOT_ACCEPTABLE:			return ERROR_PAGE_406;
 		case HTTP_TIMEOUT:					return ERROR_PAGE_408;
+		case HTTP_CONFLICT:					return ERROR_PAGE_409;
+		case HTTP_CONTENT_TOO_LARGE:		return ERROR_PAGE_413;
 		case HTTP_INTERNAL_SERVER_ERROR:	return ERROR_PAGE_500;
 		case HTTP_NOT_IMPLEMENTED:			return ERROR_PAGE_501;
 		case HTTP_VERSION_NOT_SUPPORTED:	return ERROR_PAGE_505;

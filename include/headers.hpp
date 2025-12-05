@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 00:24:13 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 02:22:06 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,11 @@
 #define ERROR_PAGE_405	"<html><head><title>405 Method Not Allowed</title></head>" \
 						"<body><h1>405 Method Not Allowed</h1>" \
 						"<p>The requested method is not allowed for the requested URL.</p></body></html>"
+
+#define ERROR_PAGE_406	"<html><head><title>406 Not Acceptable</title></head>" \
+						"<body><h1>406 Not Acceptable</h1>" \
+						"<p>The requested resource is capable of generating only content not acceptable " \
+						"according to the Accept headers sent in the request.</p></body></html>"
 
 #define ERROR_PAGE_408	"<html><head><title>408 Request Time Out</title></head>" \
 						"<body><h1>408 Request Time Out</h1>" \
@@ -174,6 +179,7 @@ enum	HttpStatus
 	HTTP_FORBIDDEN = 403,
 	HTTP_NOT_FOUND = 404,
 	HTTP_METHOD_NOT_ALLOWED = 405,
+	HTTP_NOT_ACCEPTABLE = 406,
 	HTTP_TIMEOUT = 408,
 	HTTP_CONFLICT = 409,
 	HTTP_CONTENT_TOO_LARGE = 413,
