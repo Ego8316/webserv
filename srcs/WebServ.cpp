@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 19:37:17 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 11:00:15 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,7 +240,7 @@ int	WebServ::removeClient(size_t indx)
 void	WebServ::sendTimeOut(Client *client)
 {
 	std::cout << RED << "Client " << this->_processing_queue.front()->getId() << " timed out" << RESET << std::endl;
-	RequestHandler::_handleError(client->getResponse(), HTTP_TIMEOUT, *this->_config);
+	RequestHandler::handleError(client->getResponse(), HTTP_TIMEOUT, *this->_config);
 	client->setState(SENDING_STRING);
 	if (client->handleEvent() == ERR_NONE)
 		std::cout << ORANGE << "TimeOut successfully sent to Client " << client->getId() << RESET << std::endl; 

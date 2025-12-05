@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 17:16:57 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 10:58:04 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,39 +30,6 @@ ServerCore::ServerCore(const ServerConfig *config)
 		_poll_fds[i].revents = 0;
 	}
 	return ;
-}
-
-/**
- * @brief Copy constructor.
- *
- * @param other Source core.
- */
-ServerCore::ServerCore(const ServerCore &other)
-{
-	_config = other._config;
-	_server_fd = other._server_fd;
-	_server_addr = other._server_addr;
-	_poll_fds = other._poll_fds;
-	return ;
-}
-
-/**
- * @brief Assignment operator.
- *
- * @param other Source core.
- *
- * @return Reference to this core.
- */
-ServerCore	&ServerCore::operator=(const ServerCore &other)
-{
-	if (this != &other)
-	{
-		_config = other._config;
-		_server_fd = other._server_fd;
-		_server_addr = other._server_addr;
-		_poll_fds = other._poll_fds;
-	}
-	return (*this);
 }
 
 /**

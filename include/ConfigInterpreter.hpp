@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:06 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 23:40:00 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 10:44:18 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ class	ConfigInterpreter
 {
 	public:
 		ConfigInterpreter(const std::vector<Block> &blocks);
-
 		std::vector<ServerConfig>	interpret();
 	private:
 		const std::vector<Block>	&_blocks;

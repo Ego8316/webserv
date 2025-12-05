@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 02:37:58 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/05 10:52:55 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,37 +14,6 @@
 #include "headers.hpp"
 
 extern int	g_shutdown;
-
-/**
- * @brief Default constructor initializing CGI state.
- */
-CGI::CGI()
-{
-	this->_cgi_script = "";
-	this->_is_init = false;
-	this->_is_complete = false;
-	this->_status = HTTP_OK;
-	this->_output = "";
-	this->_header_len = 0;
-	this->_content_len = 0;
-	this->_client_id = -1;
-	this->_pid = 0;
-	this->_process_status[0] = 0;
-	this->_process_status[1] = 0;
-	this->_pipe_to_CGI[0] = 0;
-	this->_pipe_to_CGI[1] = 0;
-	this->_pipe_from_CGI[0] = 0;
-	this->_pipe_from_CGI[1] = 0;
- 	this->_total_bytes_sent = 0;
-	this->_bytes_to_send = 0;
-	this->_total_bytes_read = 0;
-	this->_chunked = false;
-	this->_cgi_script_char = NULL;
-	this->_args = NULL;
-	this->_env = NULL;
-	this->_pipe_to_cgi_idx = -1;
-	this->_pipe_from_cgi_idx = -1;
-}
 
 CGI::CGI(const std::string &cgi_script)
 {
@@ -72,50 +41,6 @@ CGI::CGI(const std::string &cgi_script)
 	this->_env = NULL;
 	this->_pipe_to_cgi_idx = -1;
 	this->_pipe_from_cgi_idx = -1;
-}
-
-/**
- * @brief Copy constructor.
- *
- * @param other Source CGI.
- */
-CGI::CGI(const CGI &other)
-{
-	*this = other;
-}
-
-/**
- * @brief Assignment operator.
- *
- * @param other Source CGI.
- *
- * @return Reference to this CGI.
- */
-CGI &CGI::operator=(const CGI &other)
-{
-	if (this != &other)
-	{
-		this->_is_init = other._is_complete;
-		this->_is_complete = other._is_complete;
-		this->_status = other._status;
-		this->_output = other._output;
-		this->_header_len = other._header_len;
-		this->_content_len = other._content_len;
-		this->_pid = other._pid;
-		this->_process_status[0] = other._process_status[0];
-		this->_process_status[1] = other._process_status[1];
-		this->_pipe_to_CGI[0] = other._pipe_to_CGI[0];
-		this->_pipe_to_CGI[1] = other._pipe_to_CGI[1];
-		this->_pipe_from_CGI[0] = other._pipe_from_CGI[0];
-		this->_pipe_from_CGI[1] = other._pipe_from_CGI[1];
-		this->_total_bytes_sent = other._total_bytes_sent;
-		this->_bytes_to_send = other._bytes_to_send;
-		this->_chunked = other._chunked;
-		this->_cgi_script_char = NULL;
-		this->_args = NULL;
-		this->_env = NULL;
-	}
-	return (*this);
 }
 
 /**
@@ -186,7 +111,7 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 		if (!ServerCore::setNonBlocking(this->_pipe_to_CGI[PIPE_WRITE_END])
 			|| !ServerCore::setNonBlocking(this->_pipe_from_CGI[PIPE_READ_END]))
 		{	
-			RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
+			RequestHandler::handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 			this->_is_complete = true;
 			close(this->_pipe_to_CGI[PIPE_WRITE_END]);
 			close(this->_pipe_from_CGI[PIPE_READ_END]);
@@ -231,7 +156,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		|| (this->_process_status[0] != 0 && this->_process_status[0] != this->_pid))
 	{
 		this->_is_complete = true;
-		RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
+		RequestHandler::handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 		return ;
 	}
 	if (this->_process_status[0] != 0 && checkOutputTermination(bytes_read))
@@ -354,7 +279,7 @@ void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 	if ((WIFEXITED(this->_process_status[1]) && WEXITSTATUS(this->_process_status[1]))
 		|| !WIFEXITED(this->_process_status[1]))
 	{
-		RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
+		RequestHandler::handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 		std::cout << "Error : Child process returned " << this->_process_status[1] << std::endl;
 		return ;
 	}
@@ -365,10 +290,10 @@ void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 		return ;
 	}
 	if (this->_status >= HTTP_BAD_REQUEST)
-		return (RequestHandler::_handleError(&response, this->_status, config));
+		return (RequestHandler::handleError(&response, this->_status, config));
 	response.setStatus(this->_status);
 	if (!this->_header_len && !this->_chunked)
-		return (RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config));
+		return (RequestHandler::handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config));
 	if (!this->_content_len && !this->_chunked && this->_output.length() - this->_output.find("\r\n\r\n") - 4 > 0)
 		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n") - 4);
 	response.setBody(this->_output);

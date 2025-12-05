@@ -28,8 +28,6 @@ class	ServerCore
 {
 	public:
 		ServerCore(const ServerConfig *config);
-		ServerCore(const ServerCore &other);
-		ServerCore	&operator=(const ServerCore &other);
 		~ServerCore();
 
 		int							getFd() const;

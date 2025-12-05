@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 03:42:57 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 10:56:09 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,40 +29,6 @@ Resource::Resource()
 		_loc(NULL)
 {
 	return ;
-}
-
-/**
- * @brief Copy constructor.
- *
- * @param other The Resource object to copy.
- */
-Resource::Resource(const Resource &other)
-{
-	*this = other;
-	return ;
-}
-
-/**
- * @brief Assignment operator.
- *
- * @param other The Resource object to assign from.
- *
- * @return Reference to this Resource object.
- */
-Resource	&Resource::operator=(const Resource &other)
-{
-	if (this != &other)
-	{
-		_path = other._path;
-		_status = other._status;
-		_size = other._size;
-		_type = other._type;
-		_redir_code = other._redir_code;
-		_method_allowed = other._method_allowed;
-		_autoindex = other._autoindex;
-		_index = other._index;
-	}
-	return (*this);
 }
 
 /**

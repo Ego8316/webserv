@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cookie.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:09 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 16:04:19 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 10:49:15 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,33 +30,6 @@ Cookie::Cookie(std::string header)
 {
 	this->updateCookie(header);
 	return ;
-}
-
-/**
- * @brief Copy constructor.
- *
- * @param other Source cookie.
- */
-Cookie::Cookie(const Cookie &other)
-{
-	*this = other;
-}
-
-/**
- * @brief Assignment operator.
- *
- * @param other Source cookie.
- *
- * @return Reference to this cookie.
- */
-Cookie &Cookie::operator=(const Cookie &other)
-{
-	if (this != &other)
-	{
-		this->_path = other._path;
-		this->_attributes = other._attributes;
-	}
-	return (*this);
 }
 
 /**

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 03:28:04 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 10:55:25 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,30 +33,6 @@ RequestHandler::RequestHandler(void)
 }
 
 /**
- * @brief Copy constructor (unused).
- *
- * @param other Source handler.
- */
-RequestHandler::RequestHandler(const RequestHandler &other)
-{
-	(void)other;
-	return ;
-}
-
-/**
- * @brief Assignment operator (unused).
- *
- * @param other Source handler.
- *
- * @return Reference to this handler.
- */
-RequestHandler	&RequestHandler::operator=(const RequestHandler &other)
-{
-	(void)other;
-	return (*this);
-}
-
-/**
  * @brief Destructor.
  */
 RequestHandler::~RequestHandler(void)
@@ -76,13 +52,13 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 	if (request.getError())
 	{
 		if (request.getContentLength() > config.client_max_body_size)
-			return (_handleError(response, HTTP_CONTENT_TOO_LARGE, config));
-		return (_handleError(response, HTTP_BAD_REQUEST, config));
+			return (handleError(response, HTTP_CONTENT_TOO_LARGE, config));
+		return (handleError(response, HTTP_BAD_REQUEST, config));
 	}
 	if (request.getMethod() == UNKNOWN)
-		return (_handleError(response, HTTP_NOT_IMPLEMENTED, config));
+		return (handleError(response, HTTP_NOT_IMPLEMENTED, config));
 	if (request.getVersion() != "HTTP/1.1" && request.getVersion() != "HTTP/1.0")
-		return (_handleError(response, HTTP_VERSION_NOT_SUPPORTED, config));
+		return (handleError(response, HTTP_VERSION_NOT_SUPPORTED, config));
 
 	Resource	resource;
 	resource.build(request, config);
@@ -92,14 +68,14 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 	if (!resource.methodAllowed())
 	{
 		response->setHeaders("Allow", getAllow(resource.getLocation()));
-		return (_handleError(response, HTTP_METHOD_NOT_ALLOWED, config));
+		return (handleError(response, HTTP_METHOD_NOT_ALLOWED, config));
 	}
 	if (resource.isForbidden() || resource.isHidden())
-		return (_handleError(response, HTTP_FORBIDDEN, config));
+		return (handleError(response, HTTP_FORBIDDEN, config));
 	if (!resource.exists() && request.getMethod() != POST)
-		return (_handleError(response, HTTP_NOT_FOUND, config));
+		return (handleError(response, HTTP_NOT_FOUND, config));
 	if (resource.getStatus() & ACCEPT_ERROR)
-		return (_handleError(response, HTTP_NOT_ACCEPTABLE, config));
+		return (handleError(response, HTTP_NOT_ACCEPTABLE, config));
 	if (resource.isCGI())
 		return (_handleCGI(response, config, resource));
 	switch (request.getMethod())
@@ -107,7 +83,7 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 		case GET:		return _handleGet(response, config, resource);
 		case POST:		return _handlePost(response, request, config, resource);
 		case DELETE:	return _handleDelete(response, config, resource);
-		default:		return _handleError(response, HTTP_NOT_IMPLEMENTED, config);
+		default:		return handleError(response, HTTP_NOT_IMPLEMENTED, config);
 	}
 }
 
@@ -124,13 +100,13 @@ void	RequestHandler::_handleGet(Response *response, const ServerConfig &config, 
 	ssize_t		size;
 
 	if (!resource.isReadable())
-		return (_handleError(response, HTTP_FORBIDDEN, config));
+		return (handleError(response, HTTP_FORBIDDEN, config));
 
 	if (resource.isDirectory())
 	{
 		if (resource.autoindex())
 			return (_handleListDir(response, config, resource));
-		return (_handleError(response, HTTP_FORBIDDEN, config));
+		return (handleError(response, HTTP_FORBIDDEN, config));
 	}
 
 	if ((fd = open(resource.getPath().c_str(), O_RDONLY)) == -1)
@@ -159,7 +135,7 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 	bool			existed;
 
 	if (resource.isDirectory())
-		return (_handleError(response, HTTP_CONFLICT, config));
+		return (handleError(response, HTTP_CONFLICT, config));
 	std::ifstream	check(resource.getPath().c_str());
 	existed = check.good();
 	check.close();
@@ -196,7 +172,7 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 void	RequestHandler::_handleDelete(Response *response, const ServerConfig &config, const Resource &resource)
 {
 	if (resource.isDirectory() && !utils::endsWith(resource.getPath(), "/"))
-		return (_handleError(response, HTTP_CONFLICT, config));
+		return (handleError(response, HTTP_CONFLICT, config));
 	if (std::remove(resource.getPath().c_str()) != 0)
 		return (_handleErrno(response, config));
 	response->setStatus(HTTP_NO_CONTENT);
@@ -216,7 +192,7 @@ void	RequestHandler::_handleDelete(Response *response, const ServerConfig &confi
 void	RequestHandler::_handleCGI(Response *response, const ServerConfig &config, const Resource &resource)
 {
 	if (!resource.isExecutable() || resource.isDirectory())
-		return (_handleError(response, HTTP_FORBIDDEN, config));
+		return (handleError(response, HTTP_FORBIDDEN, config));
 	if (response->getCGI() == NULL)
 		response->setCGI(new CGI(resource.getPath()));
 }
@@ -277,7 +253,7 @@ void	RequestHandler::_handleListDir(Response *response, const ServerConfig &conf
  * @param code HTTP status code to send.
  * @param config Server configuration for custom pages.
  */
-void	RequestHandler::_handleError(Response *response, HttpStatus code, const ServerConfig &config)
+void	RequestHandler::handleError(Response *response, HttpStatus code, const ServerConfig &config)
 {
 	std::string	error_page_path;
 	int			fd;
@@ -308,10 +284,10 @@ void	RequestHandler::_handleError(Response *response, HttpStatus code, const Ser
 void	RequestHandler::_handleErrno(Response *response, const ServerConfig &config)
 {
 	if (errno == EACCES || errno == EPERM)
-		return (_handleError(response, HTTP_FORBIDDEN, config));
+		return (handleError(response, HTTP_FORBIDDEN, config));
 	if (errno == ENOENT)
-		return (_handleError(response, HTTP_NOT_FOUND, config));
+		return (handleError(response, HTTP_NOT_FOUND, config));
 	if (errno == ENOTEMPTY)
-		return (_handleError(response, HTTP_CONFLICT, config));
-	return (_handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
+		return (handleError(response, HTTP_CONFLICT, config));
+	return (handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
 }

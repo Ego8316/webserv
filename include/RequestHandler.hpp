@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:22:55 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 02:52:36 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 10:53:32 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,12 +35,10 @@ class	RequestHandler
 {
 	public:
 		static void	handle(Response *response, const Request &request, const ServerConfig &config);
-		static void	_handleError(Response *response, HttpStatus code, const ServerConfig &config);
+		static void	handleError(Response *response, HttpStatus code, const ServerConfig &config);
 
 	private:
 		RequestHandler();
-		RequestHandler(const RequestHandler &other);
-		RequestHandler &operator=(const RequestHandler &other);
 		~RequestHandler();
 
 		static void	_handleGet(Response *response, const ServerConfig &config, const Resource &resource);

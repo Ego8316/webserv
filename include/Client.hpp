@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:17 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 13:58:24 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 10:43:02 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,6 @@ class Client
 {
 	public:
 		Client(const ServerConfig *config, ServerCore *server);
-		Client(const Client &other);
-		Client	&operator=(const Client &other);
 		~Client();
 
 		int						handleEvent();

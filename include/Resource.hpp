@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 03:08:59 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 10:55:42 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,6 @@ class	Resource
 {
 	public:
 		Resource();
-		Resource(const Resource &other);
-		Resource	&operator=(const Resource &other);
 		~Resource();
 
 		void				build(const Request &request, const ServerConfig &config);

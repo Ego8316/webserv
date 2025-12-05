@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cookie.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 16:21:03 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 15:51:03 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 10:48:54 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,6 @@ class Cookie
 	public:
 		Cookie();
 		Cookie(std::string header);
-		Cookie(const Cookie &other);
-		Cookie &operator=(const Cookie &other);
 		~Cookie();
 
 		std::map<std::string, std::string>	const	&getAllAttributes() const;

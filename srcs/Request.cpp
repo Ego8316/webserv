@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 10:10:09 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 10:52:27 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,51 +33,15 @@ Request::Request()
 }
 
 /**
- * @brief Copy constructor.
- *
- * @param other Source request.
- */
-Request::Request(const Request &other)
-{
-	*this = other;
-	return ;
-}
-
-/**
- * @brief Assignment operator.
- *
- * @param other Source request.
- *
- * @return Reference to this request.
- */
-Request &Request::operator=(const Request &other)
-{
-	if (this != &other)
-	{
-		this->_raw_header = other._raw_header;
-		this->_raw_body = other._raw_body;
-		this->_method = other._method;
-		this->_request_target = other._request_target;
-		this->_query_string = other._query_string;
-		this->_version = other._version;
-		this->_content_length = other._content_length;
-		this->_chunked = other._chunked;
-		this->_headers = other._headers;
-		this->_error = other._error;
-		this->_accept = other._accept;
-		if (this->_query_cookies)
-			delete this->_query_cookies;
-		this->_query_cookies = new Cookie(*other._query_cookies);
-	}
-	return (*this);
-}
-
-/**
  * @brief Destructor. Frees any allocated cookies.
  */
 Request::~Request()
 {
-	delete this->_query_cookies;
+	if (this->_query_cookies)
+	{
+		delete this->_query_cookies;
+		this->_query_cookies = NULL;
+	}
 	return ;
 }
 

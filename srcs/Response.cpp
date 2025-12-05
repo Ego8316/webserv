@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 01:53:28 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 10:57:11 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,42 +27,6 @@ Response::Response()
 	this->_skip_header = false;
 	this->_body_fd = -1;
 	return ;
-}
-
-/**
- * @brief Copy constructor.
- *
- * @param other The Response object to copy.
- */
-Response::Response(const Response &other)
-{
-	*this = other;
-	return ;
-}
-
-/**
- * @brief Assignment operator.
- *
- * @param other The Response object to assign from.
- *
- * @return Reference to this Response object.
- */
-Response	&Response::operator=(const Response &other)
-{
-	if (this != &other)
-	{
-		this->_status_code = other._status_code;
-		this->_header = other._header;
-		this->_body = other._body;
-		this->_string = other._string;
-		this->_headers = other._headers;
-		if (this->_cgi)
-			delete this->_cgi;
-		this->_cgi = other._cgi ? new CGI(*other._cgi) : NULL;
-		this->_is_cgi = other._is_cgi;
-		this->_body_fd = other._body_fd;
-	}
-	return (*this);
 }
 
 /**

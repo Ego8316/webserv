@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 03:39:46 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 10:43:37 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,49 +38,6 @@ Client::Client(const ServerConfig *config, ServerCore *server)
 	this->_request = NULL;
 	this->_response = NULL;
 	this->_time_limit = utils::getTime() + config->timeout;
-}
-
-/**
- * @brief Copy constructor.
- *
- * @param other Source client.
- */
-Client::Client(const Client &other)
-{
-	*this = other;
-}
-
-/**
- * @brief Assignment operator.
- *
- * @param other Source client.
- *
- * @return Reference to this client.
- */
-Client	&Client::operator=(const Client &other)
-{
-	if (this != &other)
-	{
-		this->_config = other._config;
-		this->_server = other._server;
-		this->_client_fd = other._client_fd;
-		this->_client_addr = other._client_addr;
-		this->_client_len = other._client_len;
-		this->_client_id = other._client_id;
-		this->_state = other._state;
-		this->_error = other._error;
-		this->_leftover = other._leftover;
-		this->_bytes_sent = other._bytes_sent;
-		this->_bytes_in_buffer = other._bytes_in_buffer;
-		this->_keep_alive = other._keep_alive;
-		if (this->_request)
-			delete this->_request;
-		this->_request = other._request ? new Request(*other._request) : NULL;
-		if (this->_response)
-			delete this->_response;
-		this->_response = other._response ? new Response(*other._response) : NULL;
-	}
-	return (*this);
 }
 
 /**

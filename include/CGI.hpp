@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/02 20:25:22 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 10:42:16 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,16 +35,8 @@ class	ServerCore;
 class CGI
 {
 	public :
-	// CONSTRUCTORS
-		CGI();
 		CGI(const std::string &cgi_script);
-		CGI(const CGI &other);
-		CGI &operator=(const CGI &other);
-	//DESTUCTORS
 		~CGI();
-	//GETTERS
-	//SETTERS
-	//MEMBER FUNCTIONS
 		void		Run(Client &client, Request &request, const ServerConfig &config, Response &response, ServerCore &server);
 		
 		void		Nanny(Client &client, Request &request, const ServerConfig &config, Response &response, ServerCore &server);
