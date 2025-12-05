@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 01:36:17 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 16:45:10 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 10:33:42 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ const Location	*ServerConfig::matchLocation(const std::string &path) const
 	for (std::map<std::string, Location>::const_iterator it = locations.begin();
 			it != locations.end(); ++it)
 	{
-		const std::string &prefix = it->first;
+		const std::string	&prefix = it->first;
 
 		if (prefix == "/" && best == NULL)
 		{
