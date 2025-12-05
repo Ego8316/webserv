@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 02:16:26 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 02:53:06 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ static std::string	getAllow(const Location *loc)
 	if (loc->methods & GET)    methods += "GET, ";
 	if (loc->methods & POST)   methods += "POST, ";
 	if (loc->methods & DELETE) methods += "DELETE, ";
-	std::cout << methods << std::endl;
 	methods.erase(methods.size() - 2);
 	return (methods);
 }
@@ -135,11 +134,11 @@ void	RequestHandler::_handleGet(Response *response, const ServerConfig &config, 
 			return (_handleListDir(response, config, resource));
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	}
-	
+
 	if ((fd = open(resource.getPath().c_str(), O_RDONLY)) == -1)
-		return (_handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
+		return (_handleErrno(response, config));
 	if ((size = utils::getFileSize(resource.getPath())) == -1)
-		return (close(fd), _handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
+		return (_handleErrno(response, config));
 	
 	response->setStatus(HTTP_OK);
 	response->setFd(fd);
@@ -169,7 +168,7 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 
 	outfile.open(resource.getPath().c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
 	if (!outfile.is_open())
-		return (_handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
+		return (_handleErrno(response, config));
 	if (!request.getRawBody().empty())
 		outfile << request.getRawBody();
 	outfile.close();
@@ -198,13 +197,7 @@ void	RequestHandler::_handleDelete(Response *response, const ServerConfig &confi
 	if (resource.isDirectory() && !utils::endsWith(resource.getPath(), "/"))
 		return (_handleError(response, HTTP_CONFLICT, config));
 	if (std::remove(resource.getPath().c_str()) != 0)
-	{
-		if (errno == EACCES || errno == EPERM)
-			return (_handleError(response, HTTP_FORBIDDEN, config));
-		if (errno == ENOENT)
-			return (_handleError(response, HTTP_NOT_FOUND, config));
-		return (_handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
-	}
+		return (_handleErrno(response, config));
 	response->setStatus(HTTP_NO_CONTENT);
 	response->setBody("");
 	response->setContentLength(0);
@@ -259,10 +252,7 @@ void	RequestHandler::_handleListDir(Response *response, const ServerConfig &conf
 	
 	dir = opendir(resource.getPath().c_str());
 	if (dir == NULL)
-	{
-		std::cerr << "Cannot open directory\n" << std::endl;
-		return (_handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
-	}
+		return (_handleErrno(response, config));
 	response_body = LISTDIR_HEADER;
 	dir_ent = readdir(dir);
 	while (dir_ent != NULL)
@@ -312,4 +302,13 @@ void	RequestHandler::_handleError(Response *response, HttpStatus code, const Ser
 	response->setBody(Response::getDefaultErrorPage(code));
 	response->setContentLength(response->getBody().size());
 	response->build();
+}
+
+void	RequestHandler::_handleErrno(Response *response, const ServerConfig &config)
+{
+	if (errno == EACCES || errno == EPERM)
+		return (_handleError(response, HTTP_FORBIDDEN, config));
+	if (errno == ENOENT)
+		return (_handleError(response, HTTP_NOT_FOUND, config));
+	return (_handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
 }
