@@ -80,9 +80,6 @@ def application():
     </html>
     """
     
-    #content_length = len(html_content_template.encode('utf-8'))
-    #content_length = content_length - len(content_length_display_placeholder) + len(str(content_length))
-    #content_length_header = f"Content-Length: {content_length}"
     content_length = len(html_content_template.encode('utf-8'))
     content_length += (content_length > 9998) + (content_length > 99998) + (content_length > 999998) + (content_length > 9999998)
     content_length_header = f"Content-Length: {content_length}"
