@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 02:53:06 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 02:55:49 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,7 +286,7 @@ void	RequestHandler::_handleError(Response *response, HttpStatus code, const Ser
 	response->setContentType("text/html");
 	if (utils::mapHasEntry(config.error_pages, (int)code))
 	{
-		error_page_path = config.error_pages.at(code);
+		error_page_path = config.root + config.error_pages.at(code);
 		if ((fd = open(error_page_path.c_str(), O_RDONLY)) >= 0)
 		{
 			if ((size = utils::getFileSize(error_page_path)) != -1)
