@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 03:17:57 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 03:42:57 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -394,10 +394,6 @@ bool	Resource::isExecutable() const
  */
 bool	Resource::isForbidden() const
 {
-	std::cout << "adssasdda" << std::endl;
-	std::cout << static_cast<int>(this->_status & CGI_FORBIDDEN) << std::endl;
-	std::cout << static_cast<int>(this->_status & IS_CGI) << std::endl;
-	std::cout << "adsasdads" << std::endl;
 	return ((this->_status & EXISTS && !(this->_status & (PERM_ROK | PERM_WOK | PERM_XOK)))
 			|| ((this->_status & CGI_FORBIDDEN) && (this->_status & IS_CGI)));
 }
