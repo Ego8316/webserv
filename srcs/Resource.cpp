@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 02:43:10 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/05 03:17:57 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,15 @@
  */
 Resource::Resource()
 	:	_path(""),
-		_status(EXISTS),
+		_status(CGI_FORBIDDEN),
 		_size(0),
 		_type(FTYPE_ANY),
 		_redir_code(HTTP_UNKNOWN_STATUS),
 		_method_allowed(true),
 		_autoindex(false),
-		_index("")
+		_index(""),
+		_was_dir(false),
+		_loc(NULL)
 {
 	return ;
 }
@@ -79,14 +81,10 @@ Resource::~Resource()
  */
 void	Resource::build(const Request &request, const ServerConfig &config)
 {
-	this->_status = CGI_FORBIDDEN;
-	this->_type = FTYPE_ANY;
-	this->_redir_code = HTTP_UNKNOWN_STATUS;
 	this->_method_allowed = (request.getMethod() & GET);
 	this->_autoindex = config.autoindex;
 	this->_index = config.index;
 	this->_path.clear();
-	this->_size = 0;
 
 	if (_checkHidden(request.getRequestTarget()))
 		return ;
@@ -114,6 +112,13 @@ void	Resource::build(const Request &request, const ServerConfig &config)
 		target.insert(0, "/");
 	if (_resolvePath(target, root, _index) == SERV_ERROR)
 		return ;
+	if (!utils::endsWith(request.getRequestTarget(), "/") && this->_was_dir)
+	{
+		this->_status = IS_REDIRECT;
+		this->_path = request.getRequestTarget() + "/";
+		this->_redir_code = HTTP_REDIRECT_PERM;
+		return ;
+	}
 	this->_evaluatePermissions();
 	this->_detectType();
 	this->_checkAccept(request);
@@ -196,7 +201,6 @@ int	Resource::_resolvePath(const std::string &requestTarget, const std::string &
 	{
 		if (errno == EACCES)
 			this->_status |= EXISTS;
-		std::cerr << "Cannot find ressource " << this->_path << std::endl;
 		return (SERV_ERROR);
 	}
 	this->_status |= EXISTS;
@@ -204,6 +208,7 @@ int	Resource::_resolvePath(const std::string &requestTarget, const std::string &
 		this->_size = static_cast<size_t>(file_stat.st_size);
 	if (S_ISDIR(file_stat.st_mode))
 	{
+		this->_was_dir = true;
 		std::string base = this->_path;
 		if (!utils::endsWith(base, "/"))
 			base += "/";

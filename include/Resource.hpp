@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:57:27 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 02:07:22 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 03:08:59 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ class	Resource
 		bool			_method_allowed;
 		bool			_autoindex;
 		std::string		_index;
+		bool			_was_dir;
 		const Location	*_loc;
 		
 		bool	_checkHidden(const std::string &requestTarget);

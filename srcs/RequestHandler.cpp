@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 02:55:49 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 03:28:04 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,8 +128,6 @@ void	RequestHandler::_handleGet(Response *response, const ServerConfig &config, 
 
 	if (resource.isDirectory())
 	{
-		if (!utils::endsWith(resource.getPath(), "/"))
-			return (_handleError(response, HTTP_REDIRECT_PERM, config));
 		if (resource.autoindex())
 			return (_handleListDir(response, config, resource));
 		return (_handleError(response, HTTP_FORBIDDEN, config));
@@ -173,14 +171,17 @@ void	RequestHandler::_handlePost(Response *response, const Request &request, con
 		outfile << request.getRawBody();
 	outfile.close();
 	if (existed)
+	{
 		response->setStatus(HTTP_NO_CONTENT);
+		response->setBody("");
+	}
 	else
 	{
 		response->setStatus(HTTP_CREATED);
+		response->setBody(POST_PAGE);
+		response->setContentType("text/html");
 		response->setHeaders("Location", resource.getPath());
 	}
-	response->setBody(POST_PAGE);
-	response->setContentType("text/html");
 	response->setContentLength(response->getBody().size());
 	response->build();
 }
@@ -310,5 +311,7 @@ void	RequestHandler::_handleErrno(Response *response, const ServerConfig &config
 		return (_handleError(response, HTTP_FORBIDDEN, config));
 	if (errno == ENOENT)
 		return (_handleError(response, HTTP_NOT_FOUND, config));
+	if (errno == ENOTEMPTY)
+		return (_handleError(response, HTTP_CONFLICT, config));
 	return (_handleError(response, HTTP_INTERNAL_SERVER_ERROR, config));
 }

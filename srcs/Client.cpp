@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 21:56:42 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 03:38:53 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -333,8 +333,6 @@ int	Client::_readHeader()
 	}
 	utils::logMsg("INFO", GREEN, "[_readHeader] Read " + utils::toString(bytes_read) + " bytes", this->_client_id);
 	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
-	if (header_str.size() > this->_config->client_header_buffer_size)
-		return (this->_state = ABORTING, SERV_ERROR);
 	if ((pos = header_str.find("\r\n\r\n")) == std::string::npos)
 	{
 		utils::logMsg("DEBUG", CYAN, "[_readHeader] Incomplete header — waiting for more", this->_client_id);
