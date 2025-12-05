@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 01:05:30 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/05 01:40:59 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,10 +224,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 	if (this->_pipe_to_CGI[PIPE_WRITE_END] != -1 && (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0))
 		bytes_sent = this->writeToCGI(request, config, server);
 	if (!checkOutputTermination(bytes_read))
-	{
-		std::cout << "still reading from cgi" << std::endl;
 		bytes_read = this->readFromCGI(config, server);
-	}
 	if (this->_process_status[0] == 0)
 		this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
 	if ((this->_process_status[0] != 0 && this->_process_status[1] != 0)
@@ -246,16 +243,6 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		close(this->_pipe_to_CGI[PIPE_WRITE_END]);
 		this->_pipe_to_CGI[PIPE_WRITE_END] = -1;
 		server.pollRemove(this->_pipe_to_cgi_idx);
-	}
-	std::cout << "checkOutputTermination = " << checkOutputTermination(bytes_read) << std::endl;
-	std::cout << "this->_process_status[0] = " << this->_process_status[0] << std::endl;
-	std::cout << "this output_length = " << this->_output.length() << std::endl;
-	std::cout << "leaving parse header with header_len == " << this->_header_len << std::endl;
-	std::cout << "leaving parse header with content_len " << this->_content_len << std::endl;
-	if (this->_header_len)
-	{
-		std::cout << "HEADER>>>" << this->_output.substr(0, this->_header_len) << "<<< END";
-		std::cout << "BODY>>>" << this->_output.substr(this->_header_len+4) << "<<< END";
 	}
 }
 
@@ -318,8 +305,6 @@ ssize_t		CGI::readFromCGI(const ServerConfig &config, ServerCore &server)
  */
 void	CGI::parseHeader(const ServerConfig &config)
 {
-	std::cout << "current output == "<< std::endl;
-	std::cout << this->_output << std::endl;
 	if (!this->_output.length() || utils::startsWith(this->_output, "HTTP/"))
 	{}
 	else if (utils::caseInsensitiveFind(this->_output, "Status: ") != this->_output.end())
@@ -341,7 +326,6 @@ void	CGI::parseHeader(const ServerConfig &config)
 		long len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ") + 16);
 		if (len < 0 || static_cast<size_t>(len) > config.client_max_body_size)
 		{
-			std::cout << "WAT ???" << std::endl;
 			this->_is_complete = true;
 			this->_status = HTTP_INTERNAL_SERVER_ERROR;
 			return ;
@@ -358,8 +342,6 @@ void	CGI::parseHeader(const ServerConfig &config)
 	}
 	if (this->_output.find("\r\n\r\n") != std::string::npos)
 		this->_header_len = this->_output.find("\r\n\r\n") + 4;
-	else
-		std::cout << "could not find end of header" << std::endl;
 }
 
 /**
@@ -369,8 +351,6 @@ void	CGI::parseHeader(const ServerConfig &config)
  */
 void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 {
-	std::cout << "CGI returned " << std::endl;
-	std::cout << this->_output << std::endl;
 	if ((WIFEXITED(this->_process_status[1]) && WEXITSTATUS(this->_process_status[1]))
 		|| !WIFEXITED(this->_process_status[1]))
 	{
@@ -387,7 +367,6 @@ void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 	if (this->_status >= HTTP_BAD_REQUEST)
 		return (RequestHandler::_handleError(&response, this->_status, config));
 	response.setStatus(this->_status);
-	std::cout << "header_end = " << this->_header_len << std::endl;
 	if (!this->_header_len && !this->_chunked)
 		return (RequestHandler::_handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config));
 	if (!this->_content_len && !this->_chunked && this->_output.length() - this->_output.find("\r\n\r\n") - 4 > 0)

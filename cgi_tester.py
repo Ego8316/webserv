@@ -66,7 +66,7 @@ def get_full_http_response_from_object(response):
 
 
 ################# NO BODY TEST #############################
-"""
+
 testf = "test_get.py"
 print(f"{RED}" + testf + f"{RESET}")
 response = requests.get(url + "cgi-bin/"+testf)
@@ -79,7 +79,7 @@ response = requests.get(url + "cgi-bin/"+testf)
 print(f"{BLUE}" + testf + " returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
 get_full_http_response_from_object(response)
 
-input("press enter to continue")"""
+input("press enter to continue")
 testf = "test_cookies_get.py"
 print(f"{RED}" + testf + f"{RESET}")
 response = requests.get(url + "cgi-bin/"+testf)
@@ -103,7 +103,7 @@ print(f"{BLUE}" + testf + " - minilorem returned in " + str(response.elapsed.tot
 get_full_http_response_from_object(response)
 
 input("press enter to continue")
-testf = "test_cookies.py"
+testf = "test_cookies_post.py"
 print(f"{RED}" + testf + f" - minilorem{RESET}")
 response = requests.post(url + "cgi-bin/"+testf, data=minilorem)
 print(f"{BLUE}" + testf + " - minilorem returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
@@ -150,7 +150,7 @@ print(f"{BLUE}" + testf + " - lorem returned in " + str(response.elapsed.total_s
 get_full_http_response_from_object(response)
 
 input("press enter to continue")
-testf = "test_cookies.py"
+testf = "test_cookies_post.py"
 print(f"{RED}" + testf + f" - lorem{RESET}")
 response = requests.post(url + "cgi-bin/"+testf, data=lorem)
 print(f"{BLUE}" + testf + " - lorem returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")

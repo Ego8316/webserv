@@ -41,7 +41,7 @@ def application():
     else:
         message = f"Hello again! You have visited this page {new_count} times."
         detail = f"The cookie '{cookie_name}' (old value: {current_count}) has been updated to '{new_count}'."
-    content_length_display_placeholder = "[CONTENT_LENGTH_PLACEHOLDER]"
+    content_length_display_placeholder = "####"
     
     html_content_template = f"""
     <!DOCTYPE html>
@@ -80,10 +80,13 @@ def application():
     </html>
     """
     
+    #content_length = len(html_content_template.encode('utf-8'))
+    #content_length = content_length - len(content_length_display_placeholder) + len(str(content_length))
+    #content_length_header = f"Content-Length: {content_length}"
     content_length = len(html_content_template.encode('utf-8'))
-    content_length = content_length - len(content_length_display_placeholder) + len(str(content_length))
+    content_length += (content_length > 9998) + (content_length > 99998) + (content_length > 999998) + (content_length > 9999998)
     content_length_header = f"Content-Length: {content_length}"
-    
+
     html_content = html_content_template.replace(content_length_display_placeholder, str(content_length))
     print(content_type_header, end="\r\n")
     print(set_cookie_header, end="\r\n")
