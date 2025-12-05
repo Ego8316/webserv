@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Resource.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:18:46 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 00:24:11 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 02:38:28 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,6 @@ void	Resource::build(const Request &request, const ServerConfig &config)
 
 	if (loc)
 	{
-		std::cout << "Found location:" << loc->path << std::endl;
 		_method_allowed = (loc->methods & request.getMethod());
 		_autoindex = loc->autoindex;
 		_index = loc->index;

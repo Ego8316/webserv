@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigInterpreter.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 21:09:28 by ego               #+#    #+#             */
-/*   Updated: 2025/12/04 20:55:21 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/05 02:38:13 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

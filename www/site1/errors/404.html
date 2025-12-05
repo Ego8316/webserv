@@ -1,1 +1,84 @@
-<!doctype html><html><body><h1>404 - Not Found</h1><p>We could not find that page.</p></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Minimal</title>
+    <style>
+        /* Minimalist reset and primary settings */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #ffffff; /* Pure white background */
+            color: #1a1a1a; /* Very dark text for contrast */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* Container is just for structure, no visible styling */
+        .error-container {
+            max-width: 600px;
+            padding: 40px 20px;
+        }
+
+        /* The big 404 number - High contrast, simple font */
+        .error-code {
+            font-size: 10em;
+            font-weight: 200; /* Light weight for elegance */
+            color: #e0e0e0; /* Very light gray to recede slightly */
+            margin: 0;
+            line-height: 1;
+        }
+
+        /* The main message - Simple and direct */
+        .error-message {
+            font-size: 1.5em;
+            font-weight: 400;
+            color: #1a1a1a;
+            margin: 20px 0 30px 0;
+            text-transform: uppercase;
+            letter-spacing: 5px; /* Spacing for a modern look */
+        }
+
+        /* The secondary description - Finer text */
+        .error-description {
+            font-size: 1em;
+            color: #666666;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        /* The link button - Understated and simple */
+        .home-link {
+            display: inline-block;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 1em;
+            padding: 8px 0;
+            border-bottom: 1px solid #1a1a1a; /* Underline effect */
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .home-link:hover {
+            color: #808080; /* Gray out slightly on hover */
+            border-color: #808080;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="error-container">
+        <h1 class="error-code">404</h1>
+        <p class="error-message">Page Not Found</p>
+        <p class="error-description">
+            The resource you requested could not be located on our server. Please check the URL for typos or click the link below to return to the main site.
+        </p>
+        <a href="/" class="home-link">Return to Homepage</a>
+    </div>
+
+</body>
+</html>
