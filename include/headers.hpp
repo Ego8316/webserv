@@ -6,7 +6,7 @@
 /*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 01:54:35 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/05 02:22:06 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,10 @@
 						"<body><h1>405 Method Not Allowed</h1>" \
 						"<p>The requested method is not allowed for the requested URL.</p></body></html>"
 
-#define ERROR_PAGE_406	""
+#define ERROR_PAGE_406	"<html><head><title>406 Not Acceptable</title></head>" \
+						"<body><h1>406 Not Acceptable</h1>" \
+						"<p>The requested resource is capable of generating only content not acceptable " \
+						"according to the Accept headers sent in the request.</p></body></html>"
 
 #define ERROR_PAGE_408	"<html><head><title>408 Request Time Out</title></head>" \
 						"<body><h1>408 Request Time Out</h1>" \
