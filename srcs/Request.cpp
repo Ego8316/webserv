@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 10:52:27 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 14:00:11 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,6 +315,7 @@ void	Request::unchunkBody()
 	long				len = 1;
 	std::string			chunk;
 	std::string			unchunked;
+	std::string			line;
 	char				*endPtr;
 	
 	pos = 0;
@@ -322,23 +323,31 @@ void	Request::unchunkBody()
 	{
 		next_nl = this->_raw_body.find("\r\n", pos);
 		hexalen = this->_raw_body.substr(pos, next_nl).c_str();
-		pos = next_nl + 2;
+		pos = next_nl;
 		len = strtol(hexalen, &endPtr, 16);
+		std::cout << "next_nl = " << next_nl << " hexalen = " << hexalen << "len = " << len << "*endPtr = " << (int)*endPtr << std::endl;
 		if (*endPtr != '\0' || len < 0)
 		{
 			std::cerr << "Cannot recogonize chunk size" << std::endl;
+			exit(0);
 			return ;
 		}
-		pos = next_nl + 2;
 		next_nl = this->_raw_body.find("\r\n", pos);
-		if (pos + len != next_nl)
+		std::cout << "pos = " << pos << " next_nl = " << next_nl  << std::endl;
+ 		line = this->_raw_body.substr(pos, next_nl);
+		std::cout << ">" << line << "< : " << line.length() <<std::endl;
+		if (pos + len != line.length())
 		{
 			std::cerr << "Wrong chunk size" << std::endl;
+			exit(0);
 			return ;
 		}
-		unchunked += this->_raw_body.substr(pos, next_nl);
+		unchunked += line;
 	}
 	this->_raw_body = unchunked;
+	this->_content_length = unchunked.length();
+	std::cout << "Raw body is now " << std::endl;
+	std::cout << this->_raw_body << std::endl;
 	return ;
 }
 

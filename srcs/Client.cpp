@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 10:43:37 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 13:07:42 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -334,7 +334,7 @@ int	Client::_readBody()
 		body_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
-	if (!(body_str.size() >= this->_request->getContentLength())
+	if (!((!this->_request->isChunked() && (body_str.size() >= this->_request->getContentLength())))
 		&& !(this->_request->isChunked() && (pos = body_str.find(NULL_CHUNK)) != std::string::npos))
 	{
 		ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
@@ -353,7 +353,7 @@ int	Client::_readBody()
 		body_str.append(buffer.begin(), buffer.begin() + bytes_read);
 		utils::logMsg("INFO", GREEN, "[_readBody] Read " + utils::toString(bytes_read) + " bytes (total: " + utils::toString(body_str.size()) + ")", this->_client_id);
 	}
-	if (body_str.size() >= this->_request->getContentLength())
+	if (body_str.size() >= this->_request->getContentLength() && !this->_request->isChunked())
 	{
 		_leftover = body_str.substr(this->_request->getContentLength());
 		body_str.erase(this->_request->getContentLength());
@@ -381,6 +381,7 @@ int	Client::_readBody()
  */
 void	Client::_processRequest()
 {
+	std::cout << *this->_request << std::endl;
 	std::string conn = utils::toLower(_request->headerGetField("Connection"));
 	if (_request->getVersion() == "HTTP/1.0")
 		_keep_alive = false;

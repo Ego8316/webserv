@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 11:54:33 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 12:56:14 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@
 #define LISTDIR_SUFFIX "<br>\n"
 #define LISTDIR_ENDING "</body>\n</html>"
 
-#define NULL_CHUNK "0\r\n\r\n"
+#define NULL_CHUNK "0x0\r\n\r\n"
 
 // Configuration printing helpers
 #define WIDTH				70UL
