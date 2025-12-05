@@ -111,4 +111,6 @@ def application(input_str):
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding='utf-8')
     input_str = input()
+    if (input_str.endswith("\r")):
+        input_str = input_str[:-1]
     application(input_str)

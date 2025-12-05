@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 10:52:55 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 16:29:15 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 	
 	(void)client;
 	if (this->_bytes_to_send == 0)
-		this->_bytes_to_send = request.getRawBody().size();
+		this->_bytes_to_send = request.getRawBody().length();
 	if (this->_pipe_to_CGI[PIPE_WRITE_END] != -1 && (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0))
 		bytes_sent = this->writeToCGI(request, config, server);
 	if (!checkOutputTermination(bytes_read))
@@ -261,7 +261,7 @@ void	CGI::parseHeader(const ServerConfig &config)
 	{
 		size_t			line_start = utils::caseInsensitiveFind(this->_output, "Transfer-Encoding: ") - this->_output.begin();
 		size_t			line_end = this->_output.find("\r\n", line_start);
-		std::string		line = this->_output.substr(line_start, line_end);
+		std::string		line = this->_output.substr(line_start, line_end - line_start);
 		if (utils::caseInsensitiveFind(line, "chunked") != line.end())
 			this->_chunked = true;
 	}

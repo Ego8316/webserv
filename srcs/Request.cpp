@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 14:00:11 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 17:18:52 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,14 +104,14 @@ void	Request::parseHeader(const ServerConfig &config)
 }
 
 /**
- * @brief Extracts query string and strips scheme/host prefixes from target.
+ * @brief Extracts query string from target.
  */
 void	Request::_parseRequestTarget()
 {
 	if (this->_request_target.find("?") != std::string::npos)
 	{
-		this->_query_string = this->_request_target.substr(this->_request_target.find("?") + 1, this->_request_target.length());
-		this->_request_target.erase(this->_request_target.find("?"), this->_request_target.length());
+		this->_query_string = this->_request_target.substr(this->_request_target.find("?") + 1);
+		this->_request_target.erase(this->_request_target.find("?"), std::string::npos);
 	}
 	return ;
 }
@@ -309,45 +309,51 @@ std::string	Request::getQueryString() const
  */
 void	Request::unchunkBody()
 {
-	size_t				pos;
-	size_t				next_nl;
+	size_t				line_start;
+	size_t				line_end;
 	const char			*hexalen;
 	long				len = 1;
 	std::string			chunk;
 	std::string			unchunked;
-	std::string			line;
 	char				*endPtr;
 	
-	pos = 0;
+	line_start = 0;
 	while (len)
 	{
-		next_nl = this->_raw_body.find("\r\n", pos);
-		hexalen = this->_raw_body.substr(pos, next_nl).c_str();
-		pos = next_nl;
+		line_end = this->_raw_body.find("\r\n", line_start);
+		if (line_end == std::string::npos)
+			break ;
+		hexalen = this->_raw_body.substr(line_start, line_end - line_start).c_str();
+		line_start = line_end;
 		len = strtol(hexalen, &endPtr, 16);
-		std::cout << "next_nl = " << next_nl << " hexalen = " << hexalen << "len = " << len << "*endPtr = " << (int)*endPtr << std::endl;
 		if (*endPtr != '\0' || len < 0)
 		{
-			std::cerr << "Cannot recogonize chunk size" << std::endl;
-			exit(0);
-			return ;
+			std::cout << RED << "Cannot recogonize chunk size" << RESET << std::endl;
+			len = 1;
+			break ;
 		}
-		next_nl = this->_raw_body.find("\r\n", pos);
-		std::cout << "pos = " << pos << " next_nl = " << next_nl  << std::endl;
- 		line = this->_raw_body.substr(pos, next_nl);
-		std::cout << ">" << line << "< : " << line.length() <<std::endl;
-		if (pos + len != line.length())
+		line_start = line_end + 2;
+		line_end = this->_raw_body.find("\r\n", line_start);
+		// if (line_end == std::string::npos && len != 0)
+		// 	break ;
+ 		chunk = this->_raw_body.substr(line_start, line_end - line_start);
+		if (len != static_cast<long>(chunk.length()))
 		{
-			std::cerr << "Wrong chunk size" << std::endl;
-			exit(0);
-			return ;
+			std::cout << RED << "Chunk size mismatch" << RESET << std::endl;
+			len = 1;
+			break ;
 		}
-		unchunked += line;
+		unchunked += chunk;
+		line_start = line_end + 2;
+	}
+	if (len != 0)
+	{
+		std::cout << RED << "Finished reading chunked message with len " << len << RESET << std::endl;
+		this->_error = true;
+		return ;
 	}
 	this->_raw_body = unchunked;
 	this->_content_length = unchunked.length();
-	std::cout << "Raw body is now " << std::endl;
-	std::cout << this->_raw_body << std::endl;
 	return ;
 }
 

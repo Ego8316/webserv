@@ -44,7 +44,7 @@ def get_full_http_response_from_object(response):
 
 
 ################# NO BODY TEST #############################
-
+"""
 testf = "test_get.py"
 print(f"{RED}" + testf + f"{RESET}")
 response = requests.get(url + "cgi-bin/"+testf)
@@ -71,6 +71,18 @@ testf = "test_post.py"
 print(f"{RED}" + testf + f" - minilorem{RESET}")
 response = requests.post(url + "cgi-bin/"+testf, data=minilorem)
 print(f"{BLUE}" + testf + " - minilorem returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
+get_full_http_response_from_object(response)
+
+testf = "test_post_querystr.py?Wow!AQuerySring?Amazing!"
+print(f"{RED}" + testf + f" - minilorem{RESET}")
+response = requests.post(url + "cgi-bin/"+testf, data=minilorem)
+print(f"{BLUE}" + testf + " - chunked returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
+get_full_http_response_from_object(response)
+"""
+testf = "test_post_querystr.py?"
+print(f"{RED}" + testf + f" - minilorem{RESET}")
+response = requests.post(url + "cgi-bin/"+testf, data=minilorem)
+print(f"{BLUE}" + testf + " - chunked returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
 get_full_http_response_from_object(response)
 
 input("press enter to continue")
@@ -158,47 +170,3 @@ print(f"{BLUE}" + testf + " - lorem returned in " + str(response.elapsed.total_s
 get_full_http_response_from_object(response)
 
 
-
-################# CHUNKED TEST #############################
-testf = "test_post.py"
-print(f"{RED}" + testf + f" - chunked{RESET}")
-response = requests.post(url + "cgi-bin/"+testf, data=chunked)
-print(f"{BLUE}" + testf + " - chunked returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
-get_full_http_response_from_object(response)
-
-input("press enter to continue")
-testf = "test_infinite_loop_post.py"
-print(f"{RED}" + testf + f" - chunked{RESET}")
-response = requests.post(url + "cgi-bin/"+testf, data=chunked)
-print(f"{BLUE}" + testf + " - chunked returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
-get_full_http_response_from_object(response)
-
-input("press enter to continue")
-testf = "test_cookies_post.py"
-print(f"{RED}" + testf + f" - chunked{RESET}")
-response = requests.post(url + "cgi-bin/"+testf, data=chunked)
-print(f"{BLUE}" + testf + " - chunked returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
-get_full_http_response_from_object(response)
-
-input("press enter to continue")
-testf = "test_crash_after_input.py"
-print(f"{RED}" + testf + f" - chunked{RESET}")
-response = requests.post(url + "cgi-bin/"+testf, data=chunked)
-print(f"{BLUE}" + testf + " - chunked returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
-get_full_http_response_from_object(response)
-
-input("press enter to continue")
-testf = "test_crash_before_input.py"
-print(f"{RED}" + testf + f" - chunked{RESET}")
-response = requests.post(url + "cgi-bin/"+testf, data=chunked)
-print(f"{BLUE}" + testf + " - chunked returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
-get_full_http_response_from_object(response)
-
-
-input("press enter to continue")
-print(f"{RED}test_noread_input.py - chunked{RESET}")
-testf = "test_noread_input.py"
-print(f"{RED}" + testf + f" - chunked{RESET}")
-response = requests.post(url + "cgi-bin/"+testf, data=chunked)
-print(f"{BLUE}" + testf + " - chunked returned in " + str(response.elapsed.total_seconds()) + f"s{RESET}")
-get_full_http_response_from_object(response)

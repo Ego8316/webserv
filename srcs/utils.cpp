@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 11:54:45 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/05 17:00:45 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ bool	utils::endsWith(const std::string& str, const std::string& suffix)
 {
 	if (str.length() < suffix.length())
 	{
-		return false;
+		return (false);
 	}
 	return (str.substr(str.length() - suffix.length(), suffix.length()) == suffix);
 }
@@ -42,7 +42,7 @@ bool	utils::startsWith(const std::string& str, const std::string& prefix)
 {
 	if (str.length() < prefix.length())
 	{
-		return false;
+		return (false);
 	}
 	return (str.substr(0, prefix.length()) == prefix);
 }
