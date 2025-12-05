@@ -1,1 +1,1 @@
-ping=ok
+ping=aaaaaok
