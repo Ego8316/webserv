@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 13:07:42 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/06 11:18:25 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -365,7 +365,7 @@ int	Client::_readBody()
 	if (this->_request->isChunked() && (pos = body_str.find(NULL_CHUNK)) != std::string::npos)
 	{
 		_leftover = body_str.substr(pos);
-		body_str.erase(pos);
+		body_str.erase(pos + 7);
 		this->_request->unchunkBody();
 		utils::logMsg("INFO", GREEN, "[_readBody] Chunked body complete", this->_client_id);
 		this->_state = PROCESSING_REQUEST;

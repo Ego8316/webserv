@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 17:18:52 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/06 11:34:35 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -318,39 +318,41 @@ void	Request::unchunkBody()
 	char				*endPtr;
 	
 	line_start = 0;
-	while (len)
+	while (this->_raw_body.compare(line_start, 7, NULL_CHUNK))
 	{
 		line_end = this->_raw_body.find("\r\n", line_start);
 		if (line_end == std::string::npos)
-			break ;
+		{
+			std::cout << RED << "Unexpected EOF while parsing chunks" << RESET << std::endl;
+			this->_error = true;
+			return ;
+		}
 		hexalen = this->_raw_body.substr(line_start, line_end - line_start).c_str();
 		line_start = line_end;
 		len = strtol(hexalen, &endPtr, 16);
 		if (*endPtr != '\0' || len < 0)
 		{
 			std::cout << RED << "Cannot recogonize chunk size" << RESET << std::endl;
-			len = 1;
-			break ;
+			this->_error = true;
+			return ;
 		}
 		line_start = line_end + 2;
 		line_end = this->_raw_body.find("\r\n", line_start);
-		// if (line_end == std::string::npos && len != 0)
-		// 	break ;
+		if (line_end == std::string::npos)
+		{
+			std::cout << RED << "Unexpected EOF while parsing chunks" << RESET << std::endl;
+			this->_error = true;
+			return ;
+		}
  		chunk = this->_raw_body.substr(line_start, line_end - line_start);
 		if (len != static_cast<long>(chunk.length()))
 		{
-			std::cout << RED << "Chunk size mismatch" << RESET << std::endl;
-			len = 1;
-			break ;
+			std::cout << RED << "Chunk size mismatch (announced " << len << " but read " << chunk.length() << ")" << RESET << std::endl;
+			this->_error = true;
+			return ;
 		}
 		unchunked += chunk;
 		line_start = line_end + 2;
-	}
-	if (len != 0)
-	{
-		std::cout << RED << "Finished reading chunked message with len " << len << RESET << std::endl;
-		this->_error = true;
-		return ;
 	}
 	this->_raw_body = unchunked;
 	this->_content_length = unchunked.length();
