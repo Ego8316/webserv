@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/06 11:15:12 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/07 19:38:54 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@
 						"according to the Accept headers sent in the request.</p></body></html>"
 
 #define ERROR_PAGE_408	"<html><head><title>408 Request Time Out</title></head>" \
-						"<body><h1>408 Request Time Out</h1>" \
+						"<body><h1>408 Request Timeout</h1>" \
 						"<p>The request could not be fully received and responded in time</p></body></html>"
 
 #define ERROR_PAGE_409	"<html><head><title>409 Conflict</title></head>" \

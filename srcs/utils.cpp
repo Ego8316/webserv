@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 17:00:45 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/07 19:38:27 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -367,7 +367,7 @@ std::string	utils::httpStatusToStr(HttpStatus code)
 		case HTTP_NOT_ACCEPTABLE:			return "Not Acceptable";
 		case HTTP_TIMEOUT:					return "Request Timeout";
 		case HTTP_CONFLICT:					return "Conflict";
-		case HTTP_CONTENT_TOO_LARGE:		return "Content Too Large";
+		case HTTP_CONTENT_TOO_LARGE:		return "Payload Too Large";
 		case HTTP_INTERNAL_SERVER_ERROR:	return "Internal Server Error";
 		case HTTP_NOT_IMPLEMENTED:			return "Not Implemented";
 		case HTTP_VERSION_NOT_SUPPORTED:	return "HTTP Version Not Supported";
