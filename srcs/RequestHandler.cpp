@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 10:55:25 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/07 16:58:18 by ego              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,12 +49,10 @@ RequestHandler::~RequestHandler(void)
  */
 void	RequestHandler::handle(Response *response, const Request &request, const ServerConfig &config)
 {
+	if (request.getContentLength() > config.client_max_body_size)
+		return (handleError(response, HTTP_CONTENT_TOO_LARGE, config));
 	if (request.getError())
-	{
-		if (request.getContentLength() > config.client_max_body_size)
-			return (handleError(response, HTTP_CONTENT_TOO_LARGE, config));
 		return (handleError(response, HTTP_BAD_REQUEST, config));
-	}
 	if (request.getMethod() == UNKNOWN)
 		return (handleError(response, HTTP_NOT_IMPLEMENTED, config));
 	if (request.getVersion() != "HTTP/1.1" && request.getVersion() != "HTTP/1.0")
