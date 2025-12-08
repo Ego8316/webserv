@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/06 11:18:25 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/08 13:28:03 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,7 +271,7 @@ int	Client::_readHeader()
 
 	if (!this->_leftover.empty())
 	{
-		utils::logMsg("DEBUG", CYAN, "[_readHeader] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
+		// utils::logMsg("DEBUG", CYAN, "[_readHeader] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
 		header_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
@@ -288,7 +288,7 @@ int	Client::_readHeader()
 		utils::logMsg("WARN", ORANGE, "[_readHeader] Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
-	utils::logMsg("INFO", GREEN, "[_readHeader] Read " + utils::toString(bytes_read) + " bytes", this->_client_id);
+	// utils::logMsg("INFO", GREEN, "[_readHeader] Read " + utils::toString(bytes_read) + " bytes", this->_client_id);
 	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
 	if (header_str.size() > this->_config->client_header_buffer_size)
 	{
@@ -297,12 +297,12 @@ int	Client::_readHeader()
 	}
 	if ((pos = header_str.find("\r\n\r\n")) == std::string::npos)
 	{
-		utils::logMsg("DEBUG", CYAN, "[_readHeader] Incomplete header — waiting for more", this->_client_id);
+		// utils::logMsg("DEBUG", CYAN, "[_readHeader] Incomplete header — waiting for more", this->_client_id);
 		return (0);
 	}
 	this->_leftover = header_str.substr(pos + 4);
 	header_str.erase(pos);
-	utils::logMsg("INFO", GREEN, "[_readHeader] Header fully received (" + utils::toString(header_str.size()) + " bytes)", this->_client_id);
+	// utils::logMsg("INFO", GREEN, "[_readHeader] Header fully received (" + utils::toString(header_str.size()) + " bytes)", this->_client_id);
 	this->_request->parseHeader(*this->_config);
 	if (!this->_request->isChunked() && this->_request->getContentLength() == 0)
 	{
@@ -330,7 +330,7 @@ int	Client::_readBody()
 		body_str.reserve(this->_request->getContentLength());
 	if (!this->_leftover.empty())
 	{
-		utils::logMsg("DEBUG", CYAN, "[_readBody] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
+		// utils::logMsg("DEBUG", CYAN, "[_readBody] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
 		body_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
@@ -347,17 +347,17 @@ int	Client::_readBody()
 		}
 		if (bytes_read == 0)
 		{
-			utils::logMsg("WARN", ORANGE, "[_readBody] Client closed the connection", this->_client_id);
+			// utils::logMsg("WARN", ORANGE, "[_readBody] Client closed the connection", this->_client_id);
 			return (this->_state = ABORTING, 0);
 		}
 		body_str.append(buffer.begin(), buffer.begin() + bytes_read);
-		utils::logMsg("INFO", GREEN, "[_readBody] Read " + utils::toString(bytes_read) + " bytes (total: " + utils::toString(body_str.size()) + ")", this->_client_id);
+		// utils::logMsg("INFO", GREEN, "[_readBody] Read " + utils::toString(bytes_read) + " bytes (total: " + utils::toString(body_str.size()) + ")", this->_client_id);
 	}
 	if (body_str.size() >= this->_request->getContentLength() && !this->_request->isChunked())
 	{
 		_leftover = body_str.substr(this->_request->getContentLength());
 		body_str.erase(this->_request->getContentLength());
-		utils::logMsg("INFO", GREEN, "[_readBody] Body complete (" + utils::toString(body_str.size()) + " bytes)", this->_client_id);
+		// utils::logMsg("INFO", GREEN, "[_readBody] Body complete (" + utils::toString(body_str.size()) + " bytes)", this->_client_id);
 		this->_state = PROCESSING_REQUEST;
 		printState();
 		return (0);
@@ -367,12 +367,11 @@ int	Client::_readBody()
 		_leftover = body_str.substr(pos);
 		body_str.erase(pos + 7);
 		this->_request->unchunkBody();
-		utils::logMsg("INFO", GREEN, "[_readBody] Chunked body complete", this->_client_id);
+		// utils::logMsg("INFO", GREEN, "[_readBody] Chunked body complete", this->_client_id);
 		this->_state = PROCESSING_REQUEST;
 		printState();
 		return (0);
 	}
-	utils::logMsg("DEBUG", CYAN, "[_readBody] Partial body received — waiting for more", this->_client_id);
 	return (0);
 }
 
@@ -381,7 +380,7 @@ int	Client::_readBody()
  */
 void	Client::_processRequest()
 {
-	std::cout << *this->_request << std::endl;
+	// std::cout << *this->_request << std::endl;
 	std::string conn = utils::toLower(_request->headerGetField("Connection"));
 	if (_request->getVersion() == "HTTP/1.0")
 		_keep_alive = false;
@@ -432,8 +431,8 @@ int	Client::_sendString()
 
 	if (bytes_to_send > 0)
 	{
-		if (this->_bytes_sent == 0)
-			utils::logMsg("DEBUG", CYAN, "[_sendString] Response string:\n" + response_str, this->_client_id);
+		// if (this->_bytes_sent == 0)
+		// 	utils::logMsg("DEBUG", CYAN, "[_sendString] Response string:\n" + response_str, this->_client_id);
 		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, std::min(bytes_to_send, this->_config->client_body_buffer_size), this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);
@@ -441,7 +440,7 @@ int	Client::_sendString()
 			return (0);
 		if (sent == 0)
 		{
-			utils::logMsg("WARN", ORANGE, "[_sendString] Client closed the connection", this->_client_id);
+			// utils::logMsg("WARN", ORANGE, "[_sendString] Client closed the connection", this->_client_id);
 			return (this->_state = ABORTING, 0);
 		}
 		this->_bytes_sent += sent;
@@ -491,7 +490,7 @@ int	Client::_sendFile()
 	}
 	if (bytes_sent == 0)
 	{
-		utils::logMsg("WARN", ORANGE, "[_sendFile] Client closed the connection", this->_client_id);
+		// utils::logMsg("WARN", ORANGE, "[_sendFile] Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
 	return (0);

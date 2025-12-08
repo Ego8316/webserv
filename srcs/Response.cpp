@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 10:57:11 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/08 13:21:09 by hcavet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ Response::~Response()
 {
 	if (this->_cgi)
 	{
-		std::cout << BLUE << "Destroying CGI instance" << RESET << std::endl;
+		// std::cout << BLUE << "Destroying CGI instance" << RESET << std::endl;
 		delete this->_cgi;
 		this->_cgi = NULL;
 	}
