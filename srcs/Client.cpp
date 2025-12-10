@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/10 14:06:33 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 15:23:53 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -290,7 +290,7 @@ int	Client::_readHeader()
 	}
 	if (bytes_read == 0)
 	{
-		utils::logMsg("WARN", ORANGE, "[_readHeader] Client closed the connection", this->_client_id);
+		utils::logMsg("INFO", RED, "[_readHeader] Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
 	// utils::logMsg("INFO", GREEN, "[_readHeader] Read " + utils::toString(bytes_read) + " bytes", this->_client_id);
@@ -353,6 +353,7 @@ int	Client::_readBody()
 		if (bytes_read == 0)
 		{
 			// utils::logMsg("WARN", ORANGE, "[_readBody] Client closed the connection", this->_client_id);
+			utils::logMsg("INFO", RED, "[_readHeader] Client closed the connection", this->_client_id);
 			return (this->_state = ABORTING, 0);
 		}
 		body_str.append(buffer.begin(), buffer.begin() + bytes_read);
@@ -435,6 +436,8 @@ int	Client::_sendString()
 
 	if (bytes_to_send > 0)
 	{
+		if (this->_bytes_sent == 0)
+			utils::logMsg("INFO", CYAN, "[_sendString] Started sending reponse\n", this->_client_id);
 		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, std::min(bytes_to_send, this->_config->client_body_buffer_size), this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);
@@ -442,7 +445,8 @@ int	Client::_sendString()
 			return (0);
 		if (sent == 0)
 		{
-			utils::logMsg("WARN", ORANGE, "[_sendString] Client closed the connection", this->_client_id);
+			// utils::logMsg("WARN", ORANGE, "[_sendString] Client closed the connection", this->_client_id);
+			utils::logMsg("INFO", RED, "[_readHeader] Client closed the connection", this->_client_id);
 			return (this->_state = ABORTING, 0);
 		}
 		this->_bytes_sent += sent;
@@ -493,6 +497,7 @@ int	Client::_sendFile()
 	if (bytes_sent == 0)
 	{
 		// utils::logMsg("WARN", ORANGE, "[_sendFile] Client closed the connection", this->_client_id);
+		utils::logMsg("INFO", RED, "[_readHeader] Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
 	return (0);

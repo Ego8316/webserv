@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/10 14:02:15 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 15:08:03 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,7 +323,7 @@ void	Request::unchunkBody()
 		line_end = this->_raw_body.find("\r\n", line_start);
 		if (line_end == std::string::npos)
 		{
-			std::cout << RED << "Unexpected EOF while parsing chunks" << RESET << std::endl;
+			// std::cout << RED << "Unexpected EOF while parsing chunks" << RESET << std::endl;
 			this->_error = true;
 			return ;
 		}
@@ -340,14 +340,14 @@ void	Request::unchunkBody()
 		line_end = this->_raw_body.find("\r\n", line_start);
 		if (line_end == std::string::npos)
 		{
-			std::cout << RED << "Unexpected EOF while parsing chunks" << RESET << std::endl;
+			// std::cout << RED << "Unexpected EOF while parsing chunks" << RESET << std::endl;
 			this->_error = true;
 			return ;
 		}
  		chunk = this->_raw_body.substr(line_start, line_end - line_start);
 		if (len != static_cast<long>(chunk.length()))
 		{
-			std::cout << RED << "Chunk size mismatch (announced " << len << " but read " << chunk.length() << ")" << RESET << std::endl;
+			// std::cout << RED << "Chunk size mismatch (announced " << len << " but read " << chunk.length() << ")" << RESET << std::endl;
 			this->_error = true;
 			return ;
 		}
