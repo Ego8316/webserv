@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/10 15:08:21 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 17:08:20 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /**
  * @brief Default constructor. Initializes status code to 200 OK.
  */
-Response::Response()
+Response::Response(int client_id)
 {
 	this->_status_code = HTTP_OK;
 	this->_header = "";
@@ -27,6 +27,7 @@ Response::Response()
 	this->_skip_header = false;
 	this->_body_fd = -1;
 	this->_version = "HTTP/1.0";
+	this->_client_id = client_id;
 	return ;
 }
 
@@ -37,7 +38,7 @@ Response::~Response()
 {
 	if (this->_cgi)
 	{
-		// std::cout << BLUE << "Destroying CGI instance" << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, INFO, "Destroying CGI instance", this->_client_id);
 		delete this->_cgi;
 		this->_cgi = NULL;
 	}

@@ -6,7 +6,7 @@
 #    By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/12/04 21:32:49 by vviterbo         ###   ########.fr        #
+#    Updated: 2025/12/10 16:23:43 by vviterbo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,7 +27,7 @@ OBJS		=	$(addprefix $(ODIR), $(SRC:.cpp=.o))
 SRCS		=	$(addprefix $(SDIR), $(SRC))
 
 CC			=	c++
-CFLAGS		=	-Wall -Wextra -Werror  #-std=c++98 -g -fsanitize=address
+CFLAGS		=	-Wall -Wextra -Werror
 
 IFLAGS		=	-I $(IDIR)
 

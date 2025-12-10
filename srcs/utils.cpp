@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/10 15:26:53 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 17:35:29 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -468,17 +468,65 @@ std::string	utils::timeStamp()
 /**
  * @brief Log a colored message with timestamp and optional client id.
  *
- * @param level  Textual level label.
- * @param color  ANSI color prefix to apply.
- * @param msg    Message body.
+ * @param caller 	should be '__PRETTY_FUNCTION__' to get the Class::function outputting the message
+ * @param loglevel	a member of the logLevel enum, i.e DEBUG, INFO, WARN, ERROR
+ * @param msg    	Message body.
  * @param client_id Client identifier (-1 to skip).
+ * @param color_override	optional, if you want to use another color from one assigned to the provided level
  */
-void	utils::logMsg(const std::string &level, const std::string &color, const std::string &msg, int client_id)
+void	utils::logMsg(const char *caller, logLevel level, const std::string &msg, int client_id, std::string color_override)
 {
-	std::cout << color << "[" << timeStamp() << "] [" << level << "]";
-	if (client_id >= 0)
-		std::cout << " [client " << client_id << "]";
-	std::cout << " " << msg << RESET << std::endl;
+	std::string		mssgcolor = logColors[level];
+	std::string		formated_caller(caller);
+	static std::ofstream	logfile("webserv.log");
+
+	if (formated_caller.find(" "))
+		formated_caller.erase(0, formated_caller.find(" ") + 1);
+	if (formated_caller.find("("))
+		formated_caller.erase(formated_caller.find("("));
+	if (color_override != "")
+		mssgcolor = color_override;
+	if (level < WARN)
+	{
+		//std::ofstream logfile("webserv.log");
+		logfile << mssgcolor << "[" << timeStamp() << "] [" << logLevelStr[level] << "] [" + formated_caller + "]";
+		if (client_id >= 0)
+			logfile << " [client " << client_id << "]";
+		logfile << " " << msg << RESET << std::endl;
+		//logfile.close();
+	}
+	else
+	{
+		std::cout << mssgcolor << "[" << timeStamp() << "] [" << logLevelStr[level] << "] [" + formated_caller + "]";
+		if (client_id >= 0)
+			std::cout << " [client " << client_id << "]";
+		std::cout << " " << msg << RESET << std::endl;
+	}
+}
+
+std::string			utils::requestStageToStr(RequestStage stage)
+{
+	if (stage == TRY_ACCEPTING)
+		return ("TRY_ACCEPTING");
+	if (stage == INIT)
+		return ("INIT");
+	if (stage == READING_HEADER)
+		return ("READING_HEADER");
+	if (stage == READING_BODY)
+		return ("READING_BODY");
+	if (stage == PROCESSING_REQUEST)
+		return ("PROCESSING_REQUEST");
+	if (stage == CGI_RUNNING)
+		return ("CGI_RUNNING");
+	if (stage == SENDING_STRING)
+		return ("SENDING_STRING");
+	if (stage == SENDING_FILE)
+		return ("SENDING_FILE");
+	if (stage == ABORTING)
+		return ("ABORTING");
+	if (stage == DONE)
+		return ("DONE");
+	return ("");
 }
 
 void	utils::printProcessQueue(std::deque<Client *> &q)

@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/08 14:28:49 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 17:20:35 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ WebServ::~WebServ()
 	}
 	if (this->_core)
 		delete this->_core;
-	std::cerr << RED << "Destroying server" << RESET << std::endl;
+	utils::logMsg(__PRETTY_FUNCTION__, WARN, "Shutting down server", -1);
 }
 
 /**
@@ -56,7 +56,7 @@ int	WebServ::Init()
 	if (_core->init() == SERV_ERROR)
 		return (SERV_ERROR);
 	this->_core->pollAdd(this->_core->getFd(), POLLIN, -1);
-	std::cout << BOLD_GREEN << "[OK]" << GREEN << " WebServ initialized!" << RESET << std::endl;
+	utils::logMsg(__PRETTY_FUNCTION__, WARN, "WebServ initialized!", -1, GREEN);
 	return (0);
 }
 
@@ -69,12 +69,12 @@ int	WebServ::Run()
 {
 	if (this->UpdateQueue() == SERV_ERROR)
 	{
-		std::cout << RED << "[UpdateQueue] UpdateQueue returned an error" << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "UpdateQueue returned an error", -1);
 		return (SERV_ERROR);
 	}
 	if (this->ProcessQueue() == SERV_ERROR)
 	{
-		std::cout << RED << "[UpdateQueue] ProcessQueue returned an error" << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "ProcessQueue returned an error", -1);
 		return (SERV_ERROR);
 	}
 	return (0);
@@ -98,12 +98,12 @@ int	WebServ::UpdateQueue()
 		{
 			if (event->server == true)
 			{
-				 std::cerr << RED << "[UpdateQueue] Server error: closing all connections !" << RESET << std::endl;
+				utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Poll returned an error on the server socket: closing all connections", -1);
 				return (SERV_ERROR);
 			}
 			else
 			{
-				std::cout << RED << "[UpdateQueue] Removing client " << event->client_id << " due to error" << RESET << std::endl;
+				utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Removing client due to error", event->client_id);
 				if (this->_clients[event->client_id])
 					removeClient(event->client_id);
 			}
@@ -112,20 +112,20 @@ int	WebServ::UpdateQueue()
 		{
 			if (event->server == true)
 			{
-				std::cout << GREEN << "[UpdateQueue] New connection detected. Creating client..." << RESET << std::endl;
+				utils::logMsg(__PRETTY_FUNCTION__, INFO, "New connection detected. Creating client instance", -1);
 				Client	*new_client = newClient();
 				if (new_client)
 				{
 					this->_processing_queue.push_front(new_client);
 				}
 				else
-					std::cerr << RED << "[UpdateQueue] Error creating Client instance" << RESET << std::endl;
+					utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Failed creating Client instance", -1);
 			}
 			else
 			{
 				if (this->_clients[event->client_id] && this->_clients[event->client_id]->getState() == DONE)
 				{
-					std::cout << MAGENTA << "[UpdateQueue] Client " << event->client_id << " added to processing queue" << RESET << std::endl;
+					utils::logMsg(__PRETTY_FUNCTION__, INFO, "Added request to queue", event->client_id);
 					this->_clients[event->client_id]->setState(INIT);
 					this->_clients[event->client_id]->setTimeLimit(utils::getTime() + this->_config->timeout);
 					this->_processing_queue.push_back(this->_clients[event->client_id]);
@@ -167,11 +167,10 @@ int	WebServ::ProcessQueue()
 	else if (next_client->getState() != DONE && error <= WOULD_BLOCK)
 		this->_processing_queue.push_back(next_client);
 	else if (next_client->getState() == DONE)
-		std::cout << GREEN << "[ProcessQueue] Client " << next_client->getId() << " finished processing." << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, INFO, "Finished processing request", next_client->getId());
 	else
-		std::cout << RED << "[ProcessQueue] Client " << next_client->getId() << 
-			" has been removed from queue : returned error " << error << 
-			" and in state " << next_client->getState() << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, INFO, "Request failed after returning error in state " \
+			+ utils::stateToStr(next_client->getState()) + " removed from queue", next_client->getId());
 	return (error);
 }
 
@@ -191,13 +190,12 @@ Client	*WebServ::newClient()
 	}
 	if (indx == this->_config->max_clients)
 	{
-		std::cerr << RED << "[newClient] Cannot accept new clients, limit reached!" << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, " Cannot accept new clients, limit reached!", -1);
 		return (NULL);
 	}
 	this->_clients[indx] = new Client(this->_config, this->_core);
 	this->_clients[indx]->setClientId(indx);
 	this->_clients[indx]->setState(TRY_ACCEPTING);
-	std::cout << GREEN << "[newClient] Client " << indx << " created." << RESET << std::endl;
 	return (this->_clients[indx]);
 }
 
@@ -214,7 +212,7 @@ int	WebServ::removeClient(size_t indx)
 
 	if (indx < this->_config->max_clients && this->_clients[indx] != NULL)
 	{
-		std::cout << RED << "[removeClient] Removing client " << indx << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, WARN, "Removing client", indx, GREEN);
 		std::deque<Client *>::iterator it = this->_processing_queue.begin();
 		while (it != this->_processing_queue.end())
 		{
@@ -239,16 +237,16 @@ int	WebServ::removeClient(size_t indx)
 
 void	WebServ::sendTimeOut(Client *client)
 {
-	std::cout << RED << "Client " << this->_processing_queue.front()->getId() << " timed out" << RESET << std::endl;
+	utils::logMsg(__PRETTY_FUNCTION__, WARN, "Request timed out", client->getId());
 	if (client->getFd() == -1)
 		return ;
 	if (client->getResponse() == NULL)
-		client->setResponse(new Response);
+		client->setResponse(new Response(client->getId()));
 	RequestHandler::handleError(client->getResponse(), HTTP_TIMEOUT, *this->_config);
 	client->setState(SENDING_STRING);
 	if (client->handleEvent() == ERR_NONE)
-		std::cout << ORANGE << "TimeOut successfully sent to Client " << client->getId() << RESET << std::endl; 
+		utils::logMsg(__PRETTY_FUNCTION__, INFO, "TimeOut notification successfully sent", client->getId()); 
 	else
-		std::cout << ORANGE << "Could not send TimeOut to Client " << client->getId() << ", aborting..." << RESET << std::endl; 
+		utils::logMsg(__PRETTY_FUNCTION__, INFO, "Could not send TimeOut notification", client->getId()); 
 	return ;
 }

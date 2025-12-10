@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:40 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 10:51:14 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 16:01:08 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class	Resource;
 class	Request
 {
 	public:
-		Request();
+		Request(int client_id);
 		~Request();
 
 		void					parseHeader(const ServerConfig &config);
@@ -55,6 +55,7 @@ class	Request
 		std::string							headerGetField(const std::string field);
 
 	private:
+		int									_client_id;
 		std::string							_raw_header;
 		std::string							_raw_body;
 		Method								_method;

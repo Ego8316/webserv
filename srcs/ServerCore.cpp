@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:53:20 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 10:58:04 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 17:19:16 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,28 +74,28 @@ int	ServerCore::init()
 {
 	if (!_socketCreate())
 	{
-		std::cerr << BOLD_RED << "[KO] Socket creation failed: " << RED << strerror(errno) << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Socket creation failed: " + utils::toString(strerror(errno)), -1);
 		return (SERV_ERROR);
 	}
-	std::cout << BOLD_GREEN << "[OK]" << GREEN << " Socket successfully created" << RESET << std::endl;
+	utils::logMsg(__PRETTY_FUNCTION__, WARN, "Socket successfully created", -1, GREEN);
 	if (!_socketSetOptions())
 	{
-		std::cerr << BOLD_RED << "[KO] Socket configuration failed: " << RED <<  strerror(errno) << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Socket configuration failed: " + utils::toString(strerror(errno)), -1);
 		return (SERV_ERROR);
 	}
-	std::cout << BOLD_GREEN << "[OK]" << GREEN << " Socket successfully configured" << RESET << std::endl;
+	utils::logMsg(__PRETTY_FUNCTION__, WARN, "Socket successfully configured", -1, GREEN);
 	if (!_socketBind())
 	{
-		std::cerr << BOLD_RED << "[KO] Socket bind failed: " << RED << strerror(errno) << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Socket bind failed: " + utils::toString(strerror(errno)), -1);
 		return (SERV_ERROR);
 	}
-	std::cout << BOLD_GREEN << "[OK]" << GREEN << " Socket successfully binded" << RESET << std::endl;
+	utils::logMsg(__PRETTY_FUNCTION__, WARN, "Socket successfully binded", -1, GREEN);
 	if (!_socketListen())
 	{
-		std::cerr << BOLD_RED << "[KO] Socket listen failed: " << RED << strerror(errno) << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Socket listen failed: " + utils::toString(strerror(errno)), -1);
 		return (false);
 	}
-	std::cout << BOLD_GREEN << "[OK]" << GREEN << " Socket successfully listened" << RESET << std::endl;
+	utils::logMsg(__PRETTY_FUNCTION__, WARN, "Socket successfully listened", -1, GREEN);
 	return (0);
 }
 
@@ -112,12 +112,12 @@ int	ServerCore::socketAcceptClient(Client *new_client)
 		&new_client->getClientLen()));
 	if (new_client->getFd() == SERV_ERROR)
 	{
-		std::cerr << BOLD_RED << "Accept failed: " << RED << strerror(errno) << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Accept failed: " + utils::toString(strerror(errno)), -1);
 		return (SERV_ERROR);
 	}
 	if (!setNonBlocking(new_client->getFd()))
 	{
-		std::cerr << BOLD_RED << "Set socket to nonblocking failed: " << RED << strerror(errno) << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Set socket to nonblocking failed: " + utils::toString(strerror(errno)), -1);
 		return (SERV_ERROR);
 	}
 	return (new_client->getFd());
@@ -203,8 +203,15 @@ std::vector<PollRevent>	ServerCore::pollWatchRevent()
 
 	ret.resize(0);
 	num_event = _pollWait();
-	if (num_event < 0)
+	if (num_event == SERV_ERROR)
+	{
+		revent.error = true;
+		revent.server = true;
+		revent.client_id = -1;
+		revent.revent = 0;
+		ret.push_back(revent);
 		return (ret);
+	}
 	for (unsigned int i = 0; i < static_cast<unsigned int>(_config->max_clients) + 1; ++i)
 	{
 		if (i == static_cast<unsigned int>(_config->max_clients))
@@ -223,10 +230,6 @@ std::vector<PollRevent>	ServerCore::pollWatchRevent()
 				revent.server = true;
 			else
 				revent.client_id = i;
-			if (i == 0)
-				std::cerr << ORANGE << "Server ended connection." << RESET << std::endl;
-			else
-				std::cerr << ORANGE << "Client " << i << " ended connection." << RESET << std::endl;
 			ret.push_back(revent);
 			--num_event;
 		}
@@ -262,8 +265,7 @@ bool	ServerCore::pollAvailFor(int idx, nfds_t operation)
 
 	if (ret == -1)
 	{
-		std::cerr << RED << "Poll failed when checking for operation "
-			<< operation << " for client " << idx << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Poll failed when checking for operation " + utils::toString(operation), idx);
 		return (false);
 	}
 	else if (ret == 0)
@@ -358,6 +360,10 @@ int	ServerCore::_pollWait()
 
 	poll_count = poll(&_poll_fds[0], _poll_fds.size(), 0);
 	if (poll_count == SERV_ERROR)
-		std::cerr << RED << "Poll failed: " << strerror(errno) << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Poll failed: " + utils::toString(strerror(errno)) \
+			+ "\nPossible causes are:\n\tManual interruption" \
+			+ "\n\tA client limit too high compare to available fds" \
+			+ "\n\tMemory shortage" \
+			+ "\n\nYou can run the webserver using strace for more infos", -1);
 	return (poll_count);
 }

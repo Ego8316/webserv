@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/10 14:56:24 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 17:08:20 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,12 +81,12 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 		return (this->Nanny(client, request, config, response, server));
 	if (pipe(this->_pipe_to_CGI) == -1)
 	{
-		std::cerr << "Could not initialize pipe: " << strerror(errno) << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Could not initialize pipe to CGI: " + utils::toString(strerror(errno)), client.getId());
 		return ;
 	}
 	if (pipe(this->_pipe_from_CGI) == -1)
 	{
-		std::cerr << "Could not initialize pipe: " << strerror(errno) << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Could not initialize pipe from CGI: " + utils::toString(strerror(errno)), client.getId());
 		close(this->_pipe_to_CGI[PIPE_READ_END]);
 		return ;
 	}
@@ -280,7 +280,7 @@ void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 		|| !WIFEXITED(this->_process_status[1]))
 	{
 		RequestHandler::handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
-		std::cout << "Error : Child process returned " << this->_process_status[1] << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, WARN, "Child process returned " + utils::toString(this->_process_status[1]), this->_client_id);
 		return ;
 	}
 	else if (utils::startsWith(this->_output, "HTTP/"))
@@ -341,14 +341,13 @@ void		CGI::Execute()
 	if (dup2(this->_pipe_to_CGI[PIPE_READ_END], STDIN_FILENO) == -1
 		|| dup2(this->_pipe_from_CGI[PIPE_WRITE_END], STDOUT_FILENO) == -1)
 	{
-		std::cerr << "dup2 initialisation failed" << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "dup2 initialisation failed: " + utils::toString(strerror(errno)), this->_client_id);
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
 	}
 	if (execve(this->_cgi_script_char, this->_args, this->_env) == -1)
 	{
-		std::cerr << RED << "CGI execution failed: " << strerror(errno) << RESET << std::endl;
-		std::cerr << RED << "While trying to run cgi " <<_cgi_script_char << RESET << std::endl;
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "execve failed: " + utils::toString(strerror(errno)) + " on call to CGI " + _cgi_script_char, this->_client_id);
 		this->_status = HTTP_INTERNAL_SERVER_ERROR;
 		exit(1);
 	}

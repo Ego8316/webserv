@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/10 14:02:44 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 17:15:44 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,6 +120,17 @@
 #define SECTION_SUB_COLOR	BLUE
 #define FIELD_NAME_COLOR	BOLD
 #define	FIELD_VALUE_COLOR	RESET
+
+enum logLevel
+{
+	DEBUG,
+	INFO,
+	WARN,
+	ERROR
+};
+
+static std::string	logColors[4] = {BLUE, GREEN, ORANGE, RED};
+static std::string	logLevelStr[4] = {"DEBUG", "INFO", "WARN", "RED"};
 
 enum	Method
 {

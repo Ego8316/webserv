@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/10 15:23:53 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 17:29:33 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,7 @@ int	Client::_tryAccepting()
 	else
 		this->_state = DONE;
 	this->_server->pollAdd(this->getFd(), POLLIN | POLLOUT, this->_client_id);
-	utils::logMsg("INFO", GREEN, "Accepted new connection", this->_client_id);
+	utils::logMsg(__PRETTY_FUNCTION__, INFO, "Accepted new connection", this->_client_id);
 	this->printState();
 	return (0);
 }
@@ -253,8 +253,8 @@ int	Client::_tryAccepting()
  */
 int	Client::_requestInit()
 {
-	this->_request = new Request();
-	this->_response = new Response();
+	this->_request = new Request(this->_client_id);
+	this->_response = new Response(this->_client_id);
 	this->_bytes_sent = 0;
 	this->_bytes_in_buffer = 0;
 	this->_keep_alive = true;
@@ -276,7 +276,7 @@ int	Client::_readHeader()
 
 	if (!this->_leftover.empty())
 	{
-		// utils::logMsg("DEBUG", CYAN, "[_readHeader] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
+		utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
 		header_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
@@ -290,10 +290,10 @@ int	Client::_readHeader()
 	}
 	if (bytes_read == 0)
 	{
-		utils::logMsg("INFO", RED, "[_readHeader] Client closed the connection", this->_client_id);
+		utils::logMsg(__PRETTY_FUNCTION__, WARN, "Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
-	// utils::logMsg("INFO", GREEN, "[_readHeader] Read " + utils::toString(bytes_read) + " bytes", this->_client_id);
+	utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Read " + utils::toString(bytes_read) + " bytes", this->_client_id);
 	header_str.append(buffer.begin(), buffer.begin() + bytes_read);
 	if (header_str.size() > this->_config->client_header_buffer_size)
 	{
@@ -302,12 +302,12 @@ int	Client::_readHeader()
 	}
 	if ((pos = header_str.find("\r\n\r\n")) == std::string::npos)
 	{
-		// utils::logMsg("DEBUG", CYAN, "[_readHeader] Incomplete header — waiting for more", this->_client_id);
+		utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Incomplete header — waiting for more", this->_client_id);
 		return (0);
 	}
 	this->_leftover = header_str.substr(pos + 4);
 	header_str.erase(pos);
-	// utils::logMsg("INFO", GREEN, "[_readHeader] Header fully received (" + utils::toString(header_str.size()) + " bytes)", this->_client_id);
+	utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Header fully received (" + utils::toString(header_str.size()) + " bytes)", this->_client_id);
 	this->_request->parseHeader(*this->_config);
 	if (!this->_request->isChunked() && this->_request->getContentLength() == 0)
 	{
@@ -335,12 +335,12 @@ int	Client::_readBody()
 		body_str.reserve(this->_request->getContentLength());
 	if (!this->_leftover.empty())
 	{
-		// utils::logMsg("DEBUG", CYAN, "[_readBody] Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
+		utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Applying leftover (" + utils::toString(_leftover.size()) + " bytes)", this->_client_id);
 		body_str.append(this->_leftover);
 		this->_leftover.clear();
 	}
-	if (!((!this->_request->isChunked() && (body_str.size() >= this->_request->getContentLength())))
-		&& !(this->_request->isChunked() && (pos = body_str.find(NULL_CHUNK)) != std::string::npos))
+	if (!(!this->_request->isChunked() && (body_str.size() >= this->_request->getContentLength()))
+		&& !((this->_request->isChunked() && body_str.find(NULL_CHUNK) != std::string::npos)))
 	{
 		ssize_t	bytes_read = this->_server->socketRead(&buffer[0], buffer.size(), this);
 		if (bytes_read == SERV_ERROR)
@@ -352,18 +352,17 @@ int	Client::_readBody()
 		}
 		if (bytes_read == 0)
 		{
-			// utils::logMsg("WARN", ORANGE, "[_readBody] Client closed the connection", this->_client_id);
-			utils::logMsg("INFO", RED, "[_readHeader] Client closed the connection", this->_client_id);
+			utils::logMsg(__PRETTY_FUNCTION__, WARN, "Client closed the connection", this->_client_id);
 			return (this->_state = ABORTING, 0);
 		}
 		body_str.append(buffer.begin(), buffer.begin() + bytes_read);
-		// utils::logMsg("INFO", GREEN, "[_readBody] Read " + utils::toString(bytes_read) + " bytes (total: " + utils::toString(body_str.size()) + ")", this->_client_id);
+		utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Read " + utils::toString(bytes_read) + " bytes (current total: " + utils::toString(body_str.size()) + ")", this->_client_id);
 	}
 	if (body_str.size() >= this->_request->getContentLength() && !this->_request->isChunked())
 	{
 		_leftover = body_str.substr(this->_request->getContentLength());
 		body_str.erase(this->_request->getContentLength());
-		// utils::logMsg("INFO", GREEN, "[_readBody] Body complete (" + utils::toString(body_str.size()) + " bytes)", this->_client_id);
+		utils::logMsg(__PRETTY_FUNCTION__, INFO, "Body complete (received" + utils::toString(body_str.size()) + " bytes)", this->_client_id);
 		this->_state = PROCESSING_REQUEST;
 		printState();
 		return (0);
@@ -373,7 +372,7 @@ int	Client::_readBody()
 		_leftover = body_str.substr(pos);
 		body_str.erase(pos + 7);
 		this->_request->unchunkBody();
-		// utils::logMsg("INFO", GREEN, "[_readBody] Chunked body complete", this->_client_id);
+		utils::logMsg(__PRETTY_FUNCTION__, INFO, "Chunked body fully received", this->_client_id);
 		this->_state = PROCESSING_REQUEST;
 		printState();
 		return (0);
@@ -393,7 +392,7 @@ void	Client::_processRequest()
 		_keep_alive = (conn.find("close") == std::string::npos);
 	_response->setHeaders("Connection", _keep_alive ? "keep-alive" : "close");
 	RequestHandler::handle(this->_response, *_request, *_config);
-	utils::logMsg("INFO", GREEN, "Processing request", this->_client_id);
+	utils::logMsg(__PRETTY_FUNCTION__, INFO, "Started processing request", this->_client_id);
 	if (_response->isCGI())
 		this->_state = CGI_RUNNING;
 	else
@@ -437,18 +436,14 @@ int	Client::_sendString()
 	if (bytes_to_send > 0)
 	{
 		if (this->_bytes_sent == 0)
-			utils::logMsg("INFO", CYAN, "[_sendString] Started sending reponse\n", this->_client_id);
+			utils::logMsg(__PRETTY_FUNCTION__, INFO, "Started sending reponse", this->_client_id);
 		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, std::min(bytes_to_send, this->_config->client_body_buffer_size), this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);
 		if (sent == WBLOCK)
 			return (0);
 		if (sent == 0)
-		{
-			// utils::logMsg("WARN", ORANGE, "[_sendString] Client closed the connection", this->_client_id);
-			utils::logMsg("INFO", RED, "[_readHeader] Client closed the connection", this->_client_id);
 			return (this->_state = ABORTING, 0);
-		}
 		this->_bytes_sent += sent;
 		return (0);
 	}
@@ -496,8 +491,7 @@ int	Client::_sendFile()
 	}
 	if (bytes_sent == 0)
 	{
-		// utils::logMsg("WARN", ORANGE, "[_sendFile] Client closed the connection", this->_client_id);
-		utils::logMsg("INFO", RED, "[_readHeader] Client closed the connection", this->_client_id);
+		utils::logMsg(__PRETTY_FUNCTION__, WARN, "Client closed the connection", this->_client_id);
 		return (this->_state = ABORTING, 0);
 	}
 	return (0);
@@ -510,8 +504,8 @@ void	Client::_prepareNew()
 {
 	delete this->_request;
 	delete this->_response;
-	this->_request = new Request();
-	this->_response = new Response();
+	this->_request = new Request(this->_client_id);
+	this->_response = new Response(this->_client_id);
 }
 
 /**
@@ -520,7 +514,7 @@ void	Client::_prepareNew()
 void	Client::printState() const
 {
 	return ;
-	utils::logMsg("INFO", BLUE, "State is now " + utils::stateToStr(this->_state), this->_client_id);
+	utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "State is now " + utils::stateToStr(this->_state), this->_client_id);
 	return ;
 }
 

@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/12/08 15:02:44 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 16:02:44 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class	CGI;
 class	Response
 {
 	public:
-		Response();
+		Response(int client_id);
 		~Response();
 
 		void	setStatus(HttpStatus code);
@@ -57,6 +57,7 @@ class	Response
 		static std::string	getDefaultErrorPage(HttpStatus code);
 
 	private:
+		int									_client_id;
 		HttpStatus							_status_code;
 		std::string							_header;
 		std::string							_body;

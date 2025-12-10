@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/10 15:08:03 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 17:08:20 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /**
  * @brief Initializes an empty request with default values.
  */
-Request::Request()
+Request::Request(int client_id)
 {
 	this->_raw_header = "";
 	this->_raw_body = "";
@@ -29,6 +29,7 @@ Request::Request()
 	this->_error = false;
 	this->_accept = FTYPE_NONE;
 	this->_query_cookies = NULL;
+	this->_client_id = client_id;
 	return ;
 }
 
@@ -323,7 +324,7 @@ void	Request::unchunkBody()
 		line_end = this->_raw_body.find("\r\n", line_start);
 		if (line_end == std::string::npos)
 		{
-			// std::cout << RED << "Unexpected EOF while parsing chunks" << RESET << std::endl;
+			utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Unexpected EOF while parsing chunks", this->_client_id);
 			this->_error = true;
 			return ;
 		}
@@ -332,7 +333,7 @@ void	Request::unchunkBody()
 		len = strtol(hexalen, &endPtr, 16);
 		if (*endPtr != '\0' || len < 0)
 		{
-			std::cout << RED << "Cannot recogonize chunk size" << RESET << std::endl;
+			utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Unexpected EOF while parsing chunks", this->_client_id);
 			this->_error = true;
 			return ;
 		}
@@ -340,14 +341,14 @@ void	Request::unchunkBody()
 		line_end = this->_raw_body.find("\r\n", line_start);
 		if (line_end == std::string::npos)
 		{
-			// std::cout << RED << "Unexpected EOF while parsing chunks" << RESET << std::endl;
+			utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Unexpected EOF while parsing chunks", this->_client_id);
 			this->_error = true;
 			return ;
 		}
  		chunk = this->_raw_body.substr(line_start, line_end - line_start);
 		if (len != static_cast<long>(chunk.length()))
 		{
-			// std::cout << RED << "Chunk size mismatch (announced " << len << " but read " << chunk.length() << ")" << RESET << std::endl;
+			utils::logMsg(__PRETTY_FUNCTION__, DEBUG, "Chunk size mismatch (announced " + utils::toString(len) + " but read " + utils::toString(chunk.length()) + ")", this->_client_id);
 			this->_error = true;
 			return ;
 		}
