@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:35:57 by ego               #+#    #+#             */
-/*   Updated: 2025/12/08 13:21:09 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/10 14:04:53 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ Response::Response()
 	this->_is_cgi = false;
 	this->_skip_header = false;
 	this->_body_fd = -1;
+	this->_version = "HTTP/1.0";
 	return ;
 }
 
@@ -36,7 +37,7 @@ Response::~Response()
 {
 	if (this->_cgi)
 	{
-		// std::cout << BLUE << "Destroying CGI instance" << RESET << std::endl;
+		std::cout << BLUE << "Destroying CGI instance" << RESET << std::endl;
 		delete this->_cgi;
 		this->_cgi = NULL;
 	}
@@ -132,6 +133,11 @@ void	Response::setSkipStatus(bool value)
 	this->_skip_header = value;
 }
 
+void	Response::setVersion(std::string version)
+{
+	this->_version = version;
+}
+
 /**
  * @brief Builds the HTTP response header string from the status code and
  * currently set headers.
@@ -143,10 +149,7 @@ void	Response::buildHeader()
 {
 	if (!utils::mapHasEntry(this->_headers, std::string("Server")))
 		this->_headers["Server"] = "Webserv/1.0 (Unix)";
-	if (!utils::mapHasEntry(this->_headers, std::string("Connection")) && this->_headers["Connection"] == "keep-alive")
-		this->_header = "HTTP/1.1 " + utils::toString(this->_status_code);
-	else
-		this->_header = "HTTP/1.0 " + utils::toString(this->_status_code);
+	this->_header = this->_version + " " + utils::toString(this->_status_code);
 	this->_header += " " + utils::httpStatusToStr(this->_status_code) + "\r\n";
 	for (std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); ++it)
 		this->_header += it->first + ": " + it->second + "\r\n";

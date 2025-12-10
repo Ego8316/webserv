@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 16:29:15 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/10 14:03:18 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		RequestHandler::handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 		return ;
 	}
-	if (this->_process_status[0] != 0 && checkOutputTermination(bytes_read))
+	if ((this->_process_status[0] != 0 && checkOutputTermination(bytes_read)) || this->_is_complete)
 	{
 		if (utils::startsWith(this->_output, "HTTP/"))
 			response.setSkipStatus(true);

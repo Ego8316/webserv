@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 12:30:36 by ego               #+#    #+#             */
-/*   Updated: 2025/12/05 10:56:52 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/08 15:02:44 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class	Response
 		void	setContentType(const std::string &type);
 		void	setContentLength(size_t len);
 		void	setSkipStatus(bool value);
+		void	setVersion(std::string version);
 
 		void	buildHeader();
 		void	build();
@@ -65,6 +66,7 @@ class	Response
 		bool								_is_cgi;
 		bool								_skip_header;
 		int									_body_fd;
+		std::string							_version;
 };
 
 std::ostream	&operator<<(std::ostream &os, const Response &src);

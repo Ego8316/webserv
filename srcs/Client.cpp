@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hcavet <hcavet@student.42.fr>              +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 17:16:23 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/08 13:28:03 by hcavet           ###   ########.fr       */
+/*   Updated: 2025/12/10 14:06:33 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,11 @@ void	Client::setState(RequestStage state)
 Response	*Client::getResponse()
 {
 	return(this->_response);
+}
+
+void		Client::setResponse(Response *response)
+{
+	this->_response = response;
 }
 
 /**
@@ -380,7 +385,6 @@ int	Client::_readBody()
  */
 void	Client::_processRequest()
 {
-	// std::cout << *this->_request << std::endl;
 	std::string conn = utils::toLower(_request->headerGetField("Connection"));
 	if (_request->getVersion() == "HTTP/1.0")
 		_keep_alive = false;
@@ -431,8 +435,6 @@ int	Client::_sendString()
 
 	if (bytes_to_send > 0)
 	{
-		// if (this->_bytes_sent == 0)
-		// 	utils::logMsg("DEBUG", CYAN, "[_sendString] Response string:\n" + response_str, this->_client_id);
 		int	sent = this->_server->socketWrite(response_str.c_str() + this->_bytes_sent, std::min(bytes_to_send, this->_config->client_body_buffer_size), this);
 		if (sent == SERV_ERROR)
 			return (SERV_ERROR);
@@ -440,7 +442,7 @@ int	Client::_sendString()
 			return (0);
 		if (sent == 0)
 		{
-			// utils::logMsg("WARN", ORANGE, "[_sendString] Client closed the connection", this->_client_id);
+			utils::logMsg("WARN", ORANGE, "[_sendString] Client closed the connection", this->_client_id);
 			return (this->_state = ABORTING, 0);
 		}
 		this->_bytes_sent += sent;

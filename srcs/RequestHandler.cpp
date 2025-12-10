@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:33:19 by ego               #+#    #+#             */
-/*   Updated: 2025/12/07 16:58:18 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/08 15:00:57 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,10 @@ void	RequestHandler::handle(Response *response, const Request &request, const Se
 		return (handleError(response, HTTP_NOT_IMPLEMENTED, config));
 	if (request.getVersion() != "HTTP/1.1" && request.getVersion() != "HTTP/1.0")
 		return (handleError(response, HTTP_VERSION_NOT_SUPPORTED, config));
-
+	else if (request.getVersion() == "HTTP/1.1")
+		response->setVersion("HTTP/1.1");
+	else
+		response->setVersion("HTTP/1.0");
 	Resource	resource;
 	resource.build(request, config);
 

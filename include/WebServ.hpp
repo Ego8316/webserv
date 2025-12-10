@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/04 14:02:23 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/10 14:03:34 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ class WebServ
 		~WebServ();
 
 		Client 				*getClient(int uid);
-	//SETTERS
-	//MEMBER FUNCTIONS
 		int					Init();
 		int					Run();
 		int 				UpdateQueue();

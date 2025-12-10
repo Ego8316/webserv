@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ego <ego@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/07 19:38:54 by ego              ###   ########.fr       */
+/*   Updated: 2025/12/10 14:02:44 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,6 @@
 #include <fcntl.h>
 #include "colors.hpp"
 
-#include <regex>
-
 #if defined(__APPLE__)
 	#define OS_NAME "macOS"
 #elif defined(__linux__)
@@ -55,8 +53,6 @@
 #define	WBLOCK		-2
 #define NEW_CLIENT	1
 
-#define NO_TIMEOUT -1
-#define CLIENT_LIMIT 1000
 #define PIPE_READ_END 0
 #define PIPE_WRITE_END 1
 
