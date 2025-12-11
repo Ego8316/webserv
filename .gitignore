@@ -2,5 +2,5 @@ testers/*
 objs/*
 WebServ
 webserv
-valgrind_detailed.log
+*.log
 testsite

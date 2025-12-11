@@ -6,7 +6,7 @@
 #    By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/10 14:31:08 by victorviter       #+#    #+#              #
-#    Updated: 2025/12/10 16:23:43 by vviterbo         ###   ########.fr        #
+#    Updated: 2025/12/11 10:11:26 by vviterbo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,8 +26,10 @@ SRC			+=	ServerCore.cpp Client.cpp Request.cpp \
 OBJS		=	$(addprefix $(ODIR), $(SRC:.cpp=.o))
 SRCS		=	$(addprefix $(SDIR), $(SRC))
 
+LOG_LEVEL ?= 2
+
 CC			=	c++
-CFLAGS		=	-Wall -Wextra -Werror
+CFLAGS		=	-Wall -Wextra -Werror -DLOG_LEVEL=$(LOG_LEVEL)
 
 IFLAGS		=	-I $(IDIR)
 
@@ -42,7 +44,8 @@ bonus		:	$(NAME)
 $(NAME)		:	$(ODIR) $(OBJS)
 				$(CC) $(CFLAGS) $(IFLAGS) $(OBJS) $(LFLAGS) -o $(NAME)
 				make -s header
-				printf "$(COLOR_G)[OK] $(NAME) is ready!$(C_RESET)\n" || \
+				printf "$(COLOR_G)[OK] $(NAME) is ready!$(C_RESET)\n\
+Log detail level set at LOG_LEVEL=$(LOG_LEVEL)\(see the README.md for more\)\n"|| \
 				printf "$(COLOR_R)[KO] Something went wrong.$(C_RESET)\n"
 
 $(ODIR)		:

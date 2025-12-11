@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/home/vviterbo/Desktop/C05/webserv/chunked_test.py", line 6, in <module>
-    from requests.exceptions import JSONDecodeError
-ImportError: cannot import name 'JSONDecodeError' from 'requests.exceptions' (/usr/lib/python3/dist-packages/requests/exceptions.py)

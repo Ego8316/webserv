@@ -6,7 +6,7 @@
 /*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/10 17:35:29 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/11 10:02:05 by vviterbo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -486,14 +486,12 @@ void	utils::logMsg(const char *caller, logLevel level, const std::string &msg, i
 		formated_caller.erase(formated_caller.find("("));
 	if (color_override != "")
 		mssgcolor = color_override;
-	if (level < WARN)
+	if (level <= LOG_LEVEL)
 	{
-		//std::ofstream logfile("webserv.log");
 		logfile << mssgcolor << "[" << timeStamp() << "] [" << logLevelStr[level] << "] [" + formated_caller + "]";
 		if (client_id >= 0)
 			logfile << " [client " << client_id << "]";
 		logfile << " " << msg << RESET << std::endl;
-		//logfile.close();
 	}
 	else
 	{
