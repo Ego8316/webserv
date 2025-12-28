@@ -1,6 +1,6 @@
 # 🌐 WebServ
 
-A fully functional HTTP/1.1 web server implementation in C++98. This project provides deep insight into the HTTP protocol, non-blocking I/O, and the architecture of web servers like NGINX.
+A fully functional HTTP/1.1 web server implementation (mostly) in C++98. This project provides deep insight into the HTTP protocol, non-blocking I/O, and the architecture of web servers like NGINX.
 
 ## 📋 Table of Contents
 
@@ -51,7 +51,7 @@ This project demonstrates:
 - **Directory Listing**: Automatic directory index generation (when enabled)
 - **CGI Support**: Execute CGI scripts (PHP, Python, etc.) based on file extensions
 - **Custom Error Pages**: Configurable error pages for different HTTP status codes
-- **Multiple Virtual Servers**: Listen on multiple ports with different configurations
+- **Multiple Virtual Servers**: Listen on multiple ports to deliver different website with different configurations
 - **Route-Based Configuration**: Per-location configuration (similar to NGINX)
 - **HTTP Redirections**: Support for 301/302 redirects
 - **Request Size Limits**: Configurable maximum body size and buffer sizes
@@ -67,7 +67,7 @@ This project demonstrates:
 
 ### Prerequisites
 
-- **C++ Compiler**: GCC or Clang with C++98 support
+- **C++ Compiler**: GCC or Clang (-std=c++98 flag removed to enable better loging)
 - **Make**: Build automation tool
 - **Optional**: PHP-CGI, Python, or other CGI interpreters for dynamic content
 
@@ -88,7 +88,12 @@ This project demonstrates:
    make
    ```
 
-   Optional: Compile with custom log level (0-4, default is 2):
+   Optional: Compile with custom log level:
+   - default log level is 2
+   - 0 is DEBUG and above, 4 is ERROR only
+   - messages that are below set log level are outputted to a file instead of cout
+   - each logging level has it's color, but it is sometime overriden to avoid givin an inapropriate impression of safety/danger
+  
    ```bash
    make LOG_LEVEL=3
    ```
@@ -370,8 +375,6 @@ This project was developed by:
 - [Hugo Cavet](https://github.com/hcavet) - hcavet@student.42lausanne.ch
 
 ---
-
-**Project Grade**: Pending evaluation
 
 **Developed as part of the 42 curriculum** - A deep dive into HTTP protocol implementation and network programming.
 
