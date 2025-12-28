@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 18:05:02 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/11 10:02:05 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/28 23:22:20 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -486,16 +486,18 @@ void	utils::logMsg(const char *caller, logLevel level, const std::string &msg, i
 		formated_caller.erase(formated_caller.find("("));
 	if (color_override != "")
 		mssgcolor = color_override;
-	if (level <= LOG_LEVEL)
+	if (level < LOG_LEVEL)
 	{
-		logfile << mssgcolor << "[" << timeStamp() << "] [" << logLevelStr[level] << "] [" + formated_caller + "]";
+		logfile << "[" << timeStamp() << "] [" << logLevelStr[level] << "]" \
+		<< std::setw(7 - logLevelStr[level].length()) << " " << "[" + formated_caller + "]";
 		if (client_id >= 0)
 			logfile << " [client " << client_id << "]";
-		logfile << " " << msg << RESET << std::endl;
+		logfile << " " << msg << std::endl;
 	}
 	else
 	{
-		std::cout << mssgcolor << "[" << timeStamp() << "] [" << logLevelStr[level] << "] [" + formated_caller + "]";
+		std::cout << mssgcolor << "[" << timeStamp() << "] [" << logLevelStr[level] << "]" \
+		<< std::setw(7 - logLevelStr[level].length()) << " " << "[" + formated_caller + "]";
 		if (client_id >= 0)
 			std::cout << " [client " << client_id << "]";
 		std::cout << " " << msg << RESET << std::endl;

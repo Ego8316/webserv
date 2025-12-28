@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/24 14:12:49 by ego               #+#    #+#             */
-/*   Updated: 2025/12/10 17:08:20 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/28 23:13:12 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -319,7 +319,7 @@ void	Request::unchunkBody()
 	char				*endPtr;
 	
 	line_start = 0;
-	while (this->_raw_body.compare(line_start, 7, NULL_CHUNK))
+	while (this->_raw_body.compare(line_start, std::string(NULL_CHUNK).length(), NULL_CHUNK))
 	{
 		line_end = this->_raw_body.find("\r\n", line_start);
 		if (line_end == std::string::npos)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 14:56:52 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/10 14:03:34 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/28 22:54:15 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,19 +29,17 @@ class WebServ
 		WebServ(const ServerConfig *config);
 		~WebServ();
 
-		Client 				*getClient(int uid);
 		int					Init();
 		int					Run();
-		int 				UpdateQueue();
-		int 				ProcessQueue();
-		Client				*newClient();
-		int					removeClient(size_t indx);
+		Client 				*getClient(int uid);
+		int 				updateQueue();
+		int 				_processQueue();
 		void				sendTimeOut(Client *client);
 
 	private:
-		WebServ(const WebServ &other);
-		WebServ	&operator=(const WebServ &other);
-
+		Client				*_newClient();
+		int					_removeClient(size_t indx);
+		
 		const ServerConfig					*_config;
 		ServerCore							*_core;
 		std::vector<Client *>				_clients;

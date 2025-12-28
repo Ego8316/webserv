@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:50 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/05 10:42:16 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/28 22:58:21 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,17 +48,16 @@ class CGI
 
 		void		Execute();
 		
+		void		setClientId(int value);
 		std::string	&getOutput();
 		HttpStatus	getStatus();
 		bool		isComplete();
 		
-		bool		checkOutputTermination(int bytes_read);
-		void		GenEnvVar(Request &request);
-		void		deleteEnvVar();
-		int			*getPipesToCGI();
-		int			*getPipesFromCGI();
-		void		setClientId(int value);
 	private :
+		void				_genEnvVar(Request &request);
+		void				_deleteEnvVar();
+		bool				_checkOutputTermination(int bytes_read);
+
 		int					_client_id;
 		std::string			_cgi_script;
 		bool				_is_init;

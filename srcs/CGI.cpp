@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 14:08:46 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/10 17:08:20 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/28 23:37:44 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ CGI::~CGI()
 		this->_server_link->pollRemove(this->_pipe_to_cgi_idx);
 	if (this->_pipe_from_cgi_idx != -1)
 		this->_server_link->pollRemove(this->_pipe_from_cgi_idx);
-	deleteEnvVar();
+	_deleteEnvVar();
 }
 
 /**
@@ -95,7 +95,7 @@ void		CGI::Run(Client &client, Request &request, const ServerConfig &config, Res
 	this->_cgi_script = "." + this->_cgi_script.substr(last_slash);
 	this->_cgi_script_char = new char[this->_cgi_script.length() + 1];
 	strcpy(this->_cgi_script_char, this->_cgi_script.c_str());
-	GenEnvVar(request);
+	_genEnvVar(request);
 	this->_pid = fork();
 	if (this->_pid == 0)
 	{
@@ -148,7 +148,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		this->_bytes_to_send = request.getRawBody().length();
 	if (this->_pipe_to_CGI[PIPE_WRITE_END] != -1 && (this->_total_bytes_sent < this->_bytes_to_send || bytes_sent == 0))
 		bytes_sent = this->writeToCGI(request, config, server);
-	if (!checkOutputTermination(bytes_read))
+	if (!_checkOutputTermination(bytes_read))
 		bytes_read = this->readFromCGI(config, server);
 	if (this->_process_status[0] == 0)
 		this->_process_status[0] = waitpid(this->_pid, &(this->_process_status[1]), WNOHANG);
@@ -159,7 +159,7 @@ void	CGI::Nanny(Client &client, Request &request, const ServerConfig &config, Re
 		RequestHandler::handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config);
 		return ;
 	}
-	if ((this->_process_status[0] != 0 && checkOutputTermination(bytes_read)) || this->_is_complete)
+	if ((this->_process_status[0] != 0 && _checkOutputTermination(bytes_read)) || this->_is_complete)
 	{
 		if (utils::startsWith(this->_output, "HTTP/"))
 			response.setSkipStatus(true);
@@ -248,7 +248,8 @@ void	CGI::parseHeader(const ServerConfig &config)
 	}
 	if (utils::caseInsensitiveFind(this->_output, "Content-Length: ") != this->_output.end())
 	{
-		long len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ") + 16);
+		long len = atoi(&*utils::caseInsensitiveFind(this->_output, "Content-Length: ") \
+			+ std::string("Content-Length: ").length());
 		if (len < 0 || static_cast<size_t>(len) > config.client_max_body_size)
 		{
 			this->_is_complete = true;
@@ -266,7 +267,7 @@ void	CGI::parseHeader(const ServerConfig &config)
 			this->_chunked = true;
 	}
 	if (this->_output.find("\r\n\r\n") != std::string::npos)
-		this->_header_len = this->_output.find("\r\n\r\n") + 4;
+		this->_header_len = this->_output.find("\r\n\r\n") + std::string("\r\n\r\n").length();
 }
 
 /**
@@ -294,8 +295,12 @@ void	CGI::genFullOutput(Response &response, const ServerConfig &config)
 	response.setStatus(this->_status);
 	if (!this->_header_len && !this->_chunked)
 		return (RequestHandler::handleError(&response, HTTP_INTERNAL_SERVER_ERROR, config));
-	if (!this->_content_len && !this->_chunked && this->_output.length() - this->_output.find("\r\n\r\n") - 4 > 0)
-		response.setContentLength(this->_output.length() - this->_output.find("\r\n\r\n") - 4);
+	if (!this->_content_len && !this->_chunked && this->_output.length() \
+		- this->_output.find("\r\n\r\n") - std::string("\r\n\r\n").length() > 0)
+	{
+		response.setContentLength(this->_output.length() \
+			- this->_output.find("\r\n\r\n") - std::string("\r\n\r\n").length());
+	}
 	response.setBody(this->_output);
 	response.build();
 	return ;
@@ -369,7 +374,7 @@ static bool	isValidContentType(const std::string &ct)
  *
  * @param request Parsed HTTP request.
  */
-void		CGI::GenEnvVar(Request &request)
+void		CGI::_genEnvVar(Request &request)
 {
 	std::vector<std::string>	env;
 	std::string					varvalue;
@@ -392,7 +397,7 @@ void		CGI::GenEnvVar(Request &request)
 		this->_env[i] = new char[env[i].length() + 1];
 		if (!this->_env[i])
 		{
-			deleteEnvVar();
+			_deleteEnvVar();
 			return ;
 		}
 		strcpy(this->_env[i], env[i].c_str());
@@ -408,7 +413,7 @@ void		CGI::GenEnvVar(Request &request)
 /**
  * @brief Frees allocated argv/env structures and script path buffer.
  */
-void	CGI::deleteEnvVar()
+void	CGI::_deleteEnvVar()
 {
 	int i = 0;
 	
@@ -446,7 +451,7 @@ void	CGI::deleteEnvVar()
  *
  * @return True when no more data is expected.
  */
-bool	CGI::checkOutputTermination(int bytes_read)
+bool	CGI::_checkOutputTermination(int bytes_read)
 {
 	(void)bytes_read;
 	if (this->_chunked)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   headers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/11 10:07:56 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/28 23:09:56 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@
 #define LISTDIR_SUFFIX "<br>\n"
 #define LISTDIR_ENDING "</body>\n</html>"
 
-#define NULL_CHUNK "0x0\r\n\r\n"
+#define NULL_CHUNK "0\r\n\r\n"
 
 // Configuration printing helpers
 #define WIDTH				70UL

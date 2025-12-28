@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/28 20:07:40 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/10 17:20:35 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/28 22:53:41 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,14 +67,14 @@ int	WebServ::Init()
  */
 int	WebServ::Run()
 {
-	if (this->UpdateQueue() == SERV_ERROR)
+	if (this->updateQueue() == SERV_ERROR)
 	{
-		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "UpdateQueue returned an error", -1);
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "updateQueue returned an error", -1);
 		return (SERV_ERROR);
 	}
-	if (this->ProcessQueue() == SERV_ERROR)
+	if (this->_processQueue() == SERV_ERROR)
 	{
-		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "ProcessQueue returned an error", -1);
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, "_processQueue returned an error", -1);
 		return (SERV_ERROR);
 	}
 	return (0);
@@ -85,7 +85,7 @@ int	WebServ::Run()
  *
  * @return 0 on success, SERV_ERROR on fatal server error.
  */
-int	WebServ::UpdateQueue()
+int	WebServ::updateQueue()
 {
 	std::vector<PollRevent>	events;
 
@@ -105,7 +105,7 @@ int	WebServ::UpdateQueue()
 			{
 				utils::logMsg(__PRETTY_FUNCTION__, ERROR, "Removing client due to error", event->client_id);
 				if (this->_clients[event->client_id])
-					removeClient(event->client_id);
+					_removeClient(event->client_id);
 			}
 		}
 		else
@@ -113,7 +113,7 @@ int	WebServ::UpdateQueue()
 			if (event->server == true)
 			{
 				utils::logMsg(__PRETTY_FUNCTION__, INFO, "New connection detected. Creating client instance", -1);
-				Client	*new_client = newClient();
+				Client	*new_client = _newClient();
 				if (new_client)
 				{
 					this->_processing_queue.push_front(new_client);
@@ -141,7 +141,7 @@ int	WebServ::UpdateQueue()
  *
  * @return Error code from client handling.
  */    
-int	WebServ::ProcessQueue()
+int	WebServ::_processQueue()
 {
 	Client	*next_client;
 	int		error;
@@ -151,7 +151,7 @@ int	WebServ::ProcessQueue()
 	while (!this->_processing_queue.empty() && this->_processing_queue.front()->getTimeLimit() < utils::getTime())
 	{
 		sendTimeOut(this->_processing_queue.front());
-		removeClient(this->_processing_queue.front()->getId());
+		_removeClient(this->_processing_queue.front()->getId());
 	}
 	if (this->_processing_queue.empty())
 		return (0);
@@ -163,7 +163,7 @@ int	WebServ::ProcessQueue()
 	if (error == KILL_SERVER)
 		return (SERV_ERROR);
 	if (error == KILL_CLIENT)
-		removeClient(next_client->getId());
+		_removeClient(next_client->getId());
 	else if (next_client->getState() != DONE && error <= WOULD_BLOCK)
 		this->_processing_queue.push_back(next_client);
 	else if (next_client->getState() == DONE)
@@ -179,7 +179,7 @@ int	WebServ::ProcessQueue()
  *
  * @return Pointer to new Client or NULL on failure/limit.
  */
-Client	*WebServ::newClient()
+Client	*WebServ::_newClient()
 {
 	unsigned int	indx;
 
@@ -206,7 +206,7 @@ Client	*WebServ::newClient()
  *
  * @return 0 on completion.
  */
-int	WebServ::removeClient(size_t indx)
+int	WebServ::_removeClient(size_t indx)
 {
 	size_t	i = 0;
 
