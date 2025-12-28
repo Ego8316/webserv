@@ -88,11 +88,7 @@ This project demonstrates:
    make
    ```
 
-   Optional: Compile with custom log level:
-   - default log level is 2
-   - 0 is DEBUG and above, 4 is ERROR only
-   - messages that are below set log level are outputted to a file instead of cout
-   - each logging level has it's color, but it is sometime overriden to avoid givin an inapropriate impression of safety/danger
+   Optional: Compile with custom log level (default is 2, see below for more)
   
    ```bash
    make LOG_LEVEL=3
@@ -348,17 +344,22 @@ WebServ/
 ## 📊 Log Levels
 
 Control logging verbosity using the `LOG_LEVEL` make variable:
+   - default is 2
+   - 0 is DEBUG and above, 4 is ERROR only
+   - messages that are below set log level are outputted to `webserv.log`
+   - each logging level has it's color, but it is sometime overriden to avoid givin an inapropriate impression of safety/danger
+
 
 ```bash
 make LOG_LEVEL=<level>
 ```
 
 **Levels:**
-- **0**: Silent (no logs)
-- **1**: ERROR only
+- **0**: ERROR + WARN + INFO + DEBUG (all)
+- **1**: ERROR + WARN + INFO
 - **2**: ERROR + WARN (default)
-- **3**: ERROR + WARN + INFO
-- **4**: ERROR + WARN + INFO + DEBUG
+- **3**: ERROR
+- **4**: NONE
 
 Example:
 ```bash
