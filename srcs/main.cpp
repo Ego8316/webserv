@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vviterbo <vviterbo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 10:44:51 by victorviter       #+#    #+#             */
-/*   Updated: 2025/12/10 17:14:37 by vviterbo         ###   ########.fr       */
+/*   Updated: 2025/12/29 00:09:14 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,9 @@ int	main(int argc, char *argv[])
 				if (web_servers[i]->Run() == SERV_ERROR)
 					throw std::runtime_error("Server " + utils::toString(i) + ": fatal error occured");
 	}
-	catch (const std::exception &e) { std::cerr << BOLD_RED << "Error: " << RED << e.what() << RESET << std::endl; }
+	catch (const std::exception &e) {
+		utils::logMsg(__PRETTY_FUNCTION__, ERROR, e.what(), -1);
+	}
 	destroyServers(web_servers);
 	return (0);
 }

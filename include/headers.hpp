@@ -6,7 +6,7 @@
 /*   By: victorviterbo <victorviterbo@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 14:15:31 by ego               #+#    #+#             */
-/*   Updated: 2025/12/28 23:09:56 by victorviter      ###   ########.fr       */
+/*   Updated: 2025/12/29 00:01:24 by victorviter      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,8 @@ enum logLevel
 	DEBUG,
 	INFO,
 	WARN,
-	ERROR
+	ERROR,
+	NONE
 };
 
 static std::string	logColors[4] = {BLUE, GREEN, ORANGE, RED};
