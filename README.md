@@ -75,12 +75,12 @@ This project demonstrates:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/victorviterbo/webserv.git
+   git clone https://github.com/victorviterbo/webserv.git WebServ
    ```
 
 2. Navigate to the project directory:
    ```bash
-   cd Docker_webserv/WebServ
+   cd WebServ/
    ```
 
 3. Compile the project:
@@ -206,8 +206,8 @@ WebServ follows a modular, event-driven architecture:
        ├─► Client        ◄─── Per-client state machine
        │      │
        │      ├─► Request        ◄─── HTTP request parsing
-       │      ├─► Response       ◄─── HTTP response building
-       │      └─► RequestHandler ◄─── Request routing & processing
+       │      ├─► RequestHandler ◄─── Request routing & processing
+       │      └─► Response       ◄─── HTTP response building
        │
        └─► ServerConfig  ◄─── Configuration management
 ```
@@ -218,8 +218,8 @@ WebServ follows a modular, event-driven architecture:
 - **ServerCore**: Handles low-level socket operations and `poll()` management
 - **Client**: Implements a state machine for request/response lifecycle
 - **Request**: Parses and stores HTTP request data
-- **Response**: Builds HTTP responses
-- **RequestHandler**: Routes requests and handles different content types
+- **Response**: Store the reponse to be sent
+- **RequestHandler**: Routes requests construct appropriate resonse object
 - **CGI**: Manages CGI process execution with pipes
 - **ConfigParser**: Parses NGINX-style configuration files
 
@@ -233,22 +233,6 @@ The server uses a single `poll()` call to monitor all file descriptors:
 
 All file descriptors are set to non-blocking mode (on macOS using `fcntl()` with `O_NONBLOCK`).
 
-```cpp
-// Event loop pseudocode
-while (!shutdown) {
-    poll(all_fds);
-    
-    if (server_fd_readable)
-        accept_new_client();
-    
-    for each client_fd_readable:
-        read_request();
-    
-    for each client_fd_writable:
-        write_response();
-}
-```
-
 ### Request Processing Pipeline
 
 Each client follows a state machine through these stages:
@@ -256,12 +240,12 @@ Each client follows a state machine through these stages:
 1. **TRY_ACCEPTING**: Accept the connection
 2. **INIT**: Initialize request/response objects
 3. **READING_HEADER**: Read HTTP headers
-4. **READING_BODY**: Read HTTP body (if present)
+4. **READING_BODY**: Read HTTP body (if present); add "leftover" from Header if needed
 5. **PROCESSING_REQUEST**: Route and handle the request
 6. **CGI_RUNNING**: Wait for CGI completion (if applicable)
-7. **SENDING_STRING**: Send response headers and buffered content
-8. **SENDING_FILE**: Stream file content to client
-9. **DONE**: Complete or prepare for next request (keep-alive)
+7. **SENDING_STRING**: Send response headers and hardcoded content
+8. **SENDING_FILE**: Stream file content to client (if applicable)
+9. **DONE**: Request completed, ready for a new Request (Webserv will remove client from processing queue)
 
 ### CGI Execution
 
@@ -345,7 +329,7 @@ WebServ/
 
 Control logging verbosity using the `LOG_LEVEL` make variable:
    - default is 2
-   - 0 is DEBUG and above, 4 is ERROR only
+   - 0 is DEBUG and above, 3 is ERROR only, 4 is NONE
    - messages that are below set log level are outputted to `webserv.log`
    - each logging level has it's color, but it is sometime overriden to avoid givin an inapropriate impression of safety/danger
 
