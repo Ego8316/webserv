@@ -75,7 +75,7 @@ This project demonstrates:
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/victorviterbo/webserv.git
    ```
 
 2. Navigate to the project directory:
@@ -88,11 +88,7 @@ This project demonstrates:
    make
    ```
 
-   Optional: Compile with custom log level:
-   - default log level is 2
-   - 0 is DEBUG and above, 4 is ERROR only
-   - messages that are below set log level are outputted to a file instead of cout
-   - each logging level has it's color, but it is sometime overriden to avoid givin an inapropriate impression of safety/danger
+   Optional: Compile with custom log level (default is 2, see below for more)
   
    ```bash
    make LOG_LEVEL=3
@@ -293,12 +289,12 @@ CGI scripts are executed in separate processes using `fork()` and `execve()`:
 
 **Location Block Directives:**
 
-- `root <path>`: Override document root
-- `index <file>`: Default file for directories
-- `autoindex on|off`: Directory listing
-- `limit_except <methods>`: Allowed HTTP methods
+- `root <path>`: Specific document root
+- `index <file>`: Default file for directory
+- `autoindex on|off`: Enable/Disable directory listing
+- `limit_except <methods>`: Allowed HTTP methods (default is GET)
 - `cgi on|off`: Enable CGI execution
-- `upload_path <path>`: File upload destination
+- `upload_path <path>`: Enable file upload and provide destination
 - `return <code> <url>`: HTTP redirect
 
 ## 📁 Project Structure
@@ -307,17 +303,17 @@ CGI scripts are executed in separate processes using `fork()` and `execve()`:
 WebServ/
 ├── bin/                    # Compiled executable
 ├── include/                # Header files
-│   ├── WebServ.hpp         # Main server class
+│   ├── WebServ.hpp         # Main server class, handles Client creation, destruction and the queue
 │   ├── ServerCore.hpp      # Socket & poll management
-│   ├── Client.hpp          # Client state machine
-│   ├── Request.hpp         # HTTP request parser
-│   ├── Response.hpp        # HTTP response builder
-│   ├── RequestHandler.hpp  # Request routing
-│   ├── CGI.hpp             # CGI execution
+│   ├── Client.hpp          # Client entity with the lifetime of the associated connection, is activated when new request from the client is received (or when it is its turn to process its request). Calls all the necessary functions to process the request and send the response
+│   ├── Request.hpp         # Creates a C++ object from the HTTP request
+│   ├── Response.hpp        # Used by the RequestHandler to store the response to be sent
+│   ├── RequestHandler.hpp  # Request dispatcher and processor
+│   ├── CGI.hpp             # Responsible for creating, terminating and monitoring the CGI run
 │   ├── Cookie.hpp          # Cookie management
 │   ├── ServerConfig.hpp    # Configuration structures
 │   ├── ConfigParser.hpp    # Config file parser
-│   └── headers.hpp         # Common includes
+│   └── headers.hpp         # Common includes, #define, enums ...
 ├── srcs/                   # Source files
 │   ├── main.cpp            # Entry point
 │   ├── WebServ.cpp
@@ -342,23 +338,28 @@ WebServ/
 ├── config.conf             # Example configuration
 ├── Makefile                # Build instructions
 ├── WebServ.pdf             # Project subject
-└── README.md               # This file
+└── README.md               # You are here !
 ```
 
 ## 📊 Log Levels
 
 Control logging verbosity using the `LOG_LEVEL` make variable:
+   - default is 2
+   - 0 is DEBUG and above, 4 is ERROR only
+   - messages that are below set log level are outputted to `webserv.log`
+   - each logging level has it's color, but it is sometime overriden to avoid givin an inapropriate impression of safety/danger
+
 
 ```bash
 make LOG_LEVEL=<level>
 ```
 
 **Levels:**
-- **0**: Silent (no logs)
-- **1**: ERROR only
+- **0**: ERROR + WARN + INFO + DEBUG (all)
+- **1**: ERROR + WARN + INFO
 - **2**: ERROR + WARN (default)
-- **3**: ERROR + WARN + INFO
-- **4**: ERROR + WARN + INFO + DEBUG
+- **3**: ERROR
+- **4**: NONE
 
 Example:
 ```bash
@@ -371,9 +372,8 @@ make LOG_LEVEL=4  # Verbose debugging
 
 This project was developed by:
 
-- [Victor Viterbo](https://github.com/victorviterbo) - vviterbo@student.42.fr
-- [Hugo Cavet](https://github.com/hcavet) - hcavet@student.42lausanne.ch
-
+- [Victor Viterbo](https://github.com/victorviterbo) - vviterbo@student.42lausanne.ch
+- [Hugo Cavet](https://github.com/Ego8316) - hcavet@student.42lausanne.ch
 ---
 
 **Developed as part of the 42 curriculum** - A deep dive into HTTP protocol implementation and network programming.
