@@ -331,7 +331,7 @@ Control logging verbosity using the `LOG_LEVEL` make variable:
    - default is 2
    - 0 is DEBUG and above, 3 is ERROR only, 4 is NONE
    - messages that are below set log level are outputted to `webserv.log`
-   - each logging level has it's color, but it is sometime overriden to avoid givin an inapropriate impression of safety/danger
+   - each logging level has it's color, but it is sometime overriden to avoid giving an inapropriate impression of safety/danger
 
 
 ```bash
