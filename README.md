@@ -4,7 +4,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/42-Project-blue" height="32"/>
-  <img src="https://img.shields.io/github/languages/code-size/Ego8316/webserv?color=5BCFFF" height="32"/>
+  <img src="https://img.shields.io/github/languages/repo-size/Ego8316/webserv?color=5BCFFF" height="32"/>
 </p>
 
 <p align="center">
